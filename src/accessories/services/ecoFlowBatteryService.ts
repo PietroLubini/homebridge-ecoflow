@@ -36,13 +36,13 @@ export class EcoFlowBatteryService extends EcoFlowService {
   }
 
   async getBatteryLevel(): Promise<CharacteristicValue> {
-    const batteryLevel = this.api.getBatteryLevel();
+    const batteryLevel = await this.api.getBatteryLevel();
     this.log.debug('BatteryLevel ->', batteryLevel);
     return batteryLevel;
   }
 
   async getChargingState(): Promise<CharacteristicValue> {
-    const isCharging = this.api.isBatteryCharging();
+    const isCharging = await this.api.isBatteryCharging();
     this.log.debug('ChargingState ->', isCharging);
     return isCharging;
   }
