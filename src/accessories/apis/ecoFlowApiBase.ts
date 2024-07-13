@@ -10,6 +10,20 @@ export abstract class EcoFlowApiBase {
   constructor(private config: DeviceConfig, private log: Logging) {
   }
 
+  protected async executeSet<TValue>(paramName: string, paramValue: TValue): Promise<void> {
+    this.log.debug(`Setting parameter ${paramName}:`, paramValue);
+    const requestCmd: SetCmdRequest = {
+      sn: this.config.serialNumber,
+      params: {
+        quotas: [paramName],
+      },
+    };
+    const response = await this.execute<GetCmdResponse>('POST', requestCmd);
+    const value = response.data[paramName];
+    this.log.debug(`Parameter ${paramName} value:`, value);
+    this.parametersCache.set(paramName, value);
+  }
+
   protected async executeGet<TValue>(paramName: string): Promise<TValue> {
     if (!this.parametersCache.get(paramName)) {
       this.log.debug('Getting parameter:', paramName);
@@ -115,4 +129,9 @@ interface GetCmdResponse {
   data: {
     [key: string]: unknown;
   };
+}
+
+interface SetCmdRequest {
+  sn: string;
+  params: GetCmdRequestParams;
 }

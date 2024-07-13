@@ -66,7 +66,6 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   }
 
   initializeDevices() {
-    this.log.debug('devices:', this.ecoFlowConfig.devices);
     for (const deviceConfig of this.ecoFlowConfig.devices) {
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial

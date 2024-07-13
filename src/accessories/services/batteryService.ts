@@ -1,9 +1,9 @@
 import { CharacteristicValue, PlatformAccessory, Service } from 'homebridge';
-import { EcoFlowService } from './ecoflowService.js';
+import { ServiceBase } from './serviecBase.js';
 import { DeviceConfig } from '../../config.js';
 import { EcoFlowHomebridgePlatform } from 'platform.js';
 
-export class EcoFlowBatteryService extends EcoFlowService {
+export class BatteryService extends ServiceBase {
   private readonly service: Service;
 
   constructor(accessory: PlatformAccessory, platform: EcoFlowHomebridgePlatform, config: DeviceConfig) {

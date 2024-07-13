@@ -3,7 +3,7 @@ import { DeviceConfig } from '../../config.js';
 import { EcoFlowApi } from '../apis/ecoFlowApi.js';
 import { EcoFlowHomebridgePlatform } from 'platform.js';
 
-export abstract class EcoFlowService {
+export abstract class ServiceBase {
   protected readonly api: EcoFlowApi;
   protected readonly log: Logging;
 
