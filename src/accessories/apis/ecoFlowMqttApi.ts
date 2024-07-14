@@ -7,6 +7,7 @@ import {
   MqttMessage,
   MqttMessageParams,
   MqttMessageType,
+  MqttSetMessageBase,
   PdStatusMqttMessageParams,
 } from './interfaces/ecoFlowMqttContacts.js';
 import { Subject } from 'rxjs';
@@ -43,12 +44,18 @@ export class EcoFlowMqttApi extends EcoFlowApiBase {
 
   public async subscribe(topicPattern: string, serialNumber: string): Promise<void> {
     const client = await this.connect();
-    const topic = topicPattern
-      .replace('<certificateAccount>', this.certificateData!.certificateAccount)
-      .replace('<sn>', serialNumber);
+    const topic = this.composeTopic(topicPattern, serialNumber);
     await client.subscribeAsync(topic);
     this.log.debug('Subscribed to topic:', topic);
-    client.on('message', (topic, message) => this.processMqttMessage(message));
+    client.on('message', (_, message) => this.processMqttMessage(message));
+  }
+
+  public async publish(topicPattern: string, serialNumber: string, data: MqttSetMessageBase): Promise<void> {
+    const client = await this.connect();
+    const topic = this.composeTopic(topicPattern, serialNumber);
+    const message = JSON.stringify(data);
+    await client.publishAsync(topic, message);
+    this.log.debug(`Published to topic '${topic}'`, message);
   }
 
   private async connect(): Promise<mqtt.MqttClient> {
@@ -87,5 +94,11 @@ export class EcoFlowMqttApi extends EcoFlowApiBase {
     } else if (mqttMessage.typeCode === MqttMessageType.PD) {
       this.pdParamsSubject.next(mqttMessage.params as PdStatusMqttMessageParams);
     }
+  }
+
+  private composeTopic(topicPattern: string, serialNumber: string): string {
+    return topicPattern
+      .replace('<certificateAccount>', this.certificateData!.certificateAccount)
+      .replace('<sn>', serialNumber);
   }
 }

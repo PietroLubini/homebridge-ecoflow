@@ -12,7 +12,7 @@ export abstract class ServiceBase {
     protected accessory: PlatformAccessory,
     protected platform: EcoFlowHomebridgePlatform,
     protected config: DeviceConfig,
-    api: EcoFlowMqttApi
+    protected api: EcoFlowMqttApi
   ) {
     this.log = platform.log;
     this.subscriptions = this.subscribe(api);

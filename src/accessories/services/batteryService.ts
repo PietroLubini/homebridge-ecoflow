@@ -1,7 +1,5 @@
-import { PlatformAccessory, Service } from 'homebridge';
+import { Service } from 'homebridge';
 import { ServiceBase } from './serviceBase.js';
-import { DeviceConfig } from '../../config.js';
-import { EcoFlowHomebridgePlatform } from 'platform.js';
 import {
   BmsStatusMqttMessageParams,
   InvStatusMqttMessageParams,
@@ -10,20 +8,9 @@ import { EcoFlowMqttApi } from 'accessories/apis/ecoFlowMqttApi.js';
 import { Subscription } from 'rxjs';
 
 export class BatteryService extends ServiceBase {
-  private readonly batteryService: Service;
-
-  constructor(
-    accessory: PlatformAccessory,
-    platform: EcoFlowHomebridgePlatform,
-    config: DeviceConfig,
-    api: EcoFlowMqttApi
-  ) {
-    super(accessory, platform, config, api);
-
-    this.batteryService =
-      this.accessory.getService(this.platform.Service.Battery) ||
-      this.accessory.addService(this.platform.Service.Battery);
-  }
+  private readonly batteryService: Service =
+    this.accessory.getService(this.platform.Service.Battery) ||
+    this.accessory.addService(this.platform.Service.Battery);
 
   protected override subscribe(api: EcoFlowMqttApi): Subscription[] {
     const result = [];

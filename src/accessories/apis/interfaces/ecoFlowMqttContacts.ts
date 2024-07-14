@@ -58,3 +58,26 @@ export interface BmsStatusMqttMessageParams extends MqttMessageParams {
 }
 
 export interface EmsStatusMqttMessageParams extends MqttMessageParams {}
+
+export interface MqttSetMessageBase {
+  id: number;
+  version: string;
+  moduleType: number;
+  operateType: string;
+}
+
+export interface MqttSetMessageParams {}
+
+export interface MqttSetEnabledMessageParams extends MqttSetMessageParams {
+  enabled: number;
+}
+
+export interface MqttSetAcEnabledMessageParams extends MqttSetEnabledMessageParams {
+  out_voltage: number;
+  out_freq: number;
+  xboost: number;
+}
+
+export interface MqttSetMessage<TParams extends MqttSetMessageParams> extends MqttSetMessageBase {
+  params: TParams;
+}
