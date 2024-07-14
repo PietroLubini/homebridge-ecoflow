@@ -1,6 +1,6 @@
-import { EcoFlowApiBase } from './ecoFlowApiBase.js';
+import { EcoFlowHttpApiBase } from './ecoFlowHttpApiBase.js';
 
-export class EcoFlowApi extends EcoFlowApiBase {
+export class EcoFlowHttpApi extends EcoFlowHttpApiBase {
   private batteryLevel: Promise<number> | null = null;
 
   async isLowBattery(): Promise<boolean> {
