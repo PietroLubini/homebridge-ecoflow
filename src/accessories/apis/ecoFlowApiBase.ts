@@ -2,13 +2,27 @@ import { Logging } from 'homebridge';
 import { DeviceConfig } from '../../config.js';
 import * as crypto from 'crypto';
 
+interface CmdResponseBase {
+  code: string;
+  message: string;
+}
+
+export interface CmdResponse<TData> extends CmdResponseBase {
+  code: string;
+  message: string;
+  data: TData;
+}
+
 export abstract class EcoFlowApiBase {
   private readonly apiUrl = 'https://api-e.ecoflow.com';
 
-  constructor(protected config: DeviceConfig, protected log: Logging) {
-  }
+  constructor(protected config: DeviceConfig, protected log: Logging) {}
 
-  protected async execute<TResponse>(relativeUrl: string, method: string, data: object): Promise<TResponse> {
+  protected async execute<TResponse extends CmdResponseBase>(
+    relativeUrl: string,
+    method: string,
+    data: object | null = null
+  ): Promise<TResponse> {
     const url = new URL(relativeUrl, this.apiUrl);
     const accessKey = this.config.accessKey;
     const nonce = this.getNonce();
@@ -19,7 +33,6 @@ export abstract class EcoFlowApiBase {
 
     const options: RequestInit = {
       method,
-      body: JSON.stringify(data),
       headers: new Headers({
         accessKey,
         nonce,
@@ -28,9 +41,18 @@ export abstract class EcoFlowApiBase {
         'Content-Type': 'application/json',
       }),
     };
+    if (data) {
+      options.body = JSON.stringify(data);
+    }
     try {
-      const res = await fetch(url, options);
-      return res.json() as TResponse;
+      const response = await fetch(url, options);
+      const result = (await response.json()) as unknown as TResponse;
+      if (result.code !== '0') {
+        throw Error(
+          `Request is failed [${response.status}]: ${response.statusText}; result: ${JSON.stringify(result)}`
+        );
+      }
+      return result;
     } catch (e) {
       this.log.error('Request is failed:', e);
       throw e;
@@ -73,9 +95,7 @@ export abstract class EcoFlowApiBase {
   }
 
   private createHmacSha256(key: string, message: string): string {
-    return crypto.createHmac('sha256', key)
-      .update(message)
-      .digest('hex');
+    return crypto.createHmac('sha256', key).update(message).digest('hex');
   }
 }
 

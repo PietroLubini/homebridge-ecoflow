@@ -29,17 +29,23 @@
     "homebridge-ecoflow",
     "ecoflow"
   ],
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "mqtt": "^5.8.0",
+    "node-cache": "^5.1.2",
+    "rxjs": "^7.8.1",
+    "uuid": "^10.0.0"
+  },
   "devDependencies": {
     "@types/node": "^20.12.13",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.11.0",
     "eslint": "^8.57.0",
+    "homebridge": "^1.8.2",
     "nodemon": "^3.1.2",
     "rimraf": "^5.0.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.5",
-    "crypto": "^1.0.1",
-    "homebridge": "^1.8.2",
-    "node-cache": "^5.1.2"
+    "typescript": "^5.4.5"
   }
 }

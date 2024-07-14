@@ -4,10 +4,12 @@
     "source.fixAll.eslint": "explicit"
   },
   "files.eol": "\n",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
   "editor.tabSize": 2,
-  "editor.rulers": [140],
-  "eslint.enable": true,
-  "prettier.singleQuote": true
+  "typescript.validate.enable": true,
+  "typescript.preferences.importModuleSpecifier": "shortest",
+  "git.mergeEditor": true,
+  "git.inputValidationSubjectLength": 70
 }

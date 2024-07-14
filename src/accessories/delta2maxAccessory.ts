@@ -4,12 +4,22 @@ import { EcoFlowHomebridgePlatform } from '../platform.js';
 import { EcoFlowAccessory } from './ecoFlowAccessory.js';
 import { DeviceConfig } from '../config.js';
 import { BatteryService } from './services/batteryService.js';
-import { OutputsService } from './services/outputsService.js';
+import { OutletsService } from './services/outletsService.js';
+import { ServiceBase } from './services/serviceBase.js';
+import { EcoFlowMqttApi } from './apis/ecoFlowMqttApi.js';
 
 export class Delta2MaxAccessory extends EcoFlowAccessory {
-  constructor(platform: EcoFlowHomebridgePlatform, accessory: PlatformAccessory, config: DeviceConfig) {
-    super(platform, accessory, config);
-    new BatteryService(accessory, platform, config);
-    new OutputsService(accessory, platform, config);
+  protected override registerServices(
+    platform: EcoFlowHomebridgePlatform,
+    accessory: PlatformAccessory,
+    config: DeviceConfig,
+    api: EcoFlowMqttApi
+  ): ServiceBase[] {
+    const result = [];
+
+    result.push(new BatteryService(accessory, platform, config, api));
+    result.push(new OutletsService(accessory, platform, config, api));
+
+    return result;
   }
 }
