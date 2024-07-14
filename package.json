@@ -1,8 +1,7 @@
 {
-  "private": true,
   "displayName": "Ecoflow",
   "name": "homebridge-ecoflow",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Homebridge plugin for EcoFlow devices (Beta)",
   "license": "MIT",
   "type": "module",

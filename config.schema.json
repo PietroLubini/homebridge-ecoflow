@@ -21,7 +21,7 @@
               "title": "Model",
               "type": "string",
               "required": true,
-              "enum": ["Delta 2 Max", "Delta 2"]
+              "enum": ["Delta 2 Max"]
             },
             "serialNumber": {
               "title": "Serial Number",
