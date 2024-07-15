@@ -17,7 +17,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
   }
 
   protected override createService(): Service {
-    const service = this.getOrAddService(this.config.name, this.serviceSubType + '1');
+    const service = this.getOrAddService(this.config.name, this.serviceSubType);
     this.addCharacteristics(service);
     return service;
   }
@@ -48,18 +48,6 @@ export abstract class OutletsServiceBase extends ServiceBase {
     const service =
       this.accessory.getServiceById(this.platform.Service.Outlet, serviceSubType) ||
       this.accessory.addService(this.platform.Service.Outlet, serviceName, serviceSubType);
-
-    this.log.info(
-      `service.displayName = ${service.displayName}; service.name = ${service.name}; serviceName = ${serviceName};`
-    );
-    // if (service.displayName !== serviceName) {
-    //   const nameCharacteristic =
-    //     service.getCharacteristic(this.platform.Characteristic.Name) ||
-    //     service.addCharacteristic(this.platform.Characteristic.Name);
-    //   nameCharacteristic.setValue(serviceName);
-    //   service.displayName = serviceName;
-    //   this.log.info('Setting service.displayName to ', serviceName);
-    // }
 
     return service;
   }
