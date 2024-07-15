@@ -43,16 +43,23 @@ export abstract class OutletsServiceBase extends ServiceBase {
     service.getCharacteristic(this.platform.Characteristic.On).onSet(value => this.setOn(value as boolean));
   }
 
-  private getOrAddService(name: string, serviceSubType: string): Service {
-    const serviceName = name + ' ' + serviceSubType;
+  private getOrAddService(deviceName: string, serviceSubType: string): Service {
+    const serviceName = deviceName + ' ' + serviceSubType;
     const service =
       this.accessory.getServiceById(this.platform.Service.Outlet, serviceSubType) ||
       this.accessory.addService(this.platform.Service.Outlet, serviceName, serviceSubType);
 
-    const nameCharacteristic =
-      service.getCharacteristic(this.platform.Characteristic.Name) ||
-      service.addCharacteristic(this.platform.Characteristic.Name);
-    nameCharacteristic.setValue(serviceName);
+    this.log.info(
+      `service.displayName = ${service.displayName}; service.name = ${service.name}; serviceName = ${serviceName};`
+    );
+    // if (service.displayName !== serviceName) {
+    //   const nameCharacteristic =
+    //     service.getCharacteristic(this.platform.Characteristic.Name) ||
+    //     service.addCharacteristic(this.platform.Characteristic.Name);
+    //   nameCharacteristic.setValue(serviceName);
+    //   service.displayName = serviceName;
+    //   this.log.info('Setting service.displayName to ', serviceName);
+    // }
 
     return service;
   }
