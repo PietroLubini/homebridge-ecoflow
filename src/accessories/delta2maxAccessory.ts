@@ -20,9 +20,9 @@ export class Delta2MaxAccessory extends EcoFlowAccessory {
     const result: ServiceBase[] = [];
 
     result.push(new BatteryService(accessory, platform, config, api));
-    // result.push(new OutletUsbService(accessory, platform, config, api));
+    result.push(new OutletUsbService(accessory, platform, config, api));
     // result.push(new OutletAcService(accessory, platform, config, api));
-    //result.push(new OutletCarService(accessory, platform, config, api));
+    result.push(new OutletCarService(accessory, platform, config, api));
 
     return result;
   }
