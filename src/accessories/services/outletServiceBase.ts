@@ -17,7 +17,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
   }
 
   protected override createService(): Service {
-    const service = this.getOrAddService(this.config.name, this.serviceSubType);
+    const service = this.getOrAddService(this.config.name, this.serviceSubType + '1');
     this.addCharacteristics(service);
     return service;
   }

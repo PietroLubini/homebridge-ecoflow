@@ -73,19 +73,17 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
 
       if (existingAccessory) {
-        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-      }
-      //   this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-      //   this.createAccessory(existingAccessory, deviceConfig);
-      // } else {
-      this.log.info('Adding new accessory:', deviceConfig.name);
-      const accessory = new this.api.platformAccessory(deviceConfig.name, uuid);
-      accessory.context.deviceConfig = deviceConfig;
-      this.createAccessory(accessory, deviceConfig);
+        this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+        this.createAccessory(existingAccessory, deviceConfig);
+      } else {
+        this.log.info('Adding new accessory:', deviceConfig.name);
+        const accessory = new this.api.platformAccessory(deviceConfig.name, uuid);
+        accessory.context.deviceConfig = deviceConfig;
+        this.createAccessory(accessory, deviceConfig);
 
-      // link the accessory to your platform
-      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-      // }
+        // link the accessory to your platform
+        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      }
     }
   }
 
