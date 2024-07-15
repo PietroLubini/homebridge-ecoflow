@@ -1,6 +1,8 @@
 import { Service } from 'homebridge';
 import { ServiceBase } from './serviceBase.js';
 import { Subscription } from 'rxjs';
+import { fileURLToPath } from 'url';
+import path from 'path';
 import fs from 'fs';
 
 export class AccessoryInformationService extends ServiceBase {
@@ -22,8 +24,10 @@ export class AccessoryInformationService extends ServiceBase {
   }
 
   private getVersion(): string {
-    const path = `${process.cwd()}/package.json`;
-    const packageData = JSON.parse(fs.readFileSync(path, 'utf8'));
+    const filename = fileURLToPath(import.meta.url);
+    const dirname = path.dirname(filename);
+    const packageJsonPath = path.resolve(dirname, '../../../package.json');
+    const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     return packageData?.version;
   }
 }
