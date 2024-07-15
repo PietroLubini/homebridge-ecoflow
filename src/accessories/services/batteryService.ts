@@ -11,7 +11,7 @@ export class BatteryService extends ServiceBase {
   protected override createService(): Service {
     const service =
       this.accessory.getService(this.platform.Service.Battery) ||
-      this.accessory.addService(this.platform.Service.Battery, 'Battery');
+      this.accessory.addService(this.platform.Service.Battery, this.config.name);
     return service;
   }
 

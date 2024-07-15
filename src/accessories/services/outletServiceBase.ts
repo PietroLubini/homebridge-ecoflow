@@ -49,6 +49,8 @@ export abstract class OutletsServiceBase extends ServiceBase {
       this.accessory.getServiceById(this.platform.Service.Outlet, serviceSubType) ||
       this.accessory.addService(this.platform.Service.Outlet, serviceName, serviceSubType);
 
+    service.setCharacteristic(this.platform.Characteristic.ConfiguredName, serviceName);
+
     return service;
   }
 }
