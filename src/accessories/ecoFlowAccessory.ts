@@ -56,7 +56,7 @@ export abstract class EcoFlowAccessory {
     this.accessory.services
       .filter(service => !services.includes(service))
       .forEach(service => {
-        this.platform.log.debug(`Removing obsolete service from accessory '${this.config.name}':`, service.displayName);
+        this.platform.log.info(`Removing obsolete service from accessory '${this.config.name}':`, service.displayName);
         this.accessory.removeService(service);
       });
   }

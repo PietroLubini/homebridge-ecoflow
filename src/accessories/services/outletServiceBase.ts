@@ -49,10 +49,10 @@ export abstract class OutletsServiceBase extends ServiceBase {
       this.accessory.getServiceById(this.platform.Service.Outlet, serviceSubType) ||
       this.accessory.addService(this.platform.Service.Outlet, serviceName, serviceSubType);
 
-    // const nameCharacteristic =
-    //   service.getCharacteristic(this.platform.Characteristic.Name) ||
-    //   service.addCharacteristic(this.platform.Characteristic.Name);
-    // nameCharacteristic.setValue(name);
+    const nameCharacteristic =
+      service.getCharacteristic(this.platform.Characteristic.Name) ||
+      service.addCharacteristic(this.platform.Characteristic.Name);
+    nameCharacteristic.setValue(serviceName);
 
     return service;
   }
