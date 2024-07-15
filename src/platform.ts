@@ -46,7 +46,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     // to start discovery of new accessories.
     this.api.on('didFinishLaunching', () => {
       log.debug('Executed didFinishLaunching callback');
-      this.initializeDevices();
+      this.registerDevices();
     });
   }
 
@@ -61,7 +61,8 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     this.accessories.push(accessory);
   }
 
-  initializeDevices() {
+  registerDevices(): void {
+    const configuredAccessories: PlatformAccessory[] = [];
     for (const deviceConfig of this.ecoFlowConfig.devices) {
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
@@ -70,21 +71,31 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
 
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
-      const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
-
-      if (existingAccessory) {
-        this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-        this.createAccessory(existingAccessory, deviceConfig);
+      let accessory = this.accessories.find(accessory => accessory.UUID === uuid);
+      if (accessory) {
+        this.log.info('Restoring existing accessory from cache:', accessory.displayName);
+        this.createAccessory(accessory, deviceConfig);
       } else {
         this.log.info('Adding new accessory:', deviceConfig.name);
-        const accessory = new this.api.platformAccessory(deviceConfig.name, uuid);
+        accessory = new this.api.platformAccessory(deviceConfig.name, uuid);
         accessory.context.deviceConfig = deviceConfig;
         this.createAccessory(accessory, deviceConfig);
 
         // link the accessory to your platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }
+      configuredAccessories.push(accessory);
     }
+    this.cleanupDevices(configuredAccessories);
+  }
+
+  cleanupDevices(configuredAccessories: PlatformAccessory[]): void {
+    this.accessories
+      .filter(accessory => !configuredAccessories.includes(accessory))
+      .forEach(accessory => {
+        this.log.info('Removing obsolete accessory:', accessory.displayName);
+        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      });
   }
 
   createAccessory(accessory: PlatformAccessory<UnknownContext>, config: DeviceConfig): EcoFlowAccessory {
