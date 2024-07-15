@@ -8,9 +8,12 @@ import { EcoFlowMqttApi } from 'accessories/apis/ecoFlowMqttApi.js';
 import { Subscription } from 'rxjs';
 
 export class BatteryService extends ServiceBase {
-  private readonly batteryService: Service =
-    this.accessory.getService(this.platform.Service.Battery) ||
-    this.accessory.addService(this.platform.Service.Battery);
+  protected override createService(): Service {
+    const service =
+      this.accessory.getService(this.platform.Service.Battery) ||
+      this.accessory.addService(this.platform.Service.Battery, 'Battery');
+    return service;
+  }
 
   protected override subscribe(api: EcoFlowMqttApi): Subscription[] {
     const result = [];
@@ -35,7 +38,7 @@ export class BatteryService extends ServiceBase {
   private updateStatusLowBattery(batteryLevel: number): void {
     const statusLowBattery = batteryLevel < 20;
     this.log.debug('Status Low Battery ->', statusLowBattery);
-    this.batteryService
+    this.service
       .getCharacteristic(this.platform.Characteristic.StatusLowBattery)
       .updateValue(
         statusLowBattery
@@ -46,12 +49,12 @@ export class BatteryService extends ServiceBase {
 
   private updateBatteryLevel(batteryLevel: number): void {
     this.log.debug('BatteryLevel ->', batteryLevel);
-    this.batteryService.getCharacteristic(this.platform.Characteristic.BatteryLevel).updateValue(batteryLevel);
+    this.service.getCharacteristic(this.platform.Characteristic.BatteryLevel).updateValue(batteryLevel);
   }
 
   private updateChargingState(chargingPower: number): void {
     const isCharging = chargingPower > 0;
     this.log.debug('ChargingState ->', isCharging);
-    this.batteryService.getCharacteristic(this.platform.Characteristic.ChargingState).updateValue(isCharging);
+    this.service.getCharacteristic(this.platform.Characteristic.ChargingState).updateValue(isCharging);
   }
 }

@@ -6,21 +6,20 @@ import { DeviceConfig } from 'config.js';
 import { MqttSetMessage, MqttSetMessageParams } from 'accessories/apis/interfaces/ecoFlowMqttContacts.js';
 
 export abstract class OutletsServiceBase extends ServiceBase {
-  protected readonly service: Service;
-
   constructor(
-    serviceSubType: string,
+    private readonly serviceSubType: string,
     accessory: PlatformAccessory,
     platform: EcoFlowHomebridgePlatform,
     config: DeviceConfig,
     api: EcoFlowMqttApi
   ) {
     super(accessory, platform, config, api);
+  }
 
-    this.service = this.getOrAddService(`${config.name} ${serviceSubType}`);
-    this.accessory.removeService(this.service);
-    this.service = this.getOrAddService(`${config.name} ${serviceSubType}`);
-    this.initService();
+  protected override createService(): Service {
+    const service = this.getOrAddService(this.config.name, this.serviceSubType);
+    this.addCharacteristics(service);
+    return service;
   }
 
   protected abstract setOn(value: boolean): Promise<void>;
@@ -40,19 +39,20 @@ export abstract class OutletsServiceBase extends ServiceBase {
     await this.api.publish('/open/<certificateAccount>/<sn>/set', this.config.serialNumber, data);
   }
 
-  private initService(): void {
-    this.service.getCharacteristic(this.platform.Characteristic.On).onSet(value => this.setOn(value as boolean));
+  private addCharacteristics(service: Service): void {
+    service.getCharacteristic(this.platform.Characteristic.On).onSet(value => this.setOn(value as boolean));
   }
 
-  private getOrAddService(name: string): Service {
+  private getOrAddService(name: string, serviceSubType: string): Service {
+    const serviceName = name + ' ' + serviceSubType;
     const service =
-      this.accessory.getServiceById(this.platform.Service.Outlet, name) ||
-      this.accessory.addService(this.platform.Service.Outlet, name, name);
+      this.accessory.getServiceById(this.platform.Service.Outlet, serviceSubType) ||
+      this.accessory.addService(this.platform.Service.Outlet, serviceName, serviceSubType);
 
-    const nameCharacteristic =
-      service.getCharacteristic(this.platform.Characteristic.Name) ||
-      service.addCharacteristic(this.platform.Characteristic.Name);
-    nameCharacteristic.setValue(name);
+    // const nameCharacteristic =
+    //   service.getCharacteristic(this.platform.Characteristic.Name) ||
+    //   service.addCharacteristic(this.platform.Characteristic.Name);
+    // nameCharacteristic.setValue(name);
 
     return service;
   }

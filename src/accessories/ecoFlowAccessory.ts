@@ -3,6 +3,7 @@ import { EcoFlowHomebridgePlatform } from '../platform.js';
 import { DeviceConfig } from '../config.js';
 import { ServiceBase } from './services/serviceBase.js';
 import { EcoFlowMqttApi } from './apis/ecoFlowMqttApi.js';
+import { AccessoryInformationService } from './services/accessoryInformationService.js';
 
 export abstract class EcoFlowAccessory {
   private readonly services: ServiceBase[];
@@ -19,14 +20,10 @@ export abstract class EcoFlowAccessory {
   ) {
     this.log = this.platform.log;
     this.api = new EcoFlowMqttApi(this.config, this.platform.log);
-    this.accessory
-      .getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'EcoFlow')
-      .setCharacteristic(this.platform.Characteristic.Model, this.config.model)
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, this.config.serialNumber);
-
     this.services = this.registerServices(this.platform, this.accessory, this.config, this.api);
-    this.connectMqtt();
+    this.services.push(new AccessoryInformationService(this.accessory, this.platform, this.config, this.api));
+    this.initServices();
+    // this.connectMqtt();
   }
 
   destroy() {
@@ -46,6 +43,23 @@ export abstract class EcoFlowAccessory {
     config: DeviceConfig,
     api: EcoFlowMqttApi
   ): ServiceBase[];
+
+  private initServices(): void {
+    this.services.forEach(service => {
+      service.init();
+    });
+    this.cleanupServices();
+  }
+
+  private cleanupServices(): void {
+    const services = this.services.map(service => service.service);
+    this.accessory.services
+      .filter(service => !services.includes(service))
+      .forEach(service => {
+        this.platform.log.debug(`Removing obsolete service from accessory '${this.config.name}':`, service.displayName);
+        this.accessory.removeService(service);
+      });
+  }
 
   private connectMqtt(): void {
     this.connectMqttTimeoutId = setTimeout(async () => await this.initMqtt(), 500);

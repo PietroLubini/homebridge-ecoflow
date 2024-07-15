@@ -17,7 +17,7 @@ export class Delta2MaxAccessory extends EcoFlowAccessory {
     config: DeviceConfig,
     api: EcoFlowMqttApi
   ): ServiceBase[] {
-    const result = [];
+    const result: ServiceBase[] = [];
 
     result.push(new BatteryService(accessory, platform, config, api));
     result.push(new OutletUsbService(accessory, platform, config, api));
