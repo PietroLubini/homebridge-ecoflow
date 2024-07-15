@@ -23,7 +23,7 @@ export abstract class EcoFlowAccessory {
     this.services = this.registerServices(this.platform, this.accessory, this.config, this.api);
     this.services.push(new AccessoryInformationService(this.accessory, this.platform, this.config, this.api));
     this.initServices();
-    // this.connectMqtt();
+    this.connectMqtt();
   }
 
   destroy() {
