@@ -16,7 +16,18 @@ export abstract class OutletsServiceBase extends ServiceBase {
     api: EcoFlowMqttApi
   ) {
     super(accessory, platform, config, api);
-    this.service = this.getOrAddService(`${config.name} > ${serviceSubType}`);
+
+    // TODO: remove
+    const existingService = this.accessory.getServiceById(
+      this.platform.Service.Outlet,
+      `${config.name} > ${serviceSubType}`
+    );
+    if (existingService) {
+      this.accessory.removeService(existingService);
+    }
+    // TODO: remove
+
+    this.service = this.getOrAddService(`${config.name} ${serviceSubType}`);
     this.initService();
   }
 
