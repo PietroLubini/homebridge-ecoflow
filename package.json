@@ -29,7 +29,6 @@
     "ecoflow"
   ],
   "dependencies": {
-    "crypto": "^1.0.1",
     "mqtt": "^5.8.0",
     "node-cache": "^5.1.2",
     "rxjs": "^7.8.1",
