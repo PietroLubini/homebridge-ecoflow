@@ -27,11 +27,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
 
-  constructor(
-    public readonly log: Logging,
-    public readonly config: PlatformConfig,
-    public readonly api: API,
-  ) {
+  constructor(public readonly log: Logging, public readonly config: PlatformConfig, public readonly api: API) {
     this.ecoFlowConfig = this.config as EcoFlowConfig;
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
@@ -74,25 +70,27 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
 
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
-      const existingAccessory = this.accessories.find((accessory) => accessory.UUID === uuid);
+      const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
 
       if (existingAccessory) {
-        this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-        this.createAccessory(existingAccessory, deviceConfig);
-      } else {
-        this.log.info('Adding new accessory:', deviceConfig.name);
-        const accessory = new this.api.platformAccessory(deviceConfig.name, uuid);
-        accessory.context.deviceConfig = deviceConfig;
-        this.createAccessory(accessory, deviceConfig);
-
-        // link the accessory to your platform
-        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [ accessory ]);
+        this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
       }
+      //   this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+      //   this.createAccessory(existingAccessory, deviceConfig);
+      // } else {
+      this.log.info('Adding new accessory:', deviceConfig.name);
+      const accessory = new this.api.platformAccessory(deviceConfig.name, uuid);
+      accessory.context.deviceConfig = deviceConfig;
+      this.createAccessory(accessory, deviceConfig);
+
+      // link the accessory to your platform
+      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      // }
     }
   }
 
   createAccessory(accessory: PlatformAccessory<UnknownContext>, config: DeviceConfig): EcoFlowAccessory {
-    switch(config.model) {
+    switch (config.model) {
       case DeviceModel.Delta2Max:
         return new Delta2MaxAccessory(this, accessory, config);
       default:
