@@ -1,4 +1,4 @@
-import { Characteristic, PlatformAccessory, Service } from 'homebridge';
+import { PlatformAccessory, Service } from 'homebridge';
 import { ServiceBase } from './serviceBase.js';
 import { EcoFlowMqttApi } from 'accessories/apis/ecoFlowMqttApi.js';
 import { EcoFlowHomebridgePlatform } from 'platform.js';
@@ -17,6 +17,8 @@ export abstract class OutletsServiceBase extends ServiceBase {
   ) {
     super(accessory, platform, config, api);
 
+    this.service = this.getOrAddService(`${config.name} ${serviceSubType}`);
+    this.accessory.removeService(this.service);
     this.service = this.getOrAddService(`${config.name} ${serviceSubType}`);
     this.initService();
   }
