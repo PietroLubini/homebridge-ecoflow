@@ -1,4 +1,4 @@
-import { PlatformAccessory, Service } from 'homebridge';
+import { Characteristic, PlatformAccessory, Service } from 'homebridge';
 import { ServiceBase } from './serviceBase.js';
 import { EcoFlowMqttApi } from 'accessories/apis/ecoFlowMqttApi.js';
 import { EcoFlowHomebridgePlatform } from 'platform.js';
@@ -16,16 +16,6 @@ export abstract class OutletsServiceBase extends ServiceBase {
     api: EcoFlowMqttApi
   ) {
     super(accessory, platform, config, api);
-
-    // TODO: remove
-    const existingService = this.accessory.getServiceById(
-      this.platform.Service.Outlet,
-      `${config.name} > ${serviceSubType}`
-    );
-    if (existingService) {
-      this.accessory.removeService(existingService);
-    }
-    // TODO: remove
 
     this.service = this.getOrAddService(`${config.name} ${serviceSubType}`);
     this.initService();
@@ -56,6 +46,11 @@ export abstract class OutletsServiceBase extends ServiceBase {
     const service =
       this.accessory.getServiceById(this.platform.Service.Outlet, name) ||
       this.accessory.addService(this.platform.Service.Outlet, name, name);
+
+    const nameCharacteristic =
+      service.getCharacteristic(this.platform.Characteristic.Name) ||
+      service.addCharacteristic(this.platform.Characteristic.Name);
+    nameCharacteristic.setValue(name);
 
     return service;
   }
