@@ -88,11 +88,17 @@ export class EcoFlowMqttApi extends EcoFlowApiBase {
   private processMqttMessage(message: Buffer): void {
     const mqttMessage = JSON.parse(message.toString()) as MqttMessage<MqttMessageParams>;
     if (mqttMessage.typeCode === MqttMessageType.BMS) {
-      this.bmsParamsSubject.next(mqttMessage.params as BmsStatusMqttMessageParams);
+      const params = mqttMessage.params as BmsStatusMqttMessageParams;
+      this.log.debug('BMS:', params);
+      this.bmsParamsSubject.next(params);
     } else if (mqttMessage.typeCode === MqttMessageType.INV) {
-      this.invParamsSubject.next(mqttMessage.params as InvStatusMqttMessageParams);
+      const params = mqttMessage.params as InvStatusMqttMessageParams;
+      this.log.debug('INV:', params);
+      this.invParamsSubject.next(params);
     } else if (mqttMessage.typeCode === MqttMessageType.PD) {
-      this.pdParamsSubject.next(mqttMessage.params as PdStatusMqttMessageParams);
+      const params = mqttMessage.params as PdStatusMqttMessageParams;
+      this.log.debug('PD:', params);
+      this.pdParamsSubject.next(params);
     }
   }
 

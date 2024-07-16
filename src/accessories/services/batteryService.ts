@@ -23,14 +23,14 @@ export class BatteryService extends ServiceBase {
   }
 
   private updateBmsParams(params: BmsStatusMqttMessageParams): void {
-    if (params.f32ShowSoc) {
+    if (params.f32ShowSoc !== undefined) {
       this.updateStatusLowBattery(params.f32ShowSoc);
       this.updateBatteryLevel(params.f32ShowSoc);
     }
   }
 
   private updateInvParams(params: InvStatusMqttMessageParams): void {
-    if (params.inputWatts) {
+    if (params.inputWatts !== undefined) {
       this.updateChargingState(params.inputWatts);
     }
   }

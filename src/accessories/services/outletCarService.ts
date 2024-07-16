@@ -38,7 +38,7 @@ export class OutletCarService extends OutletsServiceBase {
     if (params.carState !== undefined) {
       this.updateCarState(params.carState);
     }
-    if (params.carWatts) {
+    if (params.carWatts !== undefined) {
       this.updateCarInUse(params.carWatts);
     }
   }

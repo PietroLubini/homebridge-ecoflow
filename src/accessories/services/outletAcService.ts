@@ -42,7 +42,7 @@ export class OutletAcService extends OutletsServiceBase {
     if (params.cfgAcEnabled !== undefined) {
       this.updateAcState(params.cfgAcEnabled);
     }
-    if (params.outputWatts) {
+    if (params.outputWatts !== undefined) {
       this.updateAcInUse(params.outputWatts);
     }
   }

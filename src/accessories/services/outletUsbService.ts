@@ -39,12 +39,12 @@ export class OutletUsbService extends OutletsServiceBase {
       this.updateUsbState(params.dcOutState);
     }
     if (
-      params.usb1Watts ||
-      params.usb2Watts ||
-      params.qcUsb1Watts ||
-      params.qcUsb2Watts ||
-      params.typec1Watts ||
-      params.typec2Watts
+      params.usb1Watts !== undefined ||
+      params.usb2Watts !== undefined ||
+      params.qcUsb1Watts !== undefined ||
+      params.qcUsb2Watts !== undefined ||
+      params.typec1Watts !== undefined ||
+      params.typec2Watts !== undefined
     ) {
       const usbWatts =
         (params.usb1Watts ?? 0) +
