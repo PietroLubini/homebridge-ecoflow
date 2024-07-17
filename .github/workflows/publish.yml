@@ -19,7 +19,7 @@ jobs:
     outputs:
       release-version: ${{ steps.parse-release-name.outputs.release-version}}
 
-  publish_artifacts:
+  publish:
     runs-on: ubuntu-latest
     needs:
       - parse_release_name
