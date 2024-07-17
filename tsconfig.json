@@ -7,19 +7,12 @@
     "outDir": "dist",
     "rootDir": "src",
     "baseUrl": "./src",
-    "lib": [
-      "DOM",
-      "ES2022"
-    ],
+    "lib": ["DOM", "ES2022"],
     "module": "ES2022",
-    "moduleResolution":"node",
+    "moduleResolution": "node",
     "sourceMap": true,
     "strict": true,
-    "target": "ES2022",
+    "target": "ES2022"
   },
-  "include": [
-    "eslint.config.mjs",
-    "homebridge-ui",
-    "src"
-  ]
+  "include": ["eslint.config.mjs", "homebridge-ui", "src", "src/**/*.cjs"]
 }

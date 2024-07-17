@@ -1,5 +1,4 @@
 import mqtt, { MqttClient } from 'mqtt';
-import { v4 as uuidV4 } from 'uuid';
 import { CmdResponse, EcoFlowApiBase } from './ecoFlowApiBase.js';
 import {
   BmsStatusMqttMessageParams,
@@ -11,6 +10,7 @@ import {
   PdStatusMqttMessageParams,
 } from './interfaces/ecoFlowMqttContacts.js';
 import { Subject } from 'rxjs';
+import { getMachineId } from './../../helpers/machineId.js';
 
 interface AcquireCertificateResponseData {
   certificateAccount: string;
@@ -61,12 +61,14 @@ export class EcoFlowMqttApi extends EcoFlowApiBase {
   private async connect(): Promise<mqtt.MqttClient> {
     if (!this.client) {
       const certificateData = await this.acquireCertificate();
+      const clientId = `HOMEBRIDGE_${(await getMachineId(this.log)).toUpperCase()}`;
+      this.log.info('clientId: ', clientId);
       this.client = await mqtt.connectAsync(
         `${certificateData.protocol}://${certificateData.url}:${certificateData.port}`,
         {
           username: `${certificateData.certificateAccount}`,
           password: `${certificateData.certificatePassword}`,
-          clientId: `HOMEBRIDGE_${uuidV4().toUpperCase()}`,
+          clientId,
           protocolVersion: 5,
         }
       );

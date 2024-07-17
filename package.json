@@ -20,7 +20,8 @@
   "scripts": {
     "lint": "eslint src/**/*.ts --max-warnings=0",
     "watch": "npm run build && npm link && nodemon",
-    "build": "rimraf ./dist && tsc",
+    "build": "rimraf ./dist && tsc && npm run copy:cjs",
+    "copy:cjs": "copyfiles -u 1 src/**/*.cjs dist",
     "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [
@@ -31,6 +32,7 @@
   "dependencies": {
     "mqtt": "^5.8.0",
     "node-cache": "^5.1.2",
+    "node-machine-id": "^1.1.12",
     "rxjs": "^7.8.1",
     "uuid": "^10.0.0"
   },
@@ -39,6 +41,7 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.11.0",
+    "copyfiles": "^2.4.1",
     "eslint": "^8.57.0",
     "homebridge": "^1.8.2",
     "nodemon": "^3.1.2",
