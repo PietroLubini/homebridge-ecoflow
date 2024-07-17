@@ -1,0 +1,55 @@
+{
+  "displayName": "Homebridge Ecoflow",
+  "name": "homebridge-ecoflow",
+  "version": "0.0.1",
+  "description": "Homebridge plugin for EcoFlow devices",
+  "license": "MIT",
+  "author": "PietroLubini",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PietroLubini/homebridge-ecoflow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PietroLubini/homebridge-ecoflow/issues"
+  },
+  "homepage": "https://github.com/PietroLubini/homebridge-ecoflow#readme",
+  "engines": {
+    "node": "^18.16.0 || ^20.9.0",
+    "homebridge": "^1.8.0"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "lint": "eslint src/**/*.ts --max-warnings=0",
+    "watch": "npm run build && npm link && nodemon",
+    "build": "rimraf ./dist && tsc && npm run copy:cjs",
+    "copy:cjs": "copyfiles -u 1 src/**/*.cjs dist",
+    "prepublishOnly": "npm run lint && npm run build"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "homebridge-ecoflow",
+    "ecoflow",
+    "delta 2 max"
+  ],
+  "dependencies": {
+    "mqtt": "^5.8.0",
+    "node-cache": "^5.1.2",
+    "node-machine-id": "^1.1.12",
+    "rxjs": "^7.8.1",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.13",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "copyfiles": "^2.4.1",
+    "eslint": "^8.57.0",
+    "homebridge": "^1.8.2",
+    "nodemon": "^3.1.2",
+    "rimraf": "^5.0.7",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
