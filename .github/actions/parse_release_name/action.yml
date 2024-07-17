@@ -1,0 +1,14 @@
+name: Parse Release Name
+description: Get release version from Release Name
+inputs:
+  release-name:
+    description: Name of release in format v1.0.0
+    required: true
+
+outputs:
+  release-version:
+    description: Version of release, e.g. 1.0.0
+
+runs:
+  using: 'node16'
+  main: 'index.js'

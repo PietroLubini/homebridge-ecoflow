@@ -1,9 +1,10 @@
 {
   "displayName": "Homebridge Ecoflow",
   "name": "homebridge-ecoflow",
-  "version": "1.0.2",
-  "description": "Homebridge plugin for EcoFlow devices (Beta)",
+  "version": "0.0.1",
+  "description": "Homebridge plugin for EcoFlow devices",
   "license": "MIT",
+  "author": "PietroLubini",
   "type": "module",
   "repository": {
     "type": "git",
@@ -12,6 +13,7 @@
   "bugs": {
     "url": "https://github.com/PietroLubini/homebridge-ecoflow/issues"
   },
+  "homepage": "https://github.com/PietroLubini/homebridge-ecoflow#readme",
   "engines": {
     "node": "^18.16.0 || ^20.9.0",
     "homebridge": "^1.8.0"
@@ -27,7 +29,8 @@
   "keywords": [
     "homebridge-plugin",
     "homebridge-ecoflow",
-    "ecoflow"
+    "ecoflow",
+    "delta 2 max"
   ],
   "dependencies": {
     "mqtt": "^5.8.0",
