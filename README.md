@@ -33,7 +33,7 @@ If you are new to homebridge, please first read the homebridge [documentation](h
 Install homebridge-ecoflow:
 
 ```sh
-sudo npm install -g @pietrolubini/homebridge-miot
+sudo npm install -g @pietrolubini/homebridge-ecoflow
 ```
 
 ## Configuration
