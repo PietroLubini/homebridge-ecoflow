@@ -62,7 +62,6 @@ export class EcoFlowMqttApi extends EcoFlowApiBase {
     if (!this.client) {
       const certificateData = await this.acquireCertificate();
       const clientId = `HOMEBRIDGE_${(await getMachineId(this.log)).toUpperCase()}`;
-      this.log.info('clientId: ', clientId);
       this.client = await mqtt.connectAsync(
         `${certificateData.protocol}://${certificateData.url}:${certificateData.port}`,
         {
