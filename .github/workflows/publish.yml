@@ -24,7 +24,7 @@ jobs:
     needs:
       - parse_release_name
     env:
-      RELEASE_VERSION: ${{ needs.parse_release_name.outputs.release-name }}
+      RELEASE_VERSION: ${{ needs.parse_release_name.outputs.release-version }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
