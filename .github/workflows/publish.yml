@@ -49,9 +49,6 @@ jobs:
         run: npm ci
 
       - name: Publish
-        run: |
-          npm unpublish @pietrolubini/homebridge-ecoflow@0.1.0
-          npm unpublish @pietrolubini/homebridge-ecoflow@0.2.0
-          npm publish --provenance --access public
+        run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
