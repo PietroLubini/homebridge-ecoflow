@@ -40,7 +40,7 @@ export class EcoFlowHttpApi {
     };
     const response = await this.execute<CmdResponse<TCmdResponseData>>(QuotaAllPath, HttpMethod.Get, requestCmd);
     const data = response.data;
-    this.log.debug('Quotas:', data);
+    this.log.debug('All quotas:', data);
     return data;
   }
 
@@ -66,9 +66,7 @@ export class EcoFlowHttpApi {
     const bodyParamsMessage = this.composeSignMessage(body);
     params = bodyParamsMessage ? `${params}${bodyParamsMessage}&` : params;
     const message = `${params}accessKey=${accessKey}&nonce=${nonce}&timestamp=${timestamp}`;
-    this.log.debug('query message:', message);
     const requestUrl = queryParams ? `${url}?${queryParams}` : url;
-    this.log.debug('requestUrl:', requestUrl);
 
     const headers: HeadersInit = {
       accessKey,

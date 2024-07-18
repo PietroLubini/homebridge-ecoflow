@@ -30,9 +30,9 @@ export abstract class EcoFlowAccessory {
   public async initialize(): Promise<void> {
     this.services = this.createServices();
     this.services.push(new AccessoryInformationService(this));
-    // await this.connectMqtt();
     this.initializeServices();
     this.subscriptions = this.subscribeOnParameterUpdates();
+    await this.connectMqtt();
   }
 
   public destroy() {
