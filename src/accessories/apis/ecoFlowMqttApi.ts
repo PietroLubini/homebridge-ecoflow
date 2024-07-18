@@ -34,23 +34,29 @@ export class EcoFlowMqttApi {
     this.log.info('Disconnected from EcoFlow MQTT Service');
   }
 
-  public async subscribe(topicPattern: string, serialNumber: string): Promise<void> {
+  public async subscribe(topicPattern: string, serialNumber: string): Promise<boolean> {
     const client = await this.connect();
-    const topic = this.composeTopic(topicPattern, serialNumber);
-    await client.subscribeAsync(topic);
-    this.log.debug('Subscribed to topic:', topic);
-    client.on('message', (_, message) => {
-      const mqttMessage = JSON.parse(message.toString()) as MqttMessage<MqttMessageParams>;
-      this.processMqttMessage(mqttMessage);
-    });
+    if (client) {
+      const topic = this.composeTopic(topicPattern, serialNumber);
+      await client.subscribeAsync(topic);
+      this.log.debug('Subscribed to topic:', topic);
+      client.on('message', (_, message) => {
+        const mqttMessage = JSON.parse(message.toString()) as MqttMessage<MqttMessageParams>;
+        this.processMqttMessage(mqttMessage);
+      });
+      return true;
+    }
+    return false;
   }
 
   public async publish(topicPattern: string, serialNumber: string, data: MqttSetMessageBase): Promise<void> {
     const client = await this.connect();
-    const topic = this.composeTopic(topicPattern, serialNumber);
-    const message = JSON.stringify(data);
-    await client.publishAsync(topic, message);
-    this.log.debug(`Published to topic '${topic}'`, message);
+    if (client) {
+      const topic = this.composeTopic(topicPattern, serialNumber);
+      const message = JSON.stringify(data);
+      await client.publishAsync(topic, message);
+      this.log.debug(`Published to topic '${topic}'`, message);
+    }
   }
 
   public processMqttMessage(message: MqttMessage<MqttMessageParams>): void {
@@ -69,25 +75,27 @@ export class EcoFlowMqttApi {
     }
   }
 
-  private async connect(): Promise<mqtt.MqttClient> {
+  private async connect(): Promise<mqtt.MqttClient | null> {
     if (!this.client) {
       const certificateData = await this.acquireCertificate();
-      const clientId = `HOMEBRIDGE_${(await getMachineId(this.log)).toUpperCase()}`;
-      this.client = await mqtt.connectAsync(
-        `${certificateData.protocol}://${certificateData.url}:${certificateData.port}`,
-        {
-          username: `${certificateData.certificateAccount}`,
-          password: `${certificateData.certificatePassword}`,
-          clientId,
-          protocolVersion: 5,
-        }
-      );
-      this.log.info('Connected to EcoFlow MQTT Service');
+      if (certificateData) {
+        const clientId = `HOMEBRIDGE_${(await getMachineId(this.log)).toUpperCase()}`;
+        this.client = await mqtt.connectAsync(
+          `${certificateData.protocol}://${certificateData.url}:${certificateData.port}`,
+          {
+            username: `${certificateData.certificateAccount}`,
+            password: `${certificateData.certificatePassword}`,
+            clientId,
+            protocolVersion: 5,
+          }
+        );
+        this.log.info('Connected to EcoFlow MQTT Service');
+      }
     }
     return this.client;
   }
 
-  private async acquireCertificate(): Promise<AcquireCertificateResponseData> {
+  private async acquireCertificate(): Promise<AcquireCertificateResponseData | null> {
     if (!this.certificateData) {
       this.certificateData = await this.httpApi.acquireCertificate();
     }

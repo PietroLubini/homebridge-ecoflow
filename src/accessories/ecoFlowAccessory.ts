@@ -9,7 +9,6 @@ import { CmdResponseData } from './apis/interfaces/ecoFlowHttpContacts.js';
 import { Subscription } from 'rxjs';
 
 export abstract class EcoFlowAccessory {
-  public readonly log: Logging;
   public readonly mqttApi: EcoFlowMqttApi;
   protected readonly httpApi: EcoFlowHttpApi;
   private services: ServiceBase[] = [];
@@ -20,9 +19,9 @@ export abstract class EcoFlowAccessory {
   constructor(
     public readonly platform: EcoFlowHomebridgePlatform,
     public readonly accessory: PlatformAccessory,
-    public readonly config: DeviceConfig
+    public readonly config: DeviceConfig,
+    public readonly log: Logging
   ) {
-    this.log = this.platform.log;
     this.httpApi = new EcoFlowHttpApi(this.config, this.log);
     this.mqttApi = new EcoFlowMqttApi(this.httpApi, this.log);
   }
@@ -59,7 +58,7 @@ export abstract class EcoFlowAccessory {
     this.accessory.services
       .filter(service => !services.includes(service))
       .forEach(service => {
-        this.platform.log.info(`Removing obsolete service from accessory '${this.config.name}':`, service.displayName);
+        this.log.info('Removing obsolete service from accessory:', service.displayName);
         this.accessory.removeService(service);
       });
   }
@@ -75,14 +74,10 @@ export abstract class EcoFlowAccessory {
   }
 
   private async initMqtt(): Promise<void> {
-    try {
-      await this.mqttApi.subscribe('/open/<certificateAccount>/<sn>/quota', this.config.serialNumber);
-      this.isMqttConnected = true;
-    } catch (e) {
-      if (e instanceof Error) {
-        this.log.error(e.message);
-      }
-    }
+    this.isMqttConnected = await this.mqttApi.subscribe(
+      '/open/<certificateAccount>/<sn>/quota',
+      this.config.serialNumber
+    );
   }
 }
 
