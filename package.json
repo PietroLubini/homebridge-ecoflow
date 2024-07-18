@@ -16,7 +16,7 @@
   "homepage": "https://github.com/PietroLubini/homebridge-ecoflow#readme",
   "engines": {
     "node": "^18.16.0 || ^20.9.0",
-    "homebridge": "^1.8.0"
+    "homebridge": "^1.7.0"
   },
   "main": "dist/index.js",
   "scripts": {
