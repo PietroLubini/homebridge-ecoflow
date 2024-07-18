@@ -14,7 +14,7 @@ import {
 } from './apis/interfaces/ecoFlowMqttContacts.js';
 import { Subscription } from 'rxjs';
 import { EcoFlowHomebridgePlatform } from 'platform.js';
-import { PlatformAccessory } from 'homebridge';
+import { Logging, PlatformAccessory } from 'homebridge';
 import { DeviceConfig } from 'config.js';
 
 export class Delta2MaxAccessory extends EcoFlowAccessoryWithQuota<GetQuotaAllCmdResponseData> {
@@ -23,12 +23,8 @@ export class Delta2MaxAccessory extends EcoFlowAccessoryWithQuota<GetQuotaAllCmd
   private readonly outletAcService: OutletAcService;
   private readonly outletCarService: OutletCarService;
 
-  constructor(
-    public readonly platform: EcoFlowHomebridgePlatform,
-    public readonly accessory: PlatformAccessory,
-    public readonly config: DeviceConfig
-  ) {
-    super(platform, accessory, config);
+  constructor(platform: EcoFlowHomebridgePlatform, accessory: PlatformAccessory, config: DeviceConfig, log: Logging) {
+    super(platform, accessory, config, log);
     this.batteryService = new BatteryService(this);
     this.outletUsbService = new OutletUsbService(this);
     this.outletAcService = new OutletAcService(this);

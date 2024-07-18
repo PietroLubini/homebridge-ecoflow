@@ -6,6 +6,7 @@ export enum HttpMethod {
 export interface CmdResponseBase {
   code: string;
   message: string;
+  failed: boolean;
 }
 
 export interface CmdResponseData {}

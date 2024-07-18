@@ -17,7 +17,7 @@ const QuotaAllPath = '/iot-open/sign/device/quota/all';
 const CertificatePath = '/iot-open/sign/certification';
 
 export class EcoFlowHttpApi {
-  constructor(private config: DeviceConfig, private log: Logging) {}
+  constructor(private readonly config: DeviceConfig, private readonly log: Logging) {}
 
   public async getQuotas<TCmdResponseData extends CmdResponseData>(quotas: string[]): Promise<TCmdResponseData> {
     this.log.debug('Get quotas:', quotas);
@@ -28,9 +28,12 @@ export class EcoFlowHttpApi {
       },
     };
     const response = await this.execute<CmdResponse<TCmdResponseData>>(QuotaPath, HttpMethod.Post, requestCmd);
-    const data = response.data;
-    this.log.debug('Quotas:', data);
-    return data;
+    if (!response.failed) {
+      const data = response.data;
+      this.log.debug('Quotas:', data);
+      return data;
+    }
+    return {} as TCmdResponseData;
   }
 
   public async getAllQuotas<TCmdResponseData extends CmdResponseData>(): Promise<TCmdResponseData> {
@@ -39,16 +42,22 @@ export class EcoFlowHttpApi {
       sn: this.config.serialNumber,
     };
     const response = await this.execute<CmdResponse<TCmdResponseData>>(QuotaAllPath, HttpMethod.Get, requestCmd);
-    const data = response.data;
-    this.log.debug('All quotas:', data);
-    return data;
+    if (!response.failed) {
+      const data = response.data;
+      this.log.debug('All quotas:', data);
+      return data;
+    }
+    return {} as TCmdResponseData;
   }
 
-  public async acquireCertificate(): Promise<AcquireCertificateResponseData> {
+  public async acquireCertificate(): Promise<AcquireCertificateResponseData | null> {
     this.log.debug('Acquire certificate for MQTT connection');
     const response = await this.execute<CmdResponse<AcquireCertificateResponseData>>(CertificatePath, HttpMethod.Get);
-    this.log.debug('Certificate data:', response.data);
-    return response.data;
+    if (!response.failed) {
+      this.log.debug('Certificate data:', response.data);
+      return response.data;
+    }
+    return null;
   }
 
   protected async execute<TResponse extends CmdResponseBase>(
@@ -86,13 +95,15 @@ export class EcoFlowHttpApi {
       const result = (await response.json()) as unknown as TResponse;
       if (result.code !== '0') {
         throw Error(
-          `Request '${url}' is failed [${response.status}]: ${response.statusText}; result: ${JSON.stringify(result)}`
+          `Request to "${requestUrl}" with options: "${this.stringifyOptions(options)}" is failed [${
+            response.status
+          }]: ${response.statusText}; result: ${JSON.stringify(result)}`
         );
       }
       return result;
     } catch (e) {
       this.log.error('Request is failed:', e);
-      throw e;
+      return { code: '500', message: (e as Error)?.message, failed: true } as TResponse;
     }
   }
 
@@ -133,6 +144,18 @@ export class EcoFlowHttpApi {
 
   private createHmacSha256(key: string, message: string): string {
     return crypto.createHmac('sha256', key).update(message).digest('hex');
+  }
+
+  private stringifyOptions(options: RequestInit): string {
+    const headersObject: { [key: string]: string } = {};
+    (options.headers as Headers).forEach((value, key) => {
+      headersObject[key] = value;
+    });
+    const newOptions = {
+      ...options,
+      headers: headersObject,
+    };
+    return JSON.stringify(newOptions);
   }
 }
 
