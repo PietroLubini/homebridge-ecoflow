@@ -1,28 +1,10 @@
-import { PlatformAccessory } from 'homebridge';
-import {
-  InvStatusMqttMessageParams,
-  MqttSetAcEnabledMessageParams,
-} from 'accessories/apis/interfaces/ecoFlowMqttContacts.js';
-import { EcoFlowMqttApi } from 'accessories/apis/ecoFlowMqttApi.js';
-import { Subscription } from 'rxjs';
+import { MqttSetAcEnabledMessageParams } from 'accessories/apis/interfaces/ecoFlowMqttContacts.js';
 import { OutletsServiceBase } from './outletServiceBase.js';
-import { EcoFlowHomebridgePlatform } from 'platform.js';
-import { DeviceConfig } from 'config.js';
+import { EcoFlowAccessory } from 'accessories/ecoFlowAccessory.js';
 
 export class OutletAcService extends OutletsServiceBase {
-  constructor(
-    accessory: PlatformAccessory,
-    platform: EcoFlowHomebridgePlatform,
-    config: DeviceConfig,
-    api: EcoFlowMqttApi
-  ) {
-    super('AC', accessory, platform, config, api);
-  }
-
-  protected override subscribe(api: EcoFlowMqttApi): Subscription[] {
-    const result = [];
-    result.push(api.invParams$.subscribe(params => this.updateInvParams(params)));
-    return result;
+  constructor(ecoFlowAccessory: EcoFlowAccessory) {
+    super('AC', ecoFlowAccessory);
   }
 
   protected override setOn(value: boolean): Promise<void> {
@@ -34,27 +16,13 @@ export class OutletAcService extends OutletsServiceBase {
     });
   }
 
-  private updateInvParams(params: InvStatusMqttMessageParams): void {
-    this.updateAc(params);
-  }
-
-  private updateAc(params: InvStatusMqttMessageParams): void {
-    if (params.cfgAcEnabled !== undefined) {
-      this.updateAcState(params.cfgAcEnabled);
-    }
-    if (params.outputWatts !== undefined) {
-      this.updateAcInUse(params.outputWatts);
-    }
-  }
-
-  private updateAcState(state: boolean): void {
+  public updateState(state: boolean): void {
     this.log.debug('AcState ->', state);
-    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue(state);
+    this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.On).updateValue(state);
   }
 
-  private updateAcInUse(watts: number): void {
-    const isInUse = watts > 0;
+  public updateInUse(isInUse: boolean): void {
     this.log.debug('AcInUse ->', isInUse);
-    this.service.getCharacteristic(this.platform.Characteristic.OutletInUse).updateValue(isInUse);
+    this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.OutletInUse).updateValue(isInUse);
   }
 }

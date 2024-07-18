@@ -4,49 +4,52 @@ import { DeviceConfig } from '../config.js';
 import { ServiceBase } from './services/serviceBase.js';
 import { EcoFlowMqttApi } from './apis/ecoFlowMqttApi.js';
 import { AccessoryInformationService } from './services/accessoryInformationService.js';
+import { EcoFlowHttpApi } from './apis/ecoFlowHttpApi.js';
+import { CmdResponseData } from './apis/interfaces/ecoFlowHttpContacts.js';
+import { Subscription } from 'rxjs';
 
 export abstract class EcoFlowAccessory {
-  private readonly services: ServiceBase[];
-  private readonly log: Logging;
-  private readonly api: EcoFlowMqttApi;
-  private connectMqttTimeoutId: NodeJS.Timeout | null = null;
+  public readonly log: Logging;
+  public readonly mqttApi: EcoFlowMqttApi;
+  protected readonly httpApi: EcoFlowHttpApi;
+  private services: ServiceBase[] = [];
   private reconnectMqttTimeoutId: NodeJS.Timeout | null = null;
   private isMqttConnected: boolean = false;
+  private subscriptions: Subscription[] = [];
 
   constructor(
-    private readonly platform: EcoFlowHomebridgePlatform,
-    private readonly accessory: PlatformAccessory,
-    private readonly config: DeviceConfig
+    public readonly platform: EcoFlowHomebridgePlatform,
+    public readonly accessory: PlatformAccessory,
+    public readonly config: DeviceConfig
   ) {
     this.log = this.platform.log;
-    this.api = new EcoFlowMqttApi(this.config, this.platform.log);
-    this.services = this.registerServices(this.platform, this.accessory, this.config, this.api);
-    this.services.push(new AccessoryInformationService(this.accessory, this.platform, this.config, this.api));
-    this.initServices();
-    this.connectMqtt();
+    this.httpApi = new EcoFlowHttpApi(this.config, this.log);
+    this.mqttApi = new EcoFlowMqttApi(this.httpApi, this.log);
   }
 
-  destroy() {
-    if (this.connectMqttTimeoutId !== null) {
-      clearTimeout(this.connectMqttTimeoutId);
-      this.connectMqttTimeoutId = null;
-    }
+  public async initialize(): Promise<void> {
+    this.services = this.createServices();
+    this.services.push(new AccessoryInformationService(this));
+    // await this.connectMqtt();
+    this.initializeServices();
+    this.subscriptions = this.subscribeOnParameterUpdates();
+  }
+
+  public destroy() {
     if (this.reconnectMqttTimeoutId !== null) {
       clearTimeout(this.reconnectMqttTimeoutId);
       this.reconnectMqttTimeoutId = null;
     }
+    this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 
-  protected abstract registerServices(
-    platform: EcoFlowHomebridgePlatform,
-    accessory: PlatformAccessory,
-    config: DeviceConfig,
-    api: EcoFlowMqttApi
-  ): ServiceBase[];
+  protected abstract createServices(): ServiceBase[];
 
-  private initServices(): void {
+  protected abstract subscribeOnParameterUpdates(): Subscription[];
+
+  private initializeServices(): void {
     this.services.forEach(service => {
-      service.init();
+      service.initialize();
     });
     this.cleanupServices();
   }
@@ -61,8 +64,8 @@ export abstract class EcoFlowAccessory {
       });
   }
 
-  private connectMqtt(): void {
-    this.connectMqttTimeoutId = setTimeout(async () => await this.initMqtt(), 500);
+  private async connectMqtt(): Promise<void> {
+    await this.initMqtt();
     this.reconnectMqttTimeoutId = setInterval(async () => {
       // Check MQTT is connected every minute
       if (!this.isMqttConnected) {
@@ -73,12 +76,33 @@ export abstract class EcoFlowAccessory {
 
   private async initMqtt(): Promise<void> {
     try {
-      await this.api.subscribe('/open/<certificateAccount>/<sn>/quota', this.config.serialNumber);
+      await this.mqttApi.subscribe('/open/<certificateAccount>/<sn>/quota', this.config.serialNumber);
       this.isMqttConnected = true;
     } catch (e) {
       if (e instanceof Error) {
         this.log.error(e.message);
       }
     }
+  }
+}
+
+export abstract class EcoFlowAccessoryWithQuota<
+  TGetQuotasCmdResponseData extends CmdResponseData
+> extends EcoFlowAccessory {
+  private _initialData: TGetQuotasCmdResponseData | null = null;
+
+  // Getter for service
+  protected get initialData(): TGetQuotasCmdResponseData {
+    if (!this._initialData) {
+      throw new Error('Initial data is not received');
+    }
+    return this._initialData;
+  }
+
+  public override async initialize(): Promise<void> {
+    if (!this._initialData) {
+      this._initialData = await this.httpApi.getAllQuotas<TGetQuotasCmdResponseData>();
+    }
+    await super.initialize();
   }
 }

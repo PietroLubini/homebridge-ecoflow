@@ -99,11 +99,15 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   }
 
   createAccessory(accessory: PlatformAccessory<UnknownContext>, config: DeviceConfig): EcoFlowAccessory {
+    let ecoFlowAccessory;
     switch (config.model) {
       case DeviceModel.Delta2Max:
-        return new Delta2MaxAccessory(this, accessory, config);
+        ecoFlowAccessory = new Delta2MaxAccessory(this, accessory, config);
+        break;
       default:
         throw new TypeError(`"${config.model}" is not supported`);
     }
+    ecoFlowAccessory.initialize();
+    return ecoFlowAccessory;
   }
 }

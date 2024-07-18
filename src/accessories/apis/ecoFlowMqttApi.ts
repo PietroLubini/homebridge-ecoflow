@@ -1,5 +1,5 @@
 import mqtt, { MqttClient } from 'mqtt';
-import { CmdResponse, EcoFlowApiBase } from './ecoFlowApiBase.js';
+import { Logging } from 'homebridge';
 import {
   BmsStatusMqttMessageParams,
   InvStatusMqttMessageParams,
@@ -11,20 +11,10 @@ import {
 } from './interfaces/ecoFlowMqttContacts.js';
 import { Subject } from 'rxjs';
 import { getMachineId } from './../../helpers/machineId.js';
+import { AcquireCertificateResponseData } from './interfaces/ecoFlowHttpContacts.js';
+import { EcoFlowHttpApi } from './ecoFlowHttpApi.js';
 
-interface AcquireCertificateResponseData {
-  certificateAccount: string;
-  certificatePassword: string;
-  url: string;
-  port: string;
-  protocol: string;
-}
-
-interface AcquireCertificateResponse extends CmdResponse<AcquireCertificateResponseData> {}
-
-const CertificateRelativePath = '/iot-open/sign/certification';
-
-export class EcoFlowMqttApi extends EcoFlowApiBase {
+export class EcoFlowMqttApi {
   private client: MqttClient | null = null;
   private certificateData: AcquireCertificateResponseData | null = null;
   private readonly bmsParamsSubject: Subject<BmsStatusMqttMessageParams> = new Subject<BmsStatusMqttMessageParams>();
@@ -33,6 +23,8 @@ export class EcoFlowMqttApi extends EcoFlowApiBase {
   public bmsParams$ = this.bmsParamsSubject.asObservable();
   public invParams$ = this.invParamsSubject.asObservable();
   public pdParams$ = this.pdParamsSubject.asObservable();
+
+  constructor(private httpApi: EcoFlowHttpApi, private log: Logging) {}
 
   public async destroy(): Promise<void> {
     await this.client?.unsubscribeAsync('#');
@@ -47,7 +39,10 @@ export class EcoFlowMqttApi extends EcoFlowApiBase {
     const topic = this.composeTopic(topicPattern, serialNumber);
     await client.subscribeAsync(topic);
     this.log.debug('Subscribed to topic:', topic);
-    client.on('message', (_, message) => this.processMqttMessage(message));
+    client.on('message', (_, message) => {
+      const mqttMessage = JSON.parse(message.toString()) as MqttMessage<MqttMessageParams>;
+      this.processMqttMessage(mqttMessage);
+    });
   }
 
   public async publish(topicPattern: string, serialNumber: string, data: MqttSetMessageBase): Promise<void> {
@@ -56,6 +51,22 @@ export class EcoFlowMqttApi extends EcoFlowApiBase {
     const message = JSON.stringify(data);
     await client.publishAsync(topic, message);
     this.log.debug(`Published to topic '${topic}'`, message);
+  }
+
+  public processMqttMessage(message: MqttMessage<MqttMessageParams>): void {
+    if (message.typeCode === MqttMessageType.BMS) {
+      const params = message.params as BmsStatusMqttMessageParams;
+      this.log.debug('BMS:', params);
+      this.bmsParamsSubject.next(params);
+    } else if (message.typeCode === MqttMessageType.INV) {
+      const params = message.params as InvStatusMqttMessageParams;
+      this.log.debug('INV:', params);
+      this.invParamsSubject.next(params);
+    } else if (message.typeCode === MqttMessageType.PD) {
+      const params = message.params as PdStatusMqttMessageParams;
+      this.log.debug('PD:', params);
+      this.pdParamsSubject.next(params);
+    }
   }
 
   private async connect(): Promise<mqtt.MqttClient> {
@@ -78,29 +89,9 @@ export class EcoFlowMqttApi extends EcoFlowApiBase {
 
   private async acquireCertificate(): Promise<AcquireCertificateResponseData> {
     if (!this.certificateData) {
-      this.log.debug('Acquire certificate for MQTT connection');
-      const response = await this.execute<AcquireCertificateResponse>(CertificateRelativePath, 'GET');
-      this.certificateData = response.data;
-      this.log.debug('Certificate data:', this.certificateData);
+      this.certificateData = await this.httpApi.acquireCertificate();
     }
     return this.certificateData;
-  }
-
-  private processMqttMessage(message: Buffer): void {
-    const mqttMessage = JSON.parse(message.toString()) as MqttMessage<MqttMessageParams>;
-    if (mqttMessage.typeCode === MqttMessageType.BMS) {
-      const params = mqttMessage.params as BmsStatusMqttMessageParams;
-      this.log.debug('BMS:', params);
-      this.bmsParamsSubject.next(params);
-    } else if (mqttMessage.typeCode === MqttMessageType.INV) {
-      const params = mqttMessage.params as InvStatusMqttMessageParams;
-      this.log.debug('INV:', params);
-      this.invParamsSubject.next(params);
-    } else if (mqttMessage.typeCode === MqttMessageType.PD) {
-      const params = mqttMessage.params as PdStatusMqttMessageParams;
-      this.log.debug('PD:', params);
-      this.pdParamsSubject.next(params);
-    }
   }
 
   private composeTopic(topicPattern: string, serialNumber: string): string {
