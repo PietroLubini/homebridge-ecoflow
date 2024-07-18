@@ -1,70 +1,13 @@
-import { PlatformAccessory } from 'homebridge';
-import {
-  MqttSetEnabledMessageParams,
-  PdStatusMqttMessageParams,
-  PdStatusMqttMessageUsbParams,
-} from 'accessories/apis/interfaces/ecoFlowMqttContacts.js';
-import { EcoFlowMqttApi } from 'accessories/apis/ecoFlowMqttApi.js';
-import { Subscription } from 'rxjs';
+import { MqttSetEnabledMessageParams } from 'accessories/apis/interfaces/ecoFlowMqttContacts.js';
 import { OutletsServiceBase } from './outletServiceBase.js';
-import { EcoFlowHomebridgePlatform } from 'platform.js';
-import { DeviceConfig } from 'config.js';
+import { EcoFlowAccessory } from 'accessories/ecoFlowAccessory.js';
 
 export class OutletUsbService extends OutletsServiceBase {
-  constructor(
-    accessory: PlatformAccessory,
-    platform: EcoFlowHomebridgePlatform,
-    config: DeviceConfig,
-    api: EcoFlowMqttApi
-  ) {
-    super('USB', accessory, platform, config, api);
-  }
-
-  protected override subscribe(api: EcoFlowMqttApi): Subscription[] {
-    const result = [];
-    result.push(api.pdParams$.subscribe(params => this.updatePdParams(params)));
-    return result;
+  constructor(ecoFlowAccessory: EcoFlowAccessory) {
+    super('USB', ecoFlowAccessory);
   }
 
   protected override setOn(value: boolean): Promise<void> {
     return this.publishEnabled<MqttSetEnabledMessageParams>(1, 'dcOutCfg', { enabled: Number(value) });
-  }
-
-  private updatePdParams(params: PdStatusMqttMessageParams): void {
-    this.updateUsb(params);
-  }
-
-  private updateUsb(params: PdStatusMqttMessageUsbParams): void {
-    if (params.dcOutState !== undefined) {
-      this.updateUsbState(params.dcOutState);
-    }
-    if (
-      params.usb1Watts !== undefined ||
-      params.usb2Watts !== undefined ||
-      params.qcUsb1Watts !== undefined ||
-      params.qcUsb2Watts !== undefined ||
-      params.typec1Watts !== undefined ||
-      params.typec2Watts !== undefined
-    ) {
-      const usbWatts =
-        (params.usb1Watts ?? 0) +
-        (params.usb2Watts ?? 0) +
-        (params.qcUsb1Watts ?? 0) +
-        (params.qcUsb2Watts ?? 0) +
-        (params.typec1Watts ?? 0) +
-        (params.typec2Watts ?? 0);
-      this.updateUsbInUse(usbWatts);
-    }
-  }
-
-  private updateUsbInUse(watts: number): void {
-    const isInUse = watts > 0;
-    this.log.debug('UsbInUse ->', isInUse);
-    this.service.getCharacteristic(this.platform.Characteristic.OutletInUse).updateValue(isInUse);
-  }
-
-  private updateUsbState(state: boolean): void {
-    this.log.debug('UsbState ->', state);
-    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue(state);
   }
 }

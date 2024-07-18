@@ -6,4 +6,4 @@ export const PLATFORM_NAME = 'EcoFlowHomebridge';
 /**
  * This must match the name of your plugin as defined the package.json
  */
-export const PLUGIN_NAME = 'homebridge-ecoflow';
+export const PLUGIN_NAME = '@pietrolubini/homebridge-ecoflow';

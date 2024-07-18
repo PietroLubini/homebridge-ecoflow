@@ -10,5 +10,5 @@ outputs:
     description: Version of release, e.g. 1.0.0
 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'index.js'

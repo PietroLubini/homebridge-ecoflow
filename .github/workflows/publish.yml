@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Parse Release Name
         id: parse-release-name
@@ -19,12 +19,15 @@ jobs:
     outputs:
       release-version: ${{ steps.parse-release-name.outputs.release-version}}
 
-  publish_artifacts:
+  publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     needs:
       - parse_release_name
     env:
-      RELEASE_VERSION: ${{ needs.parse_release_name.outputs.release-name }}
+      RELEASE_VERSION: ${{ needs.parse_release_name.outputs.release-version }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
