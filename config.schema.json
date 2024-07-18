@@ -5,8 +5,15 @@
   "schema": {
     "type": "object",
     "properties": {
+      "name": {
+        "title": "Name",
+        "type": "string",
+        "default": "Homebridge EcoFlow",
+        "required": true
+      },
       "devices": {
         "type": "array",
+        "required": true,
         "uniqueItems": true,
         "items": {
           "type": "object",
