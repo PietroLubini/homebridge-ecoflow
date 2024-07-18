@@ -8,11 +8,11 @@ import {
   Characteristic,
   UnknownContext,
 } from 'homebridge';
-import { Logger } from 'homebridge/lib/logger.js';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config.js';
 import { Delta2MaxAccessory } from './accessories/delta2maxAccessory.js';
+import { Logger } from './helpers/logger.js';
 
 /**
  * HomebridgePlatform
@@ -65,7 +65,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     const logs: Record<string, Logging> = {};
     const configuredAccessories: PlatformAccessory[] = [];
     for (const config of this.ecoFlowConfig.devices) {
-      const log = Logger.withPrefix(`${this.commonLog.prefix} > ${config.name}`);
+      const log = Logger.create(this.commonLog, config.name);
       const existingAccessory = configuredAccessories.find(
         accessory => accessory.context.deviceConfig.serialNumber === config.serialNumber
       );
