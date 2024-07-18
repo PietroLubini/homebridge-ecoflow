@@ -2,7 +2,7 @@
 
 # homebridge-ecoflow
 
-[![homebridge-miot](https://badgen.net/npm/v/@pietrolubini/homebridge-ecoflow?icon=npm)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow)
+[![homebridge-ecoflow](https://badgen.net/npm/v/@pietrolubini/homebridge-ecoflow?icon=npm)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow)
 [![mit-license](https://badgen.net/npm/license/lodash)](https://github.com/pietrolubini/homebridge-ecoflow/blob/main/LICENSE)
 
 </span>
