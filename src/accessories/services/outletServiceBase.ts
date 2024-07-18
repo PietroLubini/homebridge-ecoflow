@@ -8,6 +8,16 @@ export abstract class OutletsServiceBase extends ServiceBase {
     super(ecoFlowAccessory);
   }
 
+  public updateState(state: boolean): void {
+    this.log.debug(`${this.serviceSubType} State ->`, state);
+    this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.On).updateValue(state);
+  }
+
+  public updateInUse(isInUse: boolean): void {
+    this.log.debug(`${this.serviceSubType} InUse ->`, isInUse);
+    this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.OutletInUse).updateValue(isInUse);
+  }
+
   protected override createService(): Service {
     const service = this.getOrAddService(this.ecoFlowAccessory.config.name, this.serviceSubType);
     this.addCharacteristics(service);

@@ -10,14 +10,4 @@ export class OutletUsbService extends OutletsServiceBase {
   protected override setOn(value: boolean): Promise<void> {
     return this.publishEnabled<MqttSetEnabledMessageParams>(1, 'dcOutCfg', { enabled: Number(value) });
   }
-
-  public updateState(state: boolean): void {
-    this.log.debug('UsbState ->', state);
-    this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.On).updateValue(state);
-  }
-
-  public updateInUse(isInUse: boolean): void {
-    this.log.debug('UsbInUse ->', isInUse);
-    this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.OutletInUse).updateValue(isInUse);
-  }
 }

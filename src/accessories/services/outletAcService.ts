@@ -15,14 +15,4 @@ export class OutletAcService extends OutletsServiceBase {
       enabled: Number(value),
     });
   }
-
-  public updateState(state: boolean): void {
-    this.log.debug('AcState ->', state);
-    this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.On).updateValue(state);
-  }
-
-  public updateInUse(isInUse: boolean): void {
-    this.log.debug('AcInUse ->', isInUse);
-    this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.OutletInUse).updateValue(isInUse);
-  }
 }

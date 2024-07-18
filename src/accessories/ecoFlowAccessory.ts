@@ -28,7 +28,7 @@ export abstract class EcoFlowAccessory {
   }
 
   public async initialize(): Promise<void> {
-    this.services = this.createServices();
+    this.services = this.getServices();
     this.services.push(new AccessoryInformationService(this));
     this.initializeServices();
     this.subscriptions = this.subscribeOnParameterUpdates();
@@ -43,7 +43,7 @@ export abstract class EcoFlowAccessory {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 
-  protected abstract createServices(): ServiceBase[];
+  protected abstract getServices(): ServiceBase[];
 
   protected abstract subscribeOnParameterUpdates(): Subscription[];
 
@@ -89,20 +89,15 @@ export abstract class EcoFlowAccessory {
 export abstract class EcoFlowAccessoryWithQuota<
   TGetQuotasCmdResponseData extends CmdResponseData
 > extends EcoFlowAccessory {
-  private _initialData: TGetQuotasCmdResponseData | null = null;
-
-  // Getter for service
-  protected get initialData(): TGetQuotasCmdResponseData {
-    if (!this._initialData) {
-      throw new Error('Initial data is not received');
-    }
-    return this._initialData;
-  }
+  private initialData: TGetQuotasCmdResponseData | null = null;
 
   public override async initialize(): Promise<void> {
-    if (!this._initialData) {
-      this._initialData = await this.httpApi.getAllQuotas<TGetQuotasCmdResponseData>();
+    if (!this.initialData) {
+      this.initialData = await this.httpApi.getAllQuotas<TGetQuotasCmdResponseData>();
     }
     await super.initialize();
+    this.updateInitialValues(this.initialData);
   }
+
+  protected abstract updateInitialValues(initialData: TGetQuotasCmdResponseData): void;
 }
