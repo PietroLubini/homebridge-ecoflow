@@ -64,6 +64,9 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   registerDevices(): void {
     const logs: Record<string, Logging> = {};
     const configuredAccessories: PlatformAccessory[] = [];
+    if (!this.ecoFlowConfig.devices) {
+      return;
+    }
     for (const config of this.ecoFlowConfig.devices) {
       const log = Logger.create(this.commonLog, config.name);
       const existingAccessory = configuredAccessories.find(
