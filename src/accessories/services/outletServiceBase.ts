@@ -1,10 +1,16 @@
 import { Service } from 'homebridge';
+import { EcoFlowAccessory } from '../ecoFlowAccessory.js';
 import { ServiceBase } from './serviceBase.js';
-import { MqttSetMessage, MqttSetMessageParams } from 'accessories/apis/interfaces/ecoFlowMqttContacts.js';
-import { EcoFlowAccessory } from 'accessories/ecoFlowAccessory.js';
+
+export interface MqttSetEnabledMessageParams {
+  enabled: number;
+}
 
 export abstract class OutletsServiceBase extends ServiceBase {
-  constructor(private readonly serviceSubType: string, ecoFlowAccessory: EcoFlowAccessory) {
+  constructor(
+    private readonly serviceSubType: string,
+    ecoFlowAccessory: EcoFlowAccessory
+  ) {
     super(ecoFlowAccessory);
   }
 
@@ -26,22 +32,12 @@ export abstract class OutletsServiceBase extends ServiceBase {
 
   protected abstract setOn(value: boolean): Promise<void>;
 
-  protected async publishEnabled<TParams extends MqttSetMessageParams>(
-    moduleType: number,
-    operateType: string,
-    params: TParams
-  ): Promise<void> {
-    const data: MqttSetMessage<TParams> = {
-      id: Math.floor(Math.random() * 1000000),
-      version: '1.0',
+  protected sendOn<TParams>(moduleType: number, operateType: string, params: TParams): Promise<void> {
+    return this.ecoFlowAccessory.mqttApi.sendSetCommand(
+      this.ecoFlowAccessory.config.serialNumber,
       moduleType,
       operateType,
-      params,
-    };
-    await this.ecoFlowAccessory.mqttApi.publish(
-      '/open/<certificateAccount>/<sn>/set',
-      this.ecoFlowAccessory.config.serialNumber,
-      data
+      params
     );
   }
 

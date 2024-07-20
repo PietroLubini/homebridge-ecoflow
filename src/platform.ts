@@ -1,18 +1,19 @@
 import {
   API,
+  Characteristic,
   DynamicPlatformPlugin,
   Logging,
   PlatformAccessory,
   PlatformConfig,
   Service,
-  Characteristic,
   UnknownContext,
 } from 'homebridge';
 
-import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
-import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config.js';
+import { Delta2Accessory } from './accessories/delta2Accessory.js';
 import { Delta2MaxAccessory } from './accessories/delta2maxAccessory.js';
+import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config.js';
 import { Logger } from './helpers/logger.js';
+import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
 /**
  * HomebridgePlatform
@@ -27,7 +28,11 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
 
-  constructor(private readonly commonLog: Logging, public readonly config: PlatformConfig, public readonly api: API) {
+  constructor(
+    private readonly commonLog: Logging,
+    public readonly config: PlatformConfig,
+    public readonly api: API
+  ) {
     this.ecoFlowConfig = this.config as EcoFlowConfig;
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
@@ -117,6 +122,9 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     switch (config.model) {
       case DeviceModel.Delta2Max:
         ecoFlowAccessory = new Delta2MaxAccessory(this, accessory, config, log);
+        break;
+      case DeviceModel.Delta2:
+        ecoFlowAccessory = new Delta2Accessory(this, accessory, config, log);
         break;
       default:
         log.warn(`"${config.model}" is not supported. Ignoring the device`);

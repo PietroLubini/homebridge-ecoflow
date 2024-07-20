@@ -1,11 +1,11 @@
 import { Logging, Service } from 'homebridge';
-import { EcoFlowAccessory } from 'accessories/ecoFlowAccessory.js';
+import { EcoFlowAccessory } from '../ecoFlowAccessory.js';
 
 export abstract class ServiceBase {
   protected readonly log: Logging;
   private _service: Service | null = null;
 
-  constructor(protected ecoFlowAccessory: EcoFlowAccessory) {
+  constructor(protected readonly ecoFlowAccessory: EcoFlowAccessory) {
     this.log = ecoFlowAccessory.log;
   }
 

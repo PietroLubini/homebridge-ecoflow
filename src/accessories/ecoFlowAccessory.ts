@@ -1,12 +1,11 @@
 import { Logging, PlatformAccessory } from 'homebridge';
-import { EcoFlowHomebridgePlatform } from '../platform.js';
-import { DeviceConfig } from '../config.js';
-import { ServiceBase } from './services/serviceBase.js';
-import { EcoFlowMqttApi } from './apis/ecoFlowMqttApi.js';
-import { AccessoryInformationService } from './services/accessoryInformationService.js';
-import { EcoFlowHttpApi } from './apis/ecoFlowHttpApi.js';
-import { CmdResponseData } from './apis/interfaces/ecoFlowHttpContacts.js';
 import { Subscription } from 'rxjs';
+import { DeviceConfig } from '../config.js';
+import { EcoFlowHomebridgePlatform } from '../platform.js';
+import { EcoFlowHttpApi } from './apis/ecoFlowHttpApi.js';
+import { EcoFlowMqttApi, MqttQuotaMessage } from './apis/ecoFlowMqttApi.js';
+import { AccessoryInformationService } from './services/accessoryInformationService.js';
+import { ServiceBase } from './services/serviceBase.js';
 
 export abstract class EcoFlowAccessory {
   public readonly mqttApi: EcoFlowMqttApi;
@@ -44,7 +43,11 @@ export abstract class EcoFlowAccessory {
 
   protected abstract getServices(): ServiceBase[];
 
-  protected abstract subscribeOnParameterUpdates(): Subscription[];
+  protected subscribeOnParameterUpdates(): Subscription[] {
+    return [this.mqttApi.quota$.subscribe(message => this.processQuotaMessage(message))];
+  }
+
+  protected abstract processQuotaMessage(message: MqttQuotaMessage): void;
 
   private initializeServices(): void {
     this.services.forEach(service => {
@@ -74,25 +77,24 @@ export abstract class EcoFlowAccessory {
   }
 
   private async initMqtt(): Promise<void> {
-    this.isMqttConnected = await this.mqttApi.subscribe(
-      '/open/<certificateAccount>/<sn>/quota',
-      this.config.serialNumber
-    );
+    this.isMqttConnected = await this.mqttApi.subscribeQuota(this.config.serialNumber);
   }
 }
 
-export abstract class EcoFlowAccessoryWithQuota<
-  TGetQuotasCmdResponseData extends CmdResponseData
-> extends EcoFlowAccessory {
-  private initialData: TGetQuotasCmdResponseData | null = null;
+export abstract class EcoFlowAccessoryWithQuota<TAllQuotaData> extends EcoFlowAccessory {
+  private _quota: TAllQuotaData | null = null;
 
   public override async initialize(): Promise<void> {
-    if (!this.initialData) {
-      this.initialData = await this.httpApi.getAllQuotas<TGetQuotasCmdResponseData>();
+    if (!this._quota) {
+      this._quota = await this.httpApi.getAllQuotas<TAllQuotaData>();
     }
     await super.initialize();
-    this.updateInitialValues(this.initialData);
+    this.updateInitialValues(this._quota);
   }
 
-  protected abstract updateInitialValues(initialData: TGetQuotasCmdResponseData): void;
+  public get quota(): TAllQuotaData {
+    return this._quota!;
+  }
+
+  protected abstract updateInitialValues(quota: TAllQuotaData): void;
 }

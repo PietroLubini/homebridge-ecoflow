@@ -1,7 +1,10 @@
 import { Logging, LogLevel } from 'homebridge';
 
 export class Logger {
-  private constructor(private readonly logger: Logging, private readonly deviceName: string) {}
+  private constructor(
+    private readonly logger: Logging,
+    private readonly deviceName: string
+  ) {}
 
   public static create(logger: Logging, deviceName: string): Logging {
     return new Logger(logger, deviceName) as unknown as Logging;

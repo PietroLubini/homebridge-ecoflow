@@ -1,6 +1,5 @@
-import { MqttSetEnabledMessageParams } from 'accessories/apis/interfaces/ecoFlowMqttContacts.js';
-import { OutletsServiceBase } from './outletServiceBase.js';
-import { EcoFlowAccessory } from 'accessories/ecoFlowAccessory.js';
+import { EcoFlowAccessory } from '../ecoFlowAccessory.js';
+import { MqttSetEnabledMessageParams, OutletsServiceBase } from './outletServiceBase.js';
 
 export class OutletUsbService extends OutletsServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessory) {
@@ -8,6 +7,6 @@ export class OutletUsbService extends OutletsServiceBase {
   }
 
   protected override setOn(value: boolean): Promise<void> {
-    return this.publishEnabled<MqttSetEnabledMessageParams>(1, 'dcOutCfg', { enabled: Number(value) });
+    return this.sendOn<MqttSetEnabledMessageParams>(1, 'dcOutCfg', { enabled: Number(value) });
   }
 }

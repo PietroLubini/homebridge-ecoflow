@@ -1,14 +1,5 @@
-import { Logging } from 'homebridge';
 import * as crypto from 'crypto';
-import {
-  AcquireCertificateResponseData,
-  CmdResponse,
-  CmdResponseBase,
-  CmdResponseData,
-  GetCmdRequest,
-  GetQuotasCmdRequest,
-  HttpMethod,
-} from './interfaces/ecoFlowHttpContacts.js';
+import { Logging } from 'homebridge';
 import { DeviceConfig } from '../../config.js';
 
 const ApiUrl = 'https://api-e.ecoflow.com';
@@ -16,10 +7,55 @@ const QuotaPath = '/iot-open/sign/device/quota';
 const QuotaAllPath = '/iot-open/sign/device/quota/all';
 const CertificatePath = '/iot-open/sign/certification';
 
-export class EcoFlowHttpApi {
-  constructor(private readonly config: DeviceConfig, private readonly log: Logging) {}
+export enum HttpMethod {
+  Get = 'GET',
+  Post = 'POST',
+}
 
-  public async getQuotas<TCmdResponseData extends CmdResponseData>(quotas: string[]): Promise<TCmdResponseData> {
+export interface CmdResponse {
+  code: string;
+  message: string;
+  failed: boolean;
+}
+
+export interface CmdResponseWithData<TData> extends CmdResponse {
+  code: string;
+  message: string;
+  data: TData;
+}
+
+export interface GetCmdRequest {
+  sn: string;
+}
+
+export interface GetQuotasCmdRequest extends GetCmdRequest {
+  params: GetQuotasCmdRequestParams;
+}
+
+export interface GetQuotasCmdRequestParams {
+  quotas: string[];
+}
+
+export interface AcquireCertificateData {
+  certificateAccount: string;
+  certificatePassword: string;
+  url: string;
+  port: string;
+  protocol: string;
+}
+
+interface Dict {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+export class EcoFlowHttpApi {
+  constructor(
+    private readonly config: DeviceConfig,
+    private readonly log: Logging
+  ) {}
+
+  public async getQuotas<TData>(quotas: string[]): Promise<TData> {
     this.log.debug('Get quotas:', quotas);
     const requestCmd: GetQuotasCmdRequest = {
       sn: this.config.serialNumber,
@@ -27,32 +63,32 @@ export class EcoFlowHttpApi {
         quotas,
       },
     };
-    const response = await this.execute<CmdResponse<TCmdResponseData>>(QuotaPath, HttpMethod.Post, requestCmd);
+    const response = await this.execute<CmdResponseWithData<Dict>>(QuotaPath, HttpMethod.Post, requestCmd);
     if (!response.failed) {
-      const data = response.data;
+      const data = this.convertData<TData>(response.data);
       this.log.debug('Quotas:', data);
       return data;
     }
-    return {} as TCmdResponseData;
+    return {} as TData;
   }
 
-  public async getAllQuotas<TCmdResponseData extends CmdResponseData>(): Promise<TCmdResponseData> {
+  public async getAllQuotas<TData>(): Promise<TData> {
     this.log.debug('Get all quotas');
     const requestCmd: GetCmdRequest = {
       sn: this.config.serialNumber,
     };
-    const response = await this.execute<CmdResponse<TCmdResponseData>>(QuotaAllPath, HttpMethod.Get, requestCmd);
+    const response = await this.execute<CmdResponseWithData<Dict>>(QuotaAllPath, HttpMethod.Get, requestCmd);
     if (!response.failed) {
-      const data = response.data;
+      const data = this.convertData<TData>(response.data);
       this.log.debug('All quotas:', data);
       return data;
     }
-    return {} as TCmdResponseData;
+    return {} as TData;
   }
 
-  public async acquireCertificate(): Promise<AcquireCertificateResponseData | null> {
+  public async acquireCertificate(): Promise<AcquireCertificateData | null> {
     this.log.debug('Acquire certificate for MQTT connection');
-    const response = await this.execute<CmdResponse<AcquireCertificateResponseData>>(CertificatePath, HttpMethod.Get);
+    const response = await this.execute<CmdResponseWithData<AcquireCertificateData>>(CertificatePath, HttpMethod.Get);
     if (!response.failed) {
       this.log.debug('Certificate data:', response.data);
       return response.data;
@@ -60,7 +96,7 @@ export class EcoFlowHttpApi {
     return null;
   }
 
-  protected async execute<TResponse extends CmdResponseBase>(
+  protected async execute<TResponse extends CmdResponse>(
     relativeUrl: string,
     method: HttpMethod,
     queryParameters: object | null = null,
@@ -95,15 +131,18 @@ export class EcoFlowHttpApi {
       const result = (await response.json()) as unknown as TResponse;
       if (result.code !== '0') {
         throw Error(
-          `Request to "${requestUrl}" with options: "${this.stringifyOptions(options)}" is failed [${
-            response.status
-          }]: ${response.statusText}; result: ${JSON.stringify(result)}`
+          `Request to "${requestUrl}" with options: "${this.stringifyOptions(options)}" is failed
+          [${response.status}]: ${response.statusText}; result: ${JSON.stringify(result)}`
         );
       }
       return result;
     } catch (e) {
       this.log.error('Request is failed:', e);
-      return { code: '500', message: (e as Error)?.message, failed: true } as TResponse;
+      return {
+        code: '500',
+        message: (e as Error)?.message,
+        failed: true,
+      } as TResponse;
     }
   }
 
@@ -114,7 +153,7 @@ export class EcoFlowHttpApi {
     return randomNumber.toString().padStart(6, '0');
   }
 
-  private composeSignMessage(obj: BodyParams | null, prefix: string = ''): string {
+  private composeSignMessage(obj: Dict | null, prefix: string = ''): string {
     if (!obj) {
       return '';
     }
@@ -147,7 +186,9 @@ export class EcoFlowHttpApi {
   }
 
   private stringifyOptions(options: RequestInit): string {
-    const headersObject: { [key: string]: string } = {};
+    const headersObject: {
+      [key: string]: string;
+    } = {};
     (options.headers as Headers).forEach((value, key) => {
       headersObject[key] = value;
     });
@@ -157,9 +198,22 @@ export class EcoFlowHttpApi {
     };
     return JSON.stringify(newOptions);
   }
-}
 
-interface BodyParams {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: any;
+  private convertData<TData>(data: Dict): TData {
+    const result: Dict = {};
+    Object.keys(data).forEach(key => {
+      const keys = key.split('.');
+      let current = result;
+
+      keys.forEach((k, index) => {
+        if (index === keys.length - 1) {
+          current[k] = data[key];
+        } else {
+          current[k] = current[k] || {};
+          current = current[k];
+        }
+      });
+    });
+    return result as TData;
+  }
 }

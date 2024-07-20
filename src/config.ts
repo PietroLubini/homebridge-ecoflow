@@ -5,7 +5,8 @@ export interface EcoFlowConfig extends PlatformConfig {
 }
 
 export enum DeviceModel {
-  Delta2Max = 'Delta 2 Max'
+  Delta2Max = 'Delta 2 Max',
+  Delta2 = 'Delta 2',
 }
 
 export interface DeviceConfig extends AccessoryConfig {

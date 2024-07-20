@@ -1,8 +1,8 @@
-import { Service } from 'homebridge';
-import { ServiceBase } from './serviceBase.js';
-import { fileURLToPath } from 'url';
-import path from 'path';
 import fs from 'fs';
+import { Service } from 'homebridge';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { ServiceBase } from './serviceBase.js';
 
 export class AccessoryInformationService extends ServiceBase {
   protected override createService(): Service {
