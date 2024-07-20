@@ -7,7 +7,6 @@ import {
   MqttSetMessage,
   MqttSetMessageWithParams,
   MqttSetReplyMessage,
-  MqttTopicType,
 } from '../apis/ecoFlowMqttApi.js';
 import { DeviceConfig } from '../config.js';
 import { EcoFlowHomebridgePlatform } from '../platform.js';
@@ -78,7 +77,6 @@ export abstract class EcoFlowAccessory {
   protected abstract processQuotaMessage(message: MqttQuotaMessage): void;
 
   protected processSetReplyMessage(message: MqttSetReplyMessage): void {
-    this.log.debug(`Read from '${MqttTopicType.SetReply}' topic:`, message);
     const messageKey = this.getMqttSetMessageKey(message);
     const command = this.setReplies[messageKey];
     delete this.setReplies[messageKey];

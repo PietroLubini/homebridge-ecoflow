@@ -77,7 +77,7 @@ export class EcoFlowMqttApi {
     if (client) {
       const topic = `/open/${this.certificateData!.certificateAccount}/${serialNumber}/set`;
       await client.publishAsync(topic, JSON.stringify(message));
-      this.log.debug(`Published to topic '${topic}'`, message);
+      this.log.debug(`Published to topic '${topic}':`, message);
     }
   }
 
@@ -99,7 +99,7 @@ export class EcoFlowMqttApi {
 
         this.client.on('message', (topic, message) => {
           const mqttMessage = JSON.parse(message.toString());
-          this.processReceivedMessage((topic.split('/').pop() || '') as MqttTopicType, mqttMessage);
+          this.processReceivedMessage(topic, (topic.split('/').pop() || '') as MqttTopicType, mqttMessage);
         });
       }
     }
@@ -117,12 +117,13 @@ export class EcoFlowMqttApi {
     return false;
   }
 
-  private processReceivedMessage(topicType: MqttTopicType, message: object): void {
+  private processReceivedMessage(topic: string, topicType: MqttTopicType, message: object): void {
     switch (topicType) {
       case MqttTopicType.Quota:
         this.quotaSubject.next(message as MqttQuotaMessage);
         break;
       case MqttTopicType.SetReply:
+        this.log.debug(`Read from topic '${topic}':`, message);
         this.setReplySubject.next(message as MqttSetReplyMessage);
         break;
       default:
