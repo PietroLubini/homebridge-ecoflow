@@ -9,8 +9,8 @@ import {
   UnknownContext,
 } from 'homebridge';
 
-import { Delta2Accessory } from './accessories/delta2Accessory.js';
-import { Delta2MaxAccessory } from './accessories/delta2maxAccessory.js';
+import { Delta2Accessory } from './accessories/batteries/delta2Accessory.js';
+import { Delta2MaxAccessory } from './accessories/batteries/delta2maxAccessory.js';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config.js';
 import { Logger } from './helpers/logger.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';

@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import { Logging } from 'homebridge';
-import { DeviceConfig } from '../../config.js';
+import { DeviceConfig } from '../config.js';
 
 const ApiUrl = 'https://api-e.ecoflow.com';
 const QuotaPath = '/iot-open/sign/device/quota';

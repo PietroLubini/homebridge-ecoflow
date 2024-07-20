@@ -1,13 +1,13 @@
 import { Logging, PlatformAccessory } from 'homebridge';
-import { DeviceConfig } from '../config.js';
-import { EcoFlowHomebridgePlatform } from '../platform.js';
-import { MqttMessageType, MqttQuotaMessage, MqttQuotaMessageWithParams } from './apis/ecoFlowMqttApi.js';
-import { EcoFlowAccessoryWithQuota } from './ecoFlowAccessory.js';
-import { BatteryService } from './services/batteryService.js';
-import { OutletAcService } from './services/outletAcService.js';
-import { OutletCarService } from './services/outletCarService.js';
-import { OutletUsbService } from './services/outletUsbService.js';
-import { ServiceBase } from './services/serviceBase.js';
+import { MqttMessageType, MqttQuotaMessage, MqttQuotaMessageWithParams } from '../../apis/ecoFlowMqttApi.js';
+import { DeviceConfig } from '../../config.js';
+import { EcoFlowHomebridgePlatform } from '../../platform.js';
+import { BatteryService } from '../../services/batteryService.js';
+import { OutletAcService } from '../../services/outletAcService.js';
+import { OutletCarService } from '../../services/outletCarService.js';
+import { OutletUsbService } from '../../services/outletUsbService.js';
+import { ServiceBase } from '../../services/serviceBase.js';
+import { EcoFlowAccessoryWithQuota } from '../ecoFlowAccessory.js';
 
 export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<BatteryAllQuotaData> {
   private readonly batteryService: BatteryService;

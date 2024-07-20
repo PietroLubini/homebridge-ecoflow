@@ -1,7 +1,7 @@
 import { Logging } from 'homebridge';
 import mqtt, { MqttClient } from 'mqtt';
 import { Subject } from 'rxjs';
-import { getMachineId } from './../../helpers/machineId.js';
+import { getMachineId } from '../helpers/machineId.js';
 import { AcquireCertificateData, EcoFlowHttpApi } from './ecoFlowHttpApi.js';
 
 export enum MqttMessageType {
@@ -21,22 +21,35 @@ export interface MqttQuotaMessageWithParams<TParams> extends MqttQuotaMessage {
   params: TParams;
 }
 
-export interface MqttSetReplyMessage {
+export interface MqttSetMessage {
   id: number;
   version: string;
-  moduleType: number;
   operateType: string;
 }
 
-export interface MqttSetReplyMessageWithParams<TParams> extends MqttSetReplyMessage {
+export interface MqttSetMessageWithParams<TParams> extends MqttSetMessage {
+  moduleType: number;
   params: TParams;
+}
+
+export interface MqttSetReplyMessage extends MqttSetMessage {
+  data: {
+    ack: boolean;
+  };
+}
+
+export enum MqttTopicType {
+  Quota = 'quota',
+  SetReply = 'set_reply',
 }
 
 export class EcoFlowMqttApi {
   private client: MqttClient | null = null;
   private certificateData: AcquireCertificateData | null = null;
   private readonly quotaSubject: Subject<MqttQuotaMessage> = new Subject<MqttQuotaMessage>();
+  private readonly setReplySubject: Subject<MqttSetReplyMessage> = new Subject<MqttSetReplyMessage>();
   public readonly quota$ = this.quotaSubject.asObservable();
+  public readonly setReply$ = this.setReplySubject.asObservable();
 
   constructor(
     private httpApi: EcoFlowHttpApi,
@@ -51,39 +64,19 @@ export class EcoFlowMqttApi {
     this.log.info('Disconnected from EcoFlow MQTT Service');
   }
 
-  public async subscribeQuota(serialNumber: string): Promise<boolean> {
-    const client = await this.connect();
-    if (client) {
-      const topic = `/open/${this.certificateData!.certificateAccount}/${serialNumber}/quota`;
-      await client.subscribeAsync(topic);
-      this.log.debug('Subscribed to topic:', topic);
-      client.on('message', (_, message) => {
-        const mqttMessage = JSON.parse(message.toString()) as MqttQuotaMessage;
-        this.quotaSubject.next(mqttMessage);
-      });
-      return true;
-    }
-    return false;
+  public subscribeOnQuota(serialNumber: string): Promise<boolean> {
+    return this.subscribe(serialNumber, MqttTopicType.Quota);
   }
 
-  public async sendSetCommand<TParams>(
-    serialNumber: string,
-    moduleType: number,
-    operateType: string,
-    params: TParams
-  ): Promise<void> {
-    const data: MqttSetReplyMessageWithParams<TParams> = {
-      id: Math.floor(Math.random() * 1000000),
-      version: '1.0',
-      moduleType,
-      operateType,
-      params,
-    };
+  public subscribeOnSetReply(serialNumber: string): Promise<boolean> {
+    return this.subscribe(serialNumber, MqttTopicType.SetReply);
+  }
+
+  public async sendSetCommand(serialNumber: string, message: MqttSetMessage): Promise<void> {
     const client = await this.connect();
     if (client) {
       const topic = `/open/${this.certificateData!.certificateAccount}/${serialNumber}/set`;
-      const message = JSON.stringify(data);
-      await client.publishAsync(topic, message);
+      await client.publishAsync(topic, JSON.stringify(message));
       this.log.debug(`Published to topic '${topic}'`, message);
     }
   }
@@ -103,9 +96,38 @@ export class EcoFlowMqttApi {
           }
         );
         this.log.info('Connected to EcoFlow MQTT Service');
+
+        this.client.on('message', (topic, message) => {
+          const mqttMessage = JSON.parse(message.toString());
+          this.processReceivedMessage((topic.split('/').pop() || '') as MqttTopicType, mqttMessage);
+        });
       }
     }
     return this.client;
+  }
+
+  private async subscribe(serialNumber: string, topicType: MqttTopicType): Promise<boolean> {
+    const client = await this.connect();
+    if (client) {
+      const topic = `/open/${this.certificateData!.certificateAccount}/${serialNumber}/${topicType}`;
+      await client.subscribeAsync(topic);
+      this.log.debug('Subscribed to topic:', topic);
+      return true;
+    }
+    return false;
+  }
+
+  private processReceivedMessage(topicType: MqttTopicType, message: object): void {
+    switch (topicType) {
+      case MqttTopicType.Quota:
+        this.quotaSubject.next(message as MqttQuotaMessage);
+        break;
+      case MqttTopicType.SetReply:
+        this.setReplySubject.next(message as MqttSetReplyMessage);
+        break;
+      default:
+        this.log.warn('Received message for unsupported topic:', topicType);
+    }
   }
 
   private async acquireCertificate(): Promise<AcquireCertificateData | null> {

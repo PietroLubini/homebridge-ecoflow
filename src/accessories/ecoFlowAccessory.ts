@@ -1,19 +1,27 @@
 import { Logging, PlatformAccessory } from 'homebridge';
 import { Subscription } from 'rxjs';
+import { EcoFlowHttpApi } from '../apis/ecoFlowHttpApi.js';
+import {
+  EcoFlowMqttApi,
+  MqttQuotaMessage,
+  MqttSetMessage,
+  MqttSetMessageWithParams,
+  MqttSetReplyMessage,
+  MqttTopicType,
+} from '../apis/ecoFlowMqttApi.js';
 import { DeviceConfig } from '../config.js';
 import { EcoFlowHomebridgePlatform } from '../platform.js';
-import { EcoFlowHttpApi } from './apis/ecoFlowHttpApi.js';
-import { EcoFlowMqttApi, MqttQuotaMessage } from './apis/ecoFlowMqttApi.js';
-import { AccessoryInformationService } from './services/accessoryInformationService.js';
-import { ServiceBase } from './services/serviceBase.js';
+import { AccessoryInformationService } from '../services/accessoryInformationService.js';
+import { ServiceBase } from '../services/serviceBase.js';
 
 export abstract class EcoFlowAccessory {
-  public readonly mqttApi: EcoFlowMqttApi;
+  protected readonly mqttApi: EcoFlowMqttApi;
   protected readonly httpApi: EcoFlowHttpApi;
   private services: ServiceBase[] = [];
   private reconnectMqttTimeoutId: NodeJS.Timeout | null = null;
   private isMqttConnected: boolean = false;
   private subscriptions: Subscription[] = [];
+  public readonly setReplies: Record<string, { requestMessage: MqttSetMessage; revert: () => void }> = {};
 
   constructor(
     public readonly platform: EcoFlowHomebridgePlatform,
@@ -41,13 +49,50 @@ export abstract class EcoFlowAccessory {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 
+  public async sendSetCommand<TParams>(
+    moduleType: number,
+    operateType: string,
+    params: TParams,
+    revert: () => void
+  ): Promise<void> {
+    const requestMessage: MqttSetMessageWithParams<TParams> = {
+      id: Math.floor(Math.random() * 1000000),
+      version: '1.0',
+      moduleType,
+      operateType,
+      params,
+    };
+    this.setReplies[this.getMqttSetMessageKey(requestMessage)] = { requestMessage, revert };
+    await this.mqttApi.sendSetCommand(this.config.serialNumber, requestMessage);
+  }
+
   protected abstract getServices(): ServiceBase[];
 
   protected subscribeOnParameterUpdates(): Subscription[] {
-    return [this.mqttApi.quota$.subscribe(message => this.processQuotaMessage(message))];
+    return [
+      this.mqttApi.quota$.subscribe(message => this.processQuotaMessage(message)),
+      this.mqttApi.setReply$.subscribe(message => this.processSetReplyMessage(message)),
+    ];
   }
 
   protected abstract processQuotaMessage(message: MqttQuotaMessage): void;
+
+  protected processSetReplyMessage(message: MqttSetReplyMessage): void {
+    this.log.debug(`Read from '${MqttTopicType.SetReply}' topic:`, message);
+    const messageKey = this.getMqttSetMessageKey(message);
+    const command = this.setReplies[messageKey];
+    delete this.setReplies[messageKey];
+    if (message.data.ack) {
+      this.log.warn('Failed to set a value. Reverts value back for:', command.requestMessage.operateType);
+      command.revert();
+    } else {
+      this.log.debug('Setting of a value was successful for:', command.requestMessage.operateType);
+    }
+  }
+
+  private getMqttSetMessageKey(message: MqttSetMessage): string {
+    return `${message.operateType}_${message.id}`;
+  }
 
   private initializeServices(): void {
     this.services.forEach(service => {
@@ -77,7 +122,9 @@ export abstract class EcoFlowAccessory {
   }
 
   private async initMqtt(): Promise<void> {
-    this.isMqttConnected = await this.mqttApi.subscribeQuota(this.config.serialNumber);
+    this.isMqttConnected =
+      (await this.mqttApi.subscribeOnQuota(this.config.serialNumber)) &&
+      (await this.mqttApi.subscribeOnSetReply(this.config.serialNumber));
   }
 }
 

@@ -1,5 +1,5 @@
 import { Service } from 'homebridge';
-import { EcoFlowAccessory } from '../ecoFlowAccessory.js';
+import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory.js';
 import { ServiceBase } from './serviceBase.js';
 
 export interface MqttSetEnabledMessageParams {
@@ -30,21 +30,22 @@ export abstract class OutletsServiceBase extends ServiceBase {
     return service;
   }
 
-  protected abstract setOn(value: boolean): Promise<void>;
+  protected abstract setOn(value: boolean, revert: () => void): Promise<void>;
 
-  protected sendOn<TParams>(moduleType: number, operateType: string, params: TParams): Promise<void> {
-    return this.ecoFlowAccessory.mqttApi.sendSetCommand(
-      this.ecoFlowAccessory.config.serialNumber,
-      moduleType,
-      operateType,
-      params
-    );
+  protected sendOn<TParams>(
+    moduleType: number,
+    operateType: string,
+    params: TParams,
+    revert: () => void
+  ): Promise<void> {
+    return this.ecoFlowAccessory.sendSetCommand(moduleType, operateType, params, revert);
   }
 
   private addCharacteristics(service: Service): void {
-    service
-      .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.On)
-      .onSet(value => this.setOn(value as boolean));
+    service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.On).onSet(value => {
+      const newValue = value as boolean;
+      this.setOn(newValue, () => this.updateState(!newValue));
+    });
   }
 
   private getOrAddService(deviceName: string, serviceSubType: string): Service {

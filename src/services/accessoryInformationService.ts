@@ -24,7 +24,7 @@ export class AccessoryInformationService extends ServiceBase {
   private getVersion(): string {
     const filename = fileURLToPath(import.meta.url);
     const dirname = path.dirname(filename);
-    const packageJsonPath = path.resolve(dirname, '../../../package.json');
+    const packageJsonPath = path.resolve(dirname, '../../package.json');
     const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
     return packageData?.version;
   }

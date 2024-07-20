@@ -1,5 +1,5 @@
 import { Logging, Service } from 'homebridge';
-import { EcoFlowAccessory } from '../ecoFlowAccessory.js';
+import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory.js';
 
 export abstract class ServiceBase {
   protected readonly log: Logging;
