@@ -22,6 +22,7 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 
 ## Supported device types
 
+- Delta 2
 - Delta 2 Max
 
 For a full list of devices that could be potentially added check [here](https://developer-eu.ecoflow.com/us/document/introduction)

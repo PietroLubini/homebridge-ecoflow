@@ -1,10 +1,16 @@
 import { Service } from 'homebridge';
+import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory.js';
 import { ServiceBase } from './serviceBase.js';
-import { MqttSetMessage, MqttSetMessageParams } from 'accessories/apis/interfaces/ecoFlowMqttContacts.js';
-import { EcoFlowAccessory } from 'accessories/ecoFlowAccessory.js';
+
+export interface MqttSetEnabledMessageParams {
+  enabled: number;
+}
 
 export abstract class OutletsServiceBase extends ServiceBase {
-  constructor(private readonly serviceSubType: string, ecoFlowAccessory: EcoFlowAccessory) {
+  constructor(
+    private readonly serviceSubType: string,
+    ecoFlowAccessory: EcoFlowAccessory
+  ) {
     super(ecoFlowAccessory);
   }
 
@@ -24,31 +30,22 @@ export abstract class OutletsServiceBase extends ServiceBase {
     return service;
   }
 
-  protected abstract setOn(value: boolean): Promise<void>;
+  protected abstract setOn(value: boolean, revert: () => void): Promise<void>;
 
-  protected async publishEnabled<TParams extends MqttSetMessageParams>(
+  protected sendOn<TParams>(
     moduleType: number,
     operateType: string,
-    params: TParams
+    params: TParams,
+    revert: () => void
   ): Promise<void> {
-    const data: MqttSetMessage<TParams> = {
-      id: Math.floor(Math.random() * 1000000),
-      version: '1.0',
-      moduleType,
-      operateType,
-      params,
-    };
-    await this.ecoFlowAccessory.mqttApi.publish(
-      '/open/<certificateAccount>/<sn>/set',
-      this.ecoFlowAccessory.config.serialNumber,
-      data
-    );
+    return this.ecoFlowAccessory.sendSetCommand(moduleType, operateType, params, revert);
   }
 
   private addCharacteristics(service: Service): void {
-    service
-      .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.On)
-      .onSet(value => this.setOn(value as boolean));
+    service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.On).onSet(value => {
+      const newValue = value as boolean;
+      this.setOn(newValue, () => this.updateState(!newValue));
+    });
   }
 
   private getOrAddService(deviceName: string, serviceSubType: string): Service {
