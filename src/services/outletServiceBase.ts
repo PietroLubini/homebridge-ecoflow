@@ -57,7 +57,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
     this.log.warn(`${this.serviceSubType} Volt ${prevVolt} ->`, volt);
     this.service
       .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Volt)
-      .updateValue(volt);
+      .updateValue(`Volt = ${volt}`);
 
     // InUse
     const isInUse = watt > 0;
