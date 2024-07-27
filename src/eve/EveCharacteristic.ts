@@ -12,8 +12,11 @@ export class PowerConsumptionVolt extends Characteristic {
   public static readonly UUID: string = 'E863F10A-079E-48FF-8F27-9C2605A29F52';
 
   constructor() {
-    super('Volt2', PowerConsumptionVolt.UUID, {
+    super('Volt', PowerConsumptionVolt.UUID, {
       format: Formats.FLOAT,
+      minValue: 0,
+      minStep: 0.1,
+      maxValue: 500,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: EveUnits.VOLT,
     });
@@ -25,8 +28,11 @@ export class PowerConsumptionAmpere extends Characteristic {
   public static readonly UUID: string = 'E863F126-079E-48FF-8F27-9C2605A29F52';
 
   constructor() {
-    super('Ampere2', PowerConsumptionAmpere.UUID, {
+    super('Ampere', PowerConsumptionAmpere.UUID, {
       format: Formats.FLOAT,
+      minValue: 0,
+      minStep: 0.1,
+      maxValue: 100,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: EveUnits.AMPERE,
     });
@@ -38,8 +44,11 @@ export class PowerConsumptionWatt extends Characteristic {
   public static readonly UUID: string = 'E863F10D-079E-48FF-8F27-9C2605A29F52';
 
   constructor() {
-    super('Consumption2', PowerConsumptionWatt.UUID, {
+    super('Consumption', PowerConsumptionWatt.UUID, {
       format: Formats.FLOAT,
+      minValue: 0,
+      minStep: 0.1,
+      maxValue: 100000,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: EveUnits.WATT,
     });
@@ -51,8 +60,11 @@ export class PowerConsumptionKilowattHour extends Characteristic {
   public static readonly UUID: string = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
 
   constructor() {
-    super('Total Consumption2', PowerConsumptionKilowattHour.UUID, {
+    super('Total Consumption', PowerConsumptionKilowattHour.UUID, {
       format: Formats.FLOAT,
+      minValue: 0,
+      minStep: 0.1,
+      maxValue: 100,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: EveUnits.KILOWATT_HOUR,
     });
