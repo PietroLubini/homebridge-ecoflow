@@ -20,7 +20,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
   }
 
   public updateWatt(value: number): void {
-    this.log.debug(`${this.serviceSubType} Watt ->`, value);
+    this.log.warn(`${this.serviceSubType} Watt ->`, value);
     this.service
       .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Watt)
       .updateValue(value);
@@ -65,6 +65,10 @@ export abstract class OutletsServiceBase extends ServiceBase {
     service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.On).onSet(value => {
       const newValue = value as boolean;
       this.setOn(newValue, () => this.updateState(!newValue));
+    });
+
+    service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Watt).onSet(value => {
+      this.log.warn(`${this.serviceSubType} Watt is set ->`, value);
     });
   }
 
