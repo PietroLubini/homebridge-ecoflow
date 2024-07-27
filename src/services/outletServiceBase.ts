@@ -46,28 +46,27 @@ export abstract class OutletsServiceBase extends ServiceBase {
   private static addCharacteristic(
     service: Service,
     characteristic: WithUUID<{ new (): Characteristic }>,
-    add: boolean = true
-  ): Characteristic | null {
+    remove: boolean = false
+  ): Characteristic {
     const existingCharacteristic = service.getCharacteristic(characteristic);
-    if (existingCharacteristic) {
+    if (existingCharacteristic && remove) {
       service.removeCharacteristic(existingCharacteristic);
-    }
-    if (add) {
       return service.addCharacteristic(characteristic);
     }
-    return null;
+
+    return existingCharacteristic;
   }
 
   private addCharacteristics(service: Service): void {
-    service.getCharacteristic(this.platform.Characteristic.On).onSet(value => {
+    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.On).onSet(value => {
       const newValue = value as boolean;
       this.setOn(newValue, () => this.updateState(!newValue));
     });
 
-    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.Watt);
-    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.KilowattHour, false);
-    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.Ampere);
-    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.Volt);
+    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.Watt, true);
+    // OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.KilowattHour, false);
+    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.Ampere, true);
+    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.Volt, true);
   }
 
   private getOrAddService(deviceName: string, serviceSubType: string): Service {
