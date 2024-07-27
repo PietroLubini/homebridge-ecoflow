@@ -30,12 +30,30 @@ export abstract class OutletsServiceBase extends ServiceBase {
 
     const prevKWatt = this.service.getCharacteristic(
       this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.KilowattHour
-    ).value;
+    ).value as number;
     const kiloWatt = watt / 1000;
     this.log.warn(`${this.serviceSubType} kWh ${prevKWatt} ->`, kiloWatt);
     this.service
       .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.KilowattHour)
       .updateValue(kiloWatt);
+
+    const prevAmpere = this.service.getCharacteristic(
+      this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Ampere
+    ).value;
+    const ampere = watt / 220;
+    this.log.warn(`${this.serviceSubType} Ampere ${prevAmpere} ->`, ampere);
+    this.service
+      .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Ampere)
+      .updateValue(ampere);
+
+    const prevVolt = this.service.getCharacteristic(
+      this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Volt
+    ).value;
+    const volt = 220 + prevKWatt;
+    this.log.warn(`${this.serviceSubType} Volt ${prevVolt} ->`, volt);
+    this.service
+      .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Volt)
+      .updateValue(volt);
 
     const isInUse = watt > 0;
     this.log.debug(`${this.serviceSubType} InUse ->`, isInUse);
