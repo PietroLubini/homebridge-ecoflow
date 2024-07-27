@@ -23,7 +23,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
     // W
     const prevWatt = this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Watt)
       .value as number;
-    this.log.warn(`${this.serviceSubType} Watt ${prevWatt} ->`, watt);
+    this.log.debug(`${this.serviceSubType} Watt ${prevWatt} ->`, watt);
     this.service
       .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Watt)
       .updateValue(watt);
@@ -33,7 +33,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
     //   this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.KilowattHour
     // ).value as number;
     // const kiloWatt = watt / 1000;
-    // this.log.warn(`${this.serviceSubType} kWh ${prevKWatt} ->`, kiloWatt);
+    // this.log.debug(`${this.serviceSubType} kWh ${prevKWatt} ->`, kiloWatt);
     // this.service
     //   .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.KilowattHour)
     //   .updateValue(kiloWatt);
@@ -43,7 +43,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
       this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Ampere
     ).value;
     const ampere = watt / 220;
-    this.log.warn(`${this.serviceSubType} Ampere ${prevAmpere} ->`, ampere);
+    this.log.debug(`${this.serviceSubType} Ampere ${prevAmpere} ->`, ampere);
     this.service
       .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Ampere)
       .updateValue(ampere);
@@ -53,7 +53,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
       this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Volt
     ).value;
     const volt = 220 + prevWatt / 1000;
-    this.log.warn(`${this.serviceSubType} Volt ${prevVolt} ->`, volt);
+    this.log.debug(`${this.serviceSubType} Volt ${prevVolt} ->`, volt);
     this.service
       .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Volt)
       .updateValue(volt);
@@ -104,6 +104,13 @@ export abstract class OutletsServiceBase extends ServiceBase {
     service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Watt).onSet(value => {
       this.log.warn(`${this.serviceSubType} Watt is set ->`, value);
     });
+
+    const characteristic = this.service.getCharacteristic(
+      this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.KilowattHour
+    );
+    if (characteristic) {
+      this.service.removeCharacteristic(characteristic);
+    }
   }
 
   private getOrAddService(deviceName: string, serviceSubType: string): Service {
