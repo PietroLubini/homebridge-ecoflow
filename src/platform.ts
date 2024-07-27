@@ -12,6 +12,7 @@ import {
 import { Delta2Accessory } from './accessories/batteries/delta2Accessory.js';
 import { Delta2MaxAccessory } from './accessories/batteries/delta2maxAccessory.js';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config.js';
+import { EveCharacteristic } from './eve/EveCharacteristic.js';
 import { Logger } from './helpers/logger.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
@@ -23,7 +24,7 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   private readonly ecoFlowConfig: EcoFlowConfig;
   public readonly Service: typeof Service;
-  public readonly Characteristic: typeof Characteristic;
+  public readonly Characteristic: typeof Characteristic & typeof EveCharacteristic;
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
@@ -35,7 +36,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   ) {
     this.ecoFlowConfig = this.config as EcoFlowConfig;
     this.Service = api.hap.Service;
-    this.Characteristic = api.hap.Characteristic;
+    this.Characteristic = {
+      ...api.hap.Characteristic,
+      ...EveCharacteristic,
+    } as unknown as typeof Characteristic & typeof EveCharacteristic;
 
     this.commonLog.debug('Finished initializing platform:', this.config.platform);
 

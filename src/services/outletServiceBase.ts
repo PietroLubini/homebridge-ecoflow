@@ -19,9 +19,29 @@ export abstract class OutletsServiceBase extends ServiceBase {
     this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.On).updateValue(state);
   }
 
-  public updateInUse(isInUse: boolean): void {
+  public updateWatt(value: number): void {
+    this.log.debug(`${this.serviceSubType} Watt ->`, value);
+    this.service
+      .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Watt)
+      .updateValue(value);
+
+    const isInUse = value > 0;
     this.log.debug(`${this.serviceSubType} InUse ->`, isInUse);
     this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.OutletInUse).updateValue(isInUse);
+  }
+
+  public updateVolt(value: number): void {
+    this.log.debug(`${this.serviceSubType} Volt ->`, value);
+    this.service
+      .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Volt)
+      .updateValue(value);
+  }
+
+  public updateAmpere(value: number): void {
+    this.log.debug(`${this.serviceSubType} Ampere ->`, value);
+    this.service
+      .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Ampere)
+      .updateValue(value);
   }
 
   protected override createService(): Service {
