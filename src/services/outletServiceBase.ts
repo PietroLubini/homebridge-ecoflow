@@ -109,7 +109,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
       this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.KilowattHour
     );
     if (characteristic) {
-      this.service.removeCharacteristic(characteristic);
+      service.removeCharacteristic(characteristic);
     }
   }
 
