@@ -12,7 +12,7 @@ export class PowerConsumptionVolt extends Characteristic {
   public static readonly UUID: string = 'E863F10A-079E-48FF-8F27-9C2605A29F52';
 
   constructor() {
-    super('Volt2', PowerConsumptionWatt.UUID, {
+    super('Volt2', PowerConsumptionVolt.UUID, {
       format: Formats.FLOAT,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: EveUnits.VOLT,
@@ -25,7 +25,7 @@ export class PowerConsumptionAmpere extends Characteristic {
   public static readonly UUID: string = 'E863F126-079E-48FF-8F27-9C2605A29F52';
 
   constructor() {
-    super('Ampere2', PowerConsumptionWatt.UUID, {
+    super('Ampere2', PowerConsumptionAmpere.UUID, {
       format: Formats.FLOAT,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: EveUnits.AMPERE,

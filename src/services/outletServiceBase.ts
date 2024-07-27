@@ -20,6 +20,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
   }
 
   public updateConsumption(watt: number): void {
+    // W
     const prevWatt = this.service.getCharacteristic(
       this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Watt
     ).value;
@@ -28,6 +29,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
       .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Watt)
       .updateValue(watt);
 
+    // kWh
     const prevKWatt = this.service.getCharacteristic(
       this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.KilowattHour
     ).value as number;
@@ -37,6 +39,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
       .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.KilowattHour)
       .updateValue(kiloWatt);
 
+    // Ampere
     const prevAmpere = this.service.getCharacteristic(
       this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Ampere
     ).value;
@@ -46,6 +49,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
       .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Ampere)
       .updateValue(ampere);
 
+    // V
     const prevVolt = this.service.getCharacteristic(
       this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Volt
     ).value;
@@ -55,24 +59,25 @@ export abstract class OutletsServiceBase extends ServiceBase {
       .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Volt)
       .updateValue(volt);
 
+    // InUse
     const isInUse = watt > 0;
     this.log.debug(`${this.serviceSubType} InUse ->`, isInUse);
     this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.OutletInUse).updateValue(isInUse);
   }
 
-  public updateVolt(value: number): void {
-    this.log.debug(`${this.serviceSubType} Volt ->`, value);
-    this.service
-      .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Volt)
-      .updateValue(value);
-  }
+  // public updateVolt(value: number): void {
+  //   this.log.debug(`${this.serviceSubType} Volt ->`, value);
+  //   this.service
+  //     .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Volt)
+  //     .updateValue(value);
+  // }
 
-  public updateAmpere(value: number): void {
-    this.log.debug(`${this.serviceSubType} Ampere ->`, value);
-    this.service
-      .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Ampere)
-      .updateValue(value);
-  }
+  // public updateAmpere(value: number): void {
+  //   this.log.debug(`${this.serviceSubType} Ampere ->`, value);
+  //   this.service
+  //     .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Ampere)
+  //     .updateValue(value);
+  // }
 
   protected override createService(): Service {
     const service = this.getOrAddService(this.ecoFlowAccessory.config.name, this.serviceSubType);
