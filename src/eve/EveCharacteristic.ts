@@ -51,7 +51,7 @@ export class PowerConsumptionKilowattHour extends Characteristic {
   public static readonly UUID: string = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
 
   constructor() {
-    super('Total Consumption', PowerConsumptionWatt.UUID, {
+    super('Total Consumption', PowerConsumptionKilowattHour.UUID, {
       format: Formats.FLOAT,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: EveUnits.KILOWATT_HOUR,
@@ -62,6 +62,7 @@ export class PowerConsumptionKilowattHour extends Characteristic {
 
 export class PowerConsumption {
   public static readonly Watt: typeof PowerConsumptionWatt = PowerConsumptionWatt;
+  public static readonly KilowattHour: typeof PowerConsumptionKilowattHour = PowerConsumptionKilowattHour;
   public static readonly Volt: typeof PowerConsumptionVolt = PowerConsumptionVolt;
   public static readonly Ampere: typeof PowerConsumptionAmpere = PowerConsumptionAmpere;
 }

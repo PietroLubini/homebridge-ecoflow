@@ -91,7 +91,7 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
       this.outletAcService!.updateState(params.cfgAcEnabled);
     }
     if (params.outputWatts !== undefined) {
-      this.outletAcService!.updateWatt(params.outputWatts);
+      this.outletAcService!.updateConsumption(params.outputWatts);
     }
   }
 
@@ -100,7 +100,7 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
       this.outletCarService!.updateState(params.carState);
     }
     if (params.carWatts !== undefined) {
-      this.outletCarService!.updateWatt(params.carWatts);
+      this.outletCarService!.updateConsumption(params.carWatts);
     }
     if (params.dcOutState !== undefined) {
       this.outletUsbService!.updateState(params.dcOutState);
@@ -121,7 +121,7 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
         params.typec1Watts,
         params.typec2Watts
       );
-      this.outletUsbService!.updateWatt(usbWatts);
+      this.outletUsbService!.updateConsumption(usbWatts);
     }
   }
 

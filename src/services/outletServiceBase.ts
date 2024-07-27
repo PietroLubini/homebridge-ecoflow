@@ -19,13 +19,25 @@ export abstract class OutletsServiceBase extends ServiceBase {
     this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.On).updateValue(state);
   }
 
-  public updateWatt(value: number): void {
-    this.log.warn(`${this.serviceSubType} Watt ->`, value);
+  public updateConsumption(watt: number): void {
+    const prevWatt = this.service.getCharacteristic(
+      this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Watt
+    ).value;
+    this.log.warn(`${this.serviceSubType} Watt ${prevWatt} ->`, watt);
     this.service
       .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.Watt)
-      .updateValue(value);
+      .updateValue(watt);
 
-    const isInUse = value > 0;
+    const prevKWatt = this.service.getCharacteristic(
+      this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.KilowattHour
+    ).value;
+    const kiloWatt = watt / 1000;
+    this.log.warn(`${this.serviceSubType} kWh ${prevKWatt} ->`, kiloWatt);
+    this.service
+      .getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.KilowattHour)
+      .updateValue(kiloWatt);
+
+    const isInUse = watt > 0;
     this.log.debug(`${this.serviceSubType} InUse ->`, isInUse);
     this.service.getCharacteristic(this.ecoFlowAccessory.platform.Characteristic.OutletInUse).updateValue(isInUse);
   }
