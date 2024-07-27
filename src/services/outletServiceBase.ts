@@ -105,7 +105,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
       this.log.warn(`${this.serviceSubType} Watt is set ->`, value);
     });
 
-    const characteristic = this.service.getCharacteristic(
+    const characteristic = service.getCharacteristic(
       this.ecoFlowAccessory.platform.Characteristic.PowerConsumption.KilowattHour
     );
     if (characteristic) {
