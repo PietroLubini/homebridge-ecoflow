@@ -20,7 +20,7 @@ export class BatteryLevel extends Characteristic {
 export class InputConsumptionWatt extends Characteristic {
   public static readonly UUID: string = '13172B0A-D346-4730-9732-32EF5B6EF8B7';
   constructor() {
-    super('Input Consumption', BatteryLevel.UUID, {
+    super('Input Consumption', InputConsumptionWatt.UUID, {
       description: '"Input Consumption, W" for usage in conditions of Automations',
       format: Formats.FLOAT,
       perms: [Perms.NOTIFY],
