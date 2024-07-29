@@ -12,7 +12,7 @@ export class PowerConsumptionVolt extends Characteristic {
   public static readonly UUID: string = 'E863F10A-079E-48FF-8F27-9C2605A29F52';
   constructor() {
     super('Eve-Volt', PowerConsumptionVolt.UUID, {
-      format: Formats.UINT16,
+      format: Formats.FLOAT,
       minValue: 0,
       minStep: 1,
       maxValue: 300,
@@ -46,7 +46,7 @@ export class PowerConsumptionWatt extends Characteristic {
     super('Eve-Watt', PowerConsumptionWatt.UUID, {
       format: Formats.FLOAT,
       minValue: 0,
-      minStep: 0.1,
+      minStep: 1,
       maxValue: 100000,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: EveUnits.WATT,
@@ -73,8 +73,8 @@ export class PowerConsumptionKilowattHour extends Characteristic {
 }
 
 export class PowerConsumption {
-  public static readonly Consumption: typeof PowerConsumptionWatt = PowerConsumptionWatt;
-  public static readonly TotalConsumption: typeof PowerConsumptionKilowattHour = PowerConsumptionKilowattHour;
+  public static readonly ConsumptionWatts: typeof PowerConsumptionWatt = PowerConsumptionWatt;
+  public static readonly ConsumptionKiloWatts: typeof PowerConsumptionKilowattHour = PowerConsumptionKilowattHour;
   public static readonly Voltage: typeof PowerConsumptionVolt = PowerConsumptionVolt;
   public static readonly Current: typeof PowerConsumptionAmpere = PowerConsumptionAmpere;
 }

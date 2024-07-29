@@ -1,7 +1,7 @@
 import { Characteristic, Service } from 'homebridge';
 import { ServiceBase } from './serviceBase.js';
 
-export class BatteryService extends ServiceBase {
+export class BatteryStatusService extends ServiceBase {
   protected override createService(): Service {
     return this.getOrAddService(this.platform.Service.Battery, this.ecoFlowAccessory.config.name);
   }

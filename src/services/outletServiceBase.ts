@@ -1,4 +1,3 @@
-import { randomInt } from 'crypto';
 import { Characteristic, CharacteristicValue, Service, WithUUID } from 'homebridge';
 import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory.js';
 import { CustomBatteryCharacteristicType as CharacteristicType } from '../config.js';
@@ -23,28 +22,16 @@ export abstract class OutletsServiceBase extends ServiceBase {
   public updateConsumption(watt: number): void {
     this.updateCharacteristic(this.platform.Characteristic.OutletInUse, 'InUse', watt > 0);
     this.updateCustomCharacteristic(
-      this.platform.Characteristic.PowerConsumption.Consumption,
-      'Consumption',
+      this.platform.Characteristic.PowerConsumption.ConsumptionWatts,
+      'Consumption, W',
       watt,
-      CharacteristicType.Consumption
+      CharacteristicType.ConsumptionInWatts
     );
     this.updateCustomCharacteristic(
-      this.platform.Characteristic.PowerConsumption.TotalConsumption,
-      'Total Consumption',
+      this.platform.Characteristic.PowerConsumption.ConsumptionKiloWatts,
+      'Consumption, kW',
       watt / 1000,
-      CharacteristicType.TotalConsumption
-    );
-    this.updateCustomCharacteristic(
-      this.platform.Characteristic.PowerConsumption.Current,
-      'Current',
-      watt / 220,
-      CharacteristicType.Current
-    );
-    this.updateCustomCharacteristic(
-      this.platform.Characteristic.PowerConsumption.Voltage,
-      'Voltage',
-      220 + randomInt(10),
-      CharacteristicType.Voltage
+      CharacteristicType.ConsumptionInKiloWatts
     );
   }
 
@@ -63,20 +50,12 @@ export abstract class OutletsServiceBase extends ServiceBase {
       this.addCharacteristic(this.platform.Characteristic.OutletInUse),
       onCharacteristic,
       this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.PowerConsumption.Consumption,
-        CharacteristicType.Consumption
+        this.platform.Characteristic.PowerConsumption.ConsumptionWatts,
+        CharacteristicType.ConsumptionInWatts
       ),
       this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.PowerConsumption.TotalConsumption,
-        CharacteristicType.TotalConsumption
-      ),
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.PowerConsumption.Current,
-        CharacteristicType.Current
-      ),
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.PowerConsumption.Voltage,
-        CharacteristicType.Voltage
+        this.platform.Characteristic.PowerConsumption.ConsumptionKiloWatts,
+        CharacteristicType.ConsumptionInKiloWatts
       ),
     ];
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.serviceName);

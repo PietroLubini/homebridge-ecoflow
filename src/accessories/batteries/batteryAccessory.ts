@@ -2,7 +2,7 @@ import { Logging, PlatformAccessory } from 'homebridge';
 import { MqttMessageType, MqttQuotaMessage, MqttQuotaMessageWithParams } from '../../apis/ecoFlowMqttApi.js';
 import { DeviceConfig } from '../../config.js';
 import { EcoFlowHomebridgePlatform } from '../../platform.js';
-import { BatteryService } from '../../services/batteryService.js';
+import { BatteryStatusService } from '../../services/batteryStatusService.js';
 import { OutletAcService } from '../../services/outletAcService.js';
 import { OutletCarService } from '../../services/outletCarService.js';
 import { OutletUsbService } from '../../services/outletUsbService.js';
@@ -10,14 +10,14 @@ import { ServiceBase } from '../../services/serviceBase.js';
 import { EcoFlowAccessoryWithQuota } from '../ecoFlowAccessory.js';
 
 export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<BatteryAllQuotaData> {
-  private readonly batteryService: BatteryService;
+  private readonly batteryService: BatteryStatusService;
   private readonly outletUsbService: OutletUsbService;
   private readonly outletAcService: OutletAcService<BatteryAllQuotaData>;
   private readonly outletCarService: OutletCarService;
 
   constructor(platform: EcoFlowHomebridgePlatform, accessory: PlatformAccessory, config: DeviceConfig, log: Logging) {
     super(platform, accessory, config, log);
-    this.batteryService = new BatteryService(this);
+    this.batteryService = new BatteryStatusService(this);
     this.outletUsbService = new OutletUsbService(this);
     this.outletAcService = new OutletAcService(this);
     this.outletCarService = new OutletCarService(this);
@@ -30,17 +30,17 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
     if (message.typeCode === MqttMessageType.BMS) {
       const bmsStatus = (message as MqttQuotaMessageWithParams<BmsStatus>).params;
-      // this.log.debug('BMS:', bmsStatus);
+      this.log.debug('BMS:', bmsStatus);
       Object.assign(this.quota.bms_bmsStatus, bmsStatus);
       this.updateBmsValues(bmsStatus);
     } else if (message.typeCode === MqttMessageType.INV) {
       const invStatus = (message as MqttQuotaMessageWithParams<InvStatus>).params;
-      // this.log.debug('INV:', invStatus);
+      this.log.debug('INV:', invStatus);
       Object.assign(this.quota.inv, invStatus);
       this.updateInvValues(invStatus);
     } else if (message.typeCode === MqttMessageType.PD) {
       const pdStatus = (message as MqttQuotaMessageWithParams<PdStatus>).params;
-      // this.log.debug('PD:', pdStatus);
+      this.log.debug('PD:', pdStatus);
       Object.assign(this.quota.pd, pdStatus);
       this.updatePdValues(pdStatus);
     }
