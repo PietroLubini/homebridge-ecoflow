@@ -59,7 +59,7 @@ export class PowerConsumptionKilowattHour extends Characteristic {
 }
 
 export class PowerConsumption {
-  public static readonly ConsumptionWatts: typeof PowerConsumptionWatt = PowerConsumptionWatt;
+  public static readonly OutputConsumptionWatts: typeof PowerConsumptionWatt = PowerConsumptionWatt;
   public static readonly ConsumptionKiloWatts: typeof PowerConsumptionKilowattHour = PowerConsumptionKilowattHour;
   public static readonly Voltage: typeof PowerConsumptionVolt = PowerConsumptionVolt;
   public static readonly Current: typeof PowerConsumptionAmpere = PowerConsumptionAmpere;

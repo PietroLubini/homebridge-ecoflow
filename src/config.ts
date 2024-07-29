@@ -22,6 +22,7 @@ export interface BatteryDeviceConfig {
 }
 
 export enum CustomBatteryCharacteristicType {
-  ConsumptionInWatts = 'Consumption, W',
+  InputConsumptionInWatts = 'Input Consumption, W',
+  OutputConsumptionInWatts = 'Output Consumption, W',
   BatteryLevel = 'Battery Level, %',
 }

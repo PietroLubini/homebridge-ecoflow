@@ -89,12 +89,15 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
   private updateInvValues(params: InvStatus): void {
     if (params.inputWatts !== undefined) {
       this.batteryService!.updateChargingState(params.inputWatts);
+      this.outletAcService!.updateInputConsumption(params.inputWatts);
+      this.outletUsbService!.updateInputConsumption(params.inputWatts);
+      this.outletCarService!.updateInputConsumption(params.inputWatts);
     }
     if (params.cfgAcEnabled !== undefined) {
       this.outletAcService!.updateState(params.cfgAcEnabled);
     }
     if (params.outputWatts !== undefined) {
-      this.outletAcService!.updateConsumption(params.outputWatts);
+      this.outletAcService!.updateOutputConsumption(params.outputWatts);
     }
   }
 
@@ -103,7 +106,7 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
       this.outletCarService!.updateState(params.carState);
     }
     if (params.carWatts !== undefined) {
-      this.outletCarService!.updateConsumption(params.carWatts);
+      this.outletCarService!.updateOutputConsumption(params.carWatts);
     }
     if (params.dcOutState !== undefined) {
       this.outletUsbService!.updateState(params.dcOutState);
@@ -124,7 +127,7 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
         params.typec1Watts,
         params.typec2Watts
       );
-      this.outletUsbService!.updateConsumption(usbWatts);
+      this.outletUsbService!.updateOutputConsumption(usbWatts);
     }
   }
 

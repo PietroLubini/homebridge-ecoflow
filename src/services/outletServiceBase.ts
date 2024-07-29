@@ -19,13 +19,22 @@ export abstract class OutletsServiceBase extends ServiceBase {
     this.updateCharacteristic(this.platform.Characteristic.On, 'State', state);
   }
 
-  public updateConsumption(watt: number): void {
+  public updateOutputConsumption(watt: number): void {
     this.updateCharacteristic(this.platform.Characteristic.OutletInUse, 'InUse', watt > 0);
     this.updateCustomCharacteristic(
-      this.platform.Characteristic.PowerConsumption.ConsumptionWatts,
-      'Consumption, W',
+      this.platform.Characteristic.PowerConsumption.OutputConsumptionWatts,
+      'Output Consumption, W',
       watt,
-      CharacteristicType.ConsumptionInWatts
+      CharacteristicType.OutputConsumptionInWatts
+    );
+  }
+
+  public updateInputConsumption(watt: number): void {
+    this.updateCustomCharacteristic(
+      this.platform.Characteristic.PowerConsumption.InputConsumptionWatts,
+      'Input Consumption, W',
+      watt,
+      CharacteristicType.InputConsumptionInWatts
     );
   }
 
@@ -48,8 +57,12 @@ export abstract class OutletsServiceBase extends ServiceBase {
       this.addCharacteristic(this.platform.Characteristic.OutletInUse),
       onCharacteristic,
       this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.PowerConsumption.ConsumptionWatts,
-        CharacteristicType.ConsumptionInWatts
+        this.platform.Characteristic.PowerConsumption.InputConsumptionWatts,
+        CharacteristicType.InputConsumptionInWatts
+      ),
+      this.tryAddCustomCharacteristic(
+        this.platform.Characteristic.PowerConsumption.OutputConsumptionWatts,
+        CharacteristicType.OutputConsumptionInWatts
       ),
       this.tryAddCustomCharacteristic(
         this.platform.Characteristic.Battery.BatteryLevel,
