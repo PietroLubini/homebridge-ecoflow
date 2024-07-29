@@ -67,5 +67,5 @@ export class PowerConsumption {
 
 // https://gist.github.com/simont77/3f4d4330fa55b83f8ca96388d9004e7d
 export class EveCharacteristic {
-  public static readonly PowerConsumption: typeof PowerConsumption = PowerConsumption;
+  public static readonly EvePowerConsumption: typeof PowerConsumption = PowerConsumption;
 }
