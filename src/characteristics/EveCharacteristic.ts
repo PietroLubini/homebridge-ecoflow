@@ -1,21 +1,13 @@
 import { Characteristic } from 'hap-nodejs';
 import { Formats, Perms, Units } from 'homebridge';
 
-export enum EveUnits {
-  WATT = 'W',
-  VOLTAGE = 'V',
-  CURRENT = 'A',
-  KILOWATT_HOUR = 'kWh',
-}
-
 export class PowerConsumptionVolt extends Characteristic {
   public static readonly UUID: string = 'E863F10A-079E-48FF-8F27-9C2605A29F52';
   constructor() {
     super('Voltage', PowerConsumptionVolt.UUID, {
       description: '"Voltage, V" in Eve App',
       format: Formats.FLOAT,
-      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-      // unit: EveUnits.VOLTAGE,
+      perms: [Perms.NOTIFY],
       minValue: 0,
       maxValue: 300,
     });
@@ -29,8 +21,7 @@ export class PowerConsumptionAmpere extends Characteristic {
     super('Current', PowerConsumptionAmpere.UUID, {
       description: '"Current, A" in Eve App',
       format: Formats.FLOAT,
-      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-      // unit: EveUnits.CURRENT,
+      perms: [Perms.NOTIFY],
       minValue: 0,
       maxValue: 100,
     });
@@ -44,8 +35,8 @@ export class PowerConsumptionWatt extends Characteristic {
     super('Consumption', PowerConsumptionWatt.UUID, {
       description: '"Consumption, W" in Eve App',
       format: Formats.FLOAT,
-      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-      unit: Units.CELSIUS,
+      perms: [Perms.NOTIFY],
+      unit: Units.CELSIUS, // To allow setting numeric value for conditions in ShortCuts
       minValue: 0,
       maxValue: 50000,
     });
@@ -59,8 +50,7 @@ export class PowerConsumptionKilowattHour extends Characteristic {
     super('Total Consumption', PowerConsumptionKilowattHour.UUID, {
       description: '"Total Consumption, kW/h" in Eve App',
       format: Formats.FLOAT,
-      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-      // unit: EveUnits.KILOWATT_HOUR,
+      perms: [Perms.NOTIFY],
       minValue: 0,
       maxValue: 50,
     });

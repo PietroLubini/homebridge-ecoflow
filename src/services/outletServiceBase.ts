@@ -29,6 +29,10 @@ export abstract class OutletsServiceBase extends ServiceBase {
     );
   }
 
+  public updateBatteryLevel(batteryLevel: number): void {
+    this.service.getCharacteristic(this.platform.Characteristic.Battery.BatteryLevel).updateValue(batteryLevel);
+  }
+
   protected override createService(): Service {
     return this.getOrAddServiceById(this.platform.Service.Outlet, this.serviceName, this.serviceSubType);
   }
@@ -46,6 +50,10 @@ export abstract class OutletsServiceBase extends ServiceBase {
       this.tryAddCustomCharacteristic(
         this.platform.Characteristic.PowerConsumption.ConsumptionWatts,
         CharacteristicType.ConsumptionInWatts
+      ),
+      this.tryAddCustomCharacteristic(
+        this.platform.Characteristic.Battery.BatteryLevel,
+        CharacteristicType.BatteryLevel
       ),
     ];
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.serviceName);

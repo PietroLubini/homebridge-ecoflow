@@ -9,11 +9,12 @@ import {
   UnknownContext,
 } from 'homebridge';
 
-import { EcoFlowAccessory } from 'accessories/ecoFlowAccessory.js';
 import { Delta2Accessory } from './accessories/batteries/delta2Accessory.js';
 import { Delta2MaxAccessory } from './accessories/batteries/delta2maxAccessory.js';
+import { EcoFlowAccessory } from './accessories/ecoFlowAccessory.js';
+import { CustomCharacteristic } from './characteristics/CustomCharacteristic.js';
+import { EveCharacteristic } from './characteristics/EveCharacteristic.js';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config.js';
-import { EveCharacteristic } from './eve/EveCharacteristic.js';
 import { Logger } from './helpers/logger.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 
@@ -22,10 +23,13 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
  * This class is the main constructor for your plugin, this is where you should
  * parse the user config and discover/register accessories with Homebridge.
  */
+
+export type EcoFlowCharacteristic = typeof Characteristic & typeof EveCharacteristic & typeof CustomCharacteristic;
+
 export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   private readonly ecoFlowConfig: EcoFlowConfig;
   public readonly Service: typeof Service;
-  public readonly Characteristic: typeof Characteristic & typeof EveCharacteristic;
+  public readonly Characteristic: EcoFlowCharacteristic;
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
@@ -40,7 +44,8 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     this.Characteristic = {
       ...api.hap.Characteristic,
       ...EveCharacteristic,
-    } as unknown as typeof Characteristic & typeof EveCharacteristic;
+      ...CustomCharacteristic,
+    } as unknown as EcoFlowCharacteristic;
 
     this.commonLog.debug('Finished initializing platform:', this.config.platform);
 

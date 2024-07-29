@@ -80,6 +80,9 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
     if (params.f32ShowSoc !== undefined) {
       this.batteryService!.updateStatusLowBattery(params.f32ShowSoc);
       this.batteryService!.updateBatteryLevel(params.f32ShowSoc);
+      this.outletAcService!.updateBatteryLevel(params.f32ShowSoc);
+      this.outletUsbService!.updateBatteryLevel(params.f32ShowSoc);
+      this.outletCarService!.updateBatteryLevel(params.f32ShowSoc);
     }
   }
 
