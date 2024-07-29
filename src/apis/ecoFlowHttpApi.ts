@@ -80,7 +80,7 @@ export class EcoFlowHttpApi {
     const response = await this.execute<CmdResponseWithData<Dict>>(QuotaAllPath, HttpMethod.Get, requestCmd);
     if (!response.failed) {
       const data = this.convertData<TData>(response.data);
-      // this.log.debug('All quotas:', data);
+      this.log.debug('All quotas:', data);
       return data;
     }
     return {} as TData;
