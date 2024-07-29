@@ -80,7 +80,7 @@ export class EcoFlowHttpApi {
     const response = await this.execute<CmdResponseWithData<Dict>>(QuotaAllPath, HttpMethod.Get, requestCmd);
     if (!response.failed) {
       const data = this.convertData<TData>(response.data);
-      this.log.debug('All quotas:', data);
+      // this.log.debug('All quotas:', data);
       return data;
     }
     return {} as TData;
@@ -90,7 +90,6 @@ export class EcoFlowHttpApi {
     this.log.debug('Acquire certificate for MQTT connection');
     const response = await this.execute<CmdResponseWithData<AcquireCertificateData>>(CertificatePath, HttpMethod.Get);
     if (!response.failed) {
-      this.log.debug('Certificate data:', response.data);
       return response.data;
     }
     return null;

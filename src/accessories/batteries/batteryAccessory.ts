@@ -30,17 +30,17 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
     if (message.typeCode === MqttMessageType.BMS) {
       const bmsStatus = (message as MqttQuotaMessageWithParams<BmsStatus>).params;
-      this.log.debug('BMS:', bmsStatus);
+      // this.log.debug('BMS:', bmsStatus);
       Object.assign(this.quota.bms_bmsStatus, bmsStatus);
       this.updateBmsValues(bmsStatus);
     } else if (message.typeCode === MqttMessageType.INV) {
       const invStatus = (message as MqttQuotaMessageWithParams<InvStatus>).params;
-      this.log.debug('INV:', invStatus);
+      // this.log.debug('INV:', invStatus);
       Object.assign(this.quota.inv, invStatus);
       this.updateInvValues(invStatus);
     } else if (message.typeCode === MqttMessageType.PD) {
       const pdStatus = (message as MqttQuotaMessageWithParams<PdStatus>).params;
-      this.log.debug('PD:', pdStatus);
+      // this.log.debug('PD:', pdStatus);
       Object.assign(this.quota.pd, pdStatus);
       this.updatePdValues(pdStatus);
     }

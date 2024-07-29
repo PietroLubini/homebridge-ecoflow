@@ -47,6 +47,23 @@
               "type": "string",
               "required": true,
               "description": "Secret Key from \"EcoFlow IoT Developer Platform\" (https://developer-eu.ecoflow.com)"
+            },
+            "battery": {
+              "title": "Battery Settings",
+              "type": "object",
+              "properties": {
+                "customCharacteristics": {
+                  "title": "Custom Characteristics",
+                  "description": "List of custom characteristics to be added for battery",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "title": "Characteristic",
+                    "type": "string",
+                    "enum": ["Consumption", "TotalConsumption", "Ampere", "Volt"]
+                  }
+                }
+              }
             }
           }
         }

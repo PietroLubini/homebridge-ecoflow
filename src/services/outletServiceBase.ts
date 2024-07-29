@@ -1,5 +1,6 @@
 import { Characteristic, CharacteristicValue, Service, WithUUID } from 'homebridge';
 import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory.js';
+import { CustomBatteryCharacteristicType as CharacteristicType } from '../config.js';
 import { ServiceBase } from './serviceBase.js';
 
 export interface MqttSetEnabledMessageParams {
@@ -20,16 +21,60 @@ export abstract class OutletsServiceBase extends ServiceBase {
 
   public updateConsumption(watt: number): void {
     this.updateCharacteristic(this.platform.Characteristic.OutletInUse, 'InUse', watt > 0);
-    this.updateCharacteristic(this.platform.Characteristic.PowerConsumption.Watt, 'Watt', watt);
-    // this.updateCharacteristic(this.platform.Characteristic.PowerConsumption.KilowattHour, 'kWh', watt / 1000);
-    // this.updateCharacteristic(this.platform.Characteristic.PowerConsumption.Ampere, 'Ampere', watt / 220);
-    // this.updateCharacteristic(this.platform.Characteristic.PowerConsumption.Volt, 'Volt', 220 + watt / 1000);
+    this.updateCustomCharacteristic(
+      this.platform.Characteristic.PowerConsumption.Watt,
+      'Watt',
+      watt,
+      CharacteristicType.Consumption
+    );
+    this.updateCustomCharacteristic(
+      this.platform.Characteristic.PowerConsumption.KilowattHour,
+      'kWh',
+      watt / 1000,
+      CharacteristicType.TotalConsumption
+    );
+    this.updateCustomCharacteristic(
+      this.platform.Characteristic.PowerConsumption.Ampere,
+      'Ampere',
+      watt / 220,
+      CharacteristicType.Ampere
+    );
+    this.updateCustomCharacteristic(
+      this.platform.Characteristic.PowerConsumption.Volt,
+      'Volt',
+      220 + watt / 1000,
+      CharacteristicType.Volt
+    );
   }
 
   protected override createService(): Service {
-    const service = this.getOrAddService(this.ecoFlowAccessory.config.name, this.serviceSubType);
-    this.addCharacteristics(service);
-    return service;
+    return this.getOrAddServiceById(this.platform.Service.Outlet, this.serviceName, this.serviceSubType);
+  }
+
+  protected override addCharacteristics(): Characteristic[] {
+    const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
+    onCharacteristic.onSet(value => {
+      const newValue = value as boolean;
+      this.setOn(newValue, () => this.updateState(!newValue));
+    });
+
+    const characteristics = [
+      this.addCharacteristic(this.platform.Characteristic.OutletInUse),
+      onCharacteristic,
+      this.tryAddCustomCharacteristic(
+        this.platform.Characteristic.PowerConsumption.Watt,
+        CharacteristicType.Consumption
+      ),
+      this.tryAddCustomCharacteristic(
+        this.platform.Characteristic.PowerConsumption.KilowattHour,
+        CharacteristicType.TotalConsumption
+      ),
+      this.tryAddCustomCharacteristic(this.platform.Characteristic.PowerConsumption.Ampere, CharacteristicType.Ampere),
+      this.tryAddCustomCharacteristic(this.platform.Characteristic.PowerConsumption.Volt, CharacteristicType.Volt),
+    ];
+    this.service.setCharacteristic(this.platform.Characteristic.Name, this.serviceName);
+
+    return characteristics.filter(characteristic => characteristic !== null);
   }
 
   protected abstract setOn(value: boolean, revert: () => void): Promise<void>;
@@ -43,52 +88,36 @@ export abstract class OutletsServiceBase extends ServiceBase {
     return this.ecoFlowAccessory.sendSetCommand(moduleType, operateType, params, revert);
   }
 
-  private static addCharacteristic(
-    service: Service,
-    characteristic: WithUUID<{ new (): Characteristic }>,
-    remove: boolean = false,
-    add: boolean = true
-  ): Characteristic {
-    const existingCharacteristic = service.getCharacteristic(characteristic);
-    if (existingCharacteristic && remove) {
-      service.removeCharacteristic(existingCharacteristic);
-      if (add) {
-        return service.addCharacteristic(characteristic);
-      }
-    }
-
-    return existingCharacteristic;
-  }
-
-  private addCharacteristics(service: Service): void {
-    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.On).onSet(value => {
-      const newValue = value as boolean;
-      this.setOn(newValue, () => this.updateState(!newValue));
-    });
-
-    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.Watt, true);
-    // OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.KilowattHour, false);
-    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.Ampere, true, false);
-    OutletsServiceBase.addCharacteristic(service, this.platform.Characteristic.PowerConsumption.Volt, true, false);
-  }
-
-  private getOrAddService(deviceName: string, serviceSubType: string): Service {
-    const serviceName = deviceName + ' ' + serviceSubType;
-    const service =
-      this.ecoFlowAccessory.accessory.getServiceById(this.platform.Service.Outlet, serviceSubType) ||
-      this.ecoFlowAccessory.accessory.addService(this.platform.Service.Outlet, serviceName, serviceSubType);
-
-    service.setCharacteristic(this.platform.Characteristic.Name, serviceName);
-
-    return service;
-  }
-
-  private updateCharacteristic(
+  protected override updateCharacteristic(
     characteristic: WithUUID<{ new (): Characteristic }>,
     name: string,
     value: CharacteristicValue
   ): void {
-    this.log.debug(`${this.serviceSubType} ${name} ->`, value);
-    this.service.getCharacteristic(characteristic).updateValue(value);
+    super.updateCharacteristic(characteristic, `${this.serviceSubType} ${name}`, value);
+  }
+
+  private tryAddCustomCharacteristic(
+    characteristic: WithUUID<{ new (): Characteristic }>,
+    characteristicType: CharacteristicType
+  ): Characteristic | null {
+    if (this.ecoFlowAccessory.config.battery?.customCharacteristics.includes(characteristicType)) {
+      return this.addCharacteristic(characteristic);
+    }
+    return null;
+  }
+
+  private updateCustomCharacteristic(
+    characteristic: WithUUID<{ new (): Characteristic }>,
+    name: string,
+    value: CharacteristicValue,
+    characteristicType: CharacteristicType
+  ): void {
+    if (this.ecoFlowAccessory.config.battery?.customCharacteristics.includes(characteristicType)) {
+      super.updateCharacteristic(characteristic, name, value);
+    }
+  }
+
+  private get serviceName(): string {
+    return `${this.ecoFlowAccessory.config.name} ${this.serviceSubType}`;
   }
 }

@@ -9,6 +9,7 @@ import {
   UnknownContext,
 } from 'homebridge';
 
+import { EcoFlowAccessory } from 'accessories/ecoFlowAccessory.js';
 import { Delta2Accessory } from './accessories/batteries/delta2Accessory.js';
 import { Delta2MaxAccessory } from './accessories/batteries/delta2maxAccessory.js';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config.js';
@@ -73,6 +74,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   registerDevices(): void {
     const logs: Record<string, Logging> = {};
     const configuredAccessories: PlatformAccessory[] = [];
+    const configuredEcoFlowAccessories: EcoFlowAccessory[] = [];
     if (!this.ecoFlowConfig.devices) {
       return;
     }
@@ -94,35 +96,55 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
       let accessory = this.accessories.find(accessory => accessory.UUID === uuid);
+      let ecoFlowAccessory: EcoFlowAccessory | null = null;
       if (accessory) {
         log.info('Restoring existing accessory from cache');
-        this.createAccessory(accessory, config, log);
+        ecoFlowAccessory = this.createAccessory(accessory, config, log);
       } else {
         log.info('Adding new accessory');
         accessory = new this.api.platformAccessory(config.name, uuid);
         accessory.context.deviceConfig = config;
-        this.createAccessory(accessory, config, log);
+        ecoFlowAccessory = this.createAccessory(accessory, config, log);
 
         // link the accessory to your platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
       }
       configuredAccessories.push(accessory);
+      if (ecoFlowAccessory) {
+        configuredEcoFlowAccessories.push(ecoFlowAccessory);
+      }
       logs[accessory.displayName] = log;
     }
-    this.cleanupDevices(configuredAccessories, logs);
+    this.cleanupDevices(configuredAccessories, configuredEcoFlowAccessories, logs);
   }
 
-  cleanupDevices(configuredAccessories: PlatformAccessory[], logs: Record<string, Logging>): void {
+  cleanupDevices(
+    configuredAccessories: PlatformAccessory[],
+    configuredEcoFlowAccessories: EcoFlowAccessory[],
+    logs: Record<string, Logging>
+  ): void {
+    const removedAccessories: PlatformAccessory[] = [];
     this.accessories
       .filter(accessory => !configuredAccessories.includes(accessory))
       .forEach(accessory => {
         logs[accessory.displayName].info('Removing obsolete accessory');
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        removedAccessories.push(accessory);
+      });
+    configuredEcoFlowAccessories
+      .filter(ecoFlowAccessory => !removedAccessories.includes(ecoFlowAccessory.accessory))
+      .forEach(ecoFlowAccessory => {
+        logs[ecoFlowAccessory.accessory.displayName].info('Initializing accessory');
+        ecoFlowAccessory.initialize();
       });
   }
 
-  createAccessory(accessory: PlatformAccessory<UnknownContext>, config: DeviceConfig, log: Logging): void {
-    let ecoFlowAccessory = null;
+  createAccessory(
+    accessory: PlatformAccessory<UnknownContext>,
+    config: DeviceConfig,
+    log: Logging
+  ): EcoFlowAccessory | null {
+    let ecoFlowAccessory: EcoFlowAccessory | null = null;
     switch (config.model) {
       case DeviceModel.Delta2Max:
         ecoFlowAccessory = new Delta2MaxAccessory(this, accessory, config, log);
@@ -133,6 +155,6 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       default:
         log.warn(`"${config.model}" is not supported. Ignoring the device`);
     }
-    ecoFlowAccessory?.initialize();
+    return ecoFlowAccessory;
   }
 }

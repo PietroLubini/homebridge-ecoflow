@@ -1,12 +1,17 @@
-import { Service } from 'homebridge';
+import { Characteristic, Service } from 'homebridge';
 import { ServiceBase } from './serviceBase.js';
 
 export class BatteryService extends ServiceBase {
   protected override createService(): Service {
-    const service =
-      this.ecoFlowAccessory.accessory.getService(this.platform.Service.Battery) ||
-      this.ecoFlowAccessory.accessory.addService(this.platform.Service.Battery, this.ecoFlowAccessory.config.name);
-    return service;
+    return this.getOrAddService(this.platform.Service.Battery, this.ecoFlowAccessory.config.name);
+  }
+
+  protected override addCharacteristics(): Characteristic[] {
+    return [
+      this.addCharacteristic(this.platform.Characteristic.StatusLowBattery),
+      this.addCharacteristic(this.platform.Characteristic.BatteryLevel),
+      this.addCharacteristic(this.platform.Characteristic.ChargingState),
+    ];
   }
 
   public updateStatusLowBattery(batteryLevel: number): void {
