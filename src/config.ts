@@ -24,6 +24,6 @@ export interface BatteryDeviceConfig {
 export enum CustomBatteryCharacteristicType {
   Consumption = 'Consumption',
   TotalConsumption = 'TotalConsumption',
-  Ampere = 'Ampere',
-  Volt = 'Volt',
+  Current = 'Current',
+  Voltage = 'Voltage',
 }
