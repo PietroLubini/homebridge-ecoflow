@@ -7,7 +7,7 @@ export class BatteryLevel extends Characteristic {
     super('Battery Level', BatteryLevel.UUID, {
       description: 'Battery Level, %',
       format: Formats.FLOAT,
-      perms: [Perms.NOTIFY],
+      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       minValue: 0,
       maxValue: 100,
       minStep: 1,
@@ -23,11 +23,11 @@ export class InputConsumptionWatt extends Characteristic {
     super('Input Consumption', InputConsumptionWatt.UUID, {
       description: 'Input Consumption, W',
       format: Formats.FLOAT,
-      perms: [Perms.NOTIFY],
+      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       minValue: 0,
       maxValue: 100,
       minStep: 1,
-      unit: Units.CELSIUS,
+      unit: Units.CELSIUS, // To allow setting numeric value for conditions in ShortCuts
     });
     this.value = this.getDefaultValue();
   }
@@ -37,10 +37,10 @@ export class OutputConsumptionWatt extends Characteristic {
   // Eve characteristic
   public static readonly UUID: string = 'E863F10D-079E-48FF-8F27-9C2605A29F52';
   constructor() {
-    super('Consumption', OutputConsumptionWatt.UUID, {
+    super('Output Consumption', OutputConsumptionWatt.UUID, {
       description: 'Output Consumption, W',
       format: Formats.FLOAT,
-      perms: [Perms.NOTIFY],
+      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: Units.CELSIUS, // To allow setting numeric value for conditions in ShortCuts
       minValue: 0,
       maxValue: 50000,
@@ -56,7 +56,7 @@ export class OutputConsumptionWatt extends Characteristic {
 //     super('Voltage', PowerConsumptionVolt.UUID, {
 //       description: '"Voltage, V" in Eve App',
 //       format: Formats.FLOAT,
-//       perms: [Perms.NOTIFY],
+//       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
 //       minValue: 0,
 //       maxValue: 300,
 //     });
@@ -70,7 +70,7 @@ export class OutputConsumptionWatt extends Characteristic {
 //     super('Current', PowerConsumptionAmpere.UUID, {
 //       description: '"Current, A" in Eve App',
 //       format: Formats.FLOAT,
-//       perms: [Perms.NOTIFY],
+//       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
 //       minValue: 0,
 //       maxValue: 100,
 //     });
@@ -84,7 +84,7 @@ export class OutputConsumptionWatt extends Characteristic {
 //     super('Total Consumption', PowerConsumptionKilowattHour.UUID, {
 //       description: '"Total Consumption, kW/h" in Eve App',
 //       format: Formats.FLOAT,
-//       perms: [Perms.NOTIFY],
+//       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
 //       minValue: 0,
 //       maxValue: 50,
 //     });
