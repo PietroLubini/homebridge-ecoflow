@@ -21,25 +21,30 @@ export abstract class OutletsServiceBase extends ServiceBase {
 
   public updateOutputConsumption(watt: number): void {
     this.updateCharacteristic(this.platform.Characteristic.OutletInUse, 'InUse', watt > 0);
-    this.updateCustomCharacteristic(
-      this.platform.Characteristic.EvePowerConsumption.OutputConsumptionWatts,
-      'Output Consumption, W',
-      watt,
-      CharacteristicType.OutputConsumptionInWatts
-    );
+    // this.updateCustomCharacteristic(
+    //   this.platform.Characteristic.EvePowerConsumption.OutputConsumptionWatts,
+    //   'Output Consumption, W',
+    //   watt,
+    //   CharacteristicType.OutputConsumptionInWatts
+    // );
   }
 
   public updateInputConsumption(watt: number): void {
-    this.updateCustomCharacteristic(
-      this.platform.Characteristic.PowerConsumption.InputConsumptionWatts,
-      'Input Consumption, W',
-      watt,
-      CharacteristicType.InputConsumptionInWatts
-    );
+    // this.updateCustomCharacteristic(
+    //   this.platform.Characteristic.PowerConsumption.InputConsumptionWatts,
+    //   'Input Consumption, W',
+    //   watt,
+    //   CharacteristicType.InputConsumptionInWatts
+    // );
   }
 
   public updateBatteryLevel(batteryLevel: number): void {
-    this.service.getCharacteristic(this.platform.Characteristic.Battery.BatteryLevel).updateValue(batteryLevel);
+    // this.updateCustomCharacteristic(
+    //   this.platform.Characteristic.Battery.BatteryLevel,
+    //   'Battery Level, %',
+    //   batteryLevel,
+    //   CharacteristicType.BatteryLevel
+    // );
   }
 
   protected override createService(): Service {
@@ -56,18 +61,18 @@ export abstract class OutletsServiceBase extends ServiceBase {
     const characteristics = [
       this.addCharacteristic(this.platform.Characteristic.OutletInUse),
       onCharacteristic,
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.PowerConsumption.InputConsumptionWatts,
-        CharacteristicType.InputConsumptionInWatts
-      ),
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.EvePowerConsumption.OutputConsumptionWatts,
-        CharacteristicType.OutputConsumptionInWatts
-      ),
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.Battery.BatteryLevel,
-        CharacteristicType.BatteryLevel
-      ),
+      // this.tryAddCustomCharacteristic(
+      //   this.platform.Characteristic.PowerConsumption.InputConsumptionWatts,
+      //   CharacteristicType.InputConsumptionInWatts
+      // ),
+      // this.tryAddCustomCharacteristic(
+      //   this.platform.Characteristic.EvePowerConsumption.OutputConsumptionWatts,
+      //   CharacteristicType.OutputConsumptionInWatts
+      // ),
+      // this.tryAddCustomCharacteristic(
+      //   this.platform.Characteristic.Battery.BatteryLevel,
+      //   CharacteristicType.BatteryLevel
+      // ),
     ];
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.serviceName);
 
