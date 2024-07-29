@@ -60,7 +60,7 @@
                   "items": {
                     "title": "Characteristic",
                     "type": "string",
-                    "enum": ["Consumption, W", "Total Consumption, kW"]
+                    "enum": ["Consumption, W"]
                   }
                 }
               }

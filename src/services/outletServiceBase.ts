@@ -27,12 +27,6 @@ export abstract class OutletsServiceBase extends ServiceBase {
       watt,
       CharacteristicType.ConsumptionInWatts
     );
-    this.updateCustomCharacteristic(
-      this.platform.Characteristic.PowerConsumption.ConsumptionKiloWatts,
-      'Total Consumption, kW',
-      watt / 1000,
-      CharacteristicType.TotalConsumptionInKiloWatts
-    );
   }
 
   protected override createService(): Service {
@@ -52,10 +46,6 @@ export abstract class OutletsServiceBase extends ServiceBase {
       this.tryAddCustomCharacteristic(
         this.platform.Characteristic.PowerConsumption.ConsumptionWatts,
         CharacteristicType.ConsumptionInWatts
-      ),
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.PowerConsumption.ConsumptionKiloWatts,
-        CharacteristicType.TotalConsumptionInKiloWatts
       ),
     ];
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.serviceName);

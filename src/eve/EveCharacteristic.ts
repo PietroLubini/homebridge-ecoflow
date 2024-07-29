@@ -11,14 +11,14 @@ export enum EveUnits {
 export class PowerConsumptionVolt extends Characteristic {
   public static readonly UUID: string = 'E863F10A-079E-48FF-8F27-9C2605A29F52';
   constructor() {
-    super('Eve-Volt', PowerConsumptionVolt.UUID, {
+    super('Voltage', PowerConsumptionVolt.UUID, {
+      description: '"Voltage, V" in Eve App',
       format: Formats.FLOAT,
+      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
+      unit: EveUnits.VOLTAGE,
       minValue: 0,
       minStep: 1,
       maxValue: 300,
-      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-      unit: EveUnits.VOLTAGE,
-      description: 'Voltage (V) value. Used by Eve App',
     });
     this.value = this.getDefaultValue();
   }
@@ -27,14 +27,14 @@ export class PowerConsumptionVolt extends Characteristic {
 export class PowerConsumptionAmpere extends Characteristic {
   public static readonly UUID: string = 'E863F126-079E-48FF-8F27-9C2605A29F52';
   constructor() {
-    super('Eve-Ampere', PowerConsumptionAmpere.UUID, {
+    super('Current', PowerConsumptionAmpere.UUID, {
+      description: '"Current, A" in Eve App',
       format: Formats.FLOAT,
+      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
+      unit: EveUnits.CURRENT,
       minValue: 0,
       minStep: 0.1,
       maxValue: 100,
-      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-      unit: EveUnits.CURRENT,
-      description: 'Current (A) value. Used by Eve App',
     });
     this.value = this.getDefaultValue();
   }
@@ -43,14 +43,14 @@ export class PowerConsumptionAmpere extends Characteristic {
 export class PowerConsumptionWatt extends Characteristic {
   public static readonly UUID: string = 'E863F10D-079E-48FF-8F27-9C2605A29F52';
   constructor() {
-    super('Eve-Watt', PowerConsumptionWatt.UUID, {
+    super('Consumption', PowerConsumptionWatt.UUID, {
+      description: '"Consumption, W" in Eve App',
       format: Formats.FLOAT,
-      minValue: 0,
-      minStep: 1,
-      maxValue: 100000,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: EveUnits.WATT,
-      description: 'Watt (W) value. Used by Eve App, reported as "Consumption"',
+      minValue: -100000,
+      minStep: 0.1,
+      maxValue: 100000,
     });
     this.value = this.getDefaultValue();
   }
@@ -59,14 +59,14 @@ export class PowerConsumptionWatt extends Characteristic {
 export class PowerConsumptionKilowattHour extends Characteristic {
   public static readonly UUID: string = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
   constructor() {
-    super('Eve-Kilowatt-Hour', PowerConsumptionKilowattHour.UUID, {
+    super('Total Consumption', PowerConsumptionKilowattHour.UUID, {
+      description: '"Total Consumption, kW/h" in Eve App',
       format: Formats.FLOAT,
-      minValue: 0,
-      minStep: 0.1,
-      maxValue: 100,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: EveUnits.KILOWATT_HOUR,
-      description: 'Kilowatt-hour (kWh) value. Used by Eve App, reported as "Total Consumption"',
+      minValue: 0,
+      minStep: 0.1,
+      maxValue: 50,
     });
     this.value = this.getDefaultValue();
   }
