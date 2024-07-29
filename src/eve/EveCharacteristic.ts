@@ -15,9 +15,8 @@ export class PowerConsumptionVolt extends Characteristic {
       description: '"Voltage, V" in Eve App',
       format: Formats.FLOAT,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-      unit: EveUnits.VOLTAGE,
+      // unit: EveUnits.VOLTAGE,
       minValue: 0,
-      minStep: 1,
       maxValue: 300,
     });
     this.value = this.getDefaultValue();
@@ -31,9 +30,8 @@ export class PowerConsumptionAmpere extends Characteristic {
       description: '"Current, A" in Eve App',
       format: Formats.FLOAT,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-      unit: EveUnits.CURRENT,
+      // unit: EveUnits.CURRENT,
       minValue: 0,
-      minStep: 0.1,
       maxValue: 100,
     });
     this.value = this.getDefaultValue();
@@ -47,10 +45,9 @@ export class PowerConsumptionWatt extends Characteristic {
       description: '"Consumption, W" in Eve App',
       format: Formats.FLOAT,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-      unit: EveUnits.WATT,
-      minValue: -100000,
-      minStep: 0.1,
-      maxValue: 100000,
+      // unit: EveUnits.WATT,
+      minValue: 0,
+      maxValue: 50000,
     });
     this.value = this.getDefaultValue();
   }
@@ -63,9 +60,8 @@ export class PowerConsumptionKilowattHour extends Characteristic {
       description: '"Total Consumption, kW/h" in Eve App',
       format: Formats.FLOAT,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-      unit: EveUnits.KILOWATT_HOUR,
+      // unit: EveUnits.KILOWATT_HOUR,
       minValue: 0,
-      minStep: 0.1,
       maxValue: 50,
     });
     this.value = this.getDefaultValue();
