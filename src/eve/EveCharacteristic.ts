@@ -1,5 +1,5 @@
 import { Characteristic } from 'hap-nodejs';
-import { Formats, Perms } from 'homebridge';
+import { Formats, Perms, Units } from 'homebridge';
 
 export enum EveUnits {
   WATT = 'W',
@@ -45,7 +45,7 @@ export class PowerConsumptionWatt extends Characteristic {
       description: '"Consumption, W" in Eve App',
       format: Formats.FLOAT,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-      // unit: EveUnits.WATT,
+      unit: Units.CELSIUS,
       minValue: 0,
       maxValue: 50000,
     });
