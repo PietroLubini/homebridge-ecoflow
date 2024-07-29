@@ -22,7 +22,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
   public updateOutputConsumption(watt: number): void {
     this.updateCharacteristic(this.platform.Characteristic.OutletInUse, 'InUse', watt > 0);
     this.updateCustomCharacteristic(
-      this.platform.Characteristic.EvePowerConsumption.OutputConsumptionWatts,
+      this.platform.Characteristic.PowerConsumption.OutputConsumptionWatts,
       'Output Consumption, W',
       watt,
       CharacteristicType.OutputConsumptionInWatts
@@ -66,7 +66,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
         CharacteristicType.InputConsumptionInWatts
       ),
       this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.EvePowerConsumption.OutputConsumptionWatts,
+        this.platform.Characteristic.PowerConsumption.OutputConsumptionWatts,
         CharacteristicType.OutputConsumptionInWatts
       ),
       this.tryAddCustomCharacteristic(

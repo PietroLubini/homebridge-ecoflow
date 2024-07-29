@@ -13,7 +13,6 @@ import { Delta2Accessory } from './accessories/batteries/delta2Accessory.js';
 import { Delta2MaxAccessory } from './accessories/batteries/delta2maxAccessory.js';
 import { EcoFlowAccessory } from './accessories/ecoFlowAccessory.js';
 import { CustomCharacteristic } from './characteristics/CustomCharacteristic.js';
-import { EveCharacteristic } from './characteristics/EveCharacteristic.js';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config.js';
 import { Logger } from './helpers/logger.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
@@ -24,7 +23,7 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
  * parse the user config and discover/register accessories with Homebridge.
  */
 
-export type EcoFlowCharacteristic = typeof Characteristic & typeof EveCharacteristic & typeof CustomCharacteristic;
+export type EcoFlowCharacteristic = typeof Characteristic & typeof CustomCharacteristic;
 
 export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   private readonly ecoFlowConfig: EcoFlowConfig;
@@ -43,7 +42,6 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     this.Service = api.hap.Service;
     this.Characteristic = {
       ...api.hap.Characteristic,
-      ...EveCharacteristic,
       ...CustomCharacteristic,
     } as unknown as EcoFlowCharacteristic;
 
