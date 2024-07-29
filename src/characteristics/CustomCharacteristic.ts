@@ -5,9 +5,9 @@ export class BatteryLevel extends Characteristic {
   public static readonly UUID: string = 'B6A95625-7EDF-49E0-B3BD-4BDF89CD1FE7';
   constructor() {
     super('BatteryLevel', BatteryLevel.UUID, {
-      description: 'Battery level for usage in conditions of Automations',
+      description: '"Battery Level, %" for usage in conditions of Automations',
       format: Formats.FLOAT,
-      perms: [Perms.NOTIFY, Perms.PAIRED_READ],
+      perms: [Perms.NOTIFY],
       minValue: 0,
       maxValue: 100,
       minStep: 1,
