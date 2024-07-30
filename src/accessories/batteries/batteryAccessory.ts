@@ -2,7 +2,7 @@ import { Logging, PlatformAccessory } from 'homebridge';
 import { MqttMessageType, MqttQuotaMessage, MqttQuotaMessageWithParams } from '../../apis/ecoFlowMqttApi.js';
 import { DeviceConfig } from '../../config.js';
 import { EcoFlowHomebridgePlatform } from '../../platform.js';
-import { BatteryService } from '../../services/batteryService.js';
+import { BatteryStatusService } from '../../services/batteryStatusService.js';
 import { OutletAcService } from '../../services/outletAcService.js';
 import { OutletCarService } from '../../services/outletCarService.js';
 import { OutletUsbService } from '../../services/outletUsbService.js';
@@ -10,14 +10,14 @@ import { ServiceBase } from '../../services/serviceBase.js';
 import { EcoFlowAccessoryWithQuota } from '../ecoFlowAccessory.js';
 
 export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<BatteryAllQuotaData> {
-  private readonly batteryService: BatteryService;
+  private readonly batteryService: BatteryStatusService;
   private readonly outletUsbService: OutletUsbService;
   private readonly outletAcService: OutletAcService<BatteryAllQuotaData>;
   private readonly outletCarService: OutletCarService;
 
   constructor(platform: EcoFlowHomebridgePlatform, accessory: PlatformAccessory, config: DeviceConfig, log: Logging) {
     super(platform, accessory, config, log);
-    this.batteryService = new BatteryService(this);
+    this.batteryService = new BatteryStatusService(this);
     this.outletUsbService = new OutletUsbService(this);
     this.outletAcService = new OutletAcService(this);
     this.outletCarService = new OutletCarService(this);
@@ -80,18 +80,24 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
     if (params.f32ShowSoc !== undefined) {
       this.batteryService!.updateStatusLowBattery(params.f32ShowSoc);
       this.batteryService!.updateBatteryLevel(params.f32ShowSoc);
+      this.outletAcService!.updateBatteryLevel(params.f32ShowSoc);
+      this.outletUsbService!.updateBatteryLevel(params.f32ShowSoc);
+      this.outletCarService!.updateBatteryLevel(params.f32ShowSoc);
     }
   }
 
   private updateInvValues(params: InvStatus): void {
     if (params.inputWatts !== undefined) {
       this.batteryService!.updateChargingState(params.inputWatts);
+      this.outletAcService!.updateInputConsumption(params.inputWatts);
+      this.outletUsbService!.updateInputConsumption(params.inputWatts);
+      this.outletCarService!.updateInputConsumption(params.inputWatts);
     }
     if (params.cfgAcEnabled !== undefined) {
       this.outletAcService!.updateState(params.cfgAcEnabled);
     }
     if (params.outputWatts !== undefined) {
-      this.outletAcService!.updateInUse(params.outputWatts > 0);
+      this.outletAcService!.updateOutputConsumption(params.outputWatts);
     }
   }
 
@@ -100,7 +106,7 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
       this.outletCarService!.updateState(params.carState);
     }
     if (params.carWatts !== undefined) {
-      this.outletCarService!.updateInUse(params.carWatts > 0);
+      this.outletCarService!.updateOutputConsumption(params.carWatts);
     }
     if (params.dcOutState !== undefined) {
       this.outletUsbService!.updateState(params.dcOutState);
@@ -121,7 +127,7 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
         params.typec1Watts,
         params.typec2Watts
       );
-      this.outletUsbService!.updateInUse(usbWatts > 0);
+      this.outletUsbService!.updateOutputConsumption(usbWatts);
     }
   }
 
@@ -144,10 +150,12 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
   }
 }
 
+// Battery management system status
 interface BmsStatus {
   f32ShowSoc: number;
 }
 
+// AC invertor status
 interface InvStatusAc {
   outputWatts?: number;
   cfgAcEnabled?: boolean;
@@ -156,6 +164,7 @@ interface InvStatusAc {
   cfgAcOutVol?: number;
 }
 
+// Invertor status
 interface InvStatus extends InvStatusAc {
   inputWatts: number;
 }

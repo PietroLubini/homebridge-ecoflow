@@ -16,32 +16,32 @@ export class Logger {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public info(message: string, ...parameters: any[]): void {
-    this.logger.info(this.wrapMessage(message), parameters);
+    this.logger.info(this.wrapMessage(message), ...parameters);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public success(message: string, ...parameters: any[]): void {
-    this.logger.success(this.wrapMessage(message), parameters);
+    this.logger.success(this.wrapMessage(message), ...parameters);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public warn(message: string, ...parameters: any[]): void {
-    this.logger.warn(this.wrapMessage(message), parameters);
+    this.logger.warn(this.wrapMessage(message), ...parameters);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public error(message: string, ...parameters: any[]): void {
-    this.logger.error(this.wrapMessage(message), parameters);
+    this.logger.error(this.wrapMessage(message), ...parameters);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public debug(message: string, ...parameters: any[]): void {
-    this.logger.debug(this.wrapMessage(message), parameters);
+    this.logger.debug(this.wrapMessage(message), ...parameters);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public log(level: LogLevel, message: string, ...parameters: any[]): void {
-    this.logger.log(level, this.wrapMessage(message), parameters);
+    this.logger.log(level, this.wrapMessage(message), ...parameters);
   }
 
   private wrapMessage(message: string): string {

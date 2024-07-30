@@ -107,6 +107,9 @@ export abstract class EcoFlowAccessory {
         this.log.info('Removing obsolete service from accessory:', service.displayName);
         this.accessory.removeService(service);
       });
+    this.services
+      .filter(service => this.accessory.services.includes(service.service))
+      .forEach(service => service.cleanupCharacteristics());
   }
 
   private async connectMqtt(): Promise<void> {

@@ -14,4 +14,15 @@ export interface DeviceConfig extends AccessoryConfig {
   serialNumber: string;
   accessKey: string;
   secretKey: string;
+  battery?: BatteryDeviceConfig;
+}
+
+export interface BatteryDeviceConfig {
+  additionalCharacteristics: AdditionalBatteryCharacteristicType[];
+}
+
+export enum AdditionalBatteryCharacteristicType {
+  BatteryLevel = 'Battery Level, %',
+  InputConsumptionInWatts = 'Input Consumption, W',
+  OutputConsumptionInWatts = 'Output Consumption, W',
 }

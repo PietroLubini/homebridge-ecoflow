@@ -64,6 +64,37 @@ Example configuration:
 }
 ```
 
+### Battery-specific Configuration
+
+If `devices`.`model` is one of [`Delta 2`, `Delta 2 Max`] it is possible to set turn on/off additional characteristics:
+
+- Input Consumption, W
+- Output Consumption, W
+- Battery Level, %
+
+```js
+{
+  ...
+  "devices": [
+    {
+      ...,
+      "model": "Delta 2 Max",
+      "battery": {
+        "additionalCharacteristics": [
+          "Battery Level, %",
+          "Input Consumption, W",
+          "Output Consumption, W"
+        ]
+      }
+    }
+  ],
+}
+```
+
+The characteristics could be used as conditions in HomeKit Automation that uses Shortcuts:
+
+<img src="docs/images/BatteryAdditionalCharacteristics.jpg" alt="Battery Additional Characteristics" width="300">
+
 ### AccessKey and SecretKey
 
 For the plugin to work EcoFlow account's `AccessKey` and `SecretKey` is required. To retrieve them

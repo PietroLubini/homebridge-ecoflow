@@ -90,7 +90,6 @@ export class EcoFlowHttpApi {
     this.log.debug('Acquire certificate for MQTT connection');
     const response = await this.execute<CmdResponseWithData<AcquireCertificateData>>(CertificatePath, HttpMethod.Get);
     if (!response.failed) {
-      this.log.debug('Certificate data:', response.data);
       return response.data;
     }
     return null;
