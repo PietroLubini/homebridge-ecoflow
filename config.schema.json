@@ -54,7 +54,7 @@
               "properties": {
                 "additionalCharacteristics": {
                   "title": "Additional characteristics",
-                  "description": "List of additional characteristics to be added for battery",
+                  "description": "List of additional characteristics for battery",
                   "type": "array",
                   "uniqueItems": true,
                   "items": {
