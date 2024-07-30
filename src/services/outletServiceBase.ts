@@ -1,6 +1,6 @@
 import { Characteristic, CharacteristicValue, Service, WithUUID } from 'homebridge';
 import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory.js';
-import { CustomBatteryCharacteristicType as CharacteristicType } from '../config.js';
+import { AdditionalBatteryCharacteristicType as CharacteristicType } from '../config.js';
 import { ServiceBase } from './serviceBase.js';
 
 export interface MqttSetEnabledMessageParams {
@@ -40,7 +40,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
 
   public updateBatteryLevel(batteryLevel: number): void {
     this.updateCustomCharacteristic(
-      this.platform.Characteristic.Battery.BatteryLevel,
+      this.platform.Characteristic.BatteryLevel,
       'Battery Level, %',
       batteryLevel,
       CharacteristicType.BatteryLevel
@@ -69,10 +69,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
         this.platform.Characteristic.PowerConsumption.OutputConsumptionWatts,
         CharacteristicType.OutputConsumptionInWatts
       ),
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.Battery.BatteryLevel,
-        CharacteristicType.BatteryLevel
-      ),
+      this.tryAddCustomCharacteristic(this.platform.Characteristic.BatteryLevel, CharacteristicType.BatteryLevel),
     ];
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.serviceName);
 
@@ -102,7 +99,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
     characteristic: WithUUID<{ new (): Characteristic }>,
     characteristicType: CharacteristicType
   ): Characteristic | null {
-    if (this.ecoFlowAccessory.config.battery?.customCharacteristics.includes(characteristicType)) {
+    if (this.ecoFlowAccessory.config.battery?.additionalCharacteristics?.includes(characteristicType)) {
       return this.addCharacteristic(characteristic);
     }
     return null;
@@ -114,7 +111,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
     value: CharacteristicValue,
     characteristicType: CharacteristicType
   ): void {
-    if (this.ecoFlowAccessory.config.battery?.customCharacteristics.includes(characteristicType)) {
+    if (this.ecoFlowAccessory.config.battery?.additionalCharacteristics?.includes(characteristicType)) {
       super.updateCharacteristic(characteristic, name, value);
     }
   }

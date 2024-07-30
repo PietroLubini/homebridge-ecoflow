@@ -52,9 +52,9 @@
               "title": "Battery Settings",
               "type": "object",
               "properties": {
-                "customCharacteristics": {
-                  "title": "Custom Characteristics",
-                  "description": "List of custom characteristics to be added for battery",
+                "additionalCharacteristics": {
+                  "title": "Additional characteristics",
+                  "description": "List of additional characteristics to be added for battery",
                   "type": "array",
                   "uniqueItems": true,
                   "items": {

@@ -18,10 +18,10 @@ export interface DeviceConfig extends AccessoryConfig {
 }
 
 export interface BatteryDeviceConfig {
-  customCharacteristics: CustomBatteryCharacteristicType[];
+  additionalCharacteristics: AdditionalBatteryCharacteristicType[];
 }
 
-export enum CustomBatteryCharacteristicType {
+export enum AdditionalBatteryCharacteristicType {
   InputConsumptionInWatts = 'Input Consumption, W',
   OutputConsumptionInWatts = 'Output Consumption, W',
   BatteryLevel = 'Battery Level, %',
