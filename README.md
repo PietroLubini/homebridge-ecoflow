@@ -81,9 +81,9 @@ If `devices`.`model` is one of [`Delta 2`, `Delta 2 Max`] it is possible to set 
       "model": "Delta 2 Max",
       "battery": {
         "additionalCharacteristics": [
+          "Battery Level, %",
           "Input Consumption, W",
-          "Output Consumption, W",
-          "Battery Level, %"
+          "Output Consumption, W"
         ]
       }
     }

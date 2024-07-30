@@ -60,7 +60,7 @@
                   "items": {
                     "title": "Characteristic",
                     "type": "string",
-                    "enum": ["Input Consumption, W", "Output Consumption, W", "Battery Level, %"]
+                    "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W"]
                   }
                 }
               }
