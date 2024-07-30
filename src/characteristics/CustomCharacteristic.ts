@@ -25,7 +25,6 @@ export class InputConsumptionWatt extends Characteristic {
       format: Formats.FLOAT,
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       minValue: 0,
-      maxValue: 50000,
       minStep: 1,
       unit: Units.CELSIUS, // To allow setting numeric value for conditions in ShortCuts
     });
@@ -43,7 +42,7 @@ export class OutputConsumptionWatt extends Characteristic {
       perms: [Perms.NOTIFY, Perms.PAIRED_READ],
       unit: Units.CELSIUS, // To allow setting numeric value for conditions in ShortCuts
       minValue: 0,
-      maxValue: 50000,
+      minStep: 1,
     });
     this.value = this.getDefaultValue();
   }
