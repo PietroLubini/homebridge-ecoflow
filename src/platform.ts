@@ -2,6 +2,7 @@ import {
   API,
   Characteristic,
   DynamicPlatformPlugin,
+  HAP,
   Logging,
   PlatformAccessory,
   PlatformConfig,
@@ -12,7 +13,11 @@ import {
 import { Delta2Accessory } from './accessories/batteries/delta2Accessory.js';
 import { Delta2MaxAccessory } from './accessories/batteries/delta2maxAccessory.js';
 import { EcoFlowAccessory } from './accessories/ecoFlowAccessory.js';
-import { CustomCharacteristic } from './characteristics/CustomCharacteristic.js';
+import {
+  CustomCharacteristics,
+  InputConsumptionWattFactory,
+  OutputConsumptionWattFactory,
+} from './characteristics/CustomCharacteristic.js';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config.js';
 import { Logger } from './helpers/logger.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
@@ -23,7 +28,7 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
  * parse the user config and discover/register accessories with Homebridge.
  */
 
-export type EcoFlowCharacteristic = typeof Characteristic & typeof CustomCharacteristic;
+export type EcoFlowCharacteristic = typeof Characteristic & typeof CustomCharacteristics;
 
 export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   private readonly ecoFlowConfig: EcoFlowConfig;
@@ -38,11 +43,12 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     public readonly config: PlatformConfig,
     public readonly api: API
   ) {
+    EcoFlowHomebridgePlatform.InitCustomCharacteristics(api.hap);
     this.ecoFlowConfig = this.config as EcoFlowConfig;
     this.Service = api.hap.Service;
     this.Characteristic = {
       ...api.hap.Characteristic,
-      ...CustomCharacteristic,
+      ...CustomCharacteristics,
     } as unknown as EcoFlowCharacteristic;
 
     this.commonLog.debug('Finished initializing platform:', this.config.platform);
@@ -61,6 +67,11 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       this.commonLog.debug('Executed didFinishLaunching callback');
       this.registerDevices();
     });
+  }
+
+  private static InitCustomCharacteristics(hap: HAP): void {
+    CustomCharacteristics.PowerConsumption.InputConsumptionWatts = InputConsumptionWattFactory(hap);
+    CustomCharacteristics.PowerConsumption.OutputConsumptionWatts = OutputConsumptionWattFactory(hap);
   }
 
   /**
