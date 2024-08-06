@@ -54,6 +54,7 @@ Example configuration:
           "name": "Battery",
           "model": "Delta 2 Max",
           "serialNumber": "R123ABCDEGHI321",
+          "location": "EU",
           "accessKey": "IROcwtlejtHj4qY4MRgCZW0CxoCdPVs3",
           "secretKey": "yBwYgZWqNnAlULKmF1Qrydy2Iheexj22"
         }
