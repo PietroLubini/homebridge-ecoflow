@@ -141,7 +141,9 @@ export abstract class EcoFlowAccessoryWithQuota<TAllQuotaData> extends EcoFlowAc
       this._quota = await this.httpApi.getAllQuotas<TAllQuotaData>();
     }
     await super.initialize();
-    this.updateInitialValues(this._quota);
+    if (this._quota) {
+      this.updateInitialValues(this._quota);
+    }
   }
 
   public get quota(): TAllQuotaData {

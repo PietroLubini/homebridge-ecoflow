@@ -72,7 +72,7 @@ export class EcoFlowHttpApi {
     return {} as TData;
   }
 
-  public async getAllQuotas<TData>(): Promise<TData> {
+  public async getAllQuotas<TData>(): Promise<TData | null> {
     this.log.debug('Get all quotas');
     const requestCmd: GetCmdRequest = {
       sn: this.config.serialNumber,
@@ -83,7 +83,7 @@ export class EcoFlowHttpApi {
       this.log.debug('All quotas:', data);
       return data;
     }
-    return {} as TData;
+    return null;
   }
 
   public async acquireCertificate(): Promise<AcquireCertificateData | null> {
