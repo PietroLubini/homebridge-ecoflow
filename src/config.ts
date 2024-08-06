@@ -9,9 +9,15 @@ export enum DeviceModel {
   Delta2 = 'Delta 2',
 }
 
+export enum LocationType {
+  EU = 'EU',
+  US = 'US',
+}
+
 export interface DeviceConfig extends AccessoryConfig {
   model: DeviceModel;
   serialNumber: string;
+  location: LocationType;
   accessKey: string;
   secretKey: string;
   battery?: BatteryDeviceConfig;

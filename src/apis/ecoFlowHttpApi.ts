@@ -1,8 +1,9 @@
 import * as crypto from 'crypto';
 import { Logging } from 'homebridge';
-import { DeviceConfig } from '../config.js';
+import { DeviceConfig, LocationType } from '../config.js';
 
-const ApiUrl = 'https://api-e.ecoflow.com';
+const ApiUrlUs = 'https://api-a.ecoflow.com';
+const ApiUrlEu = 'https://api-e.ecoflow.com';
 const QuotaPath = '/iot-open/sign/device/quota';
 const QuotaAllPath = '/iot-open/sign/device/quota/all';
 const CertificatePath = '/iot-open/sign/certification';
@@ -50,10 +51,13 @@ interface Dict {
 }
 
 export class EcoFlowHttpApi {
+  private readonly apiUrl: string;
   constructor(
     private readonly config: DeviceConfig,
     private readonly log: Logging
-  ) {}
+  ) {
+    this.apiUrl = this.config.location === LocationType.US ? ApiUrlUs : ApiUrlEu;
+  }
 
   public async getQuotas<TData>(quotas: string[]): Promise<TData> {
     this.log.debug('Get quotas:', quotas);
@@ -72,7 +76,7 @@ export class EcoFlowHttpApi {
     return {} as TData;
   }
 
-  public async getAllQuotas<TData>(): Promise<TData> {
+  public async getAllQuotas<TData>(): Promise<TData | null> {
     this.log.debug('Get all quotas');
     const requestCmd: GetCmdRequest = {
       sn: this.config.serialNumber,
@@ -83,7 +87,7 @@ export class EcoFlowHttpApi {
       this.log.debug('All quotas:', data);
       return data;
     }
-    return {} as TData;
+    return null;
   }
 
   public async acquireCertificate(): Promise<AcquireCertificateData | null> {
@@ -101,7 +105,7 @@ export class EcoFlowHttpApi {
     queryParameters: object | null = null,
     body: object | null = null
   ): Promise<TResponse> {
-    const url = new URL(relativeUrl, ApiUrl);
+    const url = new URL(relativeUrl, this.apiUrl);
     const accessKey = this.config.accessKey;
     const nonce = this.getNonce();
     const timestamp = Date.now();

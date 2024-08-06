@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Ecoflow",
   "name": "@pietrolubini/homebridge-ecoflow",
-  "version": "1.2.0-beta",
+  "version": "1.2.1-beta",
   "description": "Homebridge plugin for EcoFlow devices",
   "license": "MIT",
   "author": "PietroLubini",

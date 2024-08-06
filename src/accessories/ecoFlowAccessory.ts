@@ -79,6 +79,10 @@ export abstract class EcoFlowAccessory {
   protected processSetReplyMessage(message: MqttSetReplyMessage): void {
     const messageKey = this.getMqttSetMessageKey(message);
     const command = this.setReplies[messageKey];
+    if (!command) {
+      this.log.debug('Received "SetReply" response was sent from another instance of homebridge. Ignore it:', message);
+      return;
+    }
     delete this.setReplies[messageKey];
     if (message.data.ack) {
       this.log.warn('Failed to set a value. Reverts value back for:', command.requestMessage.operateType);
@@ -137,7 +141,9 @@ export abstract class EcoFlowAccessoryWithQuota<TAllQuotaData> extends EcoFlowAc
       this._quota = await this.httpApi.getAllQuotas<TAllQuotaData>();
     }
     await super.initialize();
-    this.updateInitialValues(this._quota);
+    if (this._quota) {
+      this.updateInitialValues(this._quota);
+    }
   }
 
   public get quota(): TAllQuotaData {

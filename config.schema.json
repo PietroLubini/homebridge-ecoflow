@@ -36,6 +36,14 @@
               "required": true,
               "description": "Serial number of the EcoFlow device"
             },
+            "location": {
+              "title": "Location",
+              "type": "string",
+              "default": "EU",
+              "required": true,
+              "enum": ["EU", "US"],
+              "description": "API host depends on device's location (EU: api-e.ecoflow.com, US: api-a.ecoflow.com)"
+            },
             "accessKey": {
               "title": "Access Key",
               "type": "string",
