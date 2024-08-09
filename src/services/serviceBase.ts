@@ -1,6 +1,6 @@
+import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic, CharacteristicValue, Logging, Service, WithUUID } from 'homebridge';
-import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory';
-import { EcoFlowHomebridgePlatform } from '../platform';
 
 export abstract class ServiceBase {
   protected readonly log: Logging;

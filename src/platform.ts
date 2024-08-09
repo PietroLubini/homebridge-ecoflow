@@ -10,17 +10,17 @@ import {
   UnknownContext,
 } from 'homebridge';
 
-import { Delta2Accessory } from './accessories/batteries/delta2Accessory';
-import { Delta2MaxAccessory } from './accessories/batteries/delta2maxAccessory';
-import { EcoFlowAccessory } from './accessories/ecoFlowAccessory';
+import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2Accessory';
+import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2maxAccessory';
+import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
 import {
   CustomCharacteristics,
   InputConsumptionWattFactory,
   OutputConsumptionWattFactory,
-} from './characteristics/customCharacteristic';
-import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config';
-import { Logger } from './helpers/logger';
-import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
+} from '@ecoflow/characteristics/customCharacteristic';
+import { DeviceConfig, DeviceModel, EcoFlowConfig } from '@ecoflow/config';
+import { Logger } from '@ecoflow/helpers/logger';
+import { PLATFORM_NAME, PLUGIN_NAME } from '@ecoflow/settings';
 
 /**
  * HomebridgePlatform

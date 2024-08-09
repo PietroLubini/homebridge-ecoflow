@@ -1,7 +1,8 @@
-import { API } from 'homebridge';
+require('module-alias/register');
 
-import { EcoFlowHomebridgePlatform } from './platform';
-import { PLATFORM_NAME } from './settings';
+import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
+import { PLATFORM_NAME } from '@ecoflow/settings';
+import { API } from 'homebridge';
 
 /**
  * This method registers the platform with Homebridge

@@ -1,5 +1,8 @@
+import {
+  InputConsumptionWattFactory,
+  OutputConsumptionWattFactory,
+} from '@ecoflow/characteristics/customCharacteristic';
 import { Formats, HAP, Perms, Units } from 'homebridge';
-import { InputConsumptionWattFactory, OutputConsumptionWattFactory } from './customCharacteristic';
 
 describe('customCharacteristic', () => {
   let hapMock: HAP;

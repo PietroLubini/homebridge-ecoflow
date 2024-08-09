@@ -1,6 +1,6 @@
+import { DeviceConfig, LocationType } from '@ecoflow/config';
 import * as crypto from 'crypto';
 import { Logging } from 'homebridge';
-import { DeviceConfig, LocationType } from '../config';
 
 const ApiUrlUs = 'https://api-a.ecoflow.com';
 const ApiUrlEu = 'https://api-e.ecoflow.com';

@@ -1,8 +1,8 @@
+import { AcquireCertificateData, EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
+import { MachineIdProvider } from '@ecoflow/helpers/machineId';
 import { Logging } from 'homebridge';
 import mqtt, { MqttClient } from 'mqtt';
 import { Subject } from 'rxjs';
-import { MachineIdProvider } from '../helpers/machineId';
-import { AcquireCertificateData, EcoFlowHttpApi } from './ecoFlowHttpApi';
 
 export enum MqttMessageType {
   PD = 'pdStatus',

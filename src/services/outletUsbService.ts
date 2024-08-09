@@ -1,5 +1,5 @@
-import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory';
-import { MqttSetEnabledMessageParams, OutletsServiceBase } from './outletServiceBase';
+import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { MqttSetEnabledMessageParams, OutletsServiceBase } from '@ecoflow/services/outletServiceBase';
 
 export class OutletUsbService extends OutletsServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessory) {

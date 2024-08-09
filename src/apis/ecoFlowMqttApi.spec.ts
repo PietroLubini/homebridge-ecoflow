@@ -1,6 +1,6 @@
+import { EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
+import { EcoFlowMqttApi } from '@ecoflow/apis/ecoFlowMqttApi';
 import { Logging } from 'homebridge';
-import { EcoFlowHttpApi } from './ecoFlowHttpApi';
-import { EcoFlowMqttApi } from './ecoFlowMqttApi';
 
 describe('EcoFlowMqttApi', () => {
   let httpApiMock: EcoFlowHttpApi;

@@ -19,10 +19,11 @@
   },
   "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint src/**/*.ts --max-warnings=0",
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "lint:fix": "eslint \"src/**/*.ts\" --max-warnings=0 --fix",
     "watch": "npm run build && npm link && nodemon",
-    "build": "rimraf ./dist && tsc",
-    "test": "jest",
+    "build": "rimraf ./dist && tsc -p tsconfig.build.json",
+    "test": "jest --forceExit",
     "test:cov": "jest --coverage",
     "test:ci": "jest --coverage --ci --testLocationInResults --reporters=default --reporters=jest-junit --coverageReporters=cobertura --forceExit",
     "prepublishOnly": "npm run lint && npm run build && npm run test:ci"
@@ -33,7 +34,11 @@
     "ecoflow",
     "delta 2 max"
   ],
+  "_moduleAliases": {
+    "@ecoflow": "dist"
+  },
   "dependencies": {
+    "module-alias": "^2.2.3",
     "mqtt": "^5.8.0",
     "node-cache": "^5.1.2",
     "node-machine-id": "^1.1.12",

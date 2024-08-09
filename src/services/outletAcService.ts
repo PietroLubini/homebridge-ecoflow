@@ -1,6 +1,6 @@
-import { BatteryAllQuotaData } from 'accessories/batteries/batteryAccessory';
-import { EcoFlowAccessoryWithQuota } from '../accessories/ecoFlowAccessory';
-import { MqttSetEnabledMessageParams, OutletsServiceBase } from './outletServiceBase';
+import { BatteryAllQuotaData } from '@ecoflow/accessories/batteries/batteryAccessory';
+import { EcoFlowAccessoryWithQuota } from '@ecoflow/accessories/ecoFlowAccessory';
+import { MqttSetEnabledMessageParams, OutletsServiceBase } from '@ecoflow/services/outletServiceBase';
 
 export class OutletAcService<TAllQuotaData extends BatteryAllQuotaData> extends OutletsServiceBase {
   constructor(protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuota<TAllQuotaData>) {

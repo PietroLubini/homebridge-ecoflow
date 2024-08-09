@@ -1,7 +1,7 @@
+import { MachineIdProvider } from '@ecoflow/helpers/machineId';
 import { Logging } from 'homebridge';
 import { machineId } from 'node-machine-id';
 import { v4 as uuidV4 } from 'uuid';
-import { MachineIdProvider } from './machineId';
 
 jest.mock('node-machine-id', () => {
   return {

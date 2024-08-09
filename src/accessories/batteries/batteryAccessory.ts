@@ -1,13 +1,13 @@
+import { EcoFlowAccessoryWithQuota } from '@ecoflow/accessories/ecoFlowAccessory';
+import { MqttMessageType, MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/ecoFlowMqttApi';
+import { DeviceConfig } from '@ecoflow/config';
+import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
+import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
+import { OutletAcService } from '@ecoflow/services/outletAcService';
+import { OutletCarService } from '@ecoflow/services/outletCarService';
+import { OutletUsbService } from '@ecoflow/services/outletUsbService';
+import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
-import { MqttMessageType, MqttQuotaMessage, MqttQuotaMessageWithParams } from '../../apis/ecoFlowMqttApi';
-import { DeviceConfig } from '../../config';
-import { EcoFlowHomebridgePlatform } from '../../platform';
-import { BatteryStatusService } from '../../services/batteryStatusService';
-import { OutletAcService } from '../../services/outletAcService';
-import { OutletCarService } from '../../services/outletCarService';
-import { OutletUsbService } from '../../services/outletUsbService';
-import { ServiceBase } from '../../services/serviceBase';
-import { EcoFlowAccessoryWithQuota } from '../ecoFlowAccessory';
 
 export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<BatteryAllQuotaData> {
   private readonly batteryService: BatteryStatusService;

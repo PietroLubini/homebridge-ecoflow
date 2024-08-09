@@ -1,5 +1,5 @@
+import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic, Service } from 'homebridge';
-import { ServiceBase } from './serviceBase';
 
 export class AccessoryInformationService extends ServiceBase {
   protected override createService(): Service {

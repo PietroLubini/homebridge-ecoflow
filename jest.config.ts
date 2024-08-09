@@ -3,12 +3,15 @@ import type { Config } from '@jest/types';
 const config: Config.InitialOptions = {
   rootDir: '',
   preset: 'ts-jest',
-  moduleDirectories: ['node_modules'],
+  moduleDirectories: ['node_modules', '<rootDir>/src'],
   moduleFileExtensions: ['js', 'json', 'ts'],
   testRegex: '.*\\.spec\\.ts$',
   coveragePathIgnorePatterns: [],
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
+  },
+  moduleNameMapper: {
+    '^@ecoflow/(.*)$': '<rootDir>/src/$1',
   },
   collectCoverageFrom: ['src/**/*.(t|j)s'],
   coverageDirectory: 'coverage',

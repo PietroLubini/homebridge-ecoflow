@@ -4,6 +4,12 @@
     "source.fixAll.eslint": "explicit"
   },
   "files.eol": "\n",
+  "files.exclude": {
+    "**/*.js": { "when": "$(basename).ts" },
+    "**/*.d.ts": { "when": "$(basename).ts" },
+    "**/*.js.map": true,
+    "**/node_modules": true
+  },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,

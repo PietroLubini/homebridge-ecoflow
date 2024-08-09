@@ -1,17 +1,17 @@
-import { Logging, PlatformAccessory } from 'homebridge';
-import { Subscription } from 'rxjs';
-import { EcoFlowHttpApi } from '../apis/ecoFlowHttpApi';
+import { EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
 import {
   EcoFlowMqttApi,
   MqttQuotaMessage,
   MqttSetMessage,
   MqttSetMessageWithParams,
   MqttSetReplyMessage,
-} from '../apis/ecoFlowMqttApi';
-import { DeviceConfig } from '../config';
-import { EcoFlowHomebridgePlatform } from '../platform';
-import { AccessoryInformationService } from '../services/accessoryInformationService';
-import { ServiceBase } from '../services/serviceBase';
+} from '@ecoflow/apis/ecoFlowMqttApi';
+import { DeviceConfig } from '@ecoflow/config';
+import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
+import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
+import { ServiceBase } from '@ecoflow/services/serviceBase';
+import { Logging, PlatformAccessory } from 'homebridge';
+import { Subscription } from 'rxjs';
 
 export abstract class EcoFlowAccessory {
   protected readonly mqttApi: EcoFlowMqttApi;
