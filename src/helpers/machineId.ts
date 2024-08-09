@@ -1,15 +1,17 @@
 import { Logging } from 'homebridge';
-import { createRequire } from 'module';
+import { machineId } from 'node-machine-id';
 import { v4 as uuidV4 } from 'uuid';
-const require = createRequire(import.meta.url);
-const { machineId } = require('./machineIdHelper.cjs');
 
-export async function getMachineId(log: Logging): Promise<string> {
-  try {
-    const id = await machineId();
-    return id;
-  } catch (error) {
-    log.warn('Can not get Machine ID. Using UUID instead', error);
-    return uuidV4();
+export class MachineIdProvider {
+  constructor(private readonly log: Logging) {}
+
+  public async getMachineId(): Promise<string> {
+    try {
+      const id = await machineId();
+      return id;
+    } catch (error) {
+      this.log.warn('Can not get Machine ID. Using UUID instead', error);
+      return uuidV4();
+    }
   }
 }

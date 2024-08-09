@@ -1,8 +1,8 @@
 import { Logging } from 'homebridge';
 import mqtt, { MqttClient } from 'mqtt';
 import { Subject } from 'rxjs';
-import { getMachineId } from '../helpers/machineId.js';
-import { AcquireCertificateData, EcoFlowHttpApi } from './ecoFlowHttpApi.js';
+import { MachineIdProvider } from '../helpers/machineId';
+import { AcquireCertificateData, EcoFlowHttpApi } from './ecoFlowHttpApi';
 
 export enum MqttMessageType {
   PD = 'pdStatus',
@@ -44,6 +44,7 @@ export enum MqttTopicType {
 }
 
 export class EcoFlowMqttApi {
+  private readonly machineIdProvider: MachineIdProvider;
   private client: MqttClient | null = null;
   private certificateData: AcquireCertificateData | null = null;
   private readonly quotaSubject: Subject<MqttQuotaMessage> = new Subject<MqttQuotaMessage>();
@@ -54,7 +55,9 @@ export class EcoFlowMqttApi {
   constructor(
     private httpApi: EcoFlowHttpApi,
     private log: Logging
-  ) {}
+  ) {
+    this.machineIdProvider = new MachineIdProvider(log);
+  }
 
   public async destroy(): Promise<void> {
     await this.client?.unsubscribeAsync('#');
@@ -85,7 +88,7 @@ export class EcoFlowMqttApi {
     if (!this.client) {
       const certificateData = await this.acquireCertificate();
       if (certificateData) {
-        const clientId = `HOMEBRIDGE_${(await getMachineId(this.log)).toUpperCase()}`;
+        const clientId = `HOMEBRIDGE_${(await this.machineIdProvider.getMachineId()).toUpperCase()}`;
         this.client = await mqtt.connectAsync(
           `${certificateData.protocol}://${certificateData.url}:${certificateData.port}`,
           {

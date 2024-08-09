@@ -1,7 +1,7 @@
 import { Characteristic, CharacteristicValue, Service, WithUUID } from 'homebridge';
-import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory.js';
-import { AdditionalBatteryCharacteristicType as CharacteristicType } from '../config.js';
-import { ServiceBase } from './serviceBase.js';
+import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory';
+import { AdditionalBatteryCharacteristicType as CharacteristicType } from '../config';
+import { ServiceBase } from './serviceBase';
 
 export interface MqttSetEnabledMessageParams {
   enabled: number;

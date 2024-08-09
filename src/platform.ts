@@ -10,17 +10,17 @@ import {
   UnknownContext,
 } from 'homebridge';
 
-import { Delta2Accessory } from './accessories/batteries/delta2Accessory.js';
-import { Delta2MaxAccessory } from './accessories/batteries/delta2maxAccessory.js';
-import { EcoFlowAccessory } from './accessories/ecoFlowAccessory.js';
+import { Delta2Accessory } from './accessories/batteries/delta2Accessory';
+import { Delta2MaxAccessory } from './accessories/batteries/delta2maxAccessory';
+import { EcoFlowAccessory } from './accessories/ecoFlowAccessory';
 import {
   CustomCharacteristics,
   InputConsumptionWattFactory,
   OutputConsumptionWattFactory,
-} from './characteristics/CustomCharacteristic.js';
-import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config.js';
-import { Logger } from './helpers/logger.js';
-import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
+} from './characteristics/customCharacteristic';
+import { DeviceConfig, DeviceModel, EcoFlowConfig } from './config';
+import { Logger } from './helpers/logger';
+import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 
 /**
  * HomebridgePlatform

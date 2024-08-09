@@ -123,3 +123,6 @@ dist
 
 # Webstorm
 .idea
+
+# Tests
+junit.xml

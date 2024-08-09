@@ -11,5 +11,8 @@
   "typescript.validate.enable": true,
   "typescript.preferences.importModuleSpecifier": "shortest",
   "git.mergeEditor": true,
-  "git.inputValidationSubjectLength": 70
+  "git.inputValidationSubjectLength": 70,
+  "jest.autoRun": {
+    "watch": false
+  }
 }

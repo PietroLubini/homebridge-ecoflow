@@ -1,8 +1,5 @@
-import fs from 'fs';
 import { Characteristic, Service } from 'homebridge';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { ServiceBase } from './serviceBase.js';
+import { ServiceBase } from './serviceBase';
 
 export class AccessoryInformationService extends ServiceBase {
   protected override createService(): Service {
@@ -27,10 +24,12 @@ export class AccessoryInformationService extends ServiceBase {
   }
 
   private getVersion(): string {
-    const filename = fileURLToPath(import.meta.url);
-    const dirname = path.dirname(filename);
-    const packageJsonPath = path.resolve(dirname, '../../package.json');
-    const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    return packageData?.version;
+    // TBD
+    // const filename = fileURLToPath(import.meta.url);
+    // const dirname = path.dirname(filename);
+    // const packageJsonPath = path.resolve(dirname, '../../package.json');
+    // const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+    // return packageData?.version;
+    return '123';
   }
 }
