@@ -69,7 +69,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     });
   }
 
-  private static InitCustomCharacteristics(hap: HAP): void {
+  public static InitCustomCharacteristics(hap: HAP): void {
     CustomCharacteristics.PowerConsumption.InputConsumptionWatts = InputConsumptionWattFactory(hap);
     CustomCharacteristics.PowerConsumption.OutputConsumptionWatts = OutputConsumptionWattFactory(hap);
   }

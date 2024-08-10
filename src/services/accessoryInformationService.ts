@@ -1,5 +1,9 @@
 import { ServiceBase } from '@ecoflow/services/serviceBase';
+import { readFileSync } from 'fs';
 import { Characteristic, Service } from 'homebridge';
+import { join } from 'path';
+
+const packageJsonPath = join(__dirname, '../../package.json');
 
 export class AccessoryInformationService extends ServiceBase {
   protected override createService(): Service {
@@ -24,12 +28,7 @@ export class AccessoryInformationService extends ServiceBase {
   }
 
   private getVersion(): string {
-    // TBD
-    // const filename = fileURLToPath(import.meta.url);
-    // const dirname = path.dirname(filename);
-    // const packageJsonPath = path.resolve(dirname, '../../package.json');
-    // const packageData = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    // return packageData?.version;
-    return '123';
+    const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+    return packageJson?.version;
   }
 }

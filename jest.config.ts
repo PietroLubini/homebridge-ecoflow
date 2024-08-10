@@ -6,7 +6,7 @@ const config: Config.InitialOptions = {
   moduleDirectories: ['node_modules', '<rootDir>/src'],
   moduleFileExtensions: ['js', 'json', 'ts'],
   testRegex: '.*\\.spec\\.ts$',
-  coveragePathIgnorePatterns: [],
+  coveragePathIgnorePatterns: ['src/helpers/tests/'],
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },

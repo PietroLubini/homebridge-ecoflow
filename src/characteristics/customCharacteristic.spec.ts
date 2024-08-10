@@ -5,7 +5,7 @@ import {
 import { Formats, HAP, Perms, Units } from 'homebridge';
 
 describe('customCharacteristic', () => {
-  let hapMock: HAP;
+  let hapMock: jest.Mocked<HAP>;
   const characteristicMock = jest.fn();
   const getDefaultValueMock = jest.fn();
 
@@ -13,7 +13,7 @@ describe('customCharacteristic', () => {
     characteristicMock.prototype.getDefaultValue = getDefaultValueMock;
     hapMock = {
       Characteristic: characteristicMock,
-    } as unknown as HAP;
+    } as unknown as jest.Mocked<HAP>;
   });
 
   describe('InputConsumptionWattFactory', () => {
