@@ -27,11 +27,27 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Lint the project
+      - name: Lint
         run: npm run lint
 
-      - name: Build the project
+      - name: Build
         run: npm run build
+
+      - name: Test and coverage
+        run: npm run test:ci
+
+      - name: Publish test results
+        if: succeededOrFailed()
+        uses: PublishTestResults@2
+        with:
+          testResultsFormat: JUnit
+          testResultsFiles: junit.xml
+
+      - name: Publish coverage
+        if: succeededOrFailed()
+        uses: PublishCodeCoverageResults@2
+        with:
+          summaryFileLocation: coverage/cobertura-coverage.xml
 
       - name: List, audit, fix outdated dependencies and build again
         run: |
