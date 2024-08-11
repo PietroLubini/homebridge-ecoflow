@@ -6,9 +6,9 @@ runs:
     - run: npm run test:ci
       shell: bash
 
-    # - uses: dorny/test-reporter@v1.9.1
-    #   if: success() || failure()
-    #   with:
-    #     name: Tests Report
-    #     path: junit.xml
-    #     reporter: jest-junit
+    - uses: dorny/test-reporter@v1.9.1
+      if: (success() || failure())
+      with:
+        name: Tests Report
+        path: junit.xml
+        reporter: jest-junit
