@@ -33,7 +33,7 @@ jobs:
         run: npm run build
 
       - name: Test
-        uses: ./.github/actions/actions/test
+        uses: ./.github/actions/test
 
       - name: Test Coverage
         uses: ./.github/actions/test_coverage
