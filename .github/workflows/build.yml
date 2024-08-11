@@ -39,7 +39,7 @@ jobs:
         run: npm run build
 
       - name: Test
-        uses: npm run test:ci
+        run: npm run test:ci
 
       # - name: Test Coverage
       #   uses: ./.github/actions/test_coverage
