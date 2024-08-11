@@ -42,6 +42,7 @@ jobs:
         run: npm run test:ci
 
       - name: Test Coverage
+        if: success() || failure()
         uses: ./.github/actions/test_coverage
         with:
           coverage_file: ./coverage/report.json
