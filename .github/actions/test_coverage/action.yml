@@ -16,10 +16,10 @@ runs:
         prnumber: ${{ steps.getPrId.outputs.number }}
         skip-step: all
         coverage-file: ${{ inputs.coverage_file }}
-        test-script: npm run test
+        test-script: npx jest --forceExit
 
     - uses: willcaul/jest-github-action@v4
       with:
-        test-command: npm run test
+        test-command: npx jest --forceExit
       env:
         GITHUB_TOKEN: ${{ github.token }}
