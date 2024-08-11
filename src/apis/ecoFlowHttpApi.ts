@@ -59,7 +59,7 @@ export class EcoFlowHttpApi {
     this.apiUrl = this.config.location === LocationType.US ? ApiUrlUs : ApiUrlEu;
   }
 
-  public async getQuotas<TData>(quotas: string[]): Promise<TData> {
+  public async getQuotas<TData>(quotas: string[]): Promise<TData | null> {
     this.log.debug('Get quotas:', quotas);
     const requestCmd: GetQuotasCmdRequest = {
       sn: this.config.serialNumber,
@@ -73,7 +73,7 @@ export class EcoFlowHttpApi {
       this.log.debug('Quotas:', data);
       return data;
     }
-    return {} as TData;
+    return null;
   }
 
   public async getAllQuotas<TData>(): Promise<TData | null> {
@@ -102,19 +102,16 @@ export class EcoFlowHttpApi {
   protected async execute<TResponse extends CmdResponse>(
     relativeUrl: string,
     method: HttpMethod,
-    queryParameters: object | null = null,
-    body: object | null = null
+    queryParameters: object | null = null
   ): Promise<TResponse> {
     const url = new URL(relativeUrl, this.apiUrl);
     const accessKey = this.config.accessKey;
     const nonce = this.getNonce();
     const timestamp = Date.now();
     const queryParams = this.composeSignMessage(queryParameters);
-    let params = queryParams ? `${queryParams}&` : '';
-    const bodyParamsMessage = this.composeSignMessage(body);
-    params = bodyParamsMessage ? `${params}${bodyParamsMessage}&` : params;
+    const params = queryParams ? `${queryParams}&` : '';
     const message = `${params}accessKey=${accessKey}&nonce=${nonce}&timestamp=${timestamp}`;
-    const requestUrl = queryParams ? `${url}?${queryParams}` : url;
+    const requestUrl = queryParams ? `${url}?${queryParams}` : url.toString();
 
     const headers: HeadersInit = {
       accessKey,
@@ -123,10 +120,6 @@ export class EcoFlowHttpApi {
       sign: this.createHmacSha256(this.config.secretKey, message),
     };
     const options: RequestInit = { method };
-    if (body) {
-      options.body = JSON.stringify(body);
-      headers['Content-Type'] = 'application/json';
-    }
     options.headers = new Headers(headers);
 
     try {
@@ -135,7 +128,7 @@ export class EcoFlowHttpApi {
       if (result.code !== '0') {
         throw Error(
           `Request to "${requestUrl}" with options: "${this.stringifyOptions(options)}" is failed
-          [${response.status}]: ${response.statusText}; result: ${JSON.stringify(result)}`
+[${response.status}]: ${response.statusText}; result: ${JSON.stringify(result)}`
         );
       }
       return result;
