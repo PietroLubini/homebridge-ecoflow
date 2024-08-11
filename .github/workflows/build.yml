@@ -13,7 +13,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # the Node.js versions to build on
         node-version: [18.x, 20.x]
 
     steps:
@@ -33,21 +32,13 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Test and coverage
-        run: npm run test:ci
+      - name: Test
+        uses: ./.github/actions/actions/test
 
-      - name: Publish test results
-        if: succeededOrFailed()
-        uses: PublishTestResults@2
+      - name: Test Coverage
+        uses: ./.github/actions/test_coverage
         with:
-          testResultsFormat: JUnit
-          testResultsFiles: junit.xml
-
-      - name: Publish coverage
-        if: succeededOrFailed()
-        uses: PublishCodeCoverageResults@2
-        with:
-          summaryFileLocation: coverage/cobertura-coverage.xml
+          coverage_file: ./coverage/report.json
 
       - name: List, audit, fix outdated dependencies and build again
         run: |

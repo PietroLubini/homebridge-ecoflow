@@ -1,0 +1,25 @@
+name: TestCoverage
+description: Runs test coverage report
+inputs:
+  coverage_file:
+    description: Path to file for generated report.json file (bypasses running the test again)
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: jwalton/gh-find-current-pr@v1.3.3
+      id: getPrId
+
+    - uses: ArtiomTr/jest-coverage-report-action@v2.3.0
+      with:
+        prnumber: ${{ steps.getPrId.outputs.number }}
+        skip-step: all
+        coverage-file: ${{ inputs.coverage_file }}
+        test-script: npm run test
+
+    - uses: willcaul/jest-github-action@v4
+      with:
+        test-command: npm run test
+      env:
+        GITHUB_TOKEN: ${{ github.token }}

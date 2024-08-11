@@ -1,0 +1,14 @@
+name: Test
+description: Runs test and report results
+runs:
+  using: 'composite'
+  steps:
+    - run: npm run test:ci
+      shell: bash
+
+    - uses: dorny/test-reporter@v1.9.1
+      if: success() || failure()
+      with:
+        name: Tests Report
+        path: junit.xml
+        reporter: jest-junit
