@@ -1,10 +1,16 @@
 name: Build
 
 on:
+  # Run workflow when PRs are merged into one of branch
   push:
-    branches:
-      - main
+    branches: [main, dev]
+
+  # Run workflow for all PRs where target branch is one of
   pull_request:
+    branches: [main, dev]
+
+  # Run workflow manually
+  workflow_dispatch:
 
 jobs:
   build:
@@ -33,7 +39,7 @@ jobs:
         run: npm run build
 
       - name: Test
-        uses: ./.github/actions/test
+        uses: npm run test:ci
 
       # - name: Test Coverage
       #   uses: ./.github/actions/test_coverage
