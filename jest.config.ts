@@ -1,20 +1,20 @@
 import type { Config } from '@jest/types';
 
 const config: Config.InitialOptions = {
-  rootDir: '',
+  rootDir: 'src',
   preset: 'ts-jest',
-  moduleDirectories: ['node_modules', '<rootDir>/src'],
+  moduleDirectories: ['node_modules', 'src'],
   moduleFileExtensions: ['js', 'json', 'ts'],
   testRegex: '.*\\.spec\\.ts$',
-  coveragePathIgnorePatterns: ['src/helpers/tests/'],
+  coveragePathIgnorePatterns: ['helpers/tests/'],
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
   moduleNameMapper: {
-    '^@ecoflow/(.*)$': '<rootDir>/src/$1',
+    '^@ecoflow/(.*)$': '<rootDir>/$1',
   },
   collectCoverageFrom: ['src/**/*.(t|j)s'],
-  coverageDirectory: 'coverage',
+  coverageDirectory: '../coverage',
   testEnvironment: 'node',
   verbose: true,
   coverageThreshold: {
