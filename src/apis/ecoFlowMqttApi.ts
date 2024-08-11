@@ -44,7 +44,6 @@ export enum MqttTopicType {
 }
 
 export class EcoFlowMqttApi {
-  private readonly machineIdProvider: MachineIdProvider;
   private client: MqttClient | null = null;
   private certificateData: AcquireCertificateData | null = null;
   private readonly quotaSubject: Subject<MqttQuotaMessage> = new Subject<MqttQuotaMessage>();
@@ -53,11 +52,10 @@ export class EcoFlowMqttApi {
   public readonly setReply$ = this.setReplySubject.asObservable();
 
   constructor(
-    private httpApi: EcoFlowHttpApi,
-    private log: Logging
-  ) {
-    this.machineIdProvider = new MachineIdProvider(log);
-  }
+    private readonly httpApi: EcoFlowHttpApi,
+    private readonly log: Logging,
+    private readonly machineIdProvider: MachineIdProvider
+  ) {}
 
   public async destroy(): Promise<void> {
     await this.client?.unsubscribeAsync('#');
@@ -102,7 +100,7 @@ export class EcoFlowMqttApi {
 
         this.client.on('message', (topic, message) => {
           const mqttMessage = JSON.parse(message.toString());
-          this.processReceivedMessage(topic, (topic.split('/').pop() || '') as MqttTopicType, mqttMessage);
+          this.processReceivedMessage(topic, topic.split('/').pop() as MqttTopicType, mqttMessage);
         });
       }
     }

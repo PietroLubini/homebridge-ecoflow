@@ -22,6 +22,7 @@ import {
 } from '@ecoflow/characteristics/customCharacteristic';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from '@ecoflow/config';
 import { Logger } from '@ecoflow/helpers/logger';
+import { MachineIdProvider } from '@ecoflow/helpers/machineId';
 import { PLATFORM_NAME, PLUGIN_NAME } from '@ecoflow/settings';
 
 /**
@@ -162,7 +163,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   ): EcoFlowAccessory | null {
     let ecoFlowAccessory: EcoFlowAccessory | null = null;
     const httpApi = new EcoFlowHttpApi(config, log);
-    const mqttApi = new EcoFlowMqttApi(httpApi, log);
+    const mqttApi = new EcoFlowMqttApi(httpApi, log, new MachineIdProvider(log));
     switch (config.model) {
       case DeviceModel.Delta2Max:
         ecoFlowAccessory = new Delta2MaxAccessory(this, accessory, config, log, httpApi, mqttApi);

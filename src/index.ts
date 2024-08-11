@@ -7,6 +7,6 @@ import { API } from 'homebridge';
 /**
  * This method registers the platform with Homebridge
  */
-export default (api: API) => {
+export default (api: API): void => {
   api.registerPlatform(PLATFORM_NAME, EcoFlowHomebridgePlatform);
 };

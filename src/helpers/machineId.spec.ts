@@ -6,9 +6,9 @@ import { v4 as uuidv4 } from 'uuid';
 jest.mock('node-machine-id');
 jest.mock('uuid');
 
-describe('EcoFlowMqttApi', () => {
+describe('MachineIdProvider', () => {
   let provider: MachineIdProvider;
-  let logMock: Logging;
+  let logMock: jest.Mocked<Logging>;
   const machineIdMock: jest.Mock = machineId as jest.Mock;
   const uuidV4Mock: jest.Mock = uuidv4 as jest.Mock;
 
@@ -17,7 +17,7 @@ describe('EcoFlowMqttApi', () => {
     uuidV4Mock.mockReset();
     logMock = {
       warn: jest.fn(),
-    } as unknown as Logging;
+    } as unknown as jest.Mocked<Logging>;
     provider = new MachineIdProvider(logMock);
   });
 
