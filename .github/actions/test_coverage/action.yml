@@ -15,6 +15,7 @@ runs:
       shell: bash
 
     - run: ls -la
+      working-directory: ./coverage
       shell: bash
 
     # - uses: ArtiomTr/jest-coverage-report-action@v2.3.0
