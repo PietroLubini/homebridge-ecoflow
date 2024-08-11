@@ -41,10 +41,10 @@ jobs:
       - name: Test
         run: npm run test:ci
 
-      # - name: Test Coverage
-      #   uses: ./.github/actions/test_coverage
-      #   with:
-      #     coverage_file: ./coverage/report.json
+      - name: Test Coverage
+        uses: ./.github/actions/test_coverage
+        with:
+          coverage_file: ./coverage/report.json
 
       - name: List, audit, fix outdated dependencies and build again
         run: |
