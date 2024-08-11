@@ -1,5 +1,11 @@
 import { EcoFlowAccessoryWithQuota } from '@ecoflow/accessories/ecoFlowAccessory';
-import { MqttMessageType, MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/ecoFlowMqttApi';
+import { EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
+import {
+  EcoFlowMqttApi,
+  MqttMessageType,
+  MqttQuotaMessage,
+  MqttQuotaMessageWithParams,
+} from '@ecoflow/apis/ecoFlowMqttApi';
 import { DeviceConfig } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
@@ -15,8 +21,15 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
   private readonly outletAcService: OutletAcService<BatteryAllQuotaData>;
   private readonly outletCarService: OutletCarService;
 
-  constructor(platform: EcoFlowHomebridgePlatform, accessory: PlatformAccessory, config: DeviceConfig, log: Logging) {
-    super(platform, accessory, config, log);
+  constructor(
+    platform: EcoFlowHomebridgePlatform,
+    accessory: PlatformAccessory,
+    config: DeviceConfig,
+    log: Logging,
+    httpApi: EcoFlowHttpApi,
+    mqttApi: EcoFlowMqttApi
+  ) {
+    super(platform, accessory, config, log, httpApi, mqttApi);
     this.batteryService = new BatteryStatusService(this);
     this.outletUsbService = new OutletUsbService(this);
     this.outletAcService = new OutletAcService(this);

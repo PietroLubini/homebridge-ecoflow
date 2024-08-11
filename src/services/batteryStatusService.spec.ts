@@ -16,7 +16,7 @@ describe('BatteryStatusService', () => {
   const expectedCharacteristics: MockCharacteristic[] = [
     {
       UUID: HapCharacteristic.Name.UUID,
-      value: 'Accessory Name',
+      value: 'Accessory Battery Name',
     },
     {
       UUID: HapCharacteristic.StatusLowBattery.UUID,
@@ -49,18 +49,16 @@ describe('BatteryStatusService', () => {
       log: logMock,
       platform: platformMock,
       accessory: accessoryMock,
-      config: {
-        name: 'accessory1',
-      },
+      config: {},
     } as unknown as jest.Mocked<EcoFlowAccessory>;
     service = new BatteryStatusService(ecoFlowAccessoryMock);
-    hapService = new HapService('Accessory Name', HapService.Battery.UUID);
+    hapService = new HapService('Accessory Battery Name', HapService.Battery.UUID);
   });
 
   describe('initialize', () => {
     it('should add Battery service when it is not added to accessory yet', () => {
       const expected = hapService;
-      accessoryMock.getService.mockReturnValueOnce(undefined);
+      (ecoFlowAccessoryMock.config.name = 'accessory1'), accessoryMock.getService.mockReturnValueOnce(undefined);
       accessoryMock.addService.mockReturnValueOnce(expected);
 
       service.initialize();
@@ -79,6 +77,25 @@ describe('BatteryStatusService', () => {
 
       expect(actual).toEqual(expected);
       expect(accessoryMock.addService).not.toHaveBeenCalled();
+    });
+
+    it('should use existing display name of service when there is no name in configuration', () => {
+      accessoryMock.getService.mockReturnValueOnce(hapService);
+
+      service.initialize();
+      const actual = service.service.displayName;
+
+      expect(actual).toEqual('Accessory Battery Name');
+    });
+
+    it('should use name from configuration as a display name of service when there is name in configuration', () => {
+      accessoryMock.getService.mockReturnValueOnce(hapService);
+      ecoFlowAccessoryMock.config.name = 'Name from config';
+
+      service.initialize();
+      const actual = service.service.displayName;
+
+      expect(actual).toEqual('Name from config');
     });
 
     it('should add Battery characteristics when initializing accessory', () => {
@@ -106,8 +123,8 @@ describe('BatteryStatusService', () => {
 
       expect(actual).toEqual(expectedCharacteristics);
       expect(logMock.warn.mock.calls).toEqual([
-        ['[accessory1] Removing obsolete characteristic:', 'On'],
-        ['[accessory1] Removing obsolete characteristic:', 'In Use'],
+        ['[Accessory Battery Name] Removing obsolete characteristic:', 'On'],
+        ['[Accessory Battery Name] Removing obsolete characteristic:', 'In Use'],
       ]);
     });
   });

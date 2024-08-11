@@ -14,8 +14,6 @@ import { Logging, PlatformAccessory } from 'homebridge';
 import { Subscription } from 'rxjs';
 
 export abstract class EcoFlowAccessory {
-  protected readonly mqttApi: EcoFlowMqttApi;
-  protected readonly httpApi: EcoFlowHttpApi;
   private services: ServiceBase[] = [];
   private reconnectMqttTimeoutId: NodeJS.Timeout | null = null;
   private isMqttConnected: boolean = false;
@@ -26,11 +24,10 @@ export abstract class EcoFlowAccessory {
     public readonly platform: EcoFlowHomebridgePlatform,
     public readonly accessory: PlatformAccessory,
     public readonly config: DeviceConfig,
-    public readonly log: Logging
-  ) {
-    this.httpApi = new EcoFlowHttpApi(this.config, this.log);
-    this.mqttApi = new EcoFlowMqttApi(this.httpApi, this.log);
-  }
+    public readonly log: Logging,
+    protected readonly httpApi: EcoFlowHttpApi,
+    protected readonly mqttApi: EcoFlowMqttApi
+  ) {}
 
   public async initialize(): Promise<void> {
     this.services = this.getServices();

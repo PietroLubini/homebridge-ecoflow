@@ -112,7 +112,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
     characteristicType: CharacteristicType
   ): void {
     if (this.ecoFlowAccessory.config.battery?.additionalCharacteristics?.includes(characteristicType)) {
-      super.updateCharacteristic(characteristic, name, value);
+      this.updateCharacteristic(characteristic, name, value);
     }
   }
 

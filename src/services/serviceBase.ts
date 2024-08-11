@@ -38,12 +38,7 @@ export abstract class ServiceBase {
   protected abstract addCharacteristics(): Characteristic[];
 
   protected addCharacteristic(characteristic: WithUUID<{ new (): Characteristic }>): Characteristic {
-    const existingCharacteristic = this.service.getCharacteristic(characteristic);
-    if (!existingCharacteristic) {
-      return this.service.addCharacteristic(characteristic);
-    }
-
-    return existingCharacteristic;
+    return this.service.getCharacteristic(characteristic);
   }
 
   protected getOrAddService(service: WithUUID<typeof Service>, displayName?: string): Service {
