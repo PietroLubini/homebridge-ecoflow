@@ -23,7 +23,7 @@ runs:
         prnumber: ${{ steps.getPrId.outputs.number }}
         skip-step: all
         coverage-file: ${{ inputs.coverage_file }}
-        # test-script: npm run test:ci
+        test-script: npm run test
 
     # - uses: willcaul/jest-github-action@v4
     #   with:
