@@ -11,15 +11,21 @@ runs:
     - uses: jwalton/gh-find-current-pr@v1.3.3
       id: getPrId
 
-    - uses: ArtiomTr/jest-coverage-report-action@v2.3.0
-      with:
-        prnumber: ${{ steps.getPrId.outputs.number }}
-        skip-step: all
-        coverage-file: ${{ inputs.coverage_file }}
-        test-script: npx jest --forceExit
+    - run: echo coverage_file -> ${{ inputs.coverage_file }}
+      shell: bash
 
-    - uses: willcaul/jest-github-action@v4
-      with:
-        test-command: npx jest --forceExit
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+    - run: ls -la
+      shell: bash
+
+    # - uses: ArtiomTr/jest-coverage-report-action@v2.3.0
+    #   with:
+    #     prnumber: ${{ steps.getPrId.outputs.number }}
+    #     skip-step: all
+    #     coverage-file: ${{ inputs.coverage_file }}
+    #     test-script: npx jest --forceExit
+
+    # - uses: willcaul/jest-github-action@v4
+    #   with:
+    #     test-command: npx jest --forceExit
+    #   env:
+    #     GITHUB_TOKEN: ${{ github.token }}
