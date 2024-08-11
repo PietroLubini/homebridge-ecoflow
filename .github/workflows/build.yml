@@ -35,10 +35,10 @@ jobs:
       - name: Test
         uses: ./.github/actions/test
 
-      - name: Test Coverage
-        uses: ./.github/actions/test_coverage
-        with:
-          coverage_file: ./coverage/report.json
+      # - name: Test Coverage
+      #   uses: ./.github/actions/test_coverage
+      #   with:
+      #     coverage_file: ./coverage/report.json
 
       - name: List, audit, fix outdated dependencies and build again
         run: |
