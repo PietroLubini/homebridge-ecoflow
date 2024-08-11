@@ -18,12 +18,12 @@ runs:
       working-directory: ./coverage
       shell: bash
 
-    # - uses: ArtiomTr/jest-coverage-report-action@v2.3.0
-    #   with:
-    #     prnumber: ${{ steps.getPrId.outputs.number }}
-    #     skip-step: all
-    #     coverage-file: ${{ inputs.coverage_file }}
-    #     test-script: npx jest --forceExit
+    - uses: ArtiomTr/jest-coverage-report-action@v2.3.0
+      with:
+        prnumber: ${{ steps.getPrId.outputs.number }}
+        skip-step: all
+        coverage-file: ${{ inputs.coverage_file }}
+        # test-script: npm run test:ci
 
     # - uses: willcaul/jest-github-action@v4
     #   with:
