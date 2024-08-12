@@ -2,7 +2,7 @@ import { AcquireCertificateData, EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHtt
 import { MachineIdProvider } from '@ecoflow/helpers/machineId';
 import { Logging } from 'homebridge';
 import mqtt, { MqttClient } from 'mqtt';
-import { Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 export enum MqttMessageType {
   PD = 'pdStatus',
@@ -48,8 +48,8 @@ export class EcoFlowMqttApi {
   private certificateData: AcquireCertificateData | null = null;
   private readonly quotaSubject: Subject<MqttQuotaMessage> = new Subject<MqttQuotaMessage>();
   private readonly setReplySubject: Subject<MqttSetReplyMessage> = new Subject<MqttSetReplyMessage>();
-  public readonly quota$ = this.quotaSubject.asObservable();
-  public readonly setReply$ = this.setReplySubject.asObservable();
+  public readonly quota$: Observable<MqttQuotaMessage> = this.quotaSubject.asObservable();
+  public readonly setReply$: Observable<MqttSetReplyMessage> = this.setReplySubject.asObservable();
 
   constructor(
     private readonly httpApi: EcoFlowHttpApi,

@@ -7,7 +7,7 @@ export interface MqttSetEnabledMessageParams {
   enabled: number;
 }
 
-export abstract class OutletsServiceBase extends ServiceBase {
+export abstract class OutletServiceBase extends ServiceBase {
   constructor(
     private readonly serviceSubType: string,
     ecoFlowAccessory: EcoFlowAccessory

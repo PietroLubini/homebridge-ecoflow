@@ -27,9 +27,10 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
     config: DeviceConfig,
     log: Logging,
     httpApi: EcoFlowHttpApi,
-    mqttApi: EcoFlowMqttApi
+    mqttApi: EcoFlowMqttApi,
+    initializeDefaultValues: boolean = true,
   ) {
-    super(platform, accessory, config, log, httpApi, mqttApi);
+    super(platform, accessory, config, log, httpApi, mqttApi, initializeDefaultValues);
     this.batteryService = new BatteryStatusService(this);
     this.outletUsbService = new OutletUsbService(this);
     this.outletAcService = new OutletAcService(this);
@@ -164,7 +165,7 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
 }
 
 // Battery management system status
-interface BmsStatus {
+export interface BmsStatus {
   f32ShowSoc: number;
 }
 
@@ -178,7 +179,7 @@ interface InvStatusAc {
 }
 
 // Invertor status
-interface InvStatus extends InvStatusAc {
+export interface InvStatus extends InvStatusAc {
   inputWatts: number;
 }
 
@@ -197,7 +198,7 @@ interface PdStatusUsb {
   typec2Watts?: number;
 }
 
-interface PdStatus extends PdStatusUsb, PdStatusCar {
+export interface PdStatus extends PdStatusUsb, PdStatusCar {
   carState?: boolean;
   carWatts?: number;
 }

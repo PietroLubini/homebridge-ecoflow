@@ -1,7 +1,7 @@
 import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
-import { MqttSetEnabledMessageParams, OutletsServiceBase } from '@ecoflow/services/outletServiceBase';
+import { MqttSetEnabledMessageParams, OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 
-export class OutletCarService extends OutletsServiceBase {
+export class OutletCarService extends OutletServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessory) {
     super('CAR', ecoFlowAccessory);
   }

@@ -14,7 +14,7 @@ import { Logging, PlatformAccessory } from 'homebridge';
 import { Subscription } from 'rxjs';
 
 export abstract class EcoFlowAccessory {
-  private services: ServiceBase[] = [];
+  private _services: ServiceBase[] = [];
   private reconnectMqttTimeoutId: NodeJS.Timeout | null = null;
   private isMqttConnected: boolean = false;
   private subscriptions: Subscription[] = [];
@@ -29,12 +29,30 @@ export abstract class EcoFlowAccessory {
     protected readonly mqttApi: EcoFlowMqttApi
   ) {}
 
+  // Getter for services
+  public get services(): ServiceBase[] {
+    return this._services;
+  }
+
   public async initialize(): Promise<void> {
-    this.services = this.getServices();
-    this.services.push(new AccessoryInformationService(this));
+    this._services = this.getServices();
+    this._services.push(new AccessoryInformationService(this));
     this.initializeServices();
     this.subscriptions = this.subscribeOnParameterUpdates();
     await this.connectMqtt();
+  }
+
+  public cleanupServices(): void {
+    const services = this.services.map(service => service.service);
+    this.accessory.services
+      .filter(service => !services.includes(service))
+      .forEach(service => {
+        this.log.warn('Removing obsolete service from accessory:', service.displayName);
+        this.accessory.removeService(service);
+      });
+    this.services
+      .filter(service => this.accessory.services.includes(service.service))
+      .forEach(service => service.cleanupCharacteristics());
   }
 
   public destroy() {
@@ -97,20 +115,6 @@ export abstract class EcoFlowAccessory {
     this.services.forEach(service => {
       service.initialize();
     });
-    this.cleanupServices();
-  }
-
-  private cleanupServices(): void {
-    const services = this.services.map(service => service.service);
-    this.accessory.services
-      .filter(service => !services.includes(service))
-      .forEach(service => {
-        this.log.info('Removing obsolete service from accessory:', service.displayName);
-        this.accessory.removeService(service);
-      });
-    this.services
-      .filter(service => this.accessory.services.includes(service.service))
-      .forEach(service => service.cleanupCharacteristics());
   }
 
   private async connectMqtt(): Promise<void> {
@@ -120,7 +124,7 @@ export abstract class EcoFlowAccessory {
       if (!this.isMqttConnected) {
         await this.initMqtt();
       }
-    }, 60 * 1000);
+    }, this.config.reconnectMqttTimeoutInMs ?? 60000);
   }
 
   private async initMqtt(): Promise<void> {
@@ -133,12 +137,24 @@ export abstract class EcoFlowAccessory {
 export abstract class EcoFlowAccessoryWithQuota<TAllQuotaData> extends EcoFlowAccessory {
   private _quota: TAllQuotaData | null = null;
 
+  constructor(
+    platform: EcoFlowHomebridgePlatform,
+    accessory: PlatformAccessory,
+    config: DeviceConfig,
+    log: Logging,
+    httpApi: EcoFlowHttpApi,
+    mqttApi: EcoFlowMqttApi,
+    private readonly initializeDefaultValues: boolean
+  ) {
+    super(platform, accessory, config, log, httpApi, mqttApi);
+  }
+
   public override async initialize(): Promise<void> {
     if (!this._quota) {
       this._quota = await this.httpApi.getAllQuotas<TAllQuotaData>();
     }
     await super.initialize();
-    if (this._quota) {
+    if (this._quota && this.initializeDefaultValues) {
       this.updateInitialValues(this._quota);
     }
   }
