@@ -314,7 +314,7 @@ describe('EcoFlowHomebridgePlatform', () => {
           'EcoFlowHomebridge',
           [accessory1Mock]
         );
-        expect(commonLogMock.info.mock.calls).toEqual([['Removing obsolete accessory:', 'accessory1']]);
+        expect(commonLogMock.info.mock.calls).toEqual([['Removing obsolete accessory:', 'accessory12']]);
       });
     });
   });
