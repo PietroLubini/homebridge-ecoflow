@@ -9,18 +9,17 @@ inputs:
     required: true
   skip_comparison_with_target_branch:
     description: Ignore comparison of coverage with target branch
-    default: 'false'
-    required: false
+    required: true
 
 runs:
   using: 'composite'
   steps:
     - uses: jwalton/gh-find-current-pr@v1.3.3
       id: getPrId
-      if: ${{ inputs.skip_comparison_with_target_branch == 'false' }}
+      if: inputs.skip_comparison_with_target_branch == 'false'
 
     - uses: ArtiomTr/jest-coverage-report-action@v2.3.0
-      if: ${{ inputs.skip_comparison_with_target_branch == 'false' }}
+      if: inputs.skip_comparison_with_target_branch == 'false'
       with:
         custom-title: Coverage Report (${{ inputs.report_name_suffix }})
         prnumber: ${{ steps.getPrId.outputs.number }}
@@ -29,7 +28,7 @@ runs:
         test-script: npm run test
 
     - uses: willcaul/jest-github-action@v2
-      if: ${{ inputs.skip_comparison_with_target_branch != 'false' }}
+      if: inputs.skip_comparison_with_target_branch == 'true'
       with:
         test-command: npm run test
       env:
