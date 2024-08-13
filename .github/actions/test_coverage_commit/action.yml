@@ -32,11 +32,15 @@ runs:
       shell: bash
 
     - name: Commit Coverage Report
-      run: git commit -m "Automated commit > Coverage report"
+      run: |
+        git status
+        git commit -m "Automated commit > Coverage report"
       shell: bash
 
     - name: Push Changes
-      run: git push origin ${{ inputs.branch_ref }}
+      run: |
+        git status
+        git push origin ${{ inputs.branch_ref }}
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
