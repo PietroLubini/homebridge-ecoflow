@@ -8,13 +8,12 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: jwalton/gh-find-current-pr@v1
+    - uses: jwalton/gh-find-current-pr@v1.3.3
       id: getPrId
 
-    - uses: ArtiomTr/jest-coverage-report-action@v2
+    - uses: ArtiomTr/jest-coverage-report-action@v2.3.0
       with:
         prnumber: ${{ steps.getPrId.outputs.number }}
         # skip-step: all
         # coverage-file: ${{ inputs.coverage_file }}
         test-script: npm run test
-        

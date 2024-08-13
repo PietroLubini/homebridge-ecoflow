@@ -43,7 +43,7 @@ jobs:
         run: npm run build
 
       - name: Test
-        run: npm run test:ci
+        uses: ./.github/actions/test
 
       - name: Test Coverage
         if: success() || failure()
