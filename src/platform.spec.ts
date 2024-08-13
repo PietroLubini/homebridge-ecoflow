@@ -302,34 +302,34 @@ describe('EcoFlowHomebridgePlatform', () => {
       });
     });
 
-    // describe('cleanupDevices', () => {
-    //   it('should remove obsolete device when it is not specified in config', () => {
-    //     platform.accessories.push(accessory1Mock);
-    //     config.devices = [device2Config];
+    describe('cleanupDevices', () => {
+      it('should remove obsolete device when it is not specified in config', () => {
+        platform.accessories.push(accessory1Mock);
+        config.devices = [device2Config];
 
-    //     registerDevices();
+        registerDevices();
 
-    //     expect(apiMock.unregisterPlatformAccessories).toHaveBeenCalledWith(
-    //       '@pietrolubini/homebridge-ecoflow',
-    //       'EcoFlowHomebridge',
-    //       [accessory1Mock]
-    //     );
-    //     expect(commonLogMock.info.mock.calls).toEqual([['Removing obsolete accessory:', 'accessory1']]);
-    //   });
-    // });
+        expect(apiMock.unregisterPlatformAccessories).toHaveBeenCalledWith(
+          '@pietrolubini/homebridge-ecoflow',
+          'EcoFlowHomebridge',
+          [accessory1Mock]
+        );
+        expect(commonLogMock.info.mock.calls).toEqual([['Removing obsolete accessory:', 'accessory1']]);
+      });
+    });
   });
 
-  // describe('configureAccessory', () => {
-  //   beforeEach(() => {
-  //     platform = new EcoFlowHomebridgePlatform(commonLogMock, config, apiMock);
-  //   });
+  describe('configureAccessory', () => {
+    beforeEach(() => {
+      platform = new EcoFlowHomebridgePlatform(commonLogMock, config, apiMock);
+    });
 
-  //   it('should add accessory to list of accessories when it is restored from cache', () => {
-  //     const accessoryMock = { displayName: 'cached accessory1' } as unknown as jest.Mocked<PlatformAccessory>;
+    it('should add accessory to list of accessories when it is restored from cache', () => {
+      const accessoryMock = { displayName: 'cached accessory1' } as unknown as jest.Mocked<PlatformAccessory>;
 
-  //     platform.configureAccessory(accessoryMock);
+      platform.configureAccessory(accessoryMock);
 
-  //     expect(commonLogMock.info).toHaveBeenCalledWith('Loading accessory from cache:', 'cached accessory1');
-  //   });
-  // });
+      expect(commonLogMock.info).toHaveBeenCalledWith('Loading accessory from cache:', 'cached accessory1');
+    });
+  });
 });
