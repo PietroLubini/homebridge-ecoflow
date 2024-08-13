@@ -13,9 +13,9 @@ import { API, HAP, Logging, PlatformAccessory } from 'homebridge';
 
 jest.mock('@ecoflow/accessories/batteries/delta2Accessory');
 jest.mock('@ecoflow/accessories/batteries/delta2maxAccessory');
-jest.mock('@ecoflow/apis/EcoFlowHttpApi');
-jest.mock('@ecoflow/apis/EcoFlowMqttApi');
-jest.mock('@ecoflow/helpers/MachineIdProvider');
+jest.mock('@ecoflow/apis/ecoFlowHttpApi');
+jest.mock('@ecoflow/apis/ecoFlowMqttApi');
+jest.mock('@ecoflow/helpers/machineIdProvider');
 
 describe('EcoFlowHomebridgePlatform', () => {
   let commonLogMock: jest.Mocked<Logging>;
