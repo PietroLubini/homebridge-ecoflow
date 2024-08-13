@@ -3,13 +3,13 @@ name: Build
 on:
   # Run workflow when PRs are merged into one of branch
   push:
-    branches: [main, dev, task/tests]
+    branches: [main]
     paths-ignore:
       - '.github/workflows/publish.yml'
 
   # Run workflow for all PRs where target branch is one of
   pull_request:
-    branches: [main, dev]
+    branches: [main]
     paths-ignore:
       - '.github/workflows/publish.yml'
 
