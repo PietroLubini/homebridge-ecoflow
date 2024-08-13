@@ -16,7 +16,7 @@ runs:
 
     - uses: ArtiomTr/jest-coverage-report-action@v2.3.0
       with:
-        custom-title: TestS Coverage Report (${{ inputs.report_name_suffix }})
+        custom-title: Coverage Report (${{ inputs.report_name_suffix }})
         prnumber: ${{ steps.getPrId.outputs.number }}
         skip-step: all
         coverage-file: ${{ inputs.coverage_file }}
