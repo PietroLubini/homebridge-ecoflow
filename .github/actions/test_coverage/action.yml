@@ -7,17 +7,30 @@ inputs:
   coverage_file:
     description: Path to file for generated new_report.json file for source branch (bypasses running the test coverage for source branch)
     required: true
+  skip_comparison_with_target_branch:
+    description: Ignore comparison of coverage with target branch
+    default: 'false'
+    required: false
 
 runs:
   using: 'composite'
   steps:
     - uses: jwalton/gh-find-current-pr@v1.3.3
       id: getPrId
+      if: ${{ inputs.skip_comparison_with_target_branch == 'false' }}
 
     - uses: ArtiomTr/jest-coverage-report-action@v2.3.0
+      if: ${{ inputs.skip_comparison_with_target_branch == 'false' }}
       with:
         custom-title: Coverage Report (${{ inputs.report_name_suffix }})
         prnumber: ${{ steps.getPrId.outputs.number }}
         skip-step: all
         coverage-file: ${{ inputs.coverage_file }}
         test-script: npm run test
+
+    - uses: willcaul/jest-github-action@v2
+      if: ${{ inputs.skip_comparison_with_target_branch != 'false' }}
+      with:
+        test-command: npm run test
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
