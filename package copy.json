@@ -1,0 +1,67 @@
+{
+  "displayName": "Homebridge EcoFlow",
+  "name": "@pietrolubini/homebridge-ecoflow",
+  "version": "1.2.1-beta",
+  "description": "Homebridge plugin for EcoFlow devices",
+  "license": "MIT",
+  "author": "PietroLubini",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PietroLubini/homebridge-ecoflow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PietroLubini/homebridge-ecoflow/issues"
+  },
+  "homepage": "https://github.com/PietroLubini/homebridge-ecoflow#readme",
+  "engines": {
+    "node": "^18.16.0 || ^20.9.0",
+    "homebridge": "^1.7.0"
+  },
+  "main": "dist/index.js",
+  "scripts": {
+    "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
+    "lint:fix": "eslint \"src/**/*.ts\" --max-warnings=0 --fix",
+    "watch": "npm run build && npm link && nodemon",
+    "build": "rimraf ./dist && tsc -p tsconfig.build.json",
+    "test": "jest --forceExit",
+    "test:cov": "jest --coverage",
+    "test:ci": "jest --coverage --ci --json --coverage --testLocationInResults --outputFile=coverage/new_report.json --reporters=default --reporters=jest-junit --forceExit",
+    "prepublishOnly": "npm run lint && npm run build && npm run test:ci"
+  },
+  "keywords": [
+    "homebridge-plugin",
+    "homebridge-ecoflow",
+    "ecoflow",
+    "delta 2 max"
+  ],
+  "_moduleAliases": {
+    "@ecoflow": "dist"
+  },
+  "dependencies": {
+    "module-alias": "^2.2.3",
+    "mqtt": "^5.8.0",
+    "node-cache": "^5.1.2",
+    "node-machine-id": "^1.1.12",
+    "rxjs": "^7.8.1",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.12.13",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.57.0",
+    "homebridge": "^1.7.0",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "nodemon": "^3.1.2",
+    "prettier": "^3.3.3",
+    "prettier-plugin-organize-imports": "^4.0.0",
+    "rimraf": "^5.0.7",
+    "ts-jest": "^29.2.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
