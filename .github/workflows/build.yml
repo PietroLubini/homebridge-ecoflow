@@ -13,8 +13,11 @@ on:
     paths-ignore:
       - '.github/workflows/publish.yml'
 
+  workflow_dispatch:
+
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     env:
       SOURCE_BRANCH_COVERAGE_FILE: ./coverage/new_report.json
@@ -46,16 +49,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Before Test
-        run: git status
-
       - name: Test
         uses: ./.github/actions/test
         with:
           report_name_suffix: ${{ matrix.node-version }}
-
-      - name: Before Test Coverage
-        run: git status
 
       - name: Test Coverage
         if: success() || failure()
@@ -65,17 +62,11 @@ jobs:
           source_branch_coverage_file: ${{ env.SOURCE_BRANCH_COVERAGE_FILE }}
           target_branch_coverage_file: ${{ env.TARGET_BRANCH_COVERAGE_FILE }}
 
-      - name: Before Test Coverage Commit
-        run: git status
-
-      - name: Test Coverage Commit
-        if: ${{ github.event_name == 'pull_request' && (success() || failure()) }}
-        uses: ./.github/actions/test_coverage_commit
+      - name: Upload Test Coverage Report
+        uses: actions/upload-artifact@v4.3.6
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch_ref: ${{ github.head_ref }}
-          source_branch_coverage_file: ${{ env.SOURCE_BRANCH_COVERAGE_FILE }}
-          target_branch_coverage_file: ${{ env.TARGET_BRANCH_COVERAGE_FILE }}
+          name: test-coverage-report-${{ matrix.node-version }}
+          path: ${{ env.TARGET_BRANCH_COVERAGE_FILE }}
 
       - name: List, audit, fix outdated dependencies and build again
         run: |
@@ -84,3 +75,34 @@ jobs:
           npm audit fix || true
           npm list --outdated
           npm run build
+
+  commit_test_coverage_reports:
+    name: Commit Test Coverage Reports
+    needs: [build]
+    if: ${{ github.event_name == 'pull_request' && always() }}
+    runs-on: ubuntu-latest
+    env:
+      COVERAGE_FILE_18.x: ./coverage/report_18.x.json
+      COVERAGE_FILE_20.x: ./coverage/report_20.x.json
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Test Coverage Report (18.x)
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: test-coverage-report-18.x
+          path: ${{ env.COVERAGE_FILE_18 }}
+
+      - name: Download Test Coverage Report (20.x)
+        uses: actions/download-artifact@v4.1.8
+        with:
+          name: test-coverage-report-20.x
+          path: ${{ env.COVERAGE_FILE_20 }}
+
+      - name: Commit Test Coverage Reports
+        uses: ./.github/actions/commit
+        with:
+          comment: Test Coverage Reports
+          changes_paths: ${{ env.COVERAGE_FILE_18 }} ${{ env.COVERAGE_FILE_20 }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,39 @@
+name: Commit
+description: Commit changes to current branch
+inputs:
+  comment:
+    description: Comment of a commit
+    required: true
+  changes_paths:
+    description: Path to files to be committed
+    required: true
+  github_token:
+    description: Value of secrets.GITHUB_TOKEN
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Configure Git
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+      shell: bash
+
+    - name: Stage
+      run: git add ${{ inputs.changes_paths }}
+      shell: bash
+
+    - name: Commit
+      run: |
+        git status
+        git commit -m "Automated commit > ${{ inputs.comment }}"
+      shell: bash
+
+    - name: Push Changes
+      run: |
+        git status
+        git push
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
