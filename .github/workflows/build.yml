@@ -69,8 +69,7 @@ jobs:
         run: git status
 
       - name: Test Coverage Commit
-        if: success() || failure()
-        #${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' && (success() || failure()) }}
         uses: ./.github/actions/test_coverage_commit
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
