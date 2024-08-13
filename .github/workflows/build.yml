@@ -104,5 +104,5 @@ jobs:
         uses: ./.github/actions/commit
         with:
           comment: Test Coverage Reports
-          changes_paths: ${{ env.COVERAGE_FILE_18 }} ${{ env.COVERAGE_FILE_20 }}
+          changes_paths: ${{ env.COVERAGE_FILE_18.x }} ${{ env.COVERAGE_FILE_20.x }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
