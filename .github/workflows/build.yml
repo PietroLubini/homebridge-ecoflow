@@ -89,16 +89,16 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Download Test Coverage Report (18.x)
-        uses: actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@v4
         with:
           name: test-coverage-report-18.x
-          path: ${{ env.COVERAGE_FILE_18 }}
+          path: ${{ env.COVERAGE_FILE_18_X }}
 
       - name: Download Test Coverage Report (20.x)
-        uses: actions/download-artifact@v4.1.8
+        uses: actions/download-artifact@v4
         with:
           name: test-coverage-report-20.x
-          path: ${{ env.COVERAGE_FILE_20 }}
+          path: ${{ env.COVERAGE_FILE_20_X }}
 
       - name: Commit Test Coverage Reports
         uses: ./.github/actions/commit
