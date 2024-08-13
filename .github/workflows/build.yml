@@ -4,10 +4,14 @@ on:
   # Run workflow when PRs are merged into one of branch
   push:
     branches: [main, dev]
+    paths-ignore:
+      - '.github/workflows/publish.yml'
 
   # Run workflow for all PRs where target branch is one of
-  pull_request_target:
+  pull_request:
     branches: [main, dev]
+    paths-ignore:
+      - '.github/workflows/publish.yml'
 
   # for test purpose only
   workflow_dispatch:
