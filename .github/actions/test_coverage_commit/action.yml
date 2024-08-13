@@ -23,6 +23,10 @@ runs:
         git config user.email "actions@github.com"
       shell: bash
 
+    - name: Checkout ${{ inputs.branch_ref }}
+      run: git checkout ${{ inputs.branch_ref }}
+      shell: bash
+
     - name: Copy Coverage Report
       run: cp ${{ inputs.source_branch_coverage_file }} ${{ inputs.target_branch_coverage_file }}
       shell: bash
