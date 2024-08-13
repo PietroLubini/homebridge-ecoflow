@@ -1,5 +1,10 @@
 name: Test
 description: Runs test and report results
+inputs:
+  report_name_suffix:
+    description: Text to be added to name of test report
+    required: true
+
 runs:
   using: 'composite'
   steps:
@@ -9,6 +14,6 @@ runs:
     - uses: dorny/test-reporter@v1.9.1
       if: success() || failure()
       with:
-        name: Tests Report
+        name: Tests Report (${{ inputs.report_name_suffix }})
         path: junit.xml
         reporter: jest-junit
