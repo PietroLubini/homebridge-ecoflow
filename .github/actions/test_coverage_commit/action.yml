@@ -4,6 +4,9 @@ inputs:
   github_token:
     description: Value of secrets.GITHUB_TOKEN
     required: true
+  branch_ref:
+    description: Branch ref to which commit to push
+    required: true
   source_branch_coverage_file:
     description: Path to file for generated new report file for source branch
     required: true
@@ -29,11 +32,11 @@ runs:
       shell: bash
 
     - name: Commit Coverage Report
-      run: git commit -m "${{ inputs.target_branch_coverage_file }} > automated commit"
+      run: git commit -m "Automated commit > Coverage report"
       shell: bash
 
     - name: Push Changes
-      run: git push
+      run: git push origin ${{ inputs.branch_ref }}
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
