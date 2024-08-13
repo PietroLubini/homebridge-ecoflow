@@ -60,7 +60,8 @@ jobs:
           target_branch_coverage_file: ${{ env.TARGET_BRANCH_COVERAGE_FILE }}
 
       - name: Test Coverage Commit
-        if: ${{ github.event_name == 'pull_request' }}
+        if: success() || failure()
+        #${{ github.event_name == 'pull_request' }}
         uses: ./.github/actions/test_coverage_commit
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
