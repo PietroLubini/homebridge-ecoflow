@@ -24,7 +24,7 @@
     "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && tsc && npm run copy:cjs",
     "copy:cjs": "copyfiles -u 1 src/**/*.cjs dist",
-    "test": "jest --forceExit",
+    "test": "jest --passWithNoTests --forceExit",
     "prepublishOnly": "npm run lint && npm run build && npm run test:ci"
   },
   "keywords": [
@@ -38,6 +38,7 @@
     "node-cache": "^5.1.2",
     "node-machine-id": "^1.1.12",
     "rxjs": "^7.8.1",
+    "ts-jest": "^29.2.4",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
