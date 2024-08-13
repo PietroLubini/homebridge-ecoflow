@@ -8,18 +8,13 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    # - uses: jwalton/gh-find-current-pr@v1
-    #   id: getPrId
+    - uses: jwalton/gh-find-current-pr@v1
+      id: getPrId
 
-    # - uses: ArtiomTr/jest-coverage-report-action@v2
-    #   with:
-    #     prnumber: ${{ steps.getPrId.outputs.number }}
-    #     # skip-step: all
-    #     # coverage-file: ${{ inputs.coverage_file }}
-    #     test-script: npm run test
-
-    - uses: willcaul/jest-github-action@v2
+    - uses: ArtiomTr/jest-coverage-report-action@v2
       with:
-        test-command: npm run test
-      env:
-        GITHUB_TOKEN: ${{ github.token }}
+        prnumber: ${{ steps.getPrId.outputs.number }}
+        # skip-step: all
+        # coverage-file: ${{ inputs.coverage_file }}
+        test-script: npm run test
+        
