@@ -82,8 +82,8 @@ jobs:
     if: ${{ github.event_name == 'pull_request' && always() }}
     runs-on: ubuntu-latest
     env:
-      COVERAGE_FILE_18.x: ./coverage/report_18.x.json
-      COVERAGE_FILE_20.x: ./coverage/report_20.x.json
+      COVERAGE_FILE_18_X: coverage/report_18.x.json
+      COVERAGE_FILE_20_X: coverage/report_20.x.json
 
     steps:
       - uses: actions/checkout@v4
@@ -104,5 +104,5 @@ jobs:
         uses: ./.github/actions/commit
         with:
           comment: Test Coverage Reports
-          changes_paths: ${{ env.COVERAGE_FILE_18.x }} ${{ env.COVERAGE_FILE_20.x }}
+          changes_paths: ${{ env.COVERAGE_FILE_18_X }} ${{ env.COVERAGE_FILE_20_X }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
