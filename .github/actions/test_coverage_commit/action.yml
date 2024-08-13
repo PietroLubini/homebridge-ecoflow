@@ -1,6 +1,9 @@
 name: TestCoverageCommit
 description: Commit coverage report
 inputs:
+  github_token:
+    description: Value of secrets.GITHUB_TOKEN
+    required: true
   source_branch_coverage_file:
     description: Path to file for generated new report file for source branch
     required: true
@@ -33,4 +36,4 @@ runs:
       run: git push
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
