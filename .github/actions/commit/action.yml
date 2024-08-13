@@ -16,6 +16,7 @@ runs:
   steps:
     - name: Configure Git
       run: |
+        git status
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
       shell: bash
