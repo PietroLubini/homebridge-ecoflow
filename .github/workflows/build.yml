@@ -3,7 +3,7 @@ name: Build
 on:
   # Run workflow when PRs are merged into one of branch
   push:
-    branches: [main, dev2]
+    branches: [main]
     paths-ignore:
       - '.github/workflows/publish.yml'
 
