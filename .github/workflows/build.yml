@@ -9,7 +9,7 @@ on:
 
   # Run workflow for all PRs where target branch is one of
   pull_request:
-    branches: [main, dev]
+    branches: [main]
     paths-ignore:
       - '.github/workflows/publish.yml'
 
