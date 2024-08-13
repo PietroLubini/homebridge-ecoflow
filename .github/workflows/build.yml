@@ -48,12 +48,11 @@ jobs:
           report_name_suffix: ${{ matrix.node-version }}
 
       - name: Test Coverage
-        if: always()
+        if: ${{ github.event_name == 'pull_request' && always() }}
         uses: ./.github/actions/test_coverage
         with:
           report_name_suffix: ${{ matrix.node-version }}
           coverage_file: ./coverage/new_report.json
-          skip_comparison_with_target_branch: ${{ github.event_name != 'pull_request' }}
 
       - name: List, audit, fix outdated dependencies and build again
         run: |
