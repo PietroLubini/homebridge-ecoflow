@@ -129,7 +129,7 @@ describe('EcoFlowHomebridgePlatform', () => {
         mqttApiMock
       ) as jest.Mocked<TAccessory>;
       const accessoryBaseMock = ecoFlowAccessoryMock as jest.Mocked<BatteryAccessory>;
-      accessoryBaseMock.initialize.mockReset();
+      accessoryBaseMock.initialize = jest.fn().mockResolvedValue(undefined);
       accessoryBaseMock.cleanupServices.mockReset();
       if (!ecoFlowAccessoryMock.accessory) {
         Object.defineProperty(ecoFlowAccessoryMock, 'accessory', { value: accessoryMock });
@@ -257,10 +257,11 @@ describe('EcoFlowHomebridgePlatform', () => {
         ]);
       });
 
-      it('should initialize device when registering non cached devices', () => {
+      it('should initialize device when registering non cached devices', async () => {
         config.devices = [device1Config, device2Config];
 
         registerDevices();
+        await Promise.resolve(); // Wait for all pending promises to resolve
 
         expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
         expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();
@@ -291,11 +292,23 @@ describe('EcoFlowHomebridgePlatform', () => {
         expect(apiMock.registerPlatformAccessories).not.toHaveBeenCalled();
       });
 
-      it('should initialize device when registering cached device', () => {
+      it('should initialize device when registering cached device', async () => {
         platform.accessories.push(accessory1Mock);
         config.devices = [device1Config];
 
         registerDevices();
+        await Promise.resolve(); // Wait for all pending promises to resolve
+
+        expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
+        expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();
+      });
+
+      it('should cleanupServices of initialized device when registering cached device', async () => {
+        platform.accessories.push(accessory1Mock);
+        config.devices = [device1Config];
+
+        registerDevices();
+        await Promise.resolve(); // Wait for all pending promises to resolve
 
         expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
         expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();

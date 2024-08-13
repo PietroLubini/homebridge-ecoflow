@@ -163,8 +163,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       .filter(ecoFlowAccessory => !removedAccessories.includes(ecoFlowAccessory.accessory))
       .forEach(ecoFlowAccessory => {
         logs[ecoFlowAccessory.accessory.displayName].info('Initializing accessory');
-        ecoFlowAccessory.initialize();
-        ecoFlowAccessory.cleanupServices();
+        ecoFlowAccessory.initialize().then(() => ecoFlowAccessory.cleanupServices());
       });
   }
 
