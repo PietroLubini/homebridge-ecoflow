@@ -25,7 +25,7 @@
     "build": "rimraf ./dist && tsc -p tsconfig.build.json",
     "test": "jest --forceExit",
     "test:cov": "jest --coverage",
-    "test:ci": "jest --coverage --ci --json --coverage --testLocationInResults --outputFile=coverage/report.json --reporters=default --reporters=jest-junit --forceExit",
+    "test:ci": "jest --coverage --ci --json --coverage --testLocationInResults --outputFile=coverage/new_report.json --reporters=default --reporters=jest-junit --forceExit",
     "prepublishOnly": "npm run lint && npm run build && npm run test:ci"
   },
   "keywords": [

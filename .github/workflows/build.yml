@@ -16,6 +16,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      SOURCE_BRANCH_COVERAGE_FILE: ./coverage/new_report.json
+      TARGET_BRANCH_COVERAGE_FILE: ./coverage/report.json
 
     strategy:
       fail-fast: false
@@ -49,7 +52,15 @@ jobs:
         uses: ./.github/actions/test_coverage
         with:
           report_name_suffix: ${{ matrix.node-version }}
-          coverage_file: ./coverage/report.json
+          source_branch_coverage_file: ${{ env.SOURCE_BRANCH_COVERAGE_FILE }}
+          target_branch_coverage_file: ${{ env.TARGET_BRANCH_COVERAGE_FILE }}
+
+      - name: Test Coverage Commit
+        if: success() || failure()
+        uses: ./.github/actions/test_coverage_commit
+        with:
+          source_branch_coverage_file: ${{ env.SOURCE_BRANCH_COVERAGE_FILE }}
+          target_branch_coverage_file: ${{ env.TARGET_BRANCH_COVERAGE_FILE }}
 
       - name: List, audit, fix outdated dependencies and build again
         run: |
