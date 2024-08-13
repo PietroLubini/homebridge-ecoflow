@@ -19,8 +19,6 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    env:
-      SOURCE_BRANCH_COVERAGE_FILE: ./coverage/new_report.json
 
     strategy:
       fail-fast: false
@@ -28,11 +26,6 @@ jobs:
         node-version: [18.x, 20.x]
 
     steps:
-      - name: Set Target Branch Coverage File
-        run: |
-          echo "TARGET_BRANCH_COVERAGE_FILE=./coverage/report_${{ matrix.node-version }}.json" >> $GITHUB_ENV
-          echo "event_name: ${{ github.event_name }}"
-
       - uses: actions/checkout@v4
 
       - name: Use Node.js ${{ matrix.node-version }}
@@ -59,14 +52,7 @@ jobs:
         uses: ./.github/actions/test_coverage
         with:
           report_name_suffix: ${{ matrix.node-version }}
-          source_branch_coverage_file: ${{ env.SOURCE_BRANCH_COVERAGE_FILE }}
-          target_branch_coverage_file: ${{ env.TARGET_BRANCH_COVERAGE_FILE }}
-
-      - name: Upload Test Coverage Report
-        uses: actions/upload-artifact@v4.3.6
-        with:
-          name: test-coverage-report-${{ matrix.node-version }}
-          path: ${{ env.TARGET_BRANCH_COVERAGE_FILE }}
+          coverage_file: ./coverage/new_report.json
 
       - name: List, audit, fix outdated dependencies and build again
         run: |
@@ -75,34 +61,3 @@ jobs:
           npm audit fix || true
           npm list --outdated
           npm run build
-
-  commit_test_coverage_reports:
-    name: Commit Test Coverage Reports
-    needs: [build]
-    if: ${{ github.event_name == 'pull_request' && always() }}
-    runs-on: ubuntu-latest
-    env:
-      COVERAGE_FILE_18_X: coverage/report_18.x.json
-      COVERAGE_FILE_20_X: coverage/report_20.x.json
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download Test Coverage Report (18.x)
-        uses: actions/download-artifact@v4
-        with:
-          name: test-coverage-report-18.x
-          path: ${{ env.COVERAGE_FILE_18_X }}
-
-      - name: Download Test Coverage Report (20.x)
-        uses: actions/download-artifact@v4
-        with:
-          name: test-coverage-report-20.x
-          path: ${{ env.COVERAGE_FILE_20_X }}
-
-      - name: Commit Test Coverage Reports
-        uses: ./.github/actions/commit
-        with:
-          comment: Test Coverage Reports
-          changes_paths: ${{ env.COVERAGE_FILE_18_X }} ${{ env.COVERAGE_FILE_20_X }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}

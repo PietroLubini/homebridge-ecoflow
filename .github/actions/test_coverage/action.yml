@@ -4,11 +4,8 @@ inputs:
   report_name_suffix:
     description: Text to be added to name of test coverage report
     required: true
-  source_branch_coverage_file:
+  coverage_file:
     description: Path to file for generated new_report.json file for source branch (bypasses running the test coverage for source branch)
-    required: true
-  target_branch_coverage_file:
-    description: Path to file for existing report.json in target branch (bypasses running the test coverage for target branch)
     required: true
 
 runs:
@@ -22,6 +19,5 @@ runs:
         custom-title: Coverage Report (${{ inputs.report_name_suffix }})
         prnumber: ${{ steps.getPrId.outputs.number }}
         skip-step: all
-        coverage-file: ${{ inputs.source_branch_coverage_file }}
-        base-coverage-file: ${{ inputs.target_branch_coverage_file }}
+        coverage-file: ${{ inputs.coverage_file }}
         test-script: npm run test
