@@ -22,7 +22,7 @@ import {
 } from '@ecoflow/characteristics/customCharacteristic';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from '@ecoflow/config';
 import { Logger } from '@ecoflow/helpers/logger';
-import { MachineIdProvider } from '@ecoflow/helpers/machineId';
+import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
 import { PLATFORM_NAME, PLUGIN_NAME } from '@ecoflow/settings';
 
 /**
@@ -81,18 +81,19 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
    * This function is invoked when homebridge restores cached accessories from disk at startup.
    * It should be used to set up event handlers for characteristics and update respective values.
    */
-  configureAccessory(accessory: PlatformAccessory) {
+  public configureAccessory(accessory: PlatformAccessory) {
     this.commonLog.info('Loading accessory from cache:', accessory.displayName);
 
     // add the restored accessory to the accessories cache, so we can track if it has already been registered
     this.accessories.push(accessory);
   }
 
-  registerDevices(): void {
+  private registerDevices(): void {
     const logs: Record<string, Logging> = {};
     const configuredAccessories: PlatformAccessory[] = [];
     const configuredEcoFlowAccessories: EcoFlowAccessory[] = [];
     if (!this.ecoFlowConfig.devices) {
+      this.commonLog.warn('Devices are not configured');
       return;
     }
     for (const config of this.ecoFlowConfig.devices) {
@@ -118,13 +119,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
         log.info('Restoring existing accessory from cache');
         ecoFlowAccessory = this.createAccessory(accessory, config, log);
       } else {
-        log.info('Adding new accessory');
-        accessory = new this.api.platformAccessory(config.name, uuid);
-        accessory.context.deviceConfig = config;
-        ecoFlowAccessory = this.createAccessory(accessory, config, log);
-
-        // link the accessory to your platform
-        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        ({ accessory, ecoFlowAccessory } = this.addNewDevice(log, config, uuid));
       }
       configuredAccessories.push(accessory);
       if (ecoFlowAccessory) {
@@ -135,7 +130,23 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     this.cleanupDevices(configuredAccessories, configuredEcoFlowAccessories, logs);
   }
 
-  cleanupDevices(
+  private addNewDevice(
+    log: Logging,
+    config: DeviceConfig,
+    uuid: string
+  ): { accessory: PlatformAccessory; ecoFlowAccessory: EcoFlowAccessory | null } {
+    log.info('Adding new accessory');
+    const accessory = new this.api.platformAccessory(config.name, uuid);
+    accessory.context.deviceConfig = config;
+    const ecoFlowAccessory = this.createAccessory(accessory, config, log);
+
+    if (ecoFlowAccessory) {
+      this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+    }
+    return { accessory, ecoFlowAccessory };
+  }
+
+  private cleanupDevices(
     configuredAccessories: PlatformAccessory[],
     configuredEcoFlowAccessories: EcoFlowAccessory[],
     logs: Record<string, Logging>
@@ -144,7 +155,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     this.accessories
       .filter(accessory => !configuredAccessories.includes(accessory))
       .forEach(accessory => {
-        logs[accessory.displayName].info('Removing obsolete accessory');
+        this.commonLog.info('Removing obsolete accessory:', accessory.displayName);
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         removedAccessories.push(accessory);
       });
@@ -157,7 +168,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       });
   }
 
-  createAccessory(
+  private createAccessory(
     accessory: PlatformAccessory<UnknownContext>,
     config: DeviceConfig,
     log: Logging

@@ -1,6 +1,6 @@
 import { AcquireCertificateData, EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
 import { EcoFlowMqttApi } from '@ecoflow/apis/ecoFlowMqttApi';
-import { MachineIdProvider } from '@ecoflow/helpers/machineId';
+import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
 import { Logging } from 'homebridge';
 import { connectAsync, IPublishPacket, MqttClient, OnMessageCallback } from 'mqtt';
 

@@ -1,4 +1,4 @@
-import { MachineIdProvider } from '@ecoflow/helpers/machineId';
+import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
 import { Logging } from 'homebridge';
 import { machineId } from 'node-machine-id';
 import { v4 as uuidv4 } from 'uuid';

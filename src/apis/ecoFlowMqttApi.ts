@@ -1,5 +1,5 @@
 import { AcquireCertificateData, EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
-import { MachineIdProvider } from '@ecoflow/helpers/machineId';
+import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
 import { Logging } from 'homebridge';
 import mqtt, { MqttClient } from 'mqtt';
 import { Observable, Subject } from 'rxjs';
