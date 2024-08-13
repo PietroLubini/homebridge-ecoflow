@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [main, dev]
 
+  # for test purpose only
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
