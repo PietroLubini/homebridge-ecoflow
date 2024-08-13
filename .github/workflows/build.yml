@@ -3,7 +3,7 @@ name: Build
 on:
   # Run workflow when PRs are merged into one of branch
   push:
-    branches: [main, dev, test/tasks]
+    branches: [main, dev, task/tests]
     paths-ignore:
       - '.github/workflows/publish.yml'
 
@@ -53,7 +53,7 @@ jobs:
         with:
           report_name_suffix: ${{ matrix.node-version }}
           coverage_file: ./coverage/new_report.json
-          skip_comparison_with_target_branch: ${{ github.event_name == 'pull_request' }}
+          skip_comparison_with_target_branch: ${{ github.event_name != 'pull_request' }}
 
       - name: List, audit, fix outdated dependencies and build again
         run: |
