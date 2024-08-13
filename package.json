@@ -24,6 +24,9 @@
     "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && tsc && npm run copy:cjs",
     "copy:cjs": "copyfiles -u 1 src/**/*.cjs dist",
+    "test": "jest --forceExit",
+    "test:cov": "jest --coverage",
+    "test:ci": "jest --coverage --ci --json --coverage --testLocationInResults --outputFile=coverage/new_report.json --reporters=default --reporters=jest-junit --forceExit",
     "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [
