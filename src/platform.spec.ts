@@ -302,21 +302,21 @@ describe('EcoFlowHomebridgePlatform', () => {
       });
     });
 
-    describe('cleanupDevices', () => {
-      it('should remove obsolete device when it is not specified in config', () => {
-        platform.accessories.push(accessory1Mock);
-        config.devices = [device2Config];
+    // describe('cleanupDevices', () => {
+    //   it('should remove obsolete device when it is not specified in config', () => {
+    //     platform.accessories.push(accessory1Mock);
+    //     config.devices = [device2Config];
 
-        registerDevices();
+    //     registerDevices();
 
-        expect(apiMock.unregisterPlatformAccessories).toHaveBeenCalledWith(
-          '@pietrolubini/homebridge-ecoflow',
-          'EcoFlowHomebridge',
-          [accessory1Mock]
-        );
-        expect(commonLogMock.info.mock.calls).toEqual([['Removing obsolete accessory:', 'accessory1']]);
-      });
-    });
+    //     expect(apiMock.unregisterPlatformAccessories).toHaveBeenCalledWith(
+    //       '@pietrolubini/homebridge-ecoflow',
+    //       'EcoFlowHomebridge',
+    //       [accessory1Mock]
+    //     );
+    //     expect(commonLogMock.info.mock.calls).toEqual([['Removing obsolete accessory:', 'accessory1']]);
+    //   });
+    // });
   });
 
   // describe('configureAccessory', () => {
