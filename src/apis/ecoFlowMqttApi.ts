@@ -77,8 +77,12 @@ export class EcoFlowMqttApi {
     const client = await this.connect();
     if (client) {
       const topic = `/open/${this.certificateData!.certificateAccount}/${serialNumber}/set`;
-      await client.publishAsync(topic, JSON.stringify(message));
-      this.log.debug(`Published to topic '${topic}':`, message);
+      try {
+        await client.publishAsync(topic, JSON.stringify(message));
+        this.log.debug(`Published to topic '${topic}':`, message);
+      } catch (err) {
+        this.log.error(`Publishing to topic '${topic}' of message '${JSON.stringify(message)}' was failed:`, err);
+      }
     }
   }
 
@@ -87,18 +91,21 @@ export class EcoFlowMqttApi {
       const certificateData = await this.acquireCertificate();
       if (certificateData) {
         const clientId = `HOMEBRIDGE_${(await this.machineIdProvider.getMachineId()).toUpperCase()}`;
-        this.client = await mqtt.connectAsync(
-          `${certificateData.protocol}://${certificateData.url}:${certificateData.port}`,
-          {
-            username: `${certificateData.certificateAccount}`,
-            password: `${certificateData.certificatePassword}`,
-            clientId,
-            protocolVersion: 5,
-          }
-        );
-        this.log.info('Connected to EcoFlow MQTT Service');
-
-        this.client.on('message', (topic, message) => {
+        try {
+          this.client = await mqtt.connectAsync(
+            `${certificateData.protocol}://${certificateData.url}:${certificateData.port}`,
+            {
+              username: `${certificateData.certificateAccount}`,
+              password: `${certificateData.certificatePassword}`,
+              clientId,
+              protocolVersion: 5,
+            }
+          );
+          this.log.info('Connected to EcoFlow MQTT Service');
+        } catch (err) {
+          this.log.error('Connection to EcoFlow MQTT Service was failed', err);
+        }
+        this.client?.on('message', (topic, message) => {
           const mqttMessage = JSON.parse(message.toString());
           this.processReceivedMessage(topic, topic.split('/').pop() as MqttTopicType, mqttMessage);
         });
@@ -111,9 +118,13 @@ export class EcoFlowMqttApi {
     const client = await this.connect();
     if (client) {
       const topic = `/open/${this.certificateData!.certificateAccount}/${serialNumber}/${topicType}`;
-      await client.subscribeAsync(topic);
-      this.log.debug('Subscribed to topic:', topic);
-      return true;
+      try {
+        await client.subscribeAsync(topic);
+        this.log.debug('Subscribed to topic:', topic);
+        return true;
+      } catch (err) {
+        this.log.error(`Subscribing to topic '${topic}' was failed:`, err);
+      }
     }
     return false;
   }
