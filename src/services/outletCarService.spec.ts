@@ -1,5 +1,5 @@
 import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
-import { EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
+import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
@@ -14,7 +14,7 @@ describe('OutletCarService', () => {
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
-  let httpApiMock: jest.Mocked<EcoFlowHttpApi>;
+  let httpApiMock: jest.Mocked<EcoFlowHttpApiManager>;
   let hapService: HapService;
 
   const hapMock = {
@@ -53,7 +53,7 @@ describe('OutletCarService', () => {
       getServiceById: jest.fn(),
       addService: jest.fn(),
     } as unknown as jest.Mocked<PlatformAccessory>;
-    httpApiMock = { getAllQuotas: jest.fn() } as unknown as jest.Mocked<EcoFlowHttpApi>;
+    httpApiMock = { getAllQuotas: jest.fn() } as unknown as jest.Mocked<EcoFlowHttpApiManager>;
     ecoFlowAccessoryMock = {
       log: logMock,
       platform: platformMock,
@@ -61,7 +61,7 @@ describe('OutletCarService', () => {
       config: {
         name: 'accessory1',
       },
-      httpApi: httpApiMock,
+      httpApiManager: httpApiMock,
       quota: {},
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessory>;

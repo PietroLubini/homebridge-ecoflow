@@ -1,14 +1,14 @@
 import { BatteryAllQuotaData, BmsStatus, InvStatus, PdStatus } from '@ecoflow/accessories/batteries/batteryAccessory';
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2Accessory';
-import { EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
+import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
+import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import {
-  EcoFlowMqttApi,
   MqttMessageType,
   MqttQuotaMessage,
   MqttQuotaMessageWithParams,
   MqttSetMessageWithParams,
   MqttSetReplyMessage,
-} from '@ecoflow/apis/ecoFlowMqttApi';
+} from '@ecoflow/apis/interfaces/mqttApiMessage';
 import { DeviceConfig } from '@ecoflow/config';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';
 import { sleep } from '@ecoflow/helpers/tests/sleep';
@@ -34,8 +34,8 @@ describe('Delta2Accessory', () => {
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
   let logMock: jest.Mocked<Logging>;
-  let httpApiMock: jest.Mocked<EcoFlowHttpApi>;
-  let mqttApiMock: jest.Mocked<EcoFlowMqttApi>;
+  let httpApiMock: jest.Mocked<EcoFlowHttpApiManager>;
+  let mqttApiMock: jest.Mocked<EcoFlowMqttApiManager>;
   let config: DeviceConfig;
   let accessory: Delta2Accessory;
   let batteryStatusServiceMock: jest.Mocked<BatteryStatusService>;
@@ -111,7 +111,7 @@ describe('Delta2Accessory', () => {
     logMock = { debug: jest.fn(), warn: jest.fn() } as unknown as jest.Mocked<Logging>;
     httpApiMock = {
       getAllQuotas: jest.fn(),
-    } as unknown as jest.Mocked<EcoFlowHttpApi>;
+    } as unknown as jest.Mocked<EcoFlowHttpApiManager>;
     quotaMock = { subscribe: jest.fn() } as unknown as jest.Mocked<Observable<MqttQuotaMessage>>;
     setReplyMock = { subscribe: jest.fn() } as unknown as jest.Mocked<Observable<MqttSetReplyMessage>>;
     mqttApiMock = {
@@ -121,9 +121,9 @@ describe('Delta2Accessory', () => {
       subscribeOnQuota: jest.fn(),
       subscribeOnSetReply: jest.fn(),
       sendSetCommand: jest.fn(),
-    } as unknown as jest.Mocked<EcoFlowMqttApi>;
+    } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
-    accessory = new Delta2Accessory(platformMock, accessoryMock, config, logMock, httpApiMock, mqttApiMock, false);
+    accessory = new Delta2Accessory(platformMock, accessoryMock, config, logMock, httpApiMock, mqttApiMock);
   });
 
   describe('initialize', () => {
@@ -155,46 +155,46 @@ describe('Delta2Accessory', () => {
   describe('connectMqtt', () => {
     beforeEach(() => {
       config.reconnectMqttTimeoutMs = 100;
-      accessory = new Delta2Accessory(platformMock, accessoryMock, config, logMock, httpApiMock, mqttApiMock, false);
+      accessory = new Delta2Accessory(platformMock, accessoryMock, config, logMock, httpApiMock, mqttApiMock);
     });
 
     it('should connect to mqtt server during initialization when subscription to quota and set_reply topic is successful', async () => {
-      mqttApiMock.subscribeOnQuota.mockResolvedValue(true);
-      mqttApiMock.subscribeOnSetReply.mockResolvedValue(true);
+      mqttApiMock.subscribeOnQuotaTopic.mockResolvedValue(true);
+      mqttApiMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
 
       await accessory.initialize();
       await waitMqttReconnection(1);
 
-      expect(mqttApiMock.subscribeOnQuota).toHaveBeenCalledTimes(1);
-      expect(mqttApiMock.subscribeOnQuota).toHaveBeenCalledWith('sn1');
-      expect(mqttApiMock.subscribeOnSetReply).toHaveBeenCalledTimes(1);
-      expect(mqttApiMock.subscribeOnSetReply).toHaveBeenCalledWith('sn1');
+      expect(mqttApiMock.subscribeOnQuotaTopic).toHaveBeenCalledTimes(1);
+      expect(mqttApiMock.subscribeOnQuotaTopic).toHaveBeenCalledWith('sn1');
+      expect(mqttApiMock.subscribeOnSetReplyTopic).toHaveBeenCalledTimes(1);
+      expect(mqttApiMock.subscribeOnSetReplyTopic).toHaveBeenCalledWith('sn1');
     });
 
     it('should re-connect to mqtt server when subscription to quota was failed during initialization', async () => {
-      mqttApiMock.subscribeOnQuota
+      mqttApiMock.subscribeOnQuotaTopic
         .mockImplementationOnce(() => Promise.resolve(false))
         .mockImplementationOnce(() => Promise.resolve(true));
-      mqttApiMock.subscribeOnSetReply.mockResolvedValue(true);
+      mqttApiMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
 
       await accessory.initialize();
       await waitMqttReconnection(1);
 
-      expect(mqttApiMock.subscribeOnQuota).toHaveBeenCalledTimes(2);
-      expect(mqttApiMock.subscribeOnSetReply).toHaveBeenCalledTimes(1);
+      expect(mqttApiMock.subscribeOnQuotaTopic).toHaveBeenCalledTimes(2);
+      expect(mqttApiMock.subscribeOnSetReplyTopic).toHaveBeenCalledTimes(1);
     });
 
     it('should re-connect to mqtt server when subscription to set_reply was failed during initialization', async () => {
-      mqttApiMock.subscribeOnQuota.mockResolvedValue(true);
-      mqttApiMock.subscribeOnSetReply
+      mqttApiMock.subscribeOnQuotaTopic.mockResolvedValue(true);
+      mqttApiMock.subscribeOnSetReplyTopic
         .mockImplementationOnce(() => Promise.resolve(false))
         .mockImplementationOnce(() => Promise.resolve(true));
 
       await accessory.initialize();
       await waitMqttReconnection(1);
 
-      expect(mqttApiMock.subscribeOnQuota).toHaveBeenCalledTimes(2);
-      expect(mqttApiMock.subscribeOnSetReply).toHaveBeenCalledTimes(2);
+      expect(mqttApiMock.subscribeOnQuotaTopic).toHaveBeenCalledTimes(2);
+      expect(mqttApiMock.subscribeOnSetReplyTopic).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -655,18 +655,18 @@ describe('Delta2Accessory', () => {
       setReplyMock.subscribe.mockReturnValueOnce(setReplySubscriptionMock);
 
       config.reconnectMqttTimeoutMs = 100;
-      accessory = new Delta2Accessory(platformMock, accessoryMock, config, logMock, httpApiMock, mqttApiMock, false);
+      accessory = new Delta2Accessory(platformMock, accessoryMock, config, logMock, httpApiMock, mqttApiMock);
     });
 
     it('should stop mqtt reconnection when destroying accessory', async () => {
-      mqttApiMock.subscribeOnQuota.mockResolvedValue(false);
+      mqttApiMock.subscribeOnQuotaTopic.mockResolvedValue(false);
       await accessory.initialize();
       await waitMqttReconnection(1);
 
       await accessory.destroy();
       await waitMqttReconnection(2);
 
-      expect(mqttApiMock.subscribeOnQuota).toHaveBeenCalledTimes(2);
+      expect(mqttApiMock.subscribeOnQuotaTopic).toHaveBeenCalledTimes(2);
     });
 
     it('should unsubscribe from parameters updates when destroying accessory', async () => {

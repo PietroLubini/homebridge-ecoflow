@@ -14,14 +14,23 @@ export enum LocationType {
   US = 'US',
 }
 
-export interface DeviceConfig extends AccessoryConfig {
-  model: DeviceModel;
-  serialNumber: string;
+export type SerialNumber = string;
+
+export interface DeviceInfoConfig {
+  name: string;
+  serialNumber: SerialNumber;
+}
+
+export interface DeviceAccessConfig extends DeviceInfoConfig {
   location: LocationType;
   accessKey: string;
   secretKey: string;
-  battery?: BatteryDeviceConfig;
   reconnectMqttTimeoutMs?: number;
+}
+
+export interface DeviceConfig extends AccessoryConfig, DeviceAccessConfig {
+  model: DeviceModel;
+  battery?: BatteryDeviceConfig;
 }
 
 export interface BatteryDeviceConfig {

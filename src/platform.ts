@@ -13,8 +13,8 @@ import {
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2Accessory';
 import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2maxAccessory';
 import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
-import { EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
-import { EcoFlowMqttApi } from '@ecoflow/apis/ecoFlowMqttApi';
+import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
+import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import {
   CustomCharacteristics,
   InputConsumptionWattFactory,
@@ -40,6 +40,12 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
+
+  private readonly httpApiManager: EcoFlowHttpApiManager = new EcoFlowHttpApiManager();
+  private readonly mqttApiManager: EcoFlowMqttApiManager = new EcoFlowMqttApiManager(
+    this.httpApiManager,
+    new MachineIdProvider()
+  );
 
   constructor(
     private readonly commonLog: Logging,
@@ -159,12 +165,19 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         removedAccessories.push(accessory);
       });
-    configuredEcoFlowAccessories
-      .filter(ecoFlowAccessory => !removedAccessories.includes(ecoFlowAccessory.accessory))
-      .forEach(ecoFlowAccessory => {
-        logs[ecoFlowAccessory.accessory.displayName].info('Initializing accessory');
-        ecoFlowAccessory.initialize().then(() => ecoFlowAccessory.cleanupServices());
-      });
+    const ecoFlowAccessories = configuredEcoFlowAccessories.filter(
+      ecoFlowAccessory => !removedAccessories.includes(ecoFlowAccessory.accessory)
+    );
+    this.initialize(ecoFlowAccessories, logs);
+  }
+
+  private async initialize(accessories: EcoFlowAccessory[], logs: Record<string, Logging>): Promise<void> {
+    for (const accessory of accessories) {
+      logs[accessory.accessory.displayName].info('Initializing accessory');
+      await accessory.initialize();
+      await accessory.initializeDefaultValues();
+      await accessory.cleanupServices();
+    }
   }
 
   private createAccessory(
@@ -173,14 +186,19 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     log: Logging
   ): EcoFlowAccessory | null {
     let ecoFlowAccessory: EcoFlowAccessory | null = null;
-    const httpApi = new EcoFlowHttpApi(config, log);
-    const mqttApi = new EcoFlowMqttApi(httpApi, log, new MachineIdProvider(log));
     switch (config.model) {
       case DeviceModel.Delta2Max:
-        ecoFlowAccessory = new Delta2MaxAccessory(this, accessory, config, log, httpApi, mqttApi);
+        ecoFlowAccessory = new Delta2MaxAccessory(
+          this,
+          accessory,
+          config,
+          log,
+          this.httpApiManager,
+          this.mqttApiManager
+        );
         break;
       case DeviceModel.Delta2:
-        ecoFlowAccessory = new Delta2Accessory(this, accessory, config, log, httpApi, mqttApi);
+        ecoFlowAccessory = new Delta2Accessory(this, accessory, config, log, this.httpApiManager, this.mqttApiManager);
         break;
       default:
         log.warn(`"${config.model}" is not supported. Ignoring the device`);

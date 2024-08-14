@@ -1,6 +1,6 @@
-import { DeviceConfig, LocationType } from '@ecoflow/config';
+import { DeviceInfo } from '@ecoflow/apis/entities/deviceInfo';
+import { LocationType } from '@ecoflow/config';
 import * as crypto from 'crypto';
-import { Logging } from 'homebridge';
 
 const ApiUrlUs = 'https://api-a.ecoflow.com';
 const ApiUrlEu = 'https://api-e.ecoflow.com';
@@ -50,49 +50,49 @@ interface Dict {
   [key: string]: any;
 }
 
-export class EcoFlowHttpApi {
-  private readonly apiUrl: string;
-  constructor(
-    private readonly config: DeviceConfig,
-    private readonly log: Logging
-  ) {
-    this.apiUrl = this.config.location === LocationType.US ? ApiUrlUs : ApiUrlEu;
-  }
-
-  public async getQuotas<TData>(quotas: string[]): Promise<TData | null> {
-    this.log.debug('Get quotas:', quotas);
+export class EcoFlowHttpApiManager {
+  public async getQuotas<TData>(quotas: string[], deviceInfo: DeviceInfo): Promise<TData | null> {
+    deviceInfo.log.debug('Get quotas:', quotas);
     const requestCmd: GetQuotasCmdRequest = {
-      sn: this.config.serialNumber,
+      sn: deviceInfo.config.serialNumber,
       params: {
         quotas,
       },
     };
-    const response = await this.execute<CmdResponseWithData<Dict>>(QuotaPath, HttpMethod.Post, requestCmd);
+    const response = await this.execute<CmdResponseWithData<Dict>>(deviceInfo, QuotaPath, HttpMethod.Post, requestCmd);
     if (!response.failed) {
       const data = this.convertData<TData>(response.data);
-      this.log.debug('Quotas:', data);
+      deviceInfo.log.debug('Quotas:', data);
       return data;
     }
     return null;
   }
 
-  public async getAllQuotas<TData>(): Promise<TData | null> {
-    this.log.debug('Get all quotas');
+  public async getAllQuotas<TData>(deviceInfo: DeviceInfo): Promise<TData | null> {
+    deviceInfo.log.debug('Get all quotas');
     const requestCmd: GetCmdRequest = {
-      sn: this.config.serialNumber,
+      sn: deviceInfo.config.serialNumber,
     };
-    const response = await this.execute<CmdResponseWithData<Dict>>(QuotaAllPath, HttpMethod.Get, requestCmd);
+    const response = await this.execute<CmdResponseWithData<Dict>>(
+      deviceInfo,
+      QuotaAllPath,
+      HttpMethod.Get,
+      requestCmd
+    );
     if (!response.failed) {
       const data = this.convertData<TData>(response.data);
-      this.log.debug('All quotas:', data);
       return data;
     }
     return null;
   }
 
-  public async acquireCertificate(): Promise<AcquireCertificateData | null> {
-    this.log.debug('Acquire certificate for MQTT connection');
-    const response = await this.execute<CmdResponseWithData<AcquireCertificateData>>(CertificatePath, HttpMethod.Get);
+  public async acquireCertificate(deviceInfo: DeviceInfo): Promise<AcquireCertificateData | null> {
+    deviceInfo.log.debug('Acquire certificate for MQTT connection');
+    const response = await this.execute<CmdResponseWithData<AcquireCertificateData>>(
+      deviceInfo,
+      CertificatePath,
+      HttpMethod.Get
+    );
     if (!response.failed) {
       return response.data;
     }
@@ -100,12 +100,14 @@ export class EcoFlowHttpApi {
   }
 
   protected async execute<TResponse extends CmdResponse>(
+    deviceInfo: DeviceInfo,
     relativeUrl: string,
     method: HttpMethod,
     queryParameters: object | null = null
   ): Promise<TResponse> {
-    const url = new URL(relativeUrl, this.apiUrl);
-    const accessKey = this.config.accessKey;
+    const apiUrl = deviceInfo.config.location === LocationType.US ? ApiUrlUs : ApiUrlEu;
+    const url = new URL(relativeUrl, apiUrl);
+    const accessKey = deviceInfo.config.accessKey;
     const nonce = this.getNonce();
     const timestamp = Date.now();
     const queryParams = this.composeSignMessage(queryParameters);
@@ -117,7 +119,7 @@ export class EcoFlowHttpApi {
       accessKey,
       nonce,
       timestamp: timestamp.toString(),
-      sign: this.createHmacSha256(this.config.secretKey, message),
+      sign: this.createHmacSha256(deviceInfo.config.secretKey, message),
     };
     const options: RequestInit = { method };
     options.headers = new Headers(headers);
@@ -133,7 +135,7 @@ export class EcoFlowHttpApi {
       }
       return result;
     } catch (e) {
-      this.log.error('Request is failed:', e);
+      deviceInfo.log.error('Request is failed:', e);
       return {
         code: '500',
         message: (e as Error)?.message,
