@@ -1,13 +1,13 @@
+import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
+import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic, CharacteristicValue, Service, WithUUID } from 'homebridge';
-import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory.js';
-import { AdditionalBatteryCharacteristicType as CharacteristicType } from '../config.js';
-import { ServiceBase } from './serviceBase.js';
 
 export interface MqttSetEnabledMessageParams {
   enabled: number;
 }
 
-export abstract class OutletsServiceBase extends ServiceBase {
+export abstract class OutletServiceBase extends ServiceBase {
   constructor(
     private readonly serviceSubType: string,
     ecoFlowAccessory: EcoFlowAccessory
@@ -112,7 +112,7 @@ export abstract class OutletsServiceBase extends ServiceBase {
     characteristicType: CharacteristicType
   ): void {
     if (this.ecoFlowAccessory.config.battery?.additionalCharacteristics?.includes(characteristicType)) {
-      super.updateCharacteristic(characteristic, name, value);
+      this.updateCharacteristic(characteristic, name, value);
     }
   }
 

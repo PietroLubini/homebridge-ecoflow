@@ -4,15 +4,18 @@
     "declaration": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "dist",
+    "outDir": "./dist",
     "rootDir": "src",
     "baseUrl": "./src",
+    "paths": {
+      "@ecoflow/*": ["*"]
+    },
     "lib": ["DOM", "ES2022"],
-    "module": "ES2022",
+    "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
     "strict": true,
     "target": "ES2022"
   },
-  "include": ["eslint.config.mjs", "homebridge-ui", "src", "src/**/*.cjs"]
+  "include": ["./src"]
 }

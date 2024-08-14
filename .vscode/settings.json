@@ -4,6 +4,13 @@
     "source.fixAll.eslint": "explicit"
   },
   "files.eol": "\n",
+  "files.exclude": {
+    "**/*.js": { "when": "$(basename).ts" },
+    "**/*.d.ts": { "when": "$(basename).ts" },
+    "**/*.js.map": true,
+    "**/node_modules": true,
+    "**/coverage": true
+  },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
@@ -11,5 +18,8 @@
   "typescript.validate.enable": true,
   "typescript.preferences.importModuleSpecifier": "shortest",
   "git.mergeEditor": true,
-  "git.inputValidationSubjectLength": 70
+  "git.inputValidationSubjectLength": 70,
+  "jest.autoRun": {
+    "watch": false
+  }
 }

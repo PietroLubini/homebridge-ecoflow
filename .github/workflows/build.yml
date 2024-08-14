@@ -1,19 +1,26 @@
 name: Build
 
 on:
+  # Run workflow when PRs are merged into one of branch
   push:
-    branches:
-      - main
+    branches: [main]
+    paths-ignore:
+      - '.github/workflows/publish.yml'
+
+  # Run workflow for all PRs where target branch is one of
   pull_request:
+    branches: [main]
+    paths-ignore:
+      - '.github/workflows/publish.yml'
 
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        # the Node.js versions to build on
         node-version: [18.x, 20.x]
 
     steps:
@@ -27,10 +34,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Lint the project
+      - name: Lint
         run: npm run lint
 
-      - name: Build the project
+      - name: Build
         run: npm run build
 
       - name: List, audit, fix outdated dependencies and build again
@@ -40,3 +47,15 @@ jobs:
           npm audit fix || true
           npm list --outdated
           npm run build
+
+      - name: Test
+        uses: ./.github/actions/test
+        with:
+          report_name_suffix: ${{ matrix.node-version }}
+
+      - name: Test Coverage
+        if: ${{ github.event_name == 'pull_request' && always() }}
+        uses: ./.github/actions/test_coverage
+        with:
+          report_name_suffix: ${{ matrix.node-version }}
+          coverage_file: ./coverage/new_report.json

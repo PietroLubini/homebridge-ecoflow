@@ -1,7 +1,7 @@
-import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory.js';
-import { MqttSetEnabledMessageParams, OutletsServiceBase } from './outletServiceBase.js';
+import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { MqttSetEnabledMessageParams, OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 
-export class OutletUsbService extends OutletsServiceBase {
+export class OutletUsbService extends OutletServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessory) {
     super('USB', ecoFlowAccessory);
   }

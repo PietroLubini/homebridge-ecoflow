@@ -1,6 +1,6 @@
+import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic, CharacteristicValue, Logging, Service, WithUUID } from 'homebridge';
-import { EcoFlowAccessory } from '../accessories/ecoFlowAccessory.js';
-import { EcoFlowHomebridgePlatform } from '../platform.js';
 
 export abstract class ServiceBase {
   protected readonly log: Logging;
@@ -38,12 +38,7 @@ export abstract class ServiceBase {
   protected abstract addCharacteristics(): Characteristic[];
 
   protected addCharacteristic(characteristic: WithUUID<{ new (): Characteristic }>): Characteristic {
-    const existingCharacteristic = this.service.getCharacteristic(characteristic);
-    if (!existingCharacteristic) {
-      return this.service.addCharacteristic(characteristic);
-    }
-
-    return existingCharacteristic;
+    return this.service.getCharacteristic(characteristic);
   }
 
   protected getOrAddService(service: WithUUID<typeof Service>, displayName?: string): Service {

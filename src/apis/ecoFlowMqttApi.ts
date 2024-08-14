@@ -1,8 +1,8 @@
+import { AcquireCertificateData, EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
+import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
 import { Logging } from 'homebridge';
 import mqtt, { MqttClient } from 'mqtt';
-import { Subject } from 'rxjs';
-import { getMachineId } from '../helpers/machineId.js';
-import { AcquireCertificateData, EcoFlowHttpApi } from './ecoFlowHttpApi.js';
+import { Observable, Subject } from 'rxjs';
 
 export enum MqttMessageType {
   PD = 'pdStatus',
@@ -48,12 +48,13 @@ export class EcoFlowMqttApi {
   private certificateData: AcquireCertificateData | null = null;
   private readonly quotaSubject: Subject<MqttQuotaMessage> = new Subject<MqttQuotaMessage>();
   private readonly setReplySubject: Subject<MqttSetReplyMessage> = new Subject<MqttSetReplyMessage>();
-  public readonly quota$ = this.quotaSubject.asObservable();
-  public readonly setReply$ = this.setReplySubject.asObservable();
+  public readonly quota$: Observable<MqttQuotaMessage> = this.quotaSubject.asObservable();
+  public readonly setReply$: Observable<MqttSetReplyMessage> = this.setReplySubject.asObservable();
 
   constructor(
-    private httpApi: EcoFlowHttpApi,
-    private log: Logging
+    private readonly httpApi: EcoFlowHttpApi,
+    private readonly log: Logging,
+    private readonly machineIdProvider: MachineIdProvider
   ) {}
 
   public async destroy(): Promise<void> {
@@ -85,7 +86,7 @@ export class EcoFlowMqttApi {
     if (!this.client) {
       const certificateData = await this.acquireCertificate();
       if (certificateData) {
-        const clientId = `HOMEBRIDGE_${(await getMachineId(this.log)).toUpperCase()}`;
+        const clientId = `HOMEBRIDGE_${(await this.machineIdProvider.getMachineId()).toUpperCase()}`;
         this.client = await mqtt.connectAsync(
           `${certificateData.protocol}://${certificateData.url}:${certificateData.port}`,
           {
@@ -99,7 +100,7 @@ export class EcoFlowMqttApi {
 
         this.client.on('message', (topic, message) => {
           const mqttMessage = JSON.parse(message.toString());
-          this.processReceivedMessage(topic, (topic.split('/').pop() || '') as MqttTopicType, mqttMessage);
+          this.processReceivedMessage(topic, topic.split('/').pop() as MqttTopicType, mqttMessage);
         });
       }
     }

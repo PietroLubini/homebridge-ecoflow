@@ -21,6 +21,7 @@ export interface DeviceConfig extends AccessoryConfig {
   accessKey: string;
   secretKey: string;
   battery?: BatteryDeviceConfig;
+  reconnectMqttTimeoutMs?: number;
 }
 
 export interface BatteryDeviceConfig {

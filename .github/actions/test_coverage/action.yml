@@ -1,0 +1,23 @@
+name: TestCoverage
+description: Runs test coverage report
+inputs:
+  report_name_suffix:
+    description: Text to be added to name of test coverage report
+    required: true
+  coverage_file:
+    description: Path to file for generated new_report.json file for source branch (bypasses running the test coverage for source branch)
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: jwalton/gh-find-current-pr@v1
+      id: getPrId
+
+    - uses: ArtiomTr/jest-coverage-report-action@v2
+      with:
+        custom-title: Coverage Report (${{ inputs.report_name_suffix }})
+        prnumber: ${{ steps.getPrId.outputs.number }}
+        skip-step: all
+        coverage-file: ${{ inputs.coverage_file }}
+        test-script: npm run test
