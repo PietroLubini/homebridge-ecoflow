@@ -11,10 +11,10 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - uses: jwalton/gh-find-current-pr@v1.3.3
+    - uses: jwalton/gh-find-current-pr@v1
       id: getPrId
 
-    - uses: ArtiomTr/jest-coverage-report-action@v2.3.0
+    - uses: ArtiomTr/jest-coverage-report-action@v2
       with:
         custom-title: Coverage Report (${{ inputs.report_name_suffix }})
         prnumber: ${{ steps.getPrId.outputs.number }}

@@ -124,7 +124,7 @@ export abstract class EcoFlowAccessory {
       if (!this.isMqttConnected) {
         await this.initMqtt();
       }
-    }, this.config.reconnectMqttTimeoutInMs ?? 60000);
+    }, this.config.reconnectMqttTimeoutMs ?? 60000);
   }
 
   private async initMqtt(): Promise<void> {

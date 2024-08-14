@@ -64,7 +64,7 @@ describe('Delta2Accessory', () => {
   ];
 
   function waitMqttReconnection(attempts: number): Promise<void> {
-    return sleep(config.reconnectMqttTimeoutInMs! * (1 / 2 + attempts));
+    return sleep(config.reconnectMqttTimeoutMs! * (1 / 2 + attempts));
   }
 
   beforeEach(() => {
@@ -154,7 +154,7 @@ describe('Delta2Accessory', () => {
 
   describe('connectMqtt', () => {
     beforeEach(() => {
-      config.reconnectMqttTimeoutInMs = 100;
+      config.reconnectMqttTimeoutMs = 100;
       accessory = new Delta2Accessory(platformMock, accessoryMock, config, logMock, httpApiMock, mqttApiMock, false);
     });
 
@@ -654,7 +654,7 @@ describe('Delta2Accessory', () => {
       setReplySubscriptionMock = { unsubscribe: jest.fn() } as unknown as jest.Mocked<Subscription>;
       setReplyMock.subscribe.mockReturnValueOnce(setReplySubscriptionMock);
 
-      config.reconnectMqttTimeoutInMs = 100;
+      config.reconnectMqttTimeoutMs = 100;
       accessory = new Delta2Accessory(platformMock, accessoryMock, config, logMock, httpApiMock, mqttApiMock, false);
     });
 
