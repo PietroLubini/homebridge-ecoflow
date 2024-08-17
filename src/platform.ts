@@ -107,10 +107,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       const existingAccessory = configuredAccessories.find(
         accessory => accessory.context.deviceConfig.serialNumber === config.serialNumber
       );
-      if (existingAccessory) {
-        log.warn(`Device with the same SN (${config.serialNumber}) already exists. Ignoring the device`);
-        continue;
-      }
+      // if (existingAccessory) {
+      //   log.warn(`Device with the same SN (${config.serialNumber}) already exists. Ignoring the device`);
+      //   continue;
+      // }
 
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
