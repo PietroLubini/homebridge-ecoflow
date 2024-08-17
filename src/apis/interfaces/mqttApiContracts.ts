@@ -6,7 +6,9 @@ export enum MqttMessageType {
   EMS = 'emsStatus',
 }
 
-export interface MqttQuotaMessage {
+export interface MqttMessage {}
+
+export interface MqttQuotaMessage extends MqttMessage {
   typeCode: MqttMessageType;
 }
 
@@ -15,7 +17,7 @@ export interface MqttQuotaMessageWithParams<TParams> extends MqttQuotaMessage {
   params: TParams;
 }
 
-export interface MqttSetMessage {
+export interface MqttSetMessage extends MqttMessage {
   id: number;
   version: string;
   operateType: string;

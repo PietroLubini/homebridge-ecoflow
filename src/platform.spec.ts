@@ -139,7 +139,7 @@ describe('EcoFlowHomebridgePlatform', () => {
     }
 
     async function waitInitializationDone(): Promise<void> {
-      return sleep(500);
+      return sleep(50);
     }
 
     beforeEach(() => {

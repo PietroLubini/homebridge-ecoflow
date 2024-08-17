@@ -4,6 +4,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { AcquireCertificateData } from '@ecoflow/apis/interfaces/httpApiContracts';
 import {
+  MqttMessage,
   MqttMessageType,
   MqttQuotaMessage,
   MqttSetReplyMessage,
@@ -40,10 +41,17 @@ describe('EcoFlowMqttApiManager', () => {
   let subscription2: jest.Mocked<Subscription>;
   let subscription3: jest.Mocked<Subscription>;
   const connectAsyncMock: jest.Mock = connectAsync as jest.Mock;
-  const certificateData: AcquireCertificateData = {
+  const certificateData1: AcquireCertificateData = {
     certificateAccount: 'account1',
     certificatePassword: 'pwd1',
     url: 'url1',
+    port: '8765',
+    protocol: 'mqtts',
+  };
+  const certificateData3: AcquireCertificateData = {
+    certificateAccount: 'account3',
+    certificatePassword: 'pwd3',
+    url: 'url3',
     port: '8765',
     protocol: 'mqtts',
   };
@@ -92,16 +100,21 @@ describe('EcoFlowMqttApiManager', () => {
     } as unknown as jest.Mocked<MqttClient>;
     manager = new EcoFlowMqttApiManager(httpApiManagerMock, machineIdProviderMock);
 
-    httpApiManagerMock.acquireCertificate.mockReset();
-    machineIdProviderMock.getMachineId.mockReset();
     connectAsyncMock.mockReset();
 
-    httpApiManagerMock.acquireCertificate.mockResolvedValue(certificateData);
+    httpApiManagerMock.acquireCertificate.mockImplementation((deviceInfo: DeviceInfo) => {
+      if (deviceInfo.accessKey === config1.accessKey) {
+        return Promise.resolve(certificateData1);
+      } else if (deviceInfo.accessKey === config3.accessKey) {
+        return Promise.resolve(certificateData3);
+      }
+      return Promise.resolve(null);
+    });
     machineIdProviderMock.getMachineId.mockResolvedValue('machineId1');
     connectAsyncMock.mockImplementation((_, options: IClientOptions) => {
-      if (options.clientId?.endsWith('accessKey1')) {
+      if (options.clientId?.endsWith(certificateData1.certificateAccount)) {
         return client1Mock;
-      } else if (options.clientId?.endsWith('accessKey3')) {
+      } else if (options.clientId?.endsWith(certificateData3.certificateAccount)) {
         return client3Mock;
       }
       return undefined;
@@ -178,7 +191,7 @@ describe('EcoFlowMqttApiManager', () => {
       expect(connectAsyncMock).toHaveBeenCalledWith('mqtts://url1:8765', {
         username: 'account1',
         password: 'pwd1',
-        clientId: 'HOMEBRIDGE_MACHINEID1_accessKey1',
+        clientId: 'HOMEBRIDGE_MACHINEID1_account1',
         protocolVersion: 5,
       });
     });
@@ -242,7 +255,7 @@ describe('EcoFlowMqttApiManager', () => {
 
     function processReceivedMessage(
       topicType: MqttTopicType,
-      message: object,
+      message: MqttMessage,
       clientMock: jest.Mocked<MqttClient>
     ): void {
       const onMessageCallback: OnMessageCallback = clientMock.on.mock.calls[0][1] as unknown as OnMessageCallback;
@@ -510,7 +523,7 @@ describe('EcoFlowMqttApiManager', () => {
       expect(client3Mock.unsubscribeAsync).toHaveBeenCalledWith('#');
       expect(client3Mock.end).toHaveBeenCalledTimes(1);
       expect(log3Mock.debug.mock.calls).toEqual([
-        ['Subscribed to topic:', '/open/account1/sn3/quota'],
+        ['Subscribed to topic:', '/open/account3/sn3/quota'],
         ['Unsubscribed from all topics'],
         ['Disconnected from EcoFlow MQTT Service'],
       ]);

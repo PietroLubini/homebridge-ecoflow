@@ -15,7 +15,7 @@ describe('OutletAcService', () => {
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
-  let httpApiMock: jest.Mocked<EcoFlowHttpApiManager>;
+  let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
   let hapService: HapService;
 
   const hapMock = {
@@ -54,7 +54,7 @@ describe('OutletAcService', () => {
       getServiceById: jest.fn(),
       addService: jest.fn(),
     } as unknown as jest.Mocked<PlatformAccessory>;
-    httpApiMock = { getAllQuotas: jest.fn() } as unknown as jest.Mocked<EcoFlowHttpApiManager>;
+    httpApiManagerMock = { getAllQuotas: jest.fn() } as unknown as jest.Mocked<EcoFlowHttpApiManager>;
     ecoFlowAccessoryMock = {
       log: logMock,
       platform: platformMock,
@@ -62,7 +62,7 @@ describe('OutletAcService', () => {
       config: {
         name: 'accessory1',
       },
-      httpApiManager: httpApiMock,
+      httpApiManager: httpApiManagerMock,
       quota: {},
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessoryWithQuota<BatteryAllQuotaData>>;

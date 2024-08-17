@@ -22,4 +22,22 @@ describe('DeviceInfo', () => {
       expect(actual).toEqual('accessKey1_secretKey1');
     });
   });
+
+  describe('accessKey', () => {
+    it('should initialize accessKey when creating device info', () => {
+      device = new DeviceInfo(
+        {
+          name: 'name1',
+          accessKey: 'accessKey1',
+          location: LocationType.US,
+          secretKey: 'secretKey1',
+          serialNumber: 'sn1',
+        },
+        {} as jest.Mocked<Logging>
+      );
+      const actual = device.accessKey;
+
+      expect(actual).toEqual('accessKey1');
+    });
+  });
 });

@@ -1,4 +1,9 @@
-import { MqttQuotaMessage, MqttSetReplyMessage, MqttTopicType } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import {
+  MqttMessage,
+  MqttQuotaMessage,
+  MqttSetReplyMessage,
+  MqttTopicType,
+} from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceInfoConfig } from '@ecoflow/config';
 import { Logging } from 'homebridge';
 import { Observable, Subject, Subscription } from 'rxjs';
@@ -14,7 +19,7 @@ export class MqttDevice {
     public readonly log: Logging
   ) {}
 
-  public processReceivedMessage(topicType: MqttTopicType, message: object): void {
+  public processReceivedMessage(topicType: MqttTopicType, message: MqttMessage): void {
     switch (topicType) {
       case MqttTopicType.Quota:
         this.quotaSubject.next(message as MqttQuotaMessage);
