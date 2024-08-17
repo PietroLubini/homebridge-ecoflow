@@ -39,11 +39,7 @@ sudo npm install -g @pietrolubini/homebridge-ecoflow
 
 ## Configuration
 
-Add the `EcoFlowHomebridge` platform in `config.json` in your home directory inside `.homebridge`.
-
-Add your devices in the `devices` array.
-
-Example configuration:
+Add the `EcoFlowHomebridge` platform in `config.json` in your home directory inside `.homebridge`. Add your devices in the `devices` array. Example of configuration:
 
 ```js
 {
@@ -59,6 +55,7 @@ Example configuration:
           "secretKey": "yBwYgZWqNnAlULKmF1Qrydy2Iheexj22"
         }
       ],
+      "name": "Homebridge EcoFlow",
       "platform": "EcoFlowHomebridge",
     }
   ]

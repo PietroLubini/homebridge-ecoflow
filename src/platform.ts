@@ -73,7 +73,6 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     // in order to ensure they weren't added to homebridge already. This event can also be used
     // to start discovery of new accessories.
     this.api.on('didFinishLaunching', () => {
-      this.commonLog.debug('Executed didFinishLaunching callback');
       this.registerDevices();
     });
   }
@@ -115,7 +114,9 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
-      const uuid = this.api.hap.uuid.generate(config.serialNumber);
+      const uuid = this.api.hap.uuid.generate(
+        existingAccessory ? `${config.serialNumber}_${config.name}` : config.serialNumber
+      );
 
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
