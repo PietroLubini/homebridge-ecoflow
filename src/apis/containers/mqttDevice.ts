@@ -1,4 +1,4 @@
-import { MqttQuotaMessage, MqttSetReplyMessage, MqttTopicType } from '@ecoflow/apis/interfaces/mqttApiMessage';
+import { MqttQuotaMessage, MqttSetReplyMessage, MqttTopicType } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceInfoConfig } from '@ecoflow/config';
 import { Logging } from 'homebridge';
 import { Observable, Subject, Subscription } from 'rxjs';
@@ -10,8 +10,8 @@ export class MqttDevice {
   private readonly setReply$: Observable<MqttSetReplyMessage> = this.setReplySubject.asObservable();
 
   constructor(
-    public readonly log: Logging,
-    public config: DeviceInfoConfig
+    public config: DeviceInfoConfig,
+    public readonly log: Logging
   ) {}
 
   public processReceivedMessage(topicType: MqttTopicType, message: object): void {

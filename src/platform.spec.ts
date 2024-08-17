@@ -7,6 +7,7 @@ import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteri
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from '@ecoflow/config';
 import { Logger } from '@ecoflow/helpers/logger';
 import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
+import { sleep } from '@ecoflow/helpers/tests/sleep';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { API, HAP, Logging, PlatformAccessory } from 'homebridge';
@@ -131,12 +132,14 @@ describe('EcoFlowHomebridgePlatform', () => {
       const accessoryBaseMock = ecoFlowAccessoryMock as jest.Mocked<BatteryAccessory>;
       accessoryBaseMock.initialize = jest.fn().mockResolvedValue(undefined);
       accessoryBaseMock.cleanupServices.mockReset();
-      if (!ecoFlowAccessoryMock.accessory) {
-        Object.defineProperty(ecoFlowAccessoryMock, 'accessory', { value: accessoryMock });
-      }
+      Object.defineProperty(ecoFlowAccessoryMock, 'accessory', { value: accessoryMock, configurable: true });
       (Accessory as jest.Mock).mockImplementation(() => ecoFlowAccessoryMock);
 
       return ecoFlowAccessoryMock;
+    }
+
+    async function waitInitializationDone(): Promise<void> {
+      return sleep(500);
     }
 
     beforeEach(() => {
@@ -260,11 +263,13 @@ describe('EcoFlowHomebridgePlatform', () => {
         config.devices = [device1Config, device2Config];
 
         registerDevices();
-        await Promise.resolve(); // Wait for all pending promises to resolve
+        await waitInitializationDone();
 
         expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
+        expect(ecoflowAccessory1Mock.initializeDefaultValues).toHaveBeenCalled();
         expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();
         expect(ecoflowAccessory2Mock.initialize).toHaveBeenCalled();
+        expect(ecoflowAccessory2Mock.initializeDefaultValues).toHaveBeenCalled();
         expect(ecoflowAccessory2Mock.cleanupServices).toHaveBeenCalled();
       });
     });
@@ -296,9 +301,10 @@ describe('EcoFlowHomebridgePlatform', () => {
         config.devices = [device1Config];
 
         registerDevices();
-        await Promise.resolve(); // Wait for all pending promises to resolve
+        await waitInitializationDone();
 
         expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
+        expect(ecoflowAccessory1Mock.initializeDefaultValues).toHaveBeenCalled();
         expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();
       });
 
@@ -307,9 +313,10 @@ describe('EcoFlowHomebridgePlatform', () => {
         config.devices = [device1Config];
 
         registerDevices();
-        await Promise.resolve(); // Wait for all pending promises to resolve
+        await waitInitializationDone();
 
         expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
+        expect(ecoflowAccessory1Mock.initializeDefaultValues).toHaveBeenCalled();
         expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();
       });
     });

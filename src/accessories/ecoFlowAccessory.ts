@@ -1,12 +1,12 @@
+import { DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
-import { DeviceInfo } from '@ecoflow/apis/entities/deviceInfo';
 import {
   MqttQuotaMessage,
   MqttSetMessage,
   MqttSetMessageWithParams,
   MqttSetReplyMessage,
-} from '@ecoflow/apis/interfaces/mqttApiMessage';
+} from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
@@ -159,12 +159,12 @@ export abstract class EcoFlowAccessoryWithQuota<TAllQuotaData> extends EcoFlowAc
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
   }
 
-  public override async initializeDefaultValues(): Promise<void> {
-    if (!this._quota) {
+  public override async initializeDefaultValues(shouldUpdateInitialValues: boolean = true): Promise<void> {
+    if (!this.quota) {
       this._quota = await this.httpApiManager.getAllQuotas<TAllQuotaData>(this.deviceInfo);
     }
-    if (this._quota) {
-      this.updateInitialValues(this._quota);
+    if (this.quota && shouldUpdateInitialValues) {
+      this.updateInitialValues(this.quota);
     }
   }
 

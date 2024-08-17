@@ -1,7 +1,11 @@
 import { EcoFlowAccessoryWithQuota } from '@ecoflow/accessories/ecoFlowAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
-import { MqttMessageType, MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/interfaces/mqttApiMessage';
+import {
+  MqttMessageType,
+  MqttQuotaMessage,
+  MqttQuotaMessageWithParams,
+} from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';

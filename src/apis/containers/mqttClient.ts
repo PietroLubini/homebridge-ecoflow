@@ -1,14 +1,24 @@
-import { MqttDevice } from '@ecoflow/apis/entities/mqttDevice';
-import { AcquireCertificateData } from '@ecoflow/apis/ecoFlowHttpApiManager';
+import { MqttDevice } from '@ecoflow/apis/containers/mqttDevice';
+import { AcquireCertificateData } from '@ecoflow/apis/interfaces/httpApiContracts';
 import { DeviceInfoConfig, SerialNumber } from '@ecoflow/config';
 import { Logging } from 'homebridge';
 import mqtt from 'mqtt';
 
 export class MqttClient {
-  public client: mqtt.MqttClient | null = null;
+  private _client: mqtt.MqttClient | null = null;
   private readonly devicesCache: Record<SerialNumber, MqttDevice[]> = {};
 
   constructor(public readonly certificateData: AcquireCertificateData) {}
+
+  public get client(): mqtt.MqttClient | null {
+    return this._client;
+  }
+
+  public set client(new_client: mqtt.MqttClient) {
+    if (this._client === null) {
+      this._client = new_client;
+    }
+  }
 
   public isConnected(): boolean {
     return !!this.client;
@@ -25,7 +35,7 @@ export class MqttClient {
     if (!(config.serialNumber in this.devicesCache)) {
       this.devicesCache[config.serialNumber] = [];
     }
-    this.devicesCache[config.serialNumber].push(new MqttDevice(log, config));
+    this.devicesCache[config.serialNumber].push(new MqttDevice(config, log));
   }
 
   public getAllDevices(): MqttDevice[] {

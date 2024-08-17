@@ -16,7 +16,7 @@
   "editor.detectIndentation": false,
   "editor.tabSize": 2,
   "typescript.validate.enable": true,
-  "typescript.preferences.importModuleSpecifier": "shortest",
+  "typescript.preferences.importModuleSpecifier": "non-relative",
   "git.mergeEditor": true,
   "git.inputValidationSubjectLength": 70,
   "jest.autoRun": {

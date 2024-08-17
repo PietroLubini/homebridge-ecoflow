@@ -1,4 +1,12 @@
-import { DeviceInfo } from '@ecoflow/apis/entities/deviceInfo';
+import { DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
+import {
+  AcquireCertificateData,
+  CmdResponse,
+  CmdResponseWithData,
+  GetCmdRequest,
+  GetQuotasCmdRequest,
+  HttpMethod,
+} from '@ecoflow/apis/interfaces/httpApiContracts';
 import { LocationType } from '@ecoflow/config';
 import * as crypto from 'crypto';
 
@@ -7,43 +15,6 @@ const ApiUrlEu = 'https://api-e.ecoflow.com';
 const QuotaPath = '/iot-open/sign/device/quota';
 const QuotaAllPath = '/iot-open/sign/device/quota/all';
 const CertificatePath = '/iot-open/sign/certification';
-
-export enum HttpMethod {
-  Get = 'GET',
-  Post = 'POST',
-}
-
-export interface CmdResponse {
-  code: string;
-  message: string;
-  failed: boolean;
-}
-
-export interface CmdResponseWithData<TData> extends CmdResponse {
-  code: string;
-  message: string;
-  data: TData;
-}
-
-export interface GetCmdRequest {
-  sn: string;
-}
-
-export interface GetQuotasCmdRequest extends GetCmdRequest {
-  params: GetQuotasCmdRequestParams;
-}
-
-export interface GetQuotasCmdRequestParams {
-  quotas: string[];
-}
-
-export interface AcquireCertificateData {
-  certificateAccount: string;
-  certificatePassword: string;
-  url: string;
-  port: string;
-  protocol: string;
-}
 
 interface Dict {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,7 +33,6 @@ export class EcoFlowHttpApiManager {
     const response = await this.execute<CmdResponseWithData<Dict>>(deviceInfo, QuotaPath, HttpMethod.Post, requestCmd);
     if (!response.failed) {
       const data = this.convertData<TData>(response.data);
-      deviceInfo.log.debug('Quotas:', data);
       return data;
     }
     return null;

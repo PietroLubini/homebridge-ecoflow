@@ -1,7 +1,7 @@
+import { ConnectionKey, DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
+import { MqttClient } from '@ecoflow/apis/containers/mqttClient';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
-import { ConnectionKey, DeviceInfo } from '@ecoflow/apis/entities/deviceInfo';
-import { MqttClient } from '@ecoflow/apis/entities/mqttClient';
-import { MqttSetMessage, MqttTopicType } from '@ecoflow/apis/interfaces/mqttApiMessage';
+import { MqttSetMessage, MqttTopicType } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { SerialNumber } from '@ecoflow/config';
 import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
 import mqtt from 'mqtt';
@@ -65,8 +65,7 @@ export class EcoFlowMqttApiManager {
   private async connect(deviceInfo: DeviceInfo): Promise<MqttClient | null> {
     const apiClient = await this.acquireCertificate(deviceInfo);
     if (apiClient && !apiClient.client) {
-      // TODO: include deviceInfo.connectionKey into clientId?
-      const clientId = `HOMEBRIDGE_${(await this.machineIdProvider.getMachineId(deviceInfo.log)).toUpperCase()}`;
+      const clientId = `HOMEBRIDGE_${(await this.machineIdProvider.getMachineId(deviceInfo.log)).toUpperCase()}_${deviceInfo.accessKey}`;
       try {
         const client = await mqtt.connectAsync(
           `${apiClient.certificateData.protocol}://${apiClient.certificateData.url}:${apiClient.certificateData.port}`,
