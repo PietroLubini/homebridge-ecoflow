@@ -2,8 +2,11 @@
 
 # homebridge-ecoflow
 
-[![homebridge-ecoflow](https://img.shields.io/npm/v/@pietrolubini/homebridge-ecoflow.svg)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow)
+[![homebridge-ecoflow](https://img.shields.io/npm/v/@pietrolubini/homebridge-ecoflow.svg?label=stable)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow)
+[![homebridge-ecoflow](https://img.shields.io/npm/v/@pietrolubini/homebridge-ecoflow.svg?label=beta)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow)
 [![mit-license](https://badgen.net/npm/license/lodash)](https://github.com/pietrolubini/homebridge-ecoflow/blob/main/LICENSE)
+[![downloads](https://badgen.net/npm/dt/@pietrolubini/homebridge-ecoflow)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow)
+[![build](https://github.com/pietrolubini/homebridge-ecoflow/actions/workflows/build.yml/badge.svg)](https://github.com/pietrolubini/homebridge-ecoflow/actions/workflows/build.yml)
 
 </span>
 

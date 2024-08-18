@@ -2,12 +2,14 @@ name: Parse Release Name
 description: Get release version from Release Name
 inputs:
   release-name:
-    description: Name of release in format v1.0.0
+    description: Name of release in format v1.0.0, v2.0.1-beta
     required: true
 
 outputs:
   release-version:
-    description: Version of release, e.g. 1.0.0
+    description: Version of release, e.g. 1.0.0, 2.0.1-beta
+  release-tag:
+    description: Optional tag if release, e.g. beta or alpha
 
 runs:
   using: 'node20'

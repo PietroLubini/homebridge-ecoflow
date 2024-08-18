@@ -3,6 +3,7 @@ name: Publish
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   parse_release_name:
@@ -15,9 +16,11 @@ jobs:
         id: parse-release-name
         uses: ./.github/actions/parse_release_name
         with:
-          release-name: ${{ github.ref }}
+          #release-name: ${{ github.ref }}
+          release-name: v1.3.0-beta.2
     outputs:
       release-version: ${{ steps.parse-release-name.outputs.release-version}}
+      release-tag: ${{ steps.parse-release-name.outputs.release-tag}}
 
   publish:
     runs-on: ubuntu-latest
@@ -28,6 +31,7 @@ jobs:
       - parse_release_name
     env:
       RELEASE_VERSION: ${{ needs.parse_release_name.outputs.release-version }}
+      RELEASE_TAG: ${{ needs.parse_release_name.outputs.release-tag }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -49,6 +53,15 @@ jobs:
         run: npm ci
 
       - name: Publish
-        run: npm publish --provenance --access public
+        if: ${{ env.RELEASE_TAG == null }}
+        run: echo RELEASE_TAG > ${{ env.RELEASE_TAG }}
+        #run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish (${{ inputs.tag }})
+        if: ${{ env.RELEASE_TAG != null }}
+        run: echo RELEASE_TAG > ${{ env.RELEASE_TAG }}
+        #run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
