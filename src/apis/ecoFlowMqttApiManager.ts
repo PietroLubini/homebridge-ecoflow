@@ -51,10 +51,10 @@ export class EcoFlowMqttApiManager {
 
   public async sendSetCommand(deviceInfo: DeviceInfo, message: MqttSetMessage): Promise<void> {
     const client = await this.connect(deviceInfo);
-    if (client?.isConnected()) {
-      const topic = `/open/${client.certificateData!.certificateAccount}/${deviceInfo.config.serialNumber}/set`;
+    if (client?.isConnected() && client.client) {
+      const topic = `/open/${client.certificateData.certificateAccount}/${deviceInfo.config.serialNumber}/set`;
       try {
-        await client.client!.publishAsync(topic, JSON.stringify(message));
+        await client.client.publishAsync(topic, JSON.stringify(message));
         deviceInfo.log.debug(`Published to topic '${topic}':`, message);
       } catch (err) {
         deviceInfo.log.error(`Publishing to topic '${topic}' of message '${JSON.stringify(message)}' was failed:`, err);
@@ -93,10 +93,10 @@ export class EcoFlowMqttApiManager {
 
   private async subscribeOnTopic(deviceInfo: DeviceInfo, topicType: MqttTopicType): Promise<boolean> {
     const client = await this.connect(deviceInfo);
-    if (client?.isConnected()) {
-      const topic = `/open/${client.certificateData!.certificateAccount}/${deviceInfo.config.serialNumber}/${topicType}`;
+    if (client?.isConnected() && client.client) {
+      const topic = `/open/${client.certificateData.certificateAccount}/${deviceInfo.config.serialNumber}/${topicType}`;
       try {
-        await client.client!.subscribeAsync(topic);
+        await client.client.subscribeAsync(topic);
         deviceInfo.log.debug('Subscribed to topic:', topic);
         return true;
       } catch (err) {

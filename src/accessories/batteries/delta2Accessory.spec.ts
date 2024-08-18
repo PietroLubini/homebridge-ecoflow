@@ -644,6 +644,14 @@ describe('Delta2Accessory', () => {
       };
     });
 
+    it('should initialize quota when is called before initializeDefaultValues', async () => {
+      const expected: BatteryAllQuotaData = { bms_bmsStatus: { f32ShowSoc: 0 }, inv: { inputWatts: 0 }, pd: {} };
+
+      const actual = accessory.quota;
+
+      expect(actual).toEqual(expected);
+    });
+
     it('should get all quota when initialization of default values is requested', async () => {
       httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
 
@@ -657,10 +665,30 @@ describe('Delta2Accessory', () => {
       httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(null);
 
       await accessory.initializeDefaultValues(true);
+
+      expect(logMock.warn).toHaveBeenCalledWith('Quotas were not received');
+      expect(batteryStatusServiceMock.updateStatusLowBattery).not.toHaveBeenCalled();
+    });
+
+    it('should initialize quotas with default values when they were not received', async () => {
+      const expected: BatteryAllQuotaData = { bms_bmsStatus: { f32ShowSoc: 0 }, inv: { inputWatts: 0 }, pd: {} };
+      httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(null);
+
+      await accessory.initializeDefaultValues(true);
       const actual = accessory.quota;
 
-      expect(actual).toBeNull();
-      expect(batteryStatusServiceMock.updateStatusLowBattery).not.toHaveBeenCalled();
+      expect(actual).toEqual(expected);
+    });
+
+    it(`should initialize quotas with default values when they were not received and
+      updating of initial values is not requested`, async () => {
+      const expected: BatteryAllQuotaData = { bms_bmsStatus: { f32ShowSoc: 0 }, inv: { inputWatts: 0 }, pd: {} };
+      httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(null);
+
+      await accessory.initializeDefaultValues(false);
+      const actual = accessory.quota;
+
+      expect(actual).toEqual(expected);
     });
 
     it('should not update initial values when it is not requested', async () => {
@@ -673,40 +701,82 @@ describe('Delta2Accessory', () => {
       expect(batteryStatusServiceMock.updateStatusLowBattery).not.toHaveBeenCalled();
     });
 
-    it('should update BmsStatus-related characteristics when is requested', async () => {
-      httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
+    describe('BmsStatus', () => {
+      it('should update BmsStatus-related characteristics when is requested', async () => {
+        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
 
-      await accessory.initializeDefaultValues();
+        await accessory.initializeDefaultValues();
 
-      expect(batteryStatusServiceMock.updateStatusLowBattery).toHaveBeenCalledWith(1.1);
-      expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
-      expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
-      expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
-      expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
+        expect(batteryStatusServiceMock.updateStatusLowBattery).toHaveBeenCalledWith(1.1);
+        expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
+        expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
+        expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
+        expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
+      });
+
+      it('should update BmsStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
+        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as BatteryAllQuotaData);
+
+        await accessory.initializeDefaultValues();
+
+        expect(batteryStatusServiceMock.updateStatusLowBattery).toHaveBeenCalledWith(0);
+        expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(0);
+        expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(0);
+        expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(0);
+        expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(0);
+      });
     });
 
-    it('should update InvStatus-related characteristics when is requested', async () => {
-      httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
+    describe('InvStatus', () => {
+      it('should update InvStatus-related characteristics when is requested', async () => {
+        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
 
-      await accessory.initializeDefaultValues();
+        await accessory.initializeDefaultValues();
 
-      expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(2.1);
-      expect(outletAcServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
-      expect(outletAcServiceMock.updateState).toHaveBeenCalledWith(true);
-      expect(outletAcServiceMock.updateOutputConsumption).toHaveBeenCalledWith(2.2);
-      expect(outletUsbServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
-      expect(outletCarServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
+        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(2.1);
+        expect(outletAcServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
+        expect(outletAcServiceMock.updateState).toHaveBeenCalledWith(true);
+        expect(outletAcServiceMock.updateOutputConsumption).toHaveBeenCalledWith(2.2);
+        expect(outletUsbServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
+        expect(outletCarServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
+      });
+
+      it('should update InvStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
+        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as BatteryAllQuotaData);
+
+        await accessory.initializeDefaultValues();
+
+        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(0);
+        expect(outletAcServiceMock.updateInputConsumption).toHaveBeenCalledWith(0);
+        expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
+        expect(outletAcServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
+        expect(outletUsbServiceMock.updateInputConsumption).toHaveBeenCalledWith(0);
+        expect(outletCarServiceMock.updateInputConsumption).toHaveBeenCalledWith(0);
+      });
     });
 
-    it('should update PdStatus-related characteristics when is requested', async () => {
-      httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
+    describe('PdStatus', () => {
+      it('should update PdStatus-related characteristics when is requested', async () => {
+        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
 
-      await accessory.initializeDefaultValues();
+        await accessory.initializeDefaultValues();
 
-      expect(outletUsbServiceMock.updateState).toHaveBeenCalledWith(false);
-      expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(9);
-      expect(outletCarServiceMock.updateState).toHaveBeenCalledWith(true);
-      expect(outletCarServiceMock.updateOutputConsumption).toHaveBeenCalledWith(3.1);
+        expect(outletUsbServiceMock.updateState).toHaveBeenCalledWith(false);
+        expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(9);
+        expect(outletCarServiceMock.updateState).toHaveBeenCalledWith(true);
+        expect(outletCarServiceMock.updateOutputConsumption).toHaveBeenCalledWith(3.1);
+      });
+
+      it('should update PdStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
+        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as BatteryAllQuotaData);
+
+        await accessory.initializeDefaultValues();
+
+        expect(outletUsbServiceMock.updateState).not.toHaveBeenCalled();
+        expect(outletUsbServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
+        expect(outletCarServiceMock.updateState).not.toHaveBeenCalled();
+        expect(outletCarServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
+      });
     });
   });
 

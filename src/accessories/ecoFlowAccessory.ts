@@ -160,17 +160,27 @@ export abstract class EcoFlowAccessoryWithQuota<TAllQuotaData> extends EcoFlowAc
   }
 
   public override async initializeDefaultValues(shouldUpdateInitialValues: boolean = true): Promise<void> {
-    if (!this.quota) {
+    if (!this._quota) {
       this._quota = await this.httpApiManager.getAllQuotas<TAllQuotaData>(this.deviceInfo);
     }
-    if (this.quota && shouldUpdateInitialValues) {
+    const quotaReceived = !!this._quota;
+    this._quota = this.initializeQuota(this._quota);
+    if (!quotaReceived) {
+      this.log.warn('Quotas were not received');
+    }
+    if (quotaReceived && shouldUpdateInitialValues) {
       this.updateInitialValues(this.quota);
     }
   }
 
   public get quota(): TAllQuotaData {
-    return this._quota!;
+    if (!this._quota) {
+      this._quota = this.initializeQuota(this._quota);
+    }
+    return this._quota;
   }
 
   protected abstract updateInitialValues(quota: TAllQuotaData): void;
+
+  protected abstract initializeQuota(quota: TAllQuotaData | null): TAllQuotaData;
 }

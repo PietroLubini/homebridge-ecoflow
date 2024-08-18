@@ -381,6 +381,44 @@ describe('OutletAcService', () => {
       );
     });
 
+    it(`should send Set command to device with cfgAcOutVol set to 220000 when On value was changed and
+      there is no cfgAcOutVol value in quota`, () => {
+      ecoFlowAccessoryMock.quota.inv.cfgAcOutVol = undefined;
+
+      onCharacteristic.setValue(false);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        3,
+        'acOutCfg',
+        {
+          out_voltage: 220000,
+          out_freq: 50,
+          xboost: 0,
+          enabled: 0,
+        },
+        expect.any(Function)
+      );
+    });
+
+    it(`should send Set command to device with cfgAcOutFreq set to 1 when On value was changed and
+      there is no cfgAcOutFreq value in quota`, () => {
+      ecoFlowAccessoryMock.quota.inv.cfgAcOutFreq = undefined;
+
+      onCharacteristic.setValue(false);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        3,
+        'acOutCfg',
+        {
+          out_voltage: 47.9,
+          out_freq: 1,
+          xboost: 0,
+          enabled: 0,
+        },
+        expect.any(Function)
+      );
+    });
+
     it('should send Set command to device with XBoost set to true when On value was changed and there is no XBoost value in quota', () => {
       ecoFlowAccessoryMock.quota.inv.cfgAcXboost = undefined;
 
