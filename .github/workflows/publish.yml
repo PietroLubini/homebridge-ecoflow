@@ -17,7 +17,7 @@ jobs:
         uses: ./.github/actions/parse_release_name
         with:
           #release-name: ${{ github.ref }}
-          release-name: v1.3.0
+          release-name: v1.3.0-beta.3
     outputs:
       release-version: ${{ steps.parse-release-name.outputs.release-version}}
       release-tag: ${{ steps.parse-release-name.outputs.release-tag}}
