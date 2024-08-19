@@ -5,13 +5,17 @@ on:
   push:
     branches: [main]
     paths-ignore:
-      - '.github/workflows/publish.yml'
+      - .github/workflows/publish.yml
+      - README.md
+      - LICENSE
 
   # Run workflow for all PRs where target branch is one of
   pull_request:
     branches: [main]
     paths-ignore:
-      - '.github/workflows/publish.yml'
+      - .github/workflows/publish.yml
+      - README.md
+      - LICENSE
 
 jobs:
   build:
