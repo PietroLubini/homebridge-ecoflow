@@ -12,6 +12,7 @@ export class OutletService extends OutletServiceBase {
     super(serviceSubType, additionalCharacteristics, ecoFlowAccessory);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public override updateState(state: boolean): void {
     throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.READ_ONLY_CHARACTERISTIC);
   }
