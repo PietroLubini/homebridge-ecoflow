@@ -1,12 +1,22 @@
-import { BatteryAllQuotaData, BmsStatus, InvStatus, PdStatus } from '@ecoflow/accessories/batteries/batteryAccessory';
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2Accessory';
+import {
+  BatteryAllQuotaData,
+  BmsStatus,
+  InvStatus,
+  PdStatus,
+} from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
+import {
+  MqttBatteryMessageType,
+  MqttBatteryQuotaMessageWithParams,
+} from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
+import { OutletAcService } from '@ecoflow/accessories/batteries/services/outletAcService';
+import { OutletCarService } from '@ecoflow/accessories/batteries/services/outletCarService';
+import { OutletUsbService } from '@ecoflow/accessories/batteries/services/outletUsbService';
 import { DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import {
-  MqttMessageType,
   MqttQuotaMessage,
-  MqttQuotaMessageWithParams,
   MqttSetMessageWithParams,
   MqttSetReplyMessage,
 } from '@ecoflow/apis/interfaces/mqttApiContracts';
@@ -16,19 +26,16 @@ import { sleep } from '@ecoflow/helpers/tests/sleep';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
-import { OutletAcService } from '@ecoflow/services/outletAcService';
-import { OutletCarService } from '@ecoflow/services/outletCarService';
 import { OutletServiceBase } from '@ecoflow/services/outletServiceBase';
-import { OutletUsbService } from '@ecoflow/services/outletUsbService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Service as HapService } from 'hap-nodejs';
 import { Logging, PlatformAccessory } from 'homebridge';
 import { Subscription } from 'rxjs';
 
 jest.mock('@ecoflow/services/batteryStatusService');
-jest.mock('@ecoflow/services/outletUsbService');
-jest.mock('@ecoflow/services/outletAcService');
-jest.mock('@ecoflow/services/outletCarService');
+jest.mock('@ecoflow/accessories/batteries/services/outletUsbService');
+jest.mock('@ecoflow/accessories/batteries/services/outletAcService');
+jest.mock('@ecoflow/accessories/batteries/services/outletCarService');
 jest.mock('@ecoflow/services/accessoryInformationService');
 
 describe('Delta2Accessory', () => {
@@ -41,7 +48,7 @@ describe('Delta2Accessory', () => {
   let accessory: Delta2Accessory;
   let batteryStatusServiceMock: jest.Mocked<BatteryStatusService>;
   let outletUsbServiceMock: jest.Mocked<OutletUsbService>;
-  let outletAcServiceMock: jest.Mocked<OutletAcService<BatteryAllQuotaData>>;
+  let outletAcServiceMock: jest.Mocked<OutletAcService>;
   let outletCarServiceMock: jest.Mocked<OutletCarService>;
   let accessoryInformationServiceMock: jest.Mocked<AccessoryInformationService>;
   let deviceInfo: DeviceInfo;
@@ -99,10 +106,9 @@ describe('Delta2Accessory', () => {
     batteryStatusServiceMock = createService(BatteryStatusService, BatteryStatusService, mock => {
       mock.updateBatteryLevel.mockReset();
       mock.updateChargingState.mockReset();
-      mock.updateStatusLowBattery.mockReset();
     });
     outletUsbServiceMock = createOutletService(OutletUsbService, OutletUsbService);
-    outletAcServiceMock = createOutletService(OutletAcService, OutletAcService<BatteryAllQuotaData>);
+    outletAcServiceMock = createOutletService(OutletAcService, OutletAcService);
     outletCarServiceMock = createOutletService(OutletCarService, OutletCarService);
     accessoryInformationServiceMock = createService(AccessoryInformationService, AccessoryInformationService);
 
@@ -260,8 +266,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should update bms status in quota when BmsStatus message is received', async () => {
-        const message: MqttQuotaMessageWithParams<BmsStatus> = {
-          typeCode: MqttMessageType.BMS,
+        const message: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
+          typeCode: MqttBatteryMessageType.BMS,
           params: {
             f32ShowSoc: 34.67,
           },
@@ -274,8 +280,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should update battery level when BmsStatus message is received with f32ShowSoc', async () => {
-        const message: MqttQuotaMessageWithParams<BmsStatus> = {
-          typeCode: MqttMessageType.BMS,
+        const message: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
+          typeCode: MqttBatteryMessageType.BMS,
           params: {
             f32ShowSoc: 34.67,
           },
@@ -283,7 +289,6 @@ describe('Delta2Accessory', () => {
 
         processQuotaMessage(message);
 
-        expect(batteryStatusServiceMock.updateStatusLowBattery).toHaveBeenCalledWith(34.67);
         expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
         expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
         expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
@@ -291,14 +296,13 @@ describe('Delta2Accessory', () => {
       });
 
       it('should not update any characteristic when BmsStatus message is received with undefined status', async () => {
-        const message: MqttQuotaMessageWithParams<BmsStatus> = {
-          typeCode: MqttMessageType.BMS,
+        const message: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
+          typeCode: MqttBatteryMessageType.BMS,
           params: {} as BmsStatus,
         };
 
         processQuotaMessage(message);
 
-        expect(batteryStatusServiceMock.updateStatusLowBattery).not.toHaveBeenCalled();
         expect(batteryStatusServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
         expect(outletUsbServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
@@ -316,8 +320,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should update inv status in quota when InvStatus message is received', async () => {
-        const message: MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: MqttMessageType.INV,
+        const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
+          typeCode: MqttBatteryMessageType.INV,
           params: {
             inputWatts: 12.34,
           },
@@ -330,8 +334,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should update AC, USB, CAR input consumptions when InvStatus message is received with inputWatts', async () => {
-        const message: MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: MqttMessageType.INV,
+        const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
+          typeCode: MqttBatteryMessageType.INV,
           params: {
             inputWatts: 12.34,
           },
@@ -346,8 +350,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should update AC state when InvStatus message is received with cfgAcEnabled', async () => {
-        const message: MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: MqttMessageType.INV,
+        const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
+          typeCode: MqttBatteryMessageType.INV,
           params: {
             cfgAcEnabled: true,
           } as InvStatus,
@@ -359,8 +363,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should update AC output watts consumption when InvStatus message is received with outputWatts', async () => {
-        const message: MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: MqttMessageType.INV,
+        const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
+          typeCode: MqttBatteryMessageType.INV,
           params: {
             outputWatts: 45.67,
           } as InvStatus,
@@ -372,8 +376,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should not update any characteristic when InvStatus message is received with undefined status', async () => {
-        const message: MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: MqttMessageType.INV,
+        const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
+          typeCode: MqttBatteryMessageType.INV,
           params: {} as InvStatus,
         };
 
@@ -398,8 +402,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should update pd status in quota when PdStatus message is received', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {
             carWatts: 34.12,
           },
@@ -412,8 +416,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should update CAR state when PdStatus message is received with carState', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {
             carState: true,
           },
@@ -425,8 +429,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should update CAR output consumption when PdStatus message is received with carWatts', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {
             carWatts: 64.89,
           } as PdStatus,
@@ -438,8 +442,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should update USB state when PdStatus message is received with dcOutState', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {
             dcOutState: true,
           } as PdStatus,
@@ -450,9 +454,22 @@ describe('Delta2Accessory', () => {
         expect(outletUsbServiceMock.updateState).toHaveBeenCalledWith(true);
       });
 
+      it('should update USB output consumption with 0 when PdStatus message received with 0 usb1Watts', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
+          params: {
+            usb1Watts: 0,
+          } as PdStatus,
+        };
+
+        processQuotaMessage(message);
+
+        expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
+      });
+
       it('should update USB output consumption when PdStatus message is received with usb1Watts', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {
             usb1Watts: 1.1,
           } as PdStatus,
@@ -464,8 +481,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should update USB output consumption when PdStatus message is received with usb2Watts', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {
             usb2Watts: 2.2,
           } as PdStatus,
@@ -476,9 +493,22 @@ describe('Delta2Accessory', () => {
         expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(2.2);
       });
 
+      it('should update USB output consumption with 0 when PdStatus message received with 0 usb2Watts', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
+          params: {
+            usb2Watts: 0,
+          } as PdStatus,
+        };
+
+        processQuotaMessage(message);
+
+        expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
+      });
+
       it('should update USB output consumption when PdStatus message is received with qcUsb1Watts', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {
             qcUsb1Watts: 3.3,
           } as PdStatus,
@@ -489,9 +519,22 @@ describe('Delta2Accessory', () => {
         expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(3.3);
       });
 
+      it('should update USB output consumption with 0 when PdStatus message received with 0 qcUsb1Watts', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
+          params: {
+            qcUsb1Watts: 0,
+          } as PdStatus,
+        };
+
+        processQuotaMessage(message);
+
+        expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
+      });
+
       it('should update USB output consumption when PdStatus message is received with qcUsb2Watts', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {
             qcUsb2Watts: 4.4,
           } as PdStatus,
@@ -502,9 +545,22 @@ describe('Delta2Accessory', () => {
         expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(4.4);
       });
 
+      it('should update USB output consumption with 0 when PdStatus message received with 0 qcUsb2Watts', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
+          params: {
+            qcUsb2Watts: 0,
+          } as PdStatus,
+        };
+
+        processQuotaMessage(message);
+
+        expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
+      });
+
       it('should update USB output consumption when PdStatus message is received with typec1Watts', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {
             typec1Watts: 5.5,
           } as PdStatus,
@@ -515,9 +571,22 @@ describe('Delta2Accessory', () => {
         expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(5.5);
       });
 
+      it('should update USB output consumption with 0 when PdStatus message received with 0 typec1Watts', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
+          params: {
+            typec1Watts: 0,
+          } as PdStatus,
+        };
+
+        processQuotaMessage(message);
+
+        expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
+      });
+
       it('should update USB output consumption when PdStatus message is received with typec2Watts', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {
             typec2Watts: 6.6,
           } as PdStatus,
@@ -528,9 +597,22 @@ describe('Delta2Accessory', () => {
         expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(6.6);
       });
 
+      it('should update USB output consumption with 0 when PdStatus message received with 0 typec2Watts', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
+          params: {
+            typec2Watts: 0,
+          } as PdStatus,
+        };
+
+        processQuotaMessage(message);
+
+        expect(outletUsbServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
+      });
+
       it('should update USB output consumption when PdStatus message is received with all usb-related parameters', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {
             usb1Watts: 1.1,
             usb2Watts: 2.2,
@@ -547,8 +629,8 @@ describe('Delta2Accessory', () => {
       });
 
       it('should not update any characteristic when PdStatus message is received with undefined status', async () => {
-        const message: MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: MqttMessageType.PD,
+        const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+          typeCode: MqttBatteryMessageType.PD,
           params: {} as PdStatus,
         };
 
@@ -645,7 +727,7 @@ describe('Delta2Accessory', () => {
     });
 
     it('should initialize quota when is called before initializeDefaultValues', async () => {
-      const expected: BatteryAllQuotaData = { bms_bmsStatus: { f32ShowSoc: 0 }, inv: { inputWatts: 0 }, pd: {} };
+      const expected: BatteryAllQuotaData = { bms_bmsStatus: {}, inv: {}, pd: {} };
 
       const actual = accessory.quota;
 
@@ -667,11 +749,11 @@ describe('Delta2Accessory', () => {
       await accessory.initializeDefaultValues(true);
 
       expect(logMock.warn).toHaveBeenCalledWith('Quotas were not received');
-      expect(batteryStatusServiceMock.updateStatusLowBattery).not.toHaveBeenCalled();
+      expect(batteryStatusServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
     });
 
     it('should initialize quotas with default values when they were not received', async () => {
-      const expected: BatteryAllQuotaData = { bms_bmsStatus: { f32ShowSoc: 0 }, inv: { inputWatts: 0 }, pd: {} };
+      const expected: BatteryAllQuotaData = { bms_bmsStatus: {}, inv: {}, pd: {} };
       httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(null);
 
       await accessory.initializeDefaultValues(true);
@@ -682,7 +764,7 @@ describe('Delta2Accessory', () => {
 
     it(`should initialize quotas with default values when they were not received and
       updating of initial values is not requested`, async () => {
-      const expected: BatteryAllQuotaData = { bms_bmsStatus: { f32ShowSoc: 0 }, inv: { inputWatts: 0 }, pd: {} };
+      const expected: BatteryAllQuotaData = { bms_bmsStatus: {}, inv: {}, pd: {} };
       httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(null);
 
       await accessory.initializeDefaultValues(false);
@@ -698,7 +780,7 @@ describe('Delta2Accessory', () => {
       const actual = accessory.quota;
 
       expect(actual).toBe(quota);
-      expect(batteryStatusServiceMock.updateStatusLowBattery).not.toHaveBeenCalled();
+      expect(batteryStatusServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
     });
 
     describe('BmsStatus', () => {
@@ -707,7 +789,6 @@ describe('Delta2Accessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(batteryStatusServiceMock.updateStatusLowBattery).toHaveBeenCalledWith(1.1);
         expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
         expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
         expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
@@ -719,11 +800,10 @@ describe('Delta2Accessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(batteryStatusServiceMock.updateStatusLowBattery).toHaveBeenCalledWith(0);
-        expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(0);
-        expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(0);
-        expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(0);
-        expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(0);
+        expect(batteryStatusServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        expect(outletAcServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        expect(outletUsbServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        expect(outletCarServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
       });
     });
 
@@ -746,12 +826,12 @@ describe('Delta2Accessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(0);
-        expect(outletAcServiceMock.updateInputConsumption).toHaveBeenCalledWith(0);
+        expect(batteryStatusServiceMock.updateChargingState).not.toHaveBeenCalled();
+        expect(outletAcServiceMock.updateInputConsumption).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
-        expect(outletUsbServiceMock.updateInputConsumption).toHaveBeenCalledWith(0);
-        expect(outletCarServiceMock.updateInputConsumption).toHaveBeenCalledWith(0);
+        expect(outletUsbServiceMock.updateInputConsumption).not.toHaveBeenCalled();
+        expect(outletCarServiceMock.updateInputConsumption).not.toHaveBeenCalled();
       });
     });
 

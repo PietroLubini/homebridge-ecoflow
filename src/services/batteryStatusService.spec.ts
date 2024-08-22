@@ -136,7 +136,7 @@ describe('BatteryStatusService', () => {
     });
 
     it('should set low battery level when it is less than 20', () => {
-      service.updateStatusLowBattery(19.99);
+      service.updateBatteryLevel(19.99);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.StatusLowBattery).value;
 
@@ -145,7 +145,7 @@ describe('BatteryStatusService', () => {
     });
 
     it('should set normal battery level when it is more than or equal to 20', () => {
-      service.updateStatusLowBattery(20);
+      service.updateBatteryLevel(20);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.StatusLowBattery).value;
 

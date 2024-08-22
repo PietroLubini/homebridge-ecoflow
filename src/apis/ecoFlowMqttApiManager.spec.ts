@@ -5,7 +5,6 @@ import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { AcquireCertificateData } from '@ecoflow/apis/interfaces/httpApiContracts';
 import {
   MqttMessage,
-  MqttMessageType,
   MqttQuotaMessage,
   MqttSetReplyMessage,
   MqttTopicType,
@@ -265,7 +264,7 @@ describe('EcoFlowMqttApiManager', () => {
     }
 
     it('should process quota message in all devices that shares single mqtt client', async () => {
-      const message: MqttQuotaMessage = { typeCode: MqttMessageType.EMS };
+      const message: MqttQuotaMessage = { typeCode: 'bms' };
       await connect(deviceInfo1, deviceInfo2, deviceInfo3);
 
       processReceivedMessage(MqttTopicType.Quota, message, client1Mock);

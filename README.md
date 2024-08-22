@@ -27,6 +27,7 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 
 - Delta 2
 - Delta 2 Max
+- PowerStream Micro-inverter
 
 For a full list of devices that could be potentially added check [here](https://developer-eu.ecoflow.com/us/document/introduction)
 
@@ -95,6 +96,52 @@ If `devices`.`model` is one of [`Delta 2`, `Delta 2 Max`] it is possible to set 
 The characteristics could be used as conditions in HomeKit Automation that uses Shortcuts:
 
 <img src="docs/images/BatteryAdditionalCharacteristics.jpg" alt="Battery Additional Characteristics" width="300">
+
+### PowerStream-specific Configuration
+
+If `devices`.`model` is `PowerStream` it is possible to set turn on/off additional characteristics:
+
+- battery:
+  - Input Consumption, W
+  - Output Consumption, W
+  - Battery Level, %
+- solar:
+  - Output Consumption, W
+- inverter:
+  - Input Consumption, W
+  - Output Consumption, W
+
+```js
+{
+  ...
+  "devices": [
+    {
+      ...,
+      "model": "PowerStream",
+      "powerStream": {
+        "battery": {
+          "additionalCharacteristics": [
+            "Battery Level, %",
+            "Input Consumption, W",
+            "Output Consumption, W"
+          ]
+        },
+        "solar": {
+          "additionalCharacteristics": [
+            "Output Consumption, W"
+          ]
+        },
+        "inverter": {
+          "additionalCharacteristics": [
+            "Input Consumption, W",
+            "Output Consumption, W"
+          ]
+        }
+      }
+    }
+  ],
+}
+```
 
 ### AccessKey and SecretKey
 

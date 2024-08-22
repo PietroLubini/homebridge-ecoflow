@@ -183,4 +183,8 @@ export abstract class EcoFlowAccessoryWithQuota<TAllQuotaData> extends EcoFlowAc
   protected abstract updateInitialValues(quota: TAllQuotaData): void;
 
   protected abstract initializeQuota(quota: TAllQuotaData | null): TAllQuotaData;
+
+  protected sum(...values: (number | undefined)[]): number {
+    return values.filter(value => value !== undefined).reduce((sum, value) => sum + value, 0);
+  }
 }

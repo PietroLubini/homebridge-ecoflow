@@ -14,20 +14,21 @@ export class BatteryStatusService extends ServiceBase {
     ];
   }
 
-  public updateStatusLowBattery(batteryLevel: number): void {
-    const statusLowBattery =
-      batteryLevel < 20
-        ? this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
-        : this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
-    this.updateCharacteristic(this.platform.Characteristic.StatusLowBattery, 'StatusLowBattery', statusLowBattery);
-  }
-
   public updateBatteryLevel(batteryLevel: number): void {
     this.updateCharacteristic(this.platform.Characteristic.BatteryLevel, 'BatteryLevel', batteryLevel);
+    this.updateStatusLowBattery(batteryLevel);
   }
 
   public updateChargingState(chargingPower: number): void {
     const isCharging = chargingPower > 0;
     this.updateCharacteristic(this.platform.Characteristic.ChargingState, 'ChargingState', isCharging);
+  }
+
+  private updateStatusLowBattery(batteryLevel: number): void {
+    const statusLowBattery =
+      batteryLevel < 20
+        ? this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
+        : this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
+    this.updateCharacteristic(this.platform.Characteristic.StatusLowBattery, 'StatusLowBattery', statusLowBattery);
   }
 }

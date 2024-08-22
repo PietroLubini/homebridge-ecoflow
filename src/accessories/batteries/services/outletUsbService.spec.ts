@@ -1,17 +1,16 @@
-import { BatteryAllQuotaData } from '@ecoflow/accessories/batteries/batteryAccessory';
-import { EcoFlowAccessoryWithQuota } from '@ecoflow/accessories/ecoFlowAccessory';
+import { OutletUsbService } from '@ecoflow/accessories/batteries/services/outletUsbService';
+import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
-import { OutletAcService } from '@ecoflow/services/outletAcService';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-describe('OutletAcService', () => {
-  let service: OutletAcService<BatteryAllQuotaData>;
-  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuota<BatteryAllQuotaData>>;
+describe('OutletUsbService', () => {
+  let service: OutletUsbService;
+  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessory>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
@@ -26,7 +25,7 @@ describe('OutletAcService', () => {
   const expectedMandatoryCharacteristics: MockCharacteristic[] = [
     {
       UUID: HapCharacteristic.Name.UUID,
-      value: 'accessory1 AC',
+      value: 'accessory1 USB',
     },
     {
       UUID: HapCharacteristic.On.UUID,
@@ -65,8 +64,8 @@ describe('OutletAcService', () => {
       httpApiManager: httpApiManagerMock,
       quota: {},
       sendSetCommand: jest.fn(),
-    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuota<BatteryAllQuotaData>>;
-    service = new OutletAcService(ecoFlowAccessoryMock);
+    } as unknown as jest.Mocked<EcoFlowAccessory>;
+    service = new OutletUsbService(ecoFlowAccessoryMock);
     hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
   });
 
@@ -80,7 +79,7 @@ describe('OutletAcService', () => {
       const actual = service.service;
 
       expect(actual).toEqual(expected);
-      expect(accessoryMock.addService).toHaveBeenCalledWith(HapService.Outlet, 'accessory1 AC', 'AC');
+      expect(accessoryMock.addService).toHaveBeenCalledWith(HapService.Outlet, 'accessory1 USB', 'USB');
     });
 
     it('should use existing Outlet service when it is already added to accessory', () => {
@@ -91,7 +90,7 @@ describe('OutletAcService', () => {
       const actual = service.service;
 
       expect(actual).toEqual(expected);
-      expect(accessoryMock.getServiceById).toHaveBeenCalledWith(HapService.Outlet, 'AC');
+      expect(accessoryMock.getServiceById).toHaveBeenCalledWith(HapService.Outlet, 'USB');
       expect(accessoryMock.addService).not.toHaveBeenCalled();
     });
 
@@ -118,6 +117,7 @@ describe('OutletAcService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.InputConsumptionInWatts],
       };
+      service = new OutletUsbService(ecoFlowAccessoryMock);
 
       service.initialize();
       const actual = getActualCharacteristics(service.service);
@@ -138,6 +138,7 @@ describe('OutletAcService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
       };
+      service = new OutletUsbService(ecoFlowAccessoryMock);
 
       service.initialize();
       const actual = getActualCharacteristics(service.service);
@@ -158,6 +159,7 @@ describe('OutletAcService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.BatteryLevel],
       };
+      service = new OutletUsbService(ecoFlowAccessoryMock);
 
       service.initialize();
       const actual = getActualCharacteristics(service.service);
@@ -198,7 +200,7 @@ describe('OutletAcService', () => {
       const actual = service.service.getCharacteristic(HapCharacteristic.On).value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug).toHaveBeenCalledWith('AC State ->', true);
+      expect(logMock.debug).toHaveBeenCalledWith('USB State ->', true);
     });
 
     it('should set On state to false when it is requested', () => {
@@ -207,7 +209,7 @@ describe('OutletAcService', () => {
       const actual = service.service.getCharacteristic(HapCharacteristic.On).value;
 
       expect(actual).toBeFalsy();
-      expect(logMock.debug).toHaveBeenCalledWith('AC State ->', false);
+      expect(logMock.debug).toHaveBeenCalledWith('USB State ->', false);
     });
   });
 
@@ -216,6 +218,7 @@ describe('OutletAcService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
       };
+      service = new OutletUsbService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -227,8 +230,8 @@ describe('OutletAcService', () => {
 
       expect(actual).toEqual(35);
       expect(logMock.debug.mock.calls).toEqual([
-        ['AC InUse ->', true],
-        ['AC Output Consumption, W ->', 34.6],
+        ['USB InUse ->', true],
+        ['USB Output Consumption, W ->', 34.6],
       ]);
     });
 
@@ -243,7 +246,7 @@ describe('OutletAcService', () => {
       ).value;
 
       expect(actual).toEqual(0);
-      expect(logMock.debug.mock.calls).toEqual([['AC InUse ->', true]]);
+      expect(logMock.debug.mock.calls).toEqual([['USB InUse ->', true]]);
     });
 
     it('should set OutletInUse to true when OutputConsumption more than 0', () => {
@@ -255,7 +258,7 @@ describe('OutletAcService', () => {
       const actual = service.service.getCharacteristic(HapCharacteristic.OutletInUse).value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug.mock.calls).toEqual([['AC InUse ->', true]]);
+      expect(logMock.debug.mock.calls).toEqual([['USB InUse ->', true]]);
     });
 
     it('should set OutletInUse to false when OutputConsumption is 0', () => {
@@ -267,7 +270,7 @@ describe('OutletAcService', () => {
       const actual = service.service.getCharacteristic(HapCharacteristic.OutletInUse).value;
 
       expect(actual).toBeFalsy();
-      expect(logMock.debug.mock.calls).toEqual([['AC InUse ->', false]]);
+      expect(logMock.debug.mock.calls).toEqual([['USB InUse ->', false]]);
     });
   });
 
@@ -276,6 +279,7 @@ describe('OutletAcService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.InputConsumptionInWatts],
       };
+      service = new OutletUsbService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -286,7 +290,7 @@ describe('OutletAcService', () => {
       ).value;
 
       expect(actual).toEqual(41);
-      expect(logMock.debug.mock.calls).toEqual([['AC Input Consumption, W ->', 41.1]]);
+      expect(logMock.debug.mock.calls).toEqual([['USB Input Consumption, W ->', 41.1]]);
     });
 
     it('should not set InputConsumption when it is disabled in configuration', () => {
@@ -309,6 +313,7 @@ describe('OutletAcService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.BatteryLevel],
       };
+      service = new OutletUsbService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -317,7 +322,7 @@ describe('OutletAcService', () => {
       const actual = service.service.getCharacteristic(HapCharacteristic.BatteryLevel).value;
 
       expect(actual).toEqual(87);
-      expect(logMock.debug.mock.calls).toEqual([['AC Battery Level, % ->', 87.4]]);
+      expect(logMock.debug.mock.calls).toEqual([['USB Battery Level, % ->', 87.4]]);
     });
 
     it('should not set BatteryLevel when it is disabled in configuration', () => {
@@ -337,12 +342,6 @@ describe('OutletAcService', () => {
     let onCharacteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      ecoFlowAccessoryMock.quota.inv = {
-        inputWatts: 0,
-        cfgAcOutVol: 47.9,
-        cfgAcOutFreq: 50,
-        cfgAcXboost: false,
-      };
       service.initialize();
       onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
     });
@@ -351,12 +350,9 @@ describe('OutletAcService', () => {
       onCharacteristic.setValue(true);
 
       expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
-        3,
-        'acOutCfg',
+        1,
+        'dcOutCfg',
         {
-          out_voltage: 47.9,
-          out_freq: 50,
-          xboost: 0,
           enabled: 1,
         },
         expect.any(Function)
@@ -364,73 +360,12 @@ describe('OutletAcService', () => {
     });
 
     it('should send Set command to device when On value was changed to false', () => {
-      ecoFlowAccessoryMock.quota.inv.cfgAcXboost = true;
-
       onCharacteristic.setValue(false);
 
       expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
-        3,
-        'acOutCfg',
+        1,
+        'dcOutCfg',
         {
-          out_voltage: 47.9,
-          out_freq: 50,
-          xboost: 1,
-          enabled: 0,
-        },
-        expect.any(Function)
-      );
-    });
-
-    it(`should send Set command to device with cfgAcOutVol set to 220000 when On value was changed and
-      there is no cfgAcOutVol value in quota`, () => {
-      ecoFlowAccessoryMock.quota.inv.cfgAcOutVol = undefined;
-
-      onCharacteristic.setValue(false);
-
-      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
-        3,
-        'acOutCfg',
-        {
-          out_voltage: 220000,
-          out_freq: 50,
-          xboost: 0,
-          enabled: 0,
-        },
-        expect.any(Function)
-      );
-    });
-
-    it(`should send Set command to device with cfgAcOutFreq set to 1 when On value was changed and
-      there is no cfgAcOutFreq value in quota`, () => {
-      ecoFlowAccessoryMock.quota.inv.cfgAcOutFreq = undefined;
-
-      onCharacteristic.setValue(false);
-
-      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
-        3,
-        'acOutCfg',
-        {
-          out_voltage: 47.9,
-          out_freq: 1,
-          xboost: 0,
-          enabled: 0,
-        },
-        expect.any(Function)
-      );
-    });
-
-    it('should send Set command to device with XBoost set to true when On value was changed and there is no XBoost value in quota', () => {
-      ecoFlowAccessoryMock.quota.inv.cfgAcXboost = undefined;
-
-      onCharacteristic.setValue(false);
-
-      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
-        3,
-        'acOutCfg',
-        {
-          out_voltage: 47.9,
-          out_freq: 50,
-          xboost: 1,
           enabled: 0,
         },
         expect.any(Function)
@@ -446,7 +381,7 @@ describe('OutletAcService', () => {
       const actual = onCharacteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug.mock.calls).toEqual([['AC State ->', true]]);
+      expect(logMock.debug.mock.calls).toEqual([['USB State ->', true]]);
     });
   });
 });

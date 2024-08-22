@@ -1,20 +1,13 @@
-export enum MqttMessageType {
-  PD = 'pdStatus',
-  MPPT = 'mpptStatus',
-  INV = 'invStatus',
-  BMS = 'bmsStatus',
-  EMS = 'emsStatus',
-}
-
 export interface MqttMessage {}
 
-export interface MqttQuotaMessage extends MqttMessage {
-  typeCode: MqttMessageType;
-}
+export interface MqttQuotaMessage extends MqttMessage {}
 
 export interface MqttQuotaMessageWithParams<TParams> extends MqttQuotaMessage {
-  typeCode: MqttMessageType;
   params: TParams;
+}
+
+export interface MqttQuotaMessageWithParam<TParams> extends MqttQuotaMessage {
+  param: TParams;
 }
 
 export interface MqttSetMessage extends MqttMessage {

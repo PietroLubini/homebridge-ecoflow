@@ -1,10 +1,10 @@
+import { OutletCarService } from '@ecoflow/accessories/batteries/services/outletCarService';
 import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
-import { OutletCarService } from '@ecoflow/services/outletCarService';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
@@ -117,6 +117,7 @@ describe('OutletCarService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.InputConsumptionInWatts],
       };
+      service = new OutletCarService(ecoFlowAccessoryMock);
 
       service.initialize();
       const actual = getActualCharacteristics(service.service);
@@ -137,6 +138,7 @@ describe('OutletCarService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
       };
+      service = new OutletCarService(ecoFlowAccessoryMock);
 
       service.initialize();
       const actual = getActualCharacteristics(service.service);
@@ -157,6 +159,7 @@ describe('OutletCarService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.BatteryLevel],
       };
+      service = new OutletCarService(ecoFlowAccessoryMock);
 
       service.initialize();
       const actual = getActualCharacteristics(service.service);
@@ -215,6 +218,7 @@ describe('OutletCarService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
       };
+      service = new OutletCarService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -275,6 +279,7 @@ describe('OutletCarService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.InputConsumptionInWatts],
       };
+      service = new OutletCarService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -308,6 +313,7 @@ describe('OutletCarService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.BatteryLevel],
       };
+      service = new OutletCarService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 

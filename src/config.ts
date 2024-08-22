@@ -7,6 +7,7 @@ export interface EcoFlowConfig extends PlatformConfig {
 export enum DeviceModel {
   Delta2Max = 'Delta 2 Max',
   Delta2 = 'Delta 2',
+  PowerStream = 'PowerStream',
 }
 
 export enum LocationType {
@@ -31,6 +32,7 @@ export interface DeviceAccessConfig extends DeviceInfoConfig {
 export interface DeviceConfig extends AccessoryConfig, DeviceAccessConfig {
   model: DeviceModel;
   battery?: BatteryDeviceConfig;
+  powerStream?: PowerStreamDeviceConfig;
 }
 
 export interface BatteryDeviceConfig {
@@ -41,4 +43,10 @@ export enum AdditionalBatteryCharacteristicType {
   BatteryLevel = 'Battery Level, %',
   InputConsumptionInWatts = 'Input Consumption, W',
   OutputConsumptionInWatts = 'Output Consumption, W',
+}
+
+export interface PowerStreamDeviceConfig {
+  battery?: BatteryDeviceConfig;
+  solar?: BatteryDeviceConfig;
+  inverter?: BatteryDeviceConfig;
 }

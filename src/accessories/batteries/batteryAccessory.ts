@@ -1,24 +1,31 @@
+import {
+  BatteryAllQuotaData,
+  BmsStatus,
+  InvStatus,
+  PdStatus,
+} from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
+import {
+  MqttBatteryMessageType,
+  MqttBatteryQuotaMessage,
+  MqttBatteryQuotaMessageWithParams,
+} from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
+import { OutletAcService } from '@ecoflow/accessories/batteries/services/outletAcService';
+import { OutletCarService } from '@ecoflow/accessories/batteries/services/outletCarService';
+import { OutletUsbService } from '@ecoflow/accessories/batteries/services/outletUsbService';
 import { EcoFlowAccessoryWithQuota } from '@ecoflow/accessories/ecoFlowAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
-import {
-  MqttMessageType,
-  MqttQuotaMessage,
-  MqttQuotaMessageWithParams,
-} from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
-import { OutletAcService } from '@ecoflow/services/outletAcService';
-import { OutletCarService } from '@ecoflow/services/outletCarService';
-import { OutletUsbService } from '@ecoflow/services/outletUsbService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<BatteryAllQuotaData> {
   private readonly batteryService: BatteryStatusService;
   private readonly outletUsbService: OutletUsbService;
-  private readonly outletAcService: OutletAcService<BatteryAllQuotaData>;
+  private readonly outletAcService: OutletAcService;
   private readonly outletCarService: OutletCarService;
 
   constructor(
@@ -41,15 +48,16 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
-    if (message.typeCode === MqttMessageType.BMS) {
+    const batteryMessage = message as MqttBatteryQuotaMessage;
+    if (batteryMessage.typeCode === MqttBatteryMessageType.BMS) {
       const bmsStatus = (message as MqttQuotaMessageWithParams<BmsStatus>).params;
       Object.assign(this.quota.bms_bmsStatus, bmsStatus);
       this.updateBmsValues(bmsStatus);
-    } else if (message.typeCode === MqttMessageType.INV) {
+    } else if (batteryMessage.typeCode === MqttBatteryMessageType.INV) {
       const invStatus = (message as MqttQuotaMessageWithParams<InvStatus>).params;
       Object.assign(this.quota.inv, invStatus);
       this.updateInvValues(invStatus);
-    } else if (message.typeCode === MqttMessageType.PD) {
+    } else if (batteryMessage.typeCode === MqttBatteryMessageType.PD) {
       const pdStatus = (message as MqttQuotaMessageWithParams<PdStatus>).params;
       Object.assign(this.quota.pd, pdStatus);
       this.updatePdValues(pdStatus);
@@ -59,10 +67,10 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
   protected override initializeQuota(quota: BatteryAllQuotaData | null): BatteryAllQuotaData {
     const result = quota ?? ({} as BatteryAllQuotaData);
     if (!result.bms_bmsStatus) {
-      result.bms_bmsStatus = { f32ShowSoc: 0 };
+      result.bms_bmsStatus = {};
     }
     if (!result.inv) {
-      result.inv = { inputWatts: 0 };
+      result.inv = {};
     }
     if (!result.pd) {
       result.pd = {};
@@ -77,24 +85,24 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
   }
 
   private updateBmsInitialValues(params: BmsStatus): void {
-    const message: MqttQuotaMessageWithParams<BmsStatus> = {
-      typeCode: MqttMessageType.BMS,
+    const message: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
+      typeCode: MqttBatteryMessageType.BMS,
       params,
     };
     this.processQuotaMessage(message);
   }
 
   private updateInvInitialValues(params: InvStatus): void {
-    const message: MqttQuotaMessageWithParams<InvStatus> = {
-      typeCode: MqttMessageType.INV,
+    const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
+      typeCode: MqttBatteryMessageType.INV,
       params,
     };
     this.processQuotaMessage(message);
   }
 
   private updatePdInitialValues(params: PdStatus): void {
-    const message: MqttQuotaMessageWithParams<PdStatus> = {
-      typeCode: MqttMessageType.PD,
+    const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
+      typeCode: MqttBatteryMessageType.PD,
       params,
     };
     this.processQuotaMessage(message);
@@ -102,7 +110,6 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
 
   private updateBmsValues(params: BmsStatus): void {
     if (params.f32ShowSoc !== undefined) {
-      this.batteryService.updateStatusLowBattery(params.f32ShowSoc);
       this.batteryService.updateBatteryLevel(params.f32ShowSoc);
       this.outletAcService.updateBatteryLevel(params.f32ShowSoc);
       this.outletUsbService.updateBatteryLevel(params.f32ShowSoc);
@@ -143,7 +150,7 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
       params.typec1Watts !== undefined ||
       params.typec2Watts !== undefined
     ) {
-      const usbWatts = this.getUsbWatts(
+      const usbWatts = this.sum(
         params.usb1Watts,
         params.usb2Watts,
         params.qcUsb1Watts,
@@ -154,67 +161,4 @@ export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<Battery
       this.outletUsbService.updateOutputConsumption(usbWatts);
     }
   }
-
-  private getUsbWatts(
-    usb1Watts?: number,
-    usb2Watts?: number,
-    qcUsb1Watts?: number,
-    qcUsb2Watts?: number,
-    typec1Watts?: number,
-    typec2Watts?: number
-  ): number {
-    return (
-      (usb1Watts ?? 0) +
-      (usb2Watts ?? 0) +
-      (qcUsb1Watts ?? 0) +
-      (qcUsb2Watts ?? 0) +
-      (typec1Watts ?? 0) +
-      (typec2Watts ?? 0)
-    );
-  }
-}
-
-// Battery management system status
-export interface BmsStatus {
-  f32ShowSoc: number;
-}
-
-// AC invertor status
-interface InvStatusAc {
-  outputWatts?: number;
-  cfgAcEnabled?: boolean;
-  cfgAcXboost?: boolean;
-  cfgAcOutFreq?: number;
-  cfgAcOutVol?: number;
-}
-
-// Invertor status
-export interface InvStatus extends InvStatusAc {
-  inputWatts: number;
-}
-
-interface PdStatusCar {
-  carState?: boolean;
-  carWatts?: number;
-}
-
-interface PdStatusUsb {
-  dcOutState?: boolean;
-  usb1Watts?: number;
-  usb2Watts?: number;
-  qcUsb1Watts?: number;
-  qcUsb2Watts?: number;
-  typec1Watts?: number;
-  typec2Watts?: number;
-}
-
-export interface PdStatus extends PdStatusUsb, PdStatusCar {
-  carState?: boolean;
-  carWatts?: number;
-}
-
-export interface BatteryAllQuotaData {
-  bms_bmsStatus: BmsStatus;
-  inv: InvStatus;
-  pd: PdStatus;
 }

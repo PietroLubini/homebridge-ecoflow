@@ -1,10 +1,5 @@
 import { MqttDevice } from '@ecoflow/apis/containers/mqttDevice';
-import {
-  MqttMessageType,
-  MqttQuotaMessage,
-  MqttSetReplyMessage,
-  MqttTopicType,
-} from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { MqttQuotaMessage, MqttSetReplyMessage, MqttTopicType } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceInfoConfig } from '@ecoflow/config';
 import { Logging } from 'homebridge';
 import { Observable, Subscription } from 'rxjs';
@@ -89,7 +84,7 @@ describe('MqttDevice', () => {
     });
 
     it('should subscribe on quota$ observable when subscribing on quota topic', () => {
-      const quotaMessage: MqttQuotaMessage = { typeCode: MqttMessageType.EMS };
+      const quotaMessage: MqttQuotaMessage = { typeCode: 'bms' };
       quotaMock.subscribe.mockReturnValueOnce({} as jest.Mocked<Subscription>);
 
       device.subscribeOnMessage(MqttTopicType.Quota, quotaCallbackMock);

@@ -10,6 +10,7 @@ export interface MqttSetEnabledMessageParams {
 export abstract class OutletServiceBase extends ServiceBase {
   constructor(
     private readonly serviceSubType: string,
+    private readonly additionalCharacteristics: CharacteristicType[] | undefined,
     ecoFlowAccessory: EcoFlowAccessory
   ) {
     super(ecoFlowAccessory);
@@ -99,7 +100,7 @@ export abstract class OutletServiceBase extends ServiceBase {
     characteristic: WithUUID<{ new (): Characteristic }>,
     characteristicType: CharacteristicType
   ): Characteristic | null {
-    if (this.ecoFlowAccessory.config.battery?.additionalCharacteristics?.includes(characteristicType)) {
+    if (this.additionalCharacteristics?.includes(characteristicType)) {
       return this.addCharacteristic(characteristic);
     }
     return null;
@@ -111,7 +112,7 @@ export abstract class OutletServiceBase extends ServiceBase {
     value: CharacteristicValue,
     characteristicType: CharacteristicType
   ): void {
-    if (this.ecoFlowAccessory.config.battery?.additionalCharacteristics?.includes(characteristicType)) {
+    if (this.additionalCharacteristics?.includes(characteristicType)) {
       this.updateCharacteristic(characteristic, name, value);
     }
   }

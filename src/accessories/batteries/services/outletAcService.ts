@@ -1,10 +1,10 @@
-import { BatteryAllQuotaData } from '@ecoflow/accessories/batteries/batteryAccessory';
+import { BatteryAllQuotaData } from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
 import { EcoFlowAccessoryWithQuota } from '@ecoflow/accessories/ecoFlowAccessory';
 import { MqttSetEnabledMessageParams, OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 
-export class OutletAcService<TAllQuotaData extends BatteryAllQuotaData> extends OutletServiceBase {
-  constructor(protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuota<TAllQuotaData>) {
-    super('AC', ecoFlowAccessory);
+export class OutletAcService extends OutletServiceBase {
+  constructor(protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuota<BatteryAllQuotaData>) {
+    super('AC', ecoFlowAccessory.config.battery?.additionalCharacteristics, ecoFlowAccessory);
   }
 
   protected override setOn(value: boolean, revert: () => void): Promise<void> {

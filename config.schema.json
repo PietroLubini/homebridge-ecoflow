@@ -28,7 +28,7 @@
               "title": "Model",
               "type": "string",
               "required": true,
-              "enum": ["Delta 2", "Delta 2 Max"]
+              "enum": ["Delta 2", "Delta 2 Max", "PowerStream"]
             },
             "serialNumber": {
               "title": "Serial Number",
@@ -69,6 +69,63 @@
                     "title": "Characteristic",
                     "type": "string",
                     "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W"]
+                  }
+                }
+              }
+            },
+            "powerStream": {
+              "title": "PowerStream Settings",
+              "type": "object",
+              "properties": {
+                "battery": {
+                  "title": "Battery Settings",
+                  "type": "object",
+                  "properties": {
+                    "additionalCharacteristics": {
+                      "title": "Additional characteristics",
+                      "description": "List of additional characteristics for Battery connected to PowerStream",
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "title": "Characteristic",
+                        "type": "string",
+                        "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W"]
+                      }
+                    }
+                  }
+                },
+                "solar": {
+                  "title": "Solar Settings",
+                  "type": "object",
+                  "properties": {
+                    "additionalCharacteristics": {
+                      "title": "Additional characteristics",
+                      "description": "List of additional characteristics for PVs connected for PowerStream",
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "title": "Characteristic",
+                        "type": "string",
+                        "enum": ["Output Consumption, W"]
+                      }
+                    }
+                  }
+                },
+                "inverter": {
+                  "title": "Inverter Settings",
+                  "type": "object",
+                  "properties": {
+                    "additionalCharacteristics": {
+                      "title": "Additional characteristics",
+                      "description": "List of additional characteristics for PowerStream",
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "title": "Characteristic",
+                        "type": "string",
+                        "enum": ["Input Consumption, W", "Output Consumption, W"]
+                      }
+                    }
                   }
                 }
               }

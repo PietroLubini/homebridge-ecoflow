@@ -3,7 +3,7 @@ import { MqttSetEnabledMessageParams, OutletServiceBase } from '@ecoflow/service
 
 export class OutletCarService extends OutletServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessory) {
-    super('CAR', ecoFlowAccessory);
+    super('CAR', ecoFlowAccessory.config.battery?.additionalCharacteristics, ecoFlowAccessory);
   }
 
   protected override setOn(value: boolean, revert: () => void): Promise<void> {

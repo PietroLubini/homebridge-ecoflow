@@ -3,7 +3,7 @@ import { MqttSetEnabledMessageParams, OutletServiceBase } from '@ecoflow/service
 
 export class OutletUsbService extends OutletServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessory) {
-    super('USB', ecoFlowAccessory);
+    super('USB', ecoFlowAccessory.config.battery?.additionalCharacteristics, ecoFlowAccessory);
   }
 
   protected override setOn(value: boolean, revert: () => void): Promise<void> {

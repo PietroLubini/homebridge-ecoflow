@@ -13,6 +13,7 @@ import {
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2Accessory';
 import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2maxAccessory';
 import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import {
@@ -184,24 +185,31 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     config: DeviceConfig,
     log: Logging
   ): EcoFlowAccessory | null {
-    let ecoFlowAccessory: EcoFlowAccessory | null = null;
+    let EcoFlowAccessoryType: EcoFlowAccessoryType | null = null;
     switch (config.model) {
       case DeviceModel.Delta2Max:
-        ecoFlowAccessory = new Delta2MaxAccessory(
-          this,
-          accessory,
-          config,
-          log,
-          this.httpApiManager,
-          this.mqttApiManager
-        );
+        EcoFlowAccessoryType = Delta2MaxAccessory;
         break;
       case DeviceModel.Delta2:
-        ecoFlowAccessory = new Delta2Accessory(this, accessory, config, log, this.httpApiManager, this.mqttApiManager);
+        EcoFlowAccessoryType = Delta2Accessory;
+        break;
+      case DeviceModel.PowerStream:
+        EcoFlowAccessoryType = PowerStreamAccessory;
         break;
       default:
         log.warn(`"${config.model}" is not supported. Ignoring the device`);
     }
-    return ecoFlowAccessory;
+    return EcoFlowAccessoryType === null
+      ? null
+      : new EcoFlowAccessoryType(this, accessory, config, log, this.httpApiManager, this.mqttApiManager);
   }
 }
+
+type EcoFlowAccessoryType = new (
+  platform: EcoFlowHomebridgePlatform,
+  accessory: PlatformAccessory,
+  config: DeviceConfig,
+  log: Logging,
+  httpApiManager: EcoFlowHttpApiManager,
+  mqttApiManager: EcoFlowMqttApiManager
+) => EcoFlowAccessory;
