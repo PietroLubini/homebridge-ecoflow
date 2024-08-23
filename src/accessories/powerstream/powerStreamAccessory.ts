@@ -21,9 +21,9 @@ import { Logging, PlatformAccessory } from 'homebridge';
 
 export class PowerStreamAccessory extends EcoFlowAccessoryWithQuota<PowerStreamAllQuotaData> {
   private readonly batteryStatusService: BatteryStatusService;
-  private readonly solarService: OutletService;
-  private readonly batteryService: OutletService;
-  private readonly inverterService: OutletService;
+  private readonly solarOutletService: OutletService;
+  private readonly batteryOutletService: OutletService;
+  private readonly inverterOutletService: OutletService;
 
   constructor(
     platform: EcoFlowHomebridgePlatform,
@@ -35,13 +35,17 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuota<PowerStreamA
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
     this.batteryStatusService = new BatteryStatusService(this);
-    this.solarService = new OutletService('PV', config.powerStream?.solar?.additionalCharacteristics, this);
-    this.batteryService = new OutletService('BAT', config.powerStream?.battery?.additionalCharacteristics, this);
-    this.inverterService = new OutletService('INV', config.powerStream?.inverter?.additionalCharacteristics, this);
+    this.solarOutletService = new OutletService('PV', config.powerStream?.solar?.additionalCharacteristics, this);
+    this.batteryOutletService = new OutletService('BAT', config.powerStream?.battery?.additionalCharacteristics, this);
+    this.inverterOutletService = new OutletService(
+      'INV',
+      config.powerStream?.inverter?.additionalCharacteristics,
+      this
+    );
   }
 
   protected override getServices(): ServiceBase[] {
-    return [this.batteryStatusService, this.solarService, this.batteryService, this.inverterService];
+    return [this.batteryStatusService, this.solarOutletService, this.batteryOutletService, this.inverterOutletService];
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
@@ -86,33 +90,35 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuota<PowerStreamA
   private updateSolarValues(params: Heartbeat): void {
     if (params.pv1InputWatts !== undefined || params.pv2InputWatts !== undefined) {
       const pvWatts = this.sum(params.pv1InputWatts, params.pv2InputWatts);
-      this.solarService.updateOutputConsumption(pvWatts);
+      this.solarOutletService.updateOutputConsumption(pvWatts);
     }
   }
 
   private updateBatteryValues(params: Heartbeat): void {
     if (params.batInputWatts !== undefined) {
-      this.batteryStatusService.updateChargingState(params.batInputWatts);
       if (params.batInputWatts >= 0) {
-        this.batteryService.updateOutputConsumption(params.batInputWatts);
+        this.batteryStatusService.updateChargingState(0);
+        this.batteryOutletService.updateOutputConsumption(params.batInputWatts);
       }
       if (params.batInputWatts <= 0) {
-        this.batteryService.updateInputConsumption(params.batInputWatts);
+        const watts = Math.abs(params.batInputWatts);
+        this.batteryStatusService.updateChargingState(watts);
+        this.batteryOutletService.updateInputConsumption(watts);
       }
     }
     if (params.batSoc !== undefined) {
       this.batteryStatusService.updateBatteryLevel(params.batSoc);
-      this.batteryService.updateBatteryLevel(params.batSoc);
+      this.batteryOutletService.updateBatteryLevel(params.batSoc);
     }
   }
 
   private updateInverterValues(params: Heartbeat): void {
     if (params.invOutputWatts !== undefined) {
       if (params.invOutputWatts >= 0) {
-        this.inverterService.updateOutputConsumption(params.invOutputWatts);
+        this.inverterOutletService.updateOutputConsumption(params.invOutputWatts);
       }
       if (params.invOutputWatts <= 0) {
-        this.inverterService.updateInputConsumption(params.invOutputWatts);
+        this.inverterOutletService.updateInputConsumption(Math.abs(params.invOutputWatts));
       }
     }
   }
