@@ -1,0 +1,51 @@
+name: New Device Request
+description: Request to add new device
+title: 'New Device: '
+labels:
+  - feature
+body:
+  - type: markdown
+    attributes:
+      value: '## Device Details'
+  - type: dropdown
+    attributes:
+      label: Device
+      options:
+        - Delta Pro
+        - Smart Home Panel
+        - Smart Plug
+        - Wave Air Conditioner
+        - Glacier
+        - Power Kits
+        - PowerOcean
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Characteristics
+      description: Please provide description of characteristics to control/view in HomeKit.
+        You can make screenshots from your EcoFlow app and hightlight the metrics you want to have.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: '## Testing'
+  - type: dropdown
+    attributes:
+      label: Are you ready to test beta verion of plugin with added device support?
+      options:
+        - Choose an option...
+        - 🟢 Yes
+        - 🔴 No (please explain in the `More Information` box below)
+      default: 0
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: '## More Information'
+  - type: textarea
+    attributes:
+      label: More Information
+      description: Please provide any additional information that you think is relevant to the request.

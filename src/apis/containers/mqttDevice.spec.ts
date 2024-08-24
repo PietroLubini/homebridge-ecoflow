@@ -84,7 +84,7 @@ describe('MqttDevice', () => {
     });
 
     it('should subscribe on quota$ observable when subscribing on quota topic', () => {
-      const quotaMessage: MqttQuotaMessage = { typeCode: 'bms' };
+      const quotaMessage: MqttQuotaMessage = { param1: '1' };
       quotaMock.subscribe.mockReturnValueOnce({} as jest.Mocked<Subscription>);
 
       device.subscribeOnMessage(MqttTopicType.Quota, quotaCallbackMock);

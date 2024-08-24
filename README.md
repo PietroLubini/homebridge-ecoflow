@@ -23,11 +23,11 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 - Fully customizable HomeKit accessories
 - HomeKit automations for your EcoFlow devices
 
-## Supported device types
+## Supported Device Types
 
-- Delta 2
-- Delta 2 Max
-- PowerStream Micro-inverter
+- [Delta 2](#delta-2)
+- [Delta 2 Max](#delta-2-max)
+- [PowerStream Micro-inverter](#powerstream-micro-inverter)
 
 For a full list of devices that could be potentially added check [here](https://developer-eu.ecoflow.com/us/document/introduction)
 
@@ -178,6 +178,54 @@ If `devices`.`model` is `PowerStream` it is possible to set turn on/off addition
   ],
 }
 ```
+
+## Supported Devices
+
+### Delta 2
+
+| Service    | Characteristic        | Standard | Permission |
+| ---------- | --------------------- | -------- | ---------- |
+| Battery    | BatteryLevel          | ✅       | Read       |
+| Battery    | ChargingState         | ✅       | Read       |
+| Battery    | StatusLowBattery      | ✅       | Read       |
+| Outlet AC  | On                    | ✅       | Read/Write |
+| Outlet AC  | OutletInUse           | ✅       | Read       |
+| Outlet AC  | Battery Level, %      | ❌       | Read       |
+| Outlet AC  | Input Consumption, W  | ❌       | Read       |
+| Outlet AC  | Output Consumption, W | ❌       | Read       |
+| Outlet CAR | On                    | ✅       | Read/Write |
+| Outlet CAR | OutletInUse           | ✅       | Read       |
+| Outlet CAR | Battery Level, %      | ❌       | Read       |
+| Outlet CAR | Input Consumption, W  | ❌       | Read       |
+| Outlet CAR | Output Consumption, W | ❌       | Read       |
+| Outlet USB | On                    | ✅       | Read/Write |
+| Outlet USB | OutletInUse           | ✅       | Read       |
+| Outlet USB | Battery Level, %      | ❌       | Read       |
+| Outlet USB | Input Consumption, W  | ❌       | Read       |
+| Outlet USB | Output Consumption, W | ❌       | Read       |
+
+### Delta 2 Max
+
+Supported services are similar to [Delta 2](#delta-2)
+
+### PowerStream Micro-inverter
+
+| Service       | Characteristic        | Standard | Permission |
+| ------------- | --------------------- | -------- | ---------- |
+| Outlet INV    | On                    | ✅       | Read       |
+| Outlet INV    | OutletInUse           | ✅       | Read       |
+| Outlet INV    | Input Consumption, W  | ❌       | Read       |
+| Outlet INV    | Output Consumption, W | ❌       | Read       |
+| Outlet PV     | On                    | ✅       | -          |
+| Outlet PV     | OutletInUse           | ✅       | Read       |
+| Outlet PV     | Output Consumption, W | ❌       | Read       |
+| Outlet BAT    | On                    | ✅       | -          |
+| Outlet BAT    | OutletInUse           | ✅       | Read       |
+| Outlet BAT    | Battery Level, %      | ❌       | Read       |
+| Outlet BAT    | Input Consumption, W  | ❌       | Read       |
+| Outlet BAT    | Output Consumption, W | ❌       | Read       |
+| Lightbulb INV | On                    | ✅       | Read       |
+| Lightbulb INV | Brightness            | ✅       | Read/write |
 
 ## Troubleshooting
 

@@ -1,0 +1,107 @@
+name: Bug Report
+description: Create a report to help us improve
+title: 'Bug: '
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: '## Device Details'
+  - type: dropdown
+    attributes:
+      label: Device
+      options:
+        - Delta 2
+        - Delta 2 Max
+        - PowerStream
+        - Other
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: '## Bug Request Details'
+  - type: textarea
+    attributes:
+      label: 'Describe The Bug:'
+      description: A clear and concise description of what the bug is.
+        If applicable, add screenshots to help explain your problem.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 'Steps To Reproduce:'
+      description: Steps to reproduce the behavior.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 'Expected Behavior:'
+      description: A clear and concise description of what you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 'Actual Behavior:'
+      description: A clear and concise description of what is actual happened.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 'Plugin Logs:'
+      description: Show the Homebridge Plugin logs here, remove any sensitive information.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 'Plugin Config:'
+      description: Show your Homebridge Plugin Config here, remove any sensitive information.
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: '## Environment'
+  - type: input
+    attributes:
+      label: Plugin Version
+      placeholder: v1.2.0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Homebridge Version
+      description: Result of command `homebridge -V`
+      placeholder: '1.8.4'
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Node.js Version
+      description: Result of command `node -v`
+      placeholder: v18.16.0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: NPM Version
+      description: Result of command `npm -v`
+      placeholder: '9.5.1'
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: Operating System
+      options:
+        - Raspbian
+        - Ubuntu
+        - Debian
+        - Windows
+        - macOS
+        - Other (explain in the `Other Operating System` box below)
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 'Other Operating System (Optional):'
+      description: Describe which Operating System you have

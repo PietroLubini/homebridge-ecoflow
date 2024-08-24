@@ -17,15 +17,13 @@ import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
-import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData> {
-  private readonly batteryStatusService: BatteryStatusService;
+  private readonly inverterOutletService: OutletInvService;
   private readonly solarOutletService: OutletService;
   private readonly batteryOutletService: OutletService;
-  private readonly inverterOutletService: OutletInvService;
   private readonly inverterLightBulbService: LightBulbInvService;
 
   constructor(
@@ -37,23 +35,22 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
     mqttApiManager: EcoFlowMqttApiManager
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
-    this.batteryStatusService = new BatteryStatusService(this, 'BAT');
-    this.solarOutletService = new OutletService(this, 'PV', config.powerStream?.solar?.additionalCharacteristics);
-    this.batteryOutletService = new OutletService(this, 'BAT', config.powerStream?.battery?.additionalCharacteristics);
     this.inverterOutletService = new OutletInvService(
       this,
       'INV',
       config.powerStream?.inverter?.additionalCharacteristics
     );
+    this.solarOutletService = new OutletService(this, 'PV', config.powerStream?.solar?.additionalCharacteristics);
+    this.batteryOutletService = new OutletService(this, 'BAT', config.powerStream?.battery?.additionalCharacteristics);
+
     this.inverterLightBulbService = new LightBulbInvService(this);
   }
 
   protected override getServices(): ServiceBase[] {
     return [
-      this.batteryStatusService,
+      this.inverterOutletService,
       this.solarOutletService,
       this.batteryOutletService,
-      this.inverterOutletService,
       this.inverterLightBulbService,
     ];
   }
@@ -107,17 +104,14 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
   private updateBatteryValues(params: Heartbeat): void {
     if (params.batInputWatts !== undefined) {
       if (params.batInputWatts >= 0) {
-        this.batteryStatusService.updateChargingState(0);
         this.batteryOutletService.updateOutputConsumption(params.batInputWatts);
       }
       if (params.batInputWatts <= 0) {
         const watts = Math.abs(params.batInputWatts);
-        this.batteryStatusService.updateChargingState(watts);
         this.batteryOutletService.updateInputConsumption(watts);
       }
     }
     if (params.batSoc !== undefined) {
-      this.batteryStatusService.updateBatteryLevel(params.batSoc);
       this.batteryOutletService.updateBatteryLevel(params.batSoc);
     }
   }

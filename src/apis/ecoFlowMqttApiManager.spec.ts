@@ -308,7 +308,7 @@ describe('EcoFlowMqttApiManager', () => {
     }
 
     it('should process quota message in all devices that shares single mqtt client', async () => {
-      const message: MqttQuotaMessage = { typeCode: 'bms' };
+      const message: MqttQuotaMessage = { param1: '123' };
       await connect(deviceInfo1, deviceInfo2, deviceInfo3);
 
       processReceivedMessage(MqttTopicType.Quota, message, client1Mock);

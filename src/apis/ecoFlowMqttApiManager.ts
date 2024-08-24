@@ -10,7 +10,7 @@ import mqtt from 'mqtt';
 import { Subscription } from 'rxjs';
 
 export class EcoFlowMqttApiManager {
-  private readonly clients: Record<ConnectionKey, MqttClientContainer> = {};
+  private readonly mqttClientContainers: Record<ConnectionKey, MqttClientContainer> = {};
 
   constructor(
     private readonly httpApiManager: EcoFlowHttpApiManager,
@@ -18,13 +18,13 @@ export class EcoFlowMqttApiManager {
   ) {}
 
   public async destroy(): Promise<void> {
-    for (const connectionKey in this.clients) {
-      const apiClient = this.clients[connectionKey];
-      await apiClient.client?.unsubscribeAsync('#');
-      const devices = apiClient.getAllDevices();
+    for (const connectionKey in this.mqttClientContainers) {
+      const mqttClientContainer = this.mqttClientContainers[connectionKey];
+      await mqttClientContainer.client?.unsubscribeAsync('#');
+      const devices = mqttClientContainer.getAllDevices();
       devices.forEach(device => device.log.debug('Unsubscribed from all topics'));
 
-      await apiClient.client?.endAsync();
+      await mqttClientContainer.client?.endAsync();
       devices.forEach(device => device.log.debug('Disconnected from EcoFlow MQTT Service'));
     }
   }
@@ -65,33 +65,34 @@ export class EcoFlowMqttApiManager {
   }
 
   private async connect(deviceInfo: DeviceInfo): Promise<MqttClientContainer | null> {
-    const apiClient = await this.acquireCertificate(deviceInfo);
-    if (apiClient && !apiClient.client) {
+    const mqttClientContainer = await this.acquireCertificate(deviceInfo);
+    if (mqttClientContainer && !mqttClientContainer.client) {
       const machineId = await this.machineIdProvider.getMachineId(deviceInfo.log);
-      const clientId = `HOMEBRIDGE_${machineId.toUpperCase()}_${apiClient.certificateData.certificateAccount}`;
+      const clientId = `HOMEBRIDGE_${machineId.toUpperCase()}_${mqttClientContainer.certificateData.certificateAccount}`;
       try {
+        const certificateData = mqttClientContainer.certificateData;
         const client = await this.connectMqttClient(
-          `${apiClient.certificateData.protocol}://${apiClient.certificateData.url}:${apiClient.certificateData.port}`,
+          `${certificateData.protocol}://${certificateData.url}:${certificateData.port}`,
           {
-            username: `${apiClient.certificateData.certificateAccount}`,
-            password: `${apiClient.certificateData.certificatePassword}`,
+            username: `${certificateData.certificateAccount}`,
+            password: `${certificateData.certificatePassword}`,
             clientId,
             protocolVersion: 5,
           },
           deviceInfo
         );
         deviceInfo.log.info('Connected to EcoFlow MQTT Service');
-        apiClient.client = client;
+        mqttClientContainer.client = client;
         client.on('message', (topic, message) => {
           const mqttMessage = JSON.parse(message.toString());
-          this.processReceivedMessage(apiClient, topic, mqttMessage);
+          this.processReceivedMessage(mqttClientContainer, topic, mqttMessage);
         });
       } catch (err) {
         deviceInfo.log.error('Connection to EcoFlow MQTT Service was failed', err);
       }
     }
-    apiClient?.addDevice(deviceInfo.config, deviceInfo.log);
-    return apiClient;
+    mqttClientContainer?.addDevice(deviceInfo.config, deviceInfo.log);
+    return mqttClientContainer;
   }
 
   private async connectMqttClient(
@@ -125,22 +126,22 @@ export class EcoFlowMqttApiManager {
     topicType: MqttTopicType,
     callback: (message: TMessage) => void
   ): Subscription | undefined {
-    return this.getApiClient(deviceInfo)
+    return this.getMqttClientContainer(deviceInfo)
       ?.getDevices(deviceInfo.config.serialNumber)
       .find(device => device.config.name === deviceInfo.config.name)
       ?.subscribeOnMessage(topicType, callback);
   }
 
-  private processReceivedMessage(apiClient: MqttClientContainer, topic: string, message: MqttMessage): void {
+  private processReceivedMessage(container: MqttClientContainer, topic: string, message: MqttMessage): void {
     const { serialNumber, topicType } = this.parseTopic(topic);
-    const devices = apiClient.getDevices(serialNumber);
+    const devices = container.getDevices(serialNumber);
     devices.forEach(device => device.processReceivedMessage(topicType, message));
   }
 
   private async acquireCertificate(deviceInfo: DeviceInfo): Promise<MqttClientContainer | null> {
-    let apiClient = this.getApiClient(deviceInfo);
-    if (apiClient) {
-      return apiClient;
+    let mqttClientContainer = this.getMqttClientContainer(deviceInfo);
+    if (mqttClientContainer) {
+      return mqttClientContainer;
     }
     let certificateData: AcquireCertificateData | null = null;
     if (deviceInfo.config.simulate === true) {
@@ -155,16 +156,16 @@ export class EcoFlowMqttApiManager {
       certificateData = await this.httpApiManager.acquireCertificate(deviceInfo);
     }
     if (certificateData) {
-      apiClient = new MqttClientContainer(certificateData);
-      this.clients[deviceInfo.connectionKey] = apiClient;
-      return apiClient;
+      mqttClientContainer = new MqttClientContainer(certificateData);
+      this.mqttClientContainers[deviceInfo.connectionKey] = mqttClientContainer;
+      return mqttClientContainer;
     }
     return null;
   }
 
-  private getApiClient(deviceInfo: DeviceInfo): MqttClientContainer | null {
-    if (deviceInfo.connectionKey in this.clients) {
-      return this.clients[deviceInfo.connectionKey];
+  private getMqttClientContainer(deviceInfo: DeviceInfo): MqttClientContainer | null {
+    if (deviceInfo.connectionKey in this.mqttClientContainers) {
+      return this.mqttClientContainers[deviceInfo.connectionKey];
     }
     return null;
   }
