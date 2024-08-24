@@ -16,7 +16,6 @@ body:
         - Delta 2 Max
         - PowerStream
         - Other
-      default: 0
     validations:
       required: true
 
@@ -102,7 +101,6 @@ body:
         - Windows
         - macOS
         - Other (explain in the 'Other Operating System' box below)
-      default: 0
     validations:
       required: true
   - type: textarea
