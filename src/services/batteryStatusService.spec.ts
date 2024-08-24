@@ -1,4 +1,4 @@
-import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
@@ -7,7 +7,7 @@ import { Logging, PlatformAccessory } from 'homebridge';
 
 describe('BatteryStatusService', () => {
   let service: BatteryStatusService;
-  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessory>;
+  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryBase>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
@@ -50,7 +50,7 @@ describe('BatteryStatusService', () => {
       platform: platformMock,
       accessory: accessoryMock,
       config: {},
-    } as unknown as jest.Mocked<EcoFlowAccessory>;
+    } as unknown as jest.Mocked<EcoFlowAccessoryBase>;
     service = new BatteryStatusService(ecoFlowAccessoryMock);
     hapService = new HapService('Accessory Battery Name', HapService.Battery.UUID);
   });
@@ -58,7 +58,8 @@ describe('BatteryStatusService', () => {
   describe('initialize', () => {
     it('should add Battery service when it is not added to accessory yet', () => {
       const expected = hapService;
-      (ecoFlowAccessoryMock.config.name = 'accessory1'), accessoryMock.getService.mockReturnValueOnce(undefined);
+      ecoFlowAccessoryMock.config.name = 'accessory1';
+      accessoryMock.getService.mockReturnValueOnce(undefined);
       accessoryMock.addService.mockReturnValueOnce(expected);
 
       service.initialize();

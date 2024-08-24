@@ -1,3 +1,3 @@
-import { BatteryAccessory } from '@ecoflow/accessories/batteries/batteryAccessory';
+import { BatteryAccessoryBase } from '@ecoflow/accessories/batteries/batteryAccessoryBase';
 
-export class Delta2MaxAccessory extends BatteryAccessory {}
+export class Delta2MaxAccessory extends BatteryAccessoryBase {}

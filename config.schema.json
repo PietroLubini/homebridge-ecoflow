@@ -56,6 +56,12 @@
               "required": true,
               "description": "Secret Key from \"EcoFlow IoT Developer Platform\" (https://developer-eu.ecoflow.com)"
             },
+            "simulate": {
+              "title": "Simulate",
+              "type": "boolean",
+              "required": false,
+              "description": "A value indicating whether device should be simulated"
+            },
             "battery": {
               "title": "Battery Settings",
               "type": "object",

@@ -5,31 +5,31 @@ export interface BmsStatus {
 
 // AC invertor status
 export interface InvStatusAc {
-  outputWatts?: number; //Discharging power (W)
-  cfgAcEnabled?: boolean; //AC switch: 0: off; 1: on
-  cfgAcXboost?: boolean; //X-Boost switch: 0: off; 1: on
-  cfgAcOutFreq?: number; //Output frequency configured for the inverter (Hz)
-  cfgAcOutVol?: number; //Output voltage configured for the inverter (V)
+  outputWatts?: number; //Discharging power (W) (read)
+  cfgAcEnabled?: boolean; //AC switch: 0: off; 1: on (read/write)
+  cfgAcXboost?: boolean; //X-Boost switch: 0: off; 1: on (read/write)
+  cfgAcOutFreq?: number; //Output frequency configured for the inverter (Hz) (read/write)
+  cfgAcOutVol?: number; //Output voltage configured for the inverter (V) (read/write)
 }
 
 // Invertor status
 export interface InvStatus extends InvStatusAc {
-  inputWatts?: number; //Charging power (W)
+  inputWatts?: number; //Charging power (W) (read)
 }
 
 export interface PdStatusCar {
-  carState?: boolean; //PD CAR button status: 0: off; 1: on
-  carWatts?: number; //CAR output power (W)
+  carState?: boolean; //PD CAR button status: 0: off; 1: on (read/write)
+  carWatts?: number; //CAR output power (W) (read)
 }
 
 export interface PdStatusUsb {
-  dcOutState?: boolean; //PD DC button status: 0: off; 1: on
-  usb1Watts?: number; //Common USB1 output power (W)
-  usb2Watts?: number; //Common USB2 output power for PD (W)
-  qcUsb1Watts?: number; //qc_usb1 output power (W)
-  qcUsb2Watts?: number; //qc_usb2 output power (W)
-  typec1Watts?: number; //Type-C 1 output power (W)
-  typec2Watts?: number; //Type-C 2 output power (W)
+  dcOutState?: boolean; //PD DC button status: 0: off; 1: on (read/write)
+  usb1Watts?: number; //Common USB1 output power (W) (read)
+  usb2Watts?: number; //Common USB2 output power for PD (W) (read)
+  qcUsb1Watts?: number; //qc_usb1 output power (W) (read)
+  qcUsb2Watts?: number; //qc_usb2 output power (W) (read)
+  typec1Watts?: number; //Type-C 1 output power (W) (read)
+  typec2Watts?: number; //Type-C 2 output power (W) (read)
 }
 
 export interface PdStatus extends PdStatusUsb, PdStatusCar {}

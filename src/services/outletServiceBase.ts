@@ -1,19 +1,15 @@
-import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
-import { Characteristic, CharacteristicValue, Service, WithUUID } from 'homebridge';
-
-export interface MqttSetEnabledMessageParams {
-  enabled: number;
-}
+import { Characteristic, CharacteristicValue, WithUUID } from 'homebridge';
 
 export abstract class OutletServiceBase extends ServiceBase {
   constructor(
-    private readonly serviceSubType: string,
-    private readonly additionalCharacteristics: CharacteristicType[] | undefined,
-    ecoFlowAccessory: EcoFlowAccessory
+    ecoFlowAccessory: EcoFlowAccessoryBase,
+    serviceSubType: string,
+    private readonly additionalCharacteristics?: CharacteristicType[]
   ) {
-    super(ecoFlowAccessory);
+    super(ecoFlowAccessory.platform.Service.Outlet, ecoFlowAccessory, serviceSubType);
   }
 
   public updateState(state: boolean): void {
@@ -48,10 +44,6 @@ export abstract class OutletServiceBase extends ServiceBase {
     );
   }
 
-  protected override createService(): Service {
-    return this.getOrAddServiceById(this.platform.Service.Outlet, this.serviceName, this.serviceSubType);
-  }
-
   protected override addCharacteristics(): Characteristic[] {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
     onCharacteristic.onSet(value => {
@@ -79,23 +71,6 @@ export abstract class OutletServiceBase extends ServiceBase {
 
   protected abstract setOn(value: boolean, revert: () => void): Promise<void>;
 
-  protected sendOn<TParams>(
-    moduleType: number,
-    operateType: string,
-    params: TParams,
-    revert: () => void
-  ): Promise<void> {
-    return this.ecoFlowAccessory.sendSetCommand(moduleType, operateType, params, revert);
-  }
-
-  protected override updateCharacteristic(
-    characteristic: WithUUID<{ new (): Characteristic }>,
-    name: string,
-    value: CharacteristicValue
-  ): void {
-    super.updateCharacteristic(characteristic, `${this.serviceSubType} ${name}`, value);
-  }
-
   private tryAddCustomCharacteristic(
     characteristic: WithUUID<{ new (): Characteristic }>,
     characteristicType: CharacteristicType
@@ -115,9 +90,5 @@ export abstract class OutletServiceBase extends ServiceBase {
     if (this.additionalCharacteristics?.includes(characteristicType)) {
       this.updateCharacteristic(characteristic, name, value);
     }
-  }
-
-  private get serviceName(): string {
-    return `${this.ecoFlowAccessory.config.name} ${this.serviceSubType}`;
   }
 }

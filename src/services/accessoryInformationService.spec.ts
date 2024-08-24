@@ -1,4 +1,4 @@
-import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
@@ -10,7 +10,7 @@ jest.mock('fs');
 
 describe('AccessoryInformationService', () => {
   let service: AccessoryInformationService;
-  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessory>;
+  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryBase>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
@@ -53,7 +53,7 @@ describe('AccessoryInformationService', () => {
       Characteristic: HapCharacteristic,
     } as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
     accessoryMock = {
-      getService: jest.fn(),
+      getServiceById: jest.fn(),
       addService: jest.fn(),
     } as unknown as jest.Mocked<PlatformAccessory>;
     ecoFlowAccessoryMock = {
@@ -63,8 +63,9 @@ describe('AccessoryInformationService', () => {
       config: {
         model: 'Delta 2 Max',
         serialNumber: 'R123ABCDEGHI321',
+        name: 'Accessory1',
       },
-    } as unknown as jest.Mocked<EcoFlowAccessory>;
+    } as unknown as jest.Mocked<EcoFlowAccessoryBase>;
     service = new AccessoryInformationService(ecoFlowAccessoryMock);
     jest.spyOn(fs, 'readFileSync').mockReturnValueOnce('{"version": "1.2.3"}');
     hapService = new HapService('Information Service', HapService.AccessoryInformation.UUID);
@@ -78,7 +79,7 @@ describe('AccessoryInformationService', () => {
 
     it('should add AccessoryInformation service when it is not added to accessory yet', () => {
       const expected = hapService;
-      accessoryMock.getService.mockReturnValueOnce(undefined);
+      accessoryMock.getServiceById.mockReturnValueOnce(undefined);
       accessoryMock.addService.mockReturnValueOnce(expected);
 
       service.initialize();
@@ -87,14 +88,14 @@ describe('AccessoryInformationService', () => {
       expect(actual).toEqual(expected);
       expect(accessoryMock.addService).toHaveBeenCalledWith(
         HapService.AccessoryInformation,
-        'Information',
-        HapService.AccessoryInformation.UUID
+        'Accessory1 Information',
+        'Information'
       );
     });
 
     it('should use existing AccessoryInformation service when it is already added to accessory', () => {
       const expected = hapService;
-      accessoryMock.getService.mockReturnValueOnce(expected);
+      accessoryMock.getServiceById.mockReturnValueOnce(expected);
 
       service.initialize();
       const actual = service.service;
@@ -104,7 +105,7 @@ describe('AccessoryInformationService', () => {
     });
 
     it('should add information characteristics when initializing accessory', () => {
-      accessoryMock.getService.mockReturnValueOnce(undefined);
+      accessoryMock.getServiceById.mockReturnValueOnce(undefined);
       accessoryMock.addService.mockReturnValueOnce(hapService);
 
       service.initialize();
@@ -116,7 +117,7 @@ describe('AccessoryInformationService', () => {
 
   describe('cleanupCharacteristics', () => {
     beforeEach(() => {
-      accessoryMock.getService.mockReturnValueOnce(hapService);
+      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
     });
 
@@ -128,8 +129,8 @@ describe('AccessoryInformationService', () => {
 
       expect(actual).toEqual(expectedCharacteristics);
       expect(logMock.warn.mock.calls).toEqual([
-        ['[Information] Removing obsolete characteristic:', 'On'],
-        ['[Information] Removing obsolete characteristic:', 'In Use'],
+        ['[Information Service] Removing obsolete characteristic:', 'On'],
+        ['[Information Service] Removing obsolete characteristic:', 'In Use'],
       ]);
     });
   });

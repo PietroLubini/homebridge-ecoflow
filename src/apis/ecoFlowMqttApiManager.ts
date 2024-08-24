@@ -2,6 +2,7 @@ import { ConnectionKey, DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
 import { MqttClient } from '@ecoflow/apis/containers/mqttClient';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { MqttMessage, MqttSetMessage, MqttTopicType } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { MockMqttClient } from '@ecoflow/apis/simulations/mockMqttClient';
 import { SerialNumber } from '@ecoflow/config';
 import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
 import mqtt from 'mqtt';
@@ -22,7 +23,7 @@ export class EcoFlowMqttApiManager {
       const devices = apiClient.getAllDevices();
       devices.forEach(device => device.log.debug('Unsubscribed from all topics'));
 
-      await apiClient.client?.end();
+      await apiClient.client?.endAsync();
       devices.forEach(device => device.log.debug('Disconnected from EcoFlow MQTT Service'));
     }
   }
@@ -68,14 +69,15 @@ export class EcoFlowMqttApiManager {
       const machineId = await this.machineIdProvider.getMachineId(deviceInfo.log);
       const clientId = `HOMEBRIDGE_${machineId.toUpperCase()}_${apiClient.certificateData.certificateAccount}`;
       try {
-        const client = await mqtt.connectAsync(
+        const client = await this.connectMqttClient(
           `${apiClient.certificateData.protocol}://${apiClient.certificateData.url}:${apiClient.certificateData.port}`,
           {
             username: `${apiClient.certificateData.certificateAccount}`,
             password: `${apiClient.certificateData.certificatePassword}`,
             clientId,
             protocolVersion: 5,
-          }
+          },
+          deviceInfo
         );
         deviceInfo.log.info('Connected to EcoFlow MQTT Service');
         apiClient.client = client;
@@ -89,6 +91,17 @@ export class EcoFlowMqttApiManager {
     }
     apiClient?.addDevice(deviceInfo.config, deviceInfo.log);
     return apiClient;
+  }
+
+  private async connectMqttClient(
+    brokerUrl: string,
+    options: mqtt.IClientOptions,
+    deviceInfo: DeviceInfo
+  ): Promise<mqtt.MqttClient> {
+    if (deviceInfo.config.simulate === true) {
+      return new MockMqttClient(deviceInfo, options);
+    }
+    return await mqtt.connectAsync(brokerUrl, options);
   }
 
   private async subscribeOnTopic(deviceInfo: DeviceInfo, topicType: MqttTopicType): Promise<boolean> {

@@ -1,15 +1,15 @@
-import { EcoFlowAccessoryWithQuota } from '@ecoflow/accessories/ecoFlowAccessory';
+import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/httpApiPowerStreamContracts';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 
 export class OutletService extends OutletServiceBase {
   constructor(
+    ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>,
     serviceSubType: string,
-    additionalCharacteristics: CharacteristicType[] | undefined,
-    protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuota<PowerStreamAllQuotaData>
+    additionalCharacteristics?: CharacteristicType[]
   ) {
-    super(serviceSubType, additionalCharacteristics, ecoFlowAccessory);
+    super(ecoFlowAccessory, serviceSubType, additionalCharacteristics);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

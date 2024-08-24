@@ -1,16 +1,20 @@
 import { BatteryAllQuotaData } from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
-import { EcoFlowAccessoryWithQuota } from '@ecoflow/accessories/ecoFlowAccessory';
-import { MqttSetEnabledMessageParams, OutletServiceBase } from '@ecoflow/services/outletServiceBase';
+import {
+  MqttBatterySetAcOnMessageParams,
+  MqttBatterySetOperationType,
+} from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
+import { OutletBatteryServiceBase } from '@ecoflow/accessories/batteries/services/outletBatteryServiceBase';
+import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 
-export class OutletAcService extends OutletServiceBase {
-  constructor(protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuota<BatteryAllQuotaData>) {
-    super('AC', ecoFlowAccessory.config.battery?.additionalCharacteristics, ecoFlowAccessory);
+export class OutletAcService extends OutletBatteryServiceBase {
+  constructor(protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<BatteryAllQuotaData>) {
+    super(ecoFlowAccessory, 'AC', ecoFlowAccessory.config.battery?.additionalCharacteristics);
   }
 
   protected override setOn(value: boolean, revert: () => void): Promise<void> {
-    return this.sendOn<MqttSetAcEnabledMessageParams>(
+    return this.sendOn<MqttBatterySetAcOnMessageParams>(
       3,
-      'acOutCfg',
+      MqttBatterySetOperationType.AcOutCfg,
       {
         out_voltage:
           this.ecoFlowAccessory.quota.inv.cfgAcOutVol !== undefined
@@ -26,10 +30,4 @@ export class OutletAcService extends OutletServiceBase {
       revert
     );
   }
-}
-
-interface MqttSetAcEnabledMessageParams extends MqttSetEnabledMessageParams {
-  out_voltage: number;
-  out_freq: number;
-  xboost: number;
 }

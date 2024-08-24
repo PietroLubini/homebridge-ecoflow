@@ -1,3 +1,4 @@
+import { Simulator } from '@ecoflow/apis/simulations/simulator';
 import { AccessoryConfig, PlatformConfig } from 'homebridge';
 
 export interface EcoFlowConfig extends PlatformConfig {
@@ -26,11 +27,14 @@ export interface DeviceAccessConfig extends DeviceInfoConfig {
   location: LocationType;
   accessKey: string;
   secretKey: string;
+  model: DeviceModel;
   reconnectMqttTimeoutMs?: number;
+  simulate?: boolean;
+  simulator?: new () => Simulator;
+  simulateQuotaTimeoutMs?: number;
 }
 
 export interface DeviceConfig extends AccessoryConfig, DeviceAccessConfig {
-  model: DeviceModel;
   battery?: BatteryDeviceConfig;
   powerStream?: PowerStreamDeviceConfig;
 }

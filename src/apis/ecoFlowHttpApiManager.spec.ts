@@ -1,6 +1,6 @@
 import { DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
-import { DeviceAccessConfig, LocationType } from '@ecoflow/config';
+import { DeviceAccessConfig, DeviceModel, LocationType } from '@ecoflow/config';
 import { Logging } from 'homebridge';
 
 describe('EcoFlowHttpApiManager', () => {
@@ -22,6 +22,7 @@ describe('EcoFlowHttpApiManager', () => {
       secretKey: 'secretKey1',
       accessKey: 'accessKey1',
       serialNumber: 'sn1',
+      model: DeviceModel.Delta2,
       location: LocationType.EU,
     };
     deviceInfo = new DeviceInfo(config, logMock);

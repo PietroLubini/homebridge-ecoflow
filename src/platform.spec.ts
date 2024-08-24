@@ -1,6 +1,6 @@
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2Accessory';
 import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2maxAccessory';
-import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
@@ -111,7 +111,7 @@ describe('EcoFlowHomebridgePlatform', () => {
     let delta2Config: DeviceConfig;
     let delta2MaxConfig: DeviceConfig;
 
-    function createAccessory<TAccessory extends EcoFlowAccessory>(
+    function createAccessory<TAccessory extends EcoFlowAccessoryBase>(
       Accessory: new (
         platform: EcoFlowHomebridgePlatform,
         accessory: PlatformAccessory,
@@ -131,7 +131,7 @@ describe('EcoFlowHomebridgePlatform', () => {
         httpApiManagerMock,
         mqttApiManagerMock
       ) as jest.Mocked<TAccessory>;
-      const accessoryBaseMock = ecoFlowAccessoryMock as jest.Mocked<EcoFlowAccessory>;
+      const accessoryBaseMock = ecoFlowAccessoryMock as jest.Mocked<EcoFlowAccessoryBase>;
       accessoryBaseMock.initialize = jest.fn().mockResolvedValue(undefined);
       accessoryBaseMock.cleanupServices.mockReset();
       Object.defineProperty(ecoFlowAccessoryMock, 'accessory', { value: accessoryMock, configurable: true });

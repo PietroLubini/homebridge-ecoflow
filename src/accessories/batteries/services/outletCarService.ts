@@ -1,15 +1,19 @@
-import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
-import { MqttSetEnabledMessageParams, OutletServiceBase } from '@ecoflow/services/outletServiceBase';
+import {
+  MqttBatterySetOnMessageParams,
+  MqttBatterySetOperationType,
+} from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
+import { OutletBatteryServiceBase } from '@ecoflow/accessories/batteries/services/outletBatteryServiceBase';
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 
-export class OutletCarService extends OutletServiceBase {
-  constructor(ecoFlowAccessory: EcoFlowAccessory) {
-    super('CAR', ecoFlowAccessory.config.battery?.additionalCharacteristics, ecoFlowAccessory);
+export class OutletCarService extends OutletBatteryServiceBase {
+  constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
+    super(ecoFlowAccessory, 'CAR', ecoFlowAccessory.config.battery?.additionalCharacteristics);
   }
 
   protected override setOn(value: boolean, revert: () => void): Promise<void> {
-    return this.sendOn<MqttSetEnabledMessageParams>(
+    return this.sendOn<MqttBatterySetOnMessageParams>(
       5,
-      'mpptCar',
+      MqttBatterySetOperationType.MpptCar,
       {
         enabled: Number(value),
       },

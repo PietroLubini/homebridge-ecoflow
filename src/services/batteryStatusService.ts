@@ -1,9 +1,13 @@
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
-import { Characteristic, Service } from 'homebridge';
+import { Characteristic } from 'homebridge';
 
 export class BatteryStatusService extends ServiceBase {
-  protected override createService(): Service {
-    return this.getOrAddService(this.platform.Service.Battery, this.ecoFlowAccessory.config.name);
+  constructor(
+    protected readonly ecoFlowAccessory: EcoFlowAccessoryBase,
+    serviceSubType?: string
+  ) {
+    super(ecoFlowAccessory.platform.Service.Battery, ecoFlowAccessory, serviceSubType);
   }
 
   protected override addCharacteristics(): Characteristic[] {

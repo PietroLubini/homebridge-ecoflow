@@ -95,7 +95,7 @@ describe('MqttDevice', () => {
     });
 
     it('should subscribe on setReply$ observable when subscribing on set_reply topic', () => {
-      const setReplyMessage: MqttSetReplyMessage = { id: 1, data: { ack: false }, operateType: 'ot1', version: 'v1' };
+      const setReplyMessage: MqttSetReplyMessage = { id: 1, data: { ack: false }, version: 'v1' };
       setReplyMock.subscribe.mockReturnValueOnce({} as jest.Mocked<Subscription>);
 
       device.subscribeOnMessage(MqttTopicType.SetReply, setReplyCallbackMock);

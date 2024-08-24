@@ -12,7 +12,7 @@ import {
 import { OutletAcService } from '@ecoflow/accessories/batteries/services/outletAcService';
 import { OutletCarService } from '@ecoflow/accessories/batteries/services/outletCarService';
 import { OutletUsbService } from '@ecoflow/accessories/batteries/services/outletUsbService';
-import { EcoFlowAccessoryWithQuota } from '@ecoflow/accessories/ecoFlowAccessory';
+import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/interfaces/mqttApiContracts';
@@ -22,7 +22,7 @@ import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
-export abstract class BatteryAccessory extends EcoFlowAccessoryWithQuota<BatteryAllQuotaData> {
+export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase<BatteryAllQuotaData> {
   private readonly batteryService: BatteryStatusService;
   private readonly outletUsbService: OutletUsbService;
   private readonly outletAcService: OutletAcService;

@@ -45,7 +45,7 @@ sudo npm install -g @pietrolubini/homebridge-ecoflow
 
 Add the `EcoFlowHomebridge` platform in `config.json` in your home directory inside `.homebridge`. Add your devices in the `devices` array. Example of configuration:
 
-```js
+```json
 {
   "platforms": [
     {
@@ -60,7 +60,41 @@ Add the `EcoFlowHomebridge` platform in `config.json` in your home directory ins
         }
       ],
       "name": "Homebridge EcoFlow",
-      "platform": "EcoFlowHomebridge",
+      "platform": "EcoFlowHomebridge"
+    }
+  ]
+}
+```
+
+### AccessKey and SecretKey
+
+For the plugin to work EcoFlow account's `AccessKey` and `SecretKey` is required. To retrieve them
+
+- Register on [EcoFlow IoT Developer Platform](https://developer-eu.ecoflow.com/)
+- Wait until your request will be approved
+- Generate `AccessKey`/`SecretKey` pair [here](https://developer-eu.ecoflow.com/us/security)
+
+### Simulate Accessory
+
+It is possible to simulate accessory by adding `simulate` property to device's configuration (`accessKey` and `secretKey` could contain mock values).
+Quota is sent every 10 seconds with random values in this mode.
+
+```json
+{
+  "platforms": [
+    {
+      "devices": [
+        {
+          "name": "Battery",
+          "model": "Delta 2 Max",
+          "serialNumber": "R123ABCDEGHI321",
+          "accessKey": "key1",
+          "secretKey": "key2",
+          "simulate": true
+        }
+      ],
+      "name": "Homebridge EcoFlow",
+      "platform": "EcoFlowHomebridge"
     }
   ]
 }
@@ -74,7 +108,7 @@ If `devices`.`model` is one of [`Delta 2`, `Delta 2 Max`] it is possible to set 
 - Output Consumption, W
 - Battery Level, %
 
-```js
+```json
 {
   ...
   "devices": [
@@ -111,7 +145,7 @@ If `devices`.`model` is `PowerStream` it is possible to set turn on/off addition
   - Input Consumption, W
   - Output Consumption, W
 
-```js
+```json
 {
   ...
   "devices": [
@@ -142,14 +176,6 @@ If `devices`.`model` is `PowerStream` it is possible to set turn on/off addition
   ],
 }
 ```
-
-### AccessKey and SecretKey
-
-For the plugin to work EcoFlow account's `AccessKey` and `SecretKey` is required. To retrieve them
-
-- Register on [EcoFlow IoT Developer Platform](https://developer-eu.ecoflow.com/)
-- Wait until your request will be approved
-- Generate `AccessKey`/`SecretKey` pair [here](https://developer-eu.ecoflow.com/us/security)
 
 ## Troubleshooting
 
