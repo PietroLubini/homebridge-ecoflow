@@ -353,16 +353,26 @@ describe('EcoFlowAccessoryBase', () => {
       await accessory.initialize();
       const redundantService1 = new HapService('Assistant', HapService.Assistant.UUID);
       const redundantService2 = new HapService('Contact Sensor', HapService.ContactSensor.UUID);
-      accessoryMock.services.push(redundantService1, redundantService2);
+      const redundantService3 = new HapService('CarbonDioxideSensor', HapService.CarbonDioxideSensor.UUID);
+      redundantService2.displayName = '';
+      redundantService2.name = 'CS';
+      accessoryMock.services.push(redundantService1, redundantService2, redundantService3);
+      redundantService3.displayName = undefined as unknown as string;
+      redundantService3.name = 'Carbon';
 
       accessory.cleanupServices();
       const actual = getActualServices(accessory);
 
       expect(actual).toEqual(expectedServices);
-      expect(accessoryMock.removeService.mock.calls).toEqual([[redundantService1], [redundantService2]]);
+      expect(accessoryMock.removeService.mock.calls).toEqual([
+        [redundantService1],
+        [redundantService2],
+        [redundantService3],
+      ]);
       expect(logMock.warn.mock.calls).toEqual([
         ['Removing obsolete service from accessory:', 'Assistant'],
-        ['Removing obsolete service from accessory:', 'Contact Sensor'],
+        ['Removing obsolete service from accessory:', 'CS'],
+        ['Removing obsolete service from accessory:', 'Carbon'],
       ]);
     });
 

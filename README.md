@@ -141,7 +141,7 @@ If `devices`.`model` is `PowerStream` it is possible to set turn on/off addition
   - Input Consumption, W
   - Output Consumption, W
   - Battery Level, %
-- solar:
+- pv:
   - Output Consumption, W
 - inverter:
   - Input Consumption, W
@@ -162,7 +162,7 @@ If `devices`.`model` is `PowerStream` it is possible to set turn on/off addition
             "Output Consumption, W"
           ]
         },
-        "solar": {
+        "pv": {
           "additionalCharacteristics": [
             "Output Consumption, W"
           ]

@@ -47,7 +47,10 @@ export abstract class EcoFlowAccessoryBase {
     this.accessory.services
       .filter(service => !services.includes(service))
       .forEach(service => {
-        this.log.warn('Removing obsolete service from accessory:', service.displayName);
+        this.log.warn(
+          'Removing obsolete service from accessory:',
+          service.displayName === undefined || service.displayName === '' ? service.name : service.displayName
+        );
         this.accessory.removeService(service);
       });
     this.services

@@ -195,7 +195,7 @@ describe('PowerStreamAccessory', () => {
       it('should initialize PV outlet service with additional characteristics when they are defined in config', () => {
         const actual = run('PV', solarOutletServiceMock, {
           powerStream: {
-            solar: {
+            pv: {
               additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
             },
           },
@@ -204,10 +204,10 @@ describe('PowerStreamAccessory', () => {
         expect(actual).toEqual([CharacteristicType.OutputConsumptionInWatts]);
       });
 
-      it('should initialize PV outlet service with additional characteristics when solar settings are not defined in config', () => {
+      it('should initialize PV outlet service with additional characteristics when pv settings are not defined in config', () => {
         const actual = run('PV', solarOutletServiceMock, {
           powerStream: {
-            solar: {} as BatteryDeviceConfig,
+            pv: {} as BatteryDeviceConfig,
           },
         } as DeviceConfig);
 

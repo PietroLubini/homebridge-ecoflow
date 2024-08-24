@@ -100,8 +100,8 @@
                     }
                   }
                 },
-                "solar": {
-                  "title": "Solar Settings",
+                "pv": {
+                  "title": "PV Settings",
                   "type": "object",
                   "properties": {
                     "additionalCharacteristics": {

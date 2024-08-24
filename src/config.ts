@@ -51,6 +51,6 @@ export enum AdditionalBatteryCharacteristicType {
 
 export interface PowerStreamDeviceConfig {
   battery?: BatteryDeviceConfig;
-  solar?: BatteryDeviceConfig;
+  pv?: BatteryDeviceConfig;
   inverter?: BatteryDeviceConfig;
 }

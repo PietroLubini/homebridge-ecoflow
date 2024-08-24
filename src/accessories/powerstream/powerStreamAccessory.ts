@@ -40,7 +40,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
       'INV',
       config.powerStream?.inverter?.additionalCharacteristics
     );
-    this.solarOutletService = new OutletService(this, 'PV', config.powerStream?.solar?.additionalCharacteristics);
+    this.solarOutletService = new OutletService(this, 'PV', config.powerStream?.pv?.additionalCharacteristics);
     this.batteryOutletService = new OutletService(this, 'BAT', config.powerStream?.battery?.additionalCharacteristics);
 
     this.inverterLightBulbService = new LightBulbInvService(this);
