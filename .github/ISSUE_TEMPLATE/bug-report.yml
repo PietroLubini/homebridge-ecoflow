@@ -8,6 +8,7 @@ body:
     attributes:
       value: '## Device Details'
   - type: dropdown
+    id: device
     attributes:
       label: Device
       options:
@@ -92,6 +93,7 @@ body:
     validations:
       required: true
   - type: dropdown
+    id: environment-os
     attributes:
       label: Operating System
       options:

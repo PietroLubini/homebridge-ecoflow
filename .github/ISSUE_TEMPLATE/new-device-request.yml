@@ -8,6 +8,7 @@ body:
     attributes:
       value: '## Device Details'
   - type: dropdown
+    id: device
     attributes:
       label: Device
       options:
@@ -34,6 +35,7 @@ body:
     attributes:
       value: '## Testing'
   - type: dropdown
+    id: ready-to-test
     attributes:
       label: Are you ready to test beta version of plugin with added device support?
       options:
