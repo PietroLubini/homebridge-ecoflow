@@ -9,8 +9,8 @@ import { SimulatorTyped } from '@ecoflow/apis/simulations/simulator';
 
 export class BatterySimulator extends SimulatorTyped<MqttBatterySetMessage> {
   public override generateQuota(): object {
-    const quotaType = this.getRandomNumber(1, 3);
-    if (quotaType === 1) {
+    const quotaType = this.getRandomNumber(0, 100);
+    if (quotaType >= 0 && quotaType < 33) {
       const quotaBmsStatus: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
         typeCode: MqttBatteryMessageType.BMS,
         params: {
@@ -18,7 +18,7 @@ export class BatterySimulator extends SimulatorTyped<MqttBatterySetMessage> {
         },
       };
       return quotaBmsStatus;
-    } else if (quotaType === 2) {
+    } else if (quotaType >= 33 && quotaType < 66) {
       const quotaInvStatus: MqttBatteryQuotaMessageWithParams<InvStatus> = {
         typeCode: MqttBatteryMessageType.INV,
         params: {

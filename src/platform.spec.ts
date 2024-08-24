@@ -120,6 +120,7 @@ describe('EcoFlowHomebridgePlatform', () => {
         httpApiManager: EcoFlowHttpApiManager,
         mqttApiManager: EcoFlowMqttApiManager
       ) => TAccessory,
+      deviceConfig: DeviceConfig,
       logMock: jest.Mocked<Logging>,
       accessoryMock: jest.Mocked<PlatformAccessory>
     ): jest.Mocked<TAccessory> {
@@ -133,8 +134,10 @@ describe('EcoFlowHomebridgePlatform', () => {
       ) as jest.Mocked<TAccessory>;
       const accessoryBaseMock = ecoFlowAccessoryMock as jest.Mocked<EcoFlowAccessoryBase>;
       accessoryBaseMock.initialize = jest.fn().mockResolvedValue(undefined);
+      accessoryBaseMock.initializeDefaultValues.mockReset();
       accessoryBaseMock.cleanupServices.mockReset();
       Object.defineProperty(ecoFlowAccessoryMock, 'accessory', { value: accessoryMock, configurable: true });
+      Object.defineProperty(ecoFlowAccessoryMock, 'config', { value: deviceConfig, configurable: true });
       (Accessory as jest.Mock).mockImplementation(() => ecoFlowAccessoryMock);
 
       return ecoFlowAccessoryMock;
@@ -173,8 +176,8 @@ describe('EcoFlowHomebridgePlatform', () => {
         httpApiManagerMock,
         machineIdProviderMock
       ) as jest.Mocked<EcoFlowMqttApiManager>;
-      delta2AccessoryMock = createAccessory(Delta2Accessory, log1Mock, accessory1Mock);
-      delta2MaxAccessoryMock = createAccessory(Delta2MaxAccessory, log2Mock, accessory2Mock);
+      delta2AccessoryMock = createAccessory(Delta2Accessory, delta2Config, log1Mock, accessory1Mock);
+      delta2MaxAccessoryMock = createAccessory(Delta2MaxAccessory, delta2MaxConfig, log2Mock, accessory2Mock);
       platform = new EcoFlowHomebridgePlatform(commonLogMock, config, apiMock);
       registerDevices = apiMock.on.mock.calls[0][1];
       uuidGenerateMock.mockImplementation((serialNumber: string) => {
@@ -274,6 +277,18 @@ describe('EcoFlowHomebridgePlatform', () => {
         expect(delta2MaxAccessoryMock.initializeDefaultValues).toHaveBeenCalled();
         expect(delta2MaxAccessoryMock.cleanupServices).toHaveBeenCalled();
       });
+
+      it('should ignore initialization of default values when registering simulation of device', async () => {
+        delta2Config.simulate = true;
+        config.devices = [delta2Config];
+
+        registerDevices();
+        await waitInitializationDone();
+
+        expect(delta2AccessoryMock.initialize).toHaveBeenCalled();
+        expect(delta2AccessoryMock.initializeDefaultValues).not.toHaveBeenCalled();
+        expect(delta2AccessoryMock.cleanupServices).toHaveBeenCalled();
+      });
     });
 
     describe('createAccessory', () => {
@@ -301,7 +316,12 @@ describe('EcoFlowHomebridgePlatform', () => {
             serialNumber: 'sn2',
           } as unknown as DeviceConfig,
         ];
-        const powerStreamAccessoryMock = createAccessory(PowerStreamAccessory, log2Mock, accessory2Mock);
+        const powerStreamAccessoryMock = createAccessory(
+          PowerStreamAccessory,
+          config.devices[0],
+          log2Mock,
+          accessory2Mock
+        );
 
         registerDevices();
 

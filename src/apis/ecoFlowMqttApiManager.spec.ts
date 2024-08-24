@@ -42,6 +42,7 @@ describe('EcoFlowMqttApiManager', () => {
   let subscription1: jest.Mocked<Subscription>;
   let subscription2: jest.Mocked<Subscription>;
   let subscription3: jest.Mocked<Subscription>;
+  let actualOptions: IClientOptions;
   const connectAsyncMock: jest.Mock = connectAsync as jest.Mock;
   const certificateData1: AcquireCertificateData = {
     certificateAccount: 'account1',
@@ -72,7 +73,11 @@ describe('EcoFlowMqttApiManager', () => {
     clientMock.subscribeAsync.mockReset();
     clientMock.publishAsync.mockReset();
     clientMock.endAsync.mockReset();
-    (MockMqttClient as unknown as jest.Mock).mockImplementation(() => clientMock);
+    (MockMqttClient as unknown as jest.Mock).mockImplementation((_: DeviceInfo, options: IClientOptions) => {
+      actualOptions = options;
+      return clientMock;
+    });
+
     return clientMock;
   }
 
@@ -135,16 +140,16 @@ describe('EcoFlowMqttApiManager', () => {
 
     config1 = {
       name: 'accessory1',
-      secretKey: 'secretKey1',
       accessKey: 'accessKey1',
+      secretKey: 'secretKey1',
       serialNumber: 'sn1',
       model: DeviceModel.Delta2,
       location: LocationType.EU,
     };
     config2 = {
       name: 'accessory2',
-      secretKey: 'secretKey1',
       accessKey: 'accessKey1',
+      secretKey: 'secretKey1',
       serialNumber: 'sn2',
       model: DeviceModel.Delta2,
       location: LocationType.EU,
@@ -210,16 +215,6 @@ describe('EcoFlowMqttApiManager', () => {
       });
     });
 
-    it('should connect to mock mqtt server when simulation is activated in config', async () => {
-      deviceInfo1.config.simulate = true;
-      await manager.sendSetCommand(deviceInfo1, {
-        id: 20,
-        version: 'v1',
-      });
-
-      expect(mockClientMock.publishAsync).toHaveBeenCalled();
-    });
-
     it('should use existing connection to mqtt server when a connection is already established', async () => {
       await manager.sendSetCommand(deviceInfo1, {
         id: 20,
@@ -254,6 +249,36 @@ describe('EcoFlowMqttApiManager', () => {
       });
 
       expect(client1Mock.on).toHaveBeenCalledWith('message', expect.any(Function));
+    });
+
+    describe('simulate', () => {
+      it('should connect to mock mqtt server when simulation is activated in config', async () => {
+        deviceInfo1.config.simulate = true;
+        await manager.sendSetCommand(deviceInfo1, {
+          id: 20,
+          version: 'v1',
+        });
+
+        expect(mockClientMock.publishAsync).toHaveBeenCalled();
+      });
+
+      it('should acquire fake ceritifcate when simulation is activated in config', async () => {
+        const expected: IClientOptions = {
+          username: 'accessKey1',
+          password: 'secretKey1',
+          clientId: 'HOMEBRIDGE_MACHINEID1_accessKey1',
+          protocolVersion: 5,
+        };
+        deviceInfo1.config.simulate = true;
+
+        await manager.sendSetCommand(deviceInfo1, {
+          id: 20,
+          version: 'v1',
+        });
+
+        expect(actualOptions).toEqual(expected);
+        expect(httpApiManagerMock.acquireCertificate).not.toHaveBeenCalled();
+      });
     });
   });
 

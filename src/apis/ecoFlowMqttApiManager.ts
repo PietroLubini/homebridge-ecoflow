@@ -1,6 +1,7 @@
 import { ConnectionKey, DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
-import { MqttClient } from '@ecoflow/apis/containers/mqttClient';
+import { MqttClientContainer } from '@ecoflow/apis/containers/mqttClientContainer';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
+import { AcquireCertificateData } from '@ecoflow/apis/interfaces/httpApiContracts';
 import { MqttMessage, MqttSetMessage, MqttTopicType } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { MockMqttClient } from '@ecoflow/apis/simulations/mockMqttClient';
 import { SerialNumber } from '@ecoflow/config';
@@ -9,7 +10,7 @@ import mqtt from 'mqtt';
 import { Subscription } from 'rxjs';
 
 export class EcoFlowMqttApiManager {
-  private readonly clients: Record<ConnectionKey, MqttClient> = {};
+  private readonly clients: Record<ConnectionKey, MqttClientContainer> = {};
 
   constructor(
     private readonly httpApiManager: EcoFlowHttpApiManager,
@@ -63,7 +64,7 @@ export class EcoFlowMqttApiManager {
     }
   }
 
-  private async connect(deviceInfo: DeviceInfo): Promise<MqttClient | null> {
+  private async connect(deviceInfo: DeviceInfo): Promise<MqttClientContainer | null> {
     const apiClient = await this.acquireCertificate(deviceInfo);
     if (apiClient && !apiClient.client) {
       const machineId = await this.machineIdProvider.getMachineId(deviceInfo.log);
@@ -130,27 +131,38 @@ export class EcoFlowMqttApiManager {
       ?.subscribeOnMessage(topicType, callback);
   }
 
-  private processReceivedMessage(apiClient: MqttClient, topic: string, message: MqttMessage): void {
+  private processReceivedMessage(apiClient: MqttClientContainer, topic: string, message: MqttMessage): void {
     const { serialNumber, topicType } = this.parseTopic(topic);
     const devices = apiClient.getDevices(serialNumber);
     devices.forEach(device => device.processReceivedMessage(topicType, message));
   }
 
-  private async acquireCertificate(deviceInfo: DeviceInfo): Promise<MqttClient | null> {
+  private async acquireCertificate(deviceInfo: DeviceInfo): Promise<MqttClientContainer | null> {
     let apiClient = this.getApiClient(deviceInfo);
     if (apiClient) {
       return apiClient;
     }
-    const certificateData = await this.httpApiManager.acquireCertificate(deviceInfo);
+    let certificateData: AcquireCertificateData | null = null;
+    if (deviceInfo.config.simulate === true) {
+      certificateData = {
+        certificateAccount: deviceInfo.config.accessKey,
+        certificatePassword: deviceInfo.config.secretKey,
+        port: '8883',
+        protocol: 'mqtts',
+        url: 'fake',
+      };
+    } else {
+      certificateData = await this.httpApiManager.acquireCertificate(deviceInfo);
+    }
     if (certificateData) {
-      apiClient = new MqttClient(certificateData);
+      apiClient = new MqttClientContainer(certificateData);
       this.clients[deviceInfo.connectionKey] = apiClient;
       return apiClient;
     }
     return null;
   }
 
-  private getApiClient(deviceInfo: DeviceInfo): MqttClient | null {
+  private getApiClient(deviceInfo: DeviceInfo): MqttClientContainer | null {
     if (deviceInfo.connectionKey in this.clients) {
       return this.clients[deviceInfo.connectionKey];
     }

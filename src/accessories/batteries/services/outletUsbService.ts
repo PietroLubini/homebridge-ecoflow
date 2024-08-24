@@ -13,7 +13,7 @@ export class OutletUsbService extends OutletBatteryServiceBase {
   protected override setOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<MqttBatterySetOnMessageParams>(
       1,
-      MqttBatterySetOperationType.DcChgCfg,
+      MqttBatterySetOperationType.DcOutCfg,
       { enabled: Number(value) },
       revert
     );

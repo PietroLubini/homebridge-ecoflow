@@ -1,14 +1,14 @@
-import { MqttClient } from '@ecoflow/apis/containers/mqttClient';
+import { MqttClientContainer } from '@ecoflow/apis/containers/mqttClientContainer';
 import { MqttDevice } from '@ecoflow/apis/containers/mqttDevice';
 import { DeviceInfoConfig } from '@ecoflow/config';
 import { Logging } from 'homebridge';
 import mqtt from 'mqtt';
 
 describe('MqttClient', () => {
-  let mqttClient: MqttClient;
+  let mqttClient: MqttClientContainer;
 
   beforeEach(() => {
-    mqttClient = new MqttClient({
+    mqttClient = new MqttClientContainer({
       certificateAccount: 'account',
       certificatePassword: 'pwd',
       url: 'url1',

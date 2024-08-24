@@ -24,7 +24,7 @@ export interface MqttBatteryQuotaMessageWithParams<TParams>
 
 export enum MqttBatterySetOperationType {
   MpptCar = 'mpptCar',
-  DcChgCfg = 'dcChgCfg',
+  DcOutCfg = 'dcOutCfg',
   AcOutCfg = 'acOutCfg',
 }
 

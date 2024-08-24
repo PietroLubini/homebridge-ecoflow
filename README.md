@@ -79,6 +79,8 @@ For the plugin to work EcoFlow account's `AccessKey` and `SecretKey` is required
 It is possible to simulate accessory by adding `simulate` property to device's configuration (`accessKey` and `secretKey` could contain mock values).
 Quota is sent every 10 seconds with random values in this mode.
 
+> 🛈 Each simulated device should have fake unique `serialNumber`, `accessKey` and `secretKey`
+
 ```json
 {
   "platforms": [

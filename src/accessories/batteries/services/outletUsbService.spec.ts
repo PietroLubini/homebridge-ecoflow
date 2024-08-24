@@ -171,7 +171,7 @@ describe('OutletUsbService', () => {
           id: 0,
           version: '',
           moduleType: 1,
-          operateType: MqttBatterySetOperationType.DcChgCfg,
+          operateType: MqttBatterySetOperationType.DcOutCfg,
           params: {
             enabled: 1,
           },
@@ -188,7 +188,7 @@ describe('OutletUsbService', () => {
           id: 0,
           version: '',
           moduleType: 1,
-          operateType: MqttBatterySetOperationType.DcChgCfg,
+          operateType: MqttBatterySetOperationType.DcOutCfg,
           params: {
             enabled: 0,
           },

@@ -178,7 +178,9 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     for (const accessory of accessories) {
       logs[accessory.accessory.displayName].info('Initializing accessory');
       await accessory.initialize();
-      await accessory.initializeDefaultValues();
+      if (accessory.config.simulate !== true) {
+        await accessory.initializeDefaultValues();
+      }
       await accessory.cleanupServices();
     }
   }

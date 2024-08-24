@@ -4,7 +4,7 @@ import { DeviceInfoConfig, SerialNumber } from '@ecoflow/config';
 import { Logging } from 'homebridge';
 import mqtt from 'mqtt';
 
-export class MqttClient {
+export class MqttClientContainer {
   private _client: mqtt.MqttClient | null = null;
   private readonly devicesCache: Record<SerialNumber, MqttDevice[]> = {};
 
