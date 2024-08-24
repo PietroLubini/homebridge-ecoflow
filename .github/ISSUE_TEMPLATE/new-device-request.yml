@@ -11,6 +11,7 @@ body:
     attributes:
       label: Device
       options:
+        - Choose a device...
         - Delta Pro
         - Smart Home Panel
         - Smart Plug
@@ -18,6 +19,7 @@ body:
         - Glacier
         - Power Kits
         - PowerOcean
+      default: 0
     validations:
       required: true
   - type: textarea
@@ -33,11 +35,11 @@ body:
       value: '## Testing'
   - type: dropdown
     attributes:
-      label: Are you ready to test beta verion of plugin with added device support?
+      label: Are you ready to test beta version of plugin with added device support?
       options:
         - Choose an option...
         - 🟢 Yes
-        - 🔴 No (please explain in the `More Information` box below)
+        - 🔴 No (please explain in the 'More Information' box below)
       default: 0
     validations:
       required: true
