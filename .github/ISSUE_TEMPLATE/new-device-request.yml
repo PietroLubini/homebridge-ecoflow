@@ -19,6 +19,7 @@ body:
         - Glacier
         - Power Kits
         - PowerOcean
+      default: 0
     validations:
       required: true
   - type: textarea
@@ -39,6 +40,7 @@ body:
         - Choose an option...
         - 🟢 Yes
         - 🔴 No (please explain in the 'More Information' box below)
+      default: 0
     validations:
       required: true
 
