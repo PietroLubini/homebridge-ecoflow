@@ -12,7 +12,7 @@ describe('MqttDevice', () => {
   let setReplyCallbackMock: jest.Mock;
 
   beforeEach(() => {
-    logMock = { warn: jest.fn() } as unknown as jest.Mocked<Logging>;
+    logMock = { debug: jest.fn(), warn: jest.fn() } as unknown as jest.Mocked<Logging>;
     config = { name: 'name1', serialNumber: 'sn1' };
     device = new MqttDevice(config, logMock);
 
@@ -51,6 +51,12 @@ describe('MqttDevice', () => {
 
       expect(setReplyCallbackMock).toHaveBeenCalledWith(message);
       expect(quotaCallbackMock).not.toHaveBeenCalled();
+    });
+
+    it('should log message when it is received', () => {
+      device.processReceivedMessage(MqttTopicType.Quota, message);
+
+      expect(logMock.debug).toHaveBeenCalledWith('Received messasge:', message);
     });
   });
 

@@ -5,14 +5,18 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/Pull_Request_Template.md'
       - '.github/workflows/publish.yml'
       - 'README.md'
       - 'LICENSE'
 
   # Run workflow for all PRs where target branch is one of
   pull_request:
-    branches: [main, task/homebridge-v2]
+    branches: [main]
     paths-ignore:
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/Pull_Request_Template.md'
       - '.github/workflows/publish.yml'
       - 'README.md'
       - 'LICENSE'
