@@ -210,22 +210,22 @@ Supported services are similar to [Delta 2](#delta-2)
 
 ### PowerStream Micro-inverter
 
-| Service       | Characteristic        | Standard | Permission |
-| ------------- | --------------------- | -------- | ---------- |
-| Outlet INV    | On                    | ✅       | Read       |
-| Outlet INV    | OutletInUse           | ✅       | Read       |
-| Outlet INV    | Input Consumption, W  | ❌       | Read       |
-| Outlet INV    | Output Consumption, W | ❌       | Read       |
-| Outlet PV     | On                    | ✅       | -          |
-| Outlet PV     | OutletInUse           | ✅       | Read       |
-| Outlet PV     | Output Consumption, W | ❌       | Read       |
-| Outlet BAT    | On                    | ✅       | -          |
-| Outlet BAT    | OutletInUse           | ✅       | Read       |
-| Outlet BAT    | Battery Level, %      | ❌       | Read       |
-| Outlet BAT    | Input Consumption, W  | ❌       | Read       |
-| Outlet BAT    | Output Consumption, W | ❌       | Read       |
-| Lightbulb INV | On                    | ✅       | Read       |
-| Lightbulb INV | Brightness            | ✅       | Read/write |
+| Service             | Characteristic        | Standard | Permission |
+| ------------------- | --------------------- | -------- | ---------- |
+| Outlet INV          | On                    | ✅       | Read       |
+| Outlet INV          | OutletInUse           | ✅       | Read       |
+| Outlet INV          | Input Consumption, W  | ❌       | Read       |
+| Outlet INV          | Output Consumption, W | ❌       | Read       |
+| Outlet PV           | On                    | ✅       | -          |
+| Outlet PV           | OutletInUse           | ✅       | Read       |
+| Outlet PV           | Output Consumption, W | ❌       | Read       |
+| Outlet BAT          | On                    | ✅       | -          |
+| Outlet BAT          | OutletInUse           | ✅       | Read       |
+| Outlet BAT          | Battery Level, %      | ❌       | Read       |
+| Outlet BAT          | Input Consumption, W  | ❌       | Read       |
+| Outlet BAT          | Output Consumption, W | ❌       | Read       |
+| Lightbulb Indicator | On                    | ✅       | Read       |
+| Lightbulb Indicator | Brightness            | ✅       | Read/write |
 
 ## Troubleshooting
 
