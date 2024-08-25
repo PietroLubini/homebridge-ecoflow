@@ -95,7 +95,7 @@ describe('LightBulbInvService', () => {
       const actual = characteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug).toHaveBeenCalledWith('INV State ->', true);
+      expect(logMock.debug).toHaveBeenCalledWith('Indicator State ->', true);
     });
   });
 
@@ -114,7 +114,7 @@ describe('LightBulbInvService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug).toHaveBeenCalledWith('INV Brightness ->', 100);
+      expect(logMock.debug).toHaveBeenCalledWith('Indicator Brightness ->', 100);
     });
 
     it('should set 0% brightness when minimum value is set', () => {
@@ -123,7 +123,7 @@ describe('LightBulbInvService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(0);
-      expect(logMock.debug).toHaveBeenCalledWith('INV Brightness ->', 0);
+      expect(logMock.debug).toHaveBeenCalledWith('Indicator Brightness ->', 0);
     });
 
     it('should set brightness when it is requested', () => {
@@ -132,7 +132,7 @@ describe('LightBulbInvService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(46);
-      expect(logMock.debug).toHaveBeenCalledWith('INV Brightness ->', 45.75);
+      expect(logMock.debug).toHaveBeenCalledWith('Indicator Brightness ->', 45.75);
     });
 
     it('should revert changing of Brightness state to value set from UI when sending Set command to device is failed', () => {
@@ -145,7 +145,7 @@ describe('LightBulbInvService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug.mock.calls).toEqual([['INV Brightness ->', 100]]);
+      expect(logMock.debug.mock.calls).toEqual([['Indicator Brightness ->', 100]]);
     });
   });
 
@@ -202,7 +202,7 @@ describe('LightBulbInvService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug.mock.calls).toEqual([['INV Brightness ->', 100]]);
+      expect(logMock.debug.mock.calls).toEqual([['Indicator Brightness ->', 100]]);
     });
   });
 });

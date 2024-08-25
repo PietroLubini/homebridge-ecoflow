@@ -8,7 +8,7 @@ const packageJsonPath = join(__dirname, '../../package.json');
 
 export class AccessoryInformationService extends ServiceBase {
   constructor(protected readonly ecoFlowAccessory: EcoFlowAccessoryBase) {
-    super(ecoFlowAccessory.platform.Service.AccessoryInformation, ecoFlowAccessory, 'Information');
+    super(ecoFlowAccessory.platform.Service.AccessoryInformation, ecoFlowAccessory);
   }
 
   protected override addCharacteristics(): Characteristic[] {

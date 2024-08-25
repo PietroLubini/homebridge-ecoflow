@@ -53,7 +53,7 @@ describe('AccessoryInformationService', () => {
       Characteristic: HapCharacteristic,
     } as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
     accessoryMock = {
-      getServiceById: jest.fn(),
+      getService: jest.fn(),
       addService: jest.fn(),
     } as unknown as jest.Mocked<PlatformAccessory>;
     ecoFlowAccessoryMock = {
@@ -79,7 +79,7 @@ describe('AccessoryInformationService', () => {
 
     it('should add AccessoryInformation service when it is not added to accessory yet', () => {
       const expected = hapService;
-      accessoryMock.getServiceById.mockReturnValueOnce(undefined);
+      accessoryMock.getService.mockReturnValueOnce(undefined);
       accessoryMock.addService.mockReturnValueOnce(expected);
 
       service.initialize();
@@ -88,14 +88,14 @@ describe('AccessoryInformationService', () => {
       expect(actual).toEqual(expected);
       expect(accessoryMock.addService).toHaveBeenCalledWith(
         HapService.AccessoryInformation,
-        'Accessory1 Information',
-        'Information'
+        'Accessory1',
+        HapService.AccessoryInformation.UUID
       );
     });
 
     it('should use existing AccessoryInformation service when it is already added to accessory', () => {
       const expected = hapService;
-      accessoryMock.getServiceById.mockReturnValueOnce(expected);
+      accessoryMock.getService.mockReturnValueOnce(expected);
 
       service.initialize();
       const actual = service.service;
@@ -105,7 +105,7 @@ describe('AccessoryInformationService', () => {
     });
 
     it('should add information characteristics when initializing accessory', () => {
-      accessoryMock.getServiceById.mockReturnValueOnce(undefined);
+      accessoryMock.getService.mockReturnValueOnce(undefined);
       accessoryMock.addService.mockReturnValueOnce(hapService);
 
       service.initialize();
@@ -117,7 +117,7 @@ describe('AccessoryInformationService', () => {
 
   describe('cleanupCharacteristics', () => {
     beforeEach(() => {
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+      accessoryMock.getService.mockReturnValueOnce(hapService);
       service.initialize();
     });
 
@@ -129,8 +129,8 @@ describe('AccessoryInformationService', () => {
 
       expect(actual).toEqual(expectedCharacteristics);
       expect(logMock.warn.mock.calls).toEqual([
-        ['[Information Service] Removing obsolete characteristic:', 'On'],
-        ['[Information Service] Removing obsolete characteristic:', 'In Use'],
+        ['[Accessory1] Removing obsolete characteristic:', 'On'],
+        ['[Accessory1] Removing obsolete characteristic:', 'In Use'],
       ]);
     });
   });

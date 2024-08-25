@@ -8,7 +8,7 @@ import { LightBulbServiceBase } from '@ecoflow/services/lightBulbServiceBase';
 
 export class LightBulbInvService extends LightBulbServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
-    super(ecoFlowAccessory, 1023, 'INV');
+    super(ecoFlowAccessory, 1023, 'Indicator');
   }
 
   protected override setOn(): Promise<void> {
