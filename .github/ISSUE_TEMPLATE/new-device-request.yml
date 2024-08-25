@@ -2,7 +2,7 @@ name: New Device Request
 description: Request to add new device
 title: 'New Device: '
 labels:
-  - enhancement
+  - new device
 body:
   - type: markdown
     attributes:
