@@ -373,28 +373,28 @@ describe('PowerStreamAccessory', () => {
         it('should initialize indicator service with default max power demand when powerStream settings are not defined in config', () => {
           const actual = run({} as DeviceConfig);
 
-          expect(actual).toEqual(6000);
+          expect(actual).toEqual(600);
         });
 
         it(`should initialize indicator service with default max power demand
           when powerStream.type settings are not defined in config`, () => {
           const actual = run({ powerStream: {} } as DeviceConfig);
 
-          expect(actual).toEqual(6000);
+          expect(actual).toEqual(600);
         });
 
         it(`should initialize indicator service with 6000 max power demand
           when powerStream.type is 600W`, () => {
           const actual = run({ powerStream: { type: PowerStreamConsumptionType.W600 } } as DeviceConfig);
 
-          expect(actual).toEqual(6000);
+          expect(actual).toEqual(600);
         });
 
         it(`should initialize indicator service with 8000 max power demand
           when powerStream.type is 800W`, () => {
           const actual = run({ powerStream: { type: PowerStreamConsumptionType.W800 } } as DeviceConfig);
 
-          expect(actual).toEqual(8000);
+          expect(actual).toEqual(800);
         });
       });
     });
@@ -689,7 +689,6 @@ describe('PowerStreamAccessory', () => {
           processQuotaMessage(message);
 
           expect(inverterOutletServiceMock.updateState).toHaveBeenCalledWith(true);
-          expect(inverterPowerDemandServiceMock.updateState).toHaveBeenCalledWith(true);
         });
 
         it('should update INV brightness when Hearbeat message is received with invBrightness', async () => {
@@ -718,7 +717,7 @@ describe('PowerStreamAccessory', () => {
 
           processQuotaMessage(message);
 
-          expect(inverterPowerDemandServiceMock.updateState).not.toHaveBeenCalled();
+          expect(inverterPowerDemandServiceMock.updateState).toHaveBeenCalledWith(true);
           expect(inverterPowerDemandServiceMock.updateRotationSpeed).toHaveBeenCalledWith(450);
         });
       });

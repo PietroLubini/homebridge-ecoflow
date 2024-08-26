@@ -86,7 +86,6 @@
                 "type": {
                   "title": "Type",
                   "type": "string",
-                  "default": "600",
                   "enum": ["600", "800"],
                   "description": "Maximum power, W"
                 },

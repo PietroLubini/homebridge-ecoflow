@@ -44,7 +44,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
     this.inverterIndicatorService = new IndicatorService(this, 1023);
     this.inverterPowerDemandService = new PowerDemandService(
       this,
-      (config.powerStream?.type ?? PowerStreamConsumptionType.W600) * 10
+      config.powerStream?.type ?? PowerStreamConsumptionType.W600
     );
   }
 
@@ -133,7 +133,6 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
 
     if (params.invOnOff !== undefined) {
       this.inverterOutletService.updateState(params.invOnOff);
-      this.inverterPowerDemandService.updateState(params.invOnOff);
     }
 
     if (params.invBrightness !== undefined) {
@@ -142,6 +141,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
     }
 
     if (params.permanentWatts !== undefined) {
+      this.inverterPowerDemandService.updateState(true);
       this.inverterPowerDemandService.updateRotationSpeed(params.permanentWatts * 0.1);
     }
   }

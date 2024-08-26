@@ -21,7 +21,7 @@ export class PowerStreamSimulator extends SimulatorTyped<MqttPowerStreamSetMessa
         invOutputWatts: this.getRandomNumber(-6000, 6000),
         invOnOff: this.getRandomBoolean(),
         supplyPriority: Math.floor(this.getRandomNumber(0, 1)),
-        permanentWatts: this.getRandomNumber(0, 600),
+        permanentWatts: this.getRandomNumber(0, 6000),
         upperLimit: Math.floor(this.getRandomNumber(1, 30)),
         lowerLimit: Math.floor(this.getRandomNumber(70, 100)),
         invBrightness: Math.floor(this.getRandomNumber(0, 1023)),
