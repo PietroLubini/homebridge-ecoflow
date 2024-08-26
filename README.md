@@ -102,9 +102,36 @@ Quota is sent every 10 seconds with random values in this mode.
 }
 ```
 
-### Battery-specific Configuration
+## Supported Devices
 
-If `devices`.`model` is one of [`Delta 2`, `Delta 2 Max`] it is possible to set turn on/off additional characteristics:
+### Delta 2
+
+#### Services
+
+| Service    | Characteristic        | Standard | Permission |
+| ---------- | --------------------- | -------- | ---------- |
+| Battery    | BatteryLevel          | ✅       | Read       |
+| Battery    | ChargingState         | ✅       | Read       |
+| Battery    | StatusLowBattery      | ✅       | Read       |
+| Outlet AC  | On                    | ✅       | Read/Write |
+| Outlet AC  | OutletInUse           | ✅       | Read       |
+| Outlet AC  | Battery Level, %      | 🔲       | Read       |
+| Outlet AC  | Input Consumption, W  | 🔲       | Read       |
+| Outlet AC  | Output Consumption, W | 🔲       | Read       |
+| Outlet CAR | On                    | ✅       | Read/Write |
+| Outlet CAR | OutletInUse           | ✅       | Read       |
+| Outlet CAR | Battery Level, %      | 🔲       | Read       |
+| Outlet CAR | Input Consumption, W  | 🔲       | Read       |
+| Outlet CAR | Output Consumption, W | 🔲       | Read       |
+| Outlet USB | On                    | ✅       | Read/Write |
+| Outlet USB | OutletInUse           | ✅       | Read       |
+| Outlet USB | Battery Level, %      | 🔲       | Read       |
+| Outlet USB | Input Consumption, W  | 🔲       | Read       |
+| Outlet USB | Output Consumption, W | 🔲       | Read       |
+
+#### Configuration
+
+The following additional characteristics is available:
 
 - Input Consumption, W
 - Output Consumption, W
@@ -115,7 +142,7 @@ If `devices`.`model` is one of [`Delta 2`, `Delta 2 Max`] it is possible to set 
   ...
   "devices": [
     {
-      ...,
+      ...
       "model": "Delta 2 Max",
       "battery": {
         "additionalCharacteristics": [
@@ -133,9 +160,34 @@ The characteristics could be used as conditions in HomeKit Automation that uses 
 
 <img src="docs/images/BatteryAdditionalCharacteristics.jpg" alt="Battery Additional Characteristics" width="300">
 
-### PowerStream-specific Configuration
+### Delta 2 Max
 
-If `devices`.`model` is `PowerStream` it is possible to set turn on/off additional characteristics:
+Supported services and configuration are the same as for [Delta 2](#delta-2)
+
+### PowerStream Micro-inverter
+
+#### Services
+
+| Service             | Characteristic        | Standard | Permission |
+| ------------------- | --------------------- | -------- | ---------- |
+| Outlet INV          | On                    | ✅       | Read       |
+| Outlet INV          | OutletInUse           | ✅       | Read       |
+| Outlet INV          | Input Consumption, W  | 🔲       | Read       |
+| Outlet INV          | Output Consumption, W | 🔲       | Read       |
+| Outlet PV           | On                    | ✅       | -          |
+| Outlet PV           | OutletInUse           | ✅       | Read       |
+| Outlet PV           | Output Consumption, W | 🔲       | Read       |
+| Outlet BAT          | On                    | ✅       | -          |
+| Outlet BAT          | OutletInUse           | ✅       | Read       |
+| Outlet BAT          | Battery Level, %      | 🔲       | Read       |
+| Outlet BAT          | Input Consumption, W  | 🔲       | Read       |
+| Outlet BAT          | Output Consumption, W | 🔲       | Read       |
+| Lightbulb Indicator | On                    | ✅       | Read       |
+| Lightbulb Indicator | Brightness            | ✅       | Read/write |
+
+#### Configuration
+
+The following additional characteristics is available:
 
 - battery:
   - Input Consumption, W
@@ -152,7 +204,7 @@ If `devices`.`model` is `PowerStream` it is possible to set turn on/off addition
   ...
   "devices": [
     {
-      ...,
+      ...
       "model": "PowerStream",
       "powerStream": {
         "battery": {
@@ -178,54 +230,6 @@ If `devices`.`model` is `PowerStream` it is possible to set turn on/off addition
   ],
 }
 ```
-
-## Supported Devices
-
-### Delta 2
-
-| Service    | Characteristic        | Standard | Permission |
-| ---------- | --------------------- | -------- | ---------- |
-| Battery    | BatteryLevel          | ✅       | Read       |
-| Battery    | ChargingState         | ✅       | Read       |
-| Battery    | StatusLowBattery      | ✅       | Read       |
-| Outlet AC  | On                    | ✅       | Read/Write |
-| Outlet AC  | OutletInUse           | ✅       | Read       |
-| Outlet AC  | Battery Level, %      | ❌       | Read       |
-| Outlet AC  | Input Consumption, W  | ❌       | Read       |
-| Outlet AC  | Output Consumption, W | ❌       | Read       |
-| Outlet CAR | On                    | ✅       | Read/Write |
-| Outlet CAR | OutletInUse           | ✅       | Read       |
-| Outlet CAR | Battery Level, %      | ❌       | Read       |
-| Outlet CAR | Input Consumption, W  | ❌       | Read       |
-| Outlet CAR | Output Consumption, W | ❌       | Read       |
-| Outlet USB | On                    | ✅       | Read/Write |
-| Outlet USB | OutletInUse           | ✅       | Read       |
-| Outlet USB | Battery Level, %      | ❌       | Read       |
-| Outlet USB | Input Consumption, W  | ❌       | Read       |
-| Outlet USB | Output Consumption, W | ❌       | Read       |
-
-### Delta 2 Max
-
-Supported services are similar to [Delta 2](#delta-2)
-
-### PowerStream Micro-inverter
-
-| Service             | Characteristic        | Standard | Permission |
-| ------------------- | --------------------- | -------- | ---------- |
-| Outlet INV          | On                    | ✅       | Read       |
-| Outlet INV          | OutletInUse           | ✅       | Read       |
-| Outlet INV          | Input Consumption, W  | ❌       | Read       |
-| Outlet INV          | Output Consumption, W | ❌       | Read       |
-| Outlet PV           | On                    | ✅       | -          |
-| Outlet PV           | OutletInUse           | ✅       | Read       |
-| Outlet PV           | Output Consumption, W | ❌       | Read       |
-| Outlet BAT          | On                    | ✅       | -          |
-| Outlet BAT          | OutletInUse           | ✅       | Read       |
-| Outlet BAT          | Battery Level, %      | ❌       | Read       |
-| Outlet BAT          | Input Consumption, W  | ❌       | Read       |
-| Outlet BAT          | Output Consumption, W | ❌       | Read       |
-| Lightbulb Indicator | On                    | ✅       | Read       |
-| Lightbulb Indicator | Brightness            | ✅       | Read/write |
 
 ## Troubleshooting
 
