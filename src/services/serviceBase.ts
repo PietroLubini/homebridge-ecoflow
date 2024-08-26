@@ -87,4 +87,12 @@ export abstract class ServiceBase {
     this.log.debug(`${newName} ->`, value);
     this.service.getCharacteristic(characteristic).updateValue(value);
   }
+
+  protected covertPercentsToValue(percents: number, maxValue: number): number {
+    return (percents * maxValue) / 100;
+  }
+
+  protected covertValueToPercents(value: number, maxValue: number): number {
+    return (value * 100) / maxValue;
+  }
 }

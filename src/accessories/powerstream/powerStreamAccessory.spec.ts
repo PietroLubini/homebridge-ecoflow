@@ -9,9 +9,10 @@ import {
   MqttPowerStreamQuotaMessageWithParams,
 } from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
-import { LightBulbInvService } from '@ecoflow/accessories/powerstream/services/lightBulbInvService';
+import { IndicatorService } from '@ecoflow/accessories/powerstream/services/indicatorService';
 import { OutletInvService } from '@ecoflow/accessories/powerstream/services/outletInvService';
 import { OutletService } from '@ecoflow/accessories/powerstream/services/outletService';
+import { PowerDemandService } from '@ecoflow/accessories/powerstream/services/powerDemandService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
@@ -19,10 +20,12 @@ import {
   BatteryDeviceConfig,
   AdditionalBatteryCharacteristicType as CharacteristicType,
   DeviceConfig,
+  PowerStreamConsumptionType,
 } from '@ecoflow/config';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
+import { FanServiceBase } from '@ecoflow/services/fanServiceBase';
 import { LightBulbServiceBase } from '@ecoflow/services/lightBulbServiceBase';
 import { OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
@@ -30,7 +33,8 @@ import { Logging, PlatformAccessory } from 'homebridge';
 
 jest.mock('@ecoflow/accessories/powerstream/services/outletService');
 jest.mock('@ecoflow/accessories/powerstream/services/outletInvService');
-jest.mock('@ecoflow/accessories/powerstream/services/lightBulbInvService');
+jest.mock('@ecoflow/accessories/powerstream/services/indicatorService');
+jest.mock('@ecoflow/accessories/powerstream/services/powerDemandService');
 jest.mock('@ecoflow/services/accessoryInformationService');
 
 describe('PowerStreamAccessory', () => {
@@ -44,7 +48,8 @@ describe('PowerStreamAccessory', () => {
   let solarOutletServiceMock: jest.Mocked<OutletService>;
   let batteryOutletServiceMock: jest.Mocked<OutletService>;
   let inverterOutletServiceMock: jest.Mocked<OutletInvService>;
-  let inverterLightBulbServiceMock: jest.Mocked<LightBulbInvService>;
+  let inverterIndicatorServiceMock: jest.Mocked<IndicatorService>;
+  let inverterPowerDemandServiceMock: jest.Mocked<PowerDemandService>;
   let accessoryInformationServiceMock: jest.Mocked<AccessoryInformationService>;
   const expectedServices: MockService[] = [
     {
@@ -57,7 +62,10 @@ describe('PowerStreamAccessory', () => {
       Name: 'OutletService',
     },
     {
-      Name: 'LightBulbInvService',
+      Name: 'IndicatorService',
+    },
+    {
+      Name: 'PowerDemandService',
     },
     {
       Name: 'AccessoryInformationService',
@@ -65,58 +73,48 @@ describe('PowerStreamAccessory', () => {
   ];
 
   beforeEach(() => {
-    function createService<TService extends ServiceBase>(
-      Service: new (ecoFlowAccessory: PowerStreamAccessory) => TService,
-      mockResetCallback: ((serviceMock: jest.Mocked<TService>) => void) | null = null
-    ): jest.Mocked<TService> {
-      const serviceMock = new Service(accessory) as jest.Mocked<TService>;
+    function createService<TService extends ServiceBase>(service: TService): jest.Mocked<TService> {
+      const serviceMock = service as jest.Mocked<TService>;
       const serviceBaseMock = serviceMock as jest.Mocked<ServiceBase>;
       serviceBaseMock.initialize.mockReset();
       serviceBaseMock.cleanupCharacteristics.mockReset();
-      if (mockResetCallback) {
-        mockResetCallback(serviceMock);
-      }
-      (Service as jest.Mock).mockImplementation(() => serviceMock);
       return serviceMock;
     }
 
-    function createOutletService<TService extends OutletServiceBase>(
-      Service: new (
-        ecoFlowAccessory: PowerStreamAccessory,
-        serviceSubType: string,
-        additionalCharacteristics?: CharacteristicType[]
-      ) => TService,
-      serviceSubType: string,
-      additionalCharacteristics?: CharacteristicType[]
-    ): jest.Mocked<TService> {
-      const serviceMock = new Service(accessory, serviceSubType, additionalCharacteristics) as jest.Mocked<TService>;
-      const mockBase = serviceMock as jest.Mocked<OutletServiceBase>;
-      mockBase.initialize.mockReset();
-      mockBase.cleanupCharacteristics.mockReset();
-      mockBase.updateBatteryLevel.mockReset();
-      mockBase.updateInputConsumption.mockReset();
-      mockBase.updateOutputConsumption.mockReset();
-      mockBase.updateState.mockReset();
+    function createOutletService<TService extends OutletServiceBase>(service: TService): jest.Mocked<TService> {
+      const serviceMock = service as jest.Mocked<TService>;
+      const serviceBaseMock = serviceMock as jest.Mocked<OutletServiceBase>;
+      serviceBaseMock.initialize.mockReset();
+      serviceBaseMock.cleanupCharacteristics.mockReset();
+      serviceBaseMock.updateBatteryLevel.mockReset();
+      serviceBaseMock.updateInputConsumption.mockReset();
+      serviceBaseMock.updateOutputConsumption.mockReset();
+      serviceBaseMock.updateState.mockReset();
       return serviceMock;
     }
 
-    function createLightBulbService<TService extends LightBulbServiceBase>(
-      Service: new (ecoFlowAccessory: PowerStreamAccessory, maxBrightness: number, serviceSubType: string) => TService
-    ): jest.Mocked<TService> {
-      const serviceMock = new Service(accessory, 1023, 'INV') as jest.Mocked<TService>;
-      const mockBase = serviceMock as jest.Mocked<LightBulbServiceBase>;
-      mockBase.initialize.mockReset();
-      mockBase.cleanupCharacteristics.mockReset();
-      mockBase.updateBrightness.mockReset();
-      mockBase.updateState.mockReset();
-      (Service as jest.Mock).mockImplementation(() => serviceMock);
+    function createLightBulbService<TService extends LightBulbServiceBase>(service: TService): jest.Mocked<TService> {
+      const serviceMock = service as jest.Mocked<TService>;
+      const serviceBaseMock = serviceMock as jest.Mocked<LightBulbServiceBase>;
+      serviceBaseMock.initialize.mockReset();
+      serviceBaseMock.cleanupCharacteristics.mockReset();
+      serviceBaseMock.updateBrightness.mockReset();
+      serviceBaseMock.updateState.mockReset();
       return serviceMock;
     }
 
-    solarOutletServiceMock = createOutletService(OutletService, 'PV');
-    batteryOutletServiceMock = createOutletService(OutletService, 'BAT');
-    inverterOutletServiceMock = createOutletService(OutletInvService, 'INV');
+    function createFanService<TService extends FanServiceBase>(service: TService): jest.Mocked<TService> {
+      const serviceMock = service as jest.Mocked<TService>;
+      const serviceBaseMock = serviceMock as jest.Mocked<FanServiceBase>;
+      serviceBaseMock.initialize.mockReset();
+      serviceBaseMock.cleanupCharacteristics.mockReset();
+      serviceBaseMock.updateRotationSpeed.mockReset();
+      serviceBaseMock.updateState.mockReset();
+      return serviceMock;
+    }
 
+    solarOutletServiceMock = createOutletService(new OutletService(accessory, 'PV'));
+    batteryOutletServiceMock = createOutletService(new OutletService(accessory, 'BAT'));
     (OutletService as jest.Mock).mockImplementation((_: PowerStreamAccessory, serviceSubType: string) => {
       if (serviceSubType === 'PV') {
         return solarOutletServiceMock;
@@ -125,10 +123,18 @@ describe('PowerStreamAccessory', () => {
       }
       return undefined;
     });
+
+    inverterOutletServiceMock = createOutletService(new OutletInvService(accessory));
     (OutletInvService as jest.Mock).mockImplementation(() => inverterOutletServiceMock);
 
-    inverterLightBulbServiceMock = createLightBulbService(LightBulbInvService);
-    accessoryInformationServiceMock = createService(AccessoryInformationService);
+    inverterIndicatorServiceMock = createLightBulbService(new IndicatorService(accessory, 1023));
+    (IndicatorService as jest.Mock).mockImplementation(() => inverterIndicatorServiceMock);
+
+    inverterPowerDemandServiceMock = createFanService(new PowerDemandService(accessory, 6000));
+    (PowerDemandService as jest.Mock).mockImplementation(() => inverterPowerDemandServiceMock);
+
+    accessoryInformationServiceMock = createService(new AccessoryInformationService(accessory));
+    (AccessoryInformationService as jest.Mock).mockImplementation(() => accessoryInformationServiceMock);
 
     accessoryMock = { services: jest.fn(), removeService: jest.fn() } as unknown as jest.Mocked<PlatformAccessory>;
     platformMock = {} as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
@@ -155,147 +161,6 @@ describe('PowerStreamAccessory', () => {
     );
   });
 
-  describe('additionalCharacteristics', () => {
-    function run(
-      expectedServiceSubType: string,
-      mock: jest.Mocked<OutletServiceBase>,
-      deviceConfig: DeviceConfig
-    ): CharacteristicType[] | undefined {
-      let actual: CharacteristicType[] | undefined;
-      (OutletService as jest.Mock).mockImplementation(
-        (_: EcoFlowAccessoryBase, serviceSubType: string, additionalCharacteristics?: CharacteristicType[]) => {
-          if (serviceSubType === expectedServiceSubType) {
-            actual = additionalCharacteristics;
-            return mock;
-          }
-          return undefined;
-        }
-      );
-      (OutletInvService as jest.Mock).mockImplementation(
-        (_: EcoFlowAccessoryBase, serviceSubType: string, additionalCharacteristics?: CharacteristicType[]) => {
-          if (serviceSubType === expectedServiceSubType) {
-            actual = additionalCharacteristics;
-            return mock;
-          }
-          return undefined;
-        }
-      );
-      new PowerStreamAccessory(
-        platformMock,
-        accessoryMock,
-        deviceConfig,
-        logMock,
-        httpApiManagerMock,
-        mqttApiManagerMock
-      );
-      return actual;
-    }
-
-    describe('PV', () => {
-      it('should initialize PV outlet service with additional characteristics when they are defined in config', () => {
-        const actual = run('PV', solarOutletServiceMock, {
-          powerStream: {
-            pv: {
-              additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
-            },
-          },
-        } as DeviceConfig);
-
-        expect(actual).toEqual([CharacteristicType.OutputConsumptionInWatts]);
-      });
-
-      it('should initialize PV outlet service with additional characteristics when pv settings are not defined in config', () => {
-        const actual = run('PV', solarOutletServiceMock, {
-          powerStream: {
-            pv: {} as BatteryDeviceConfig,
-          },
-        } as DeviceConfig);
-
-        expect(actual).toBeUndefined();
-      });
-
-      it('should initialize PV outlet service with additional characteristics when powerStream settings are not defined in config', () => {
-        const actual = run('PV', solarOutletServiceMock, {} as DeviceConfig);
-
-        expect(actual).toBeUndefined();
-      });
-    });
-
-    describe('BAT', () => {
-      it('should initialize BAT outlet service with additional characteristics when they are defined in config', () => {
-        const actual = run('BAT', batteryOutletServiceMock, {
-          powerStream: {
-            battery: {
-              additionalCharacteristics: [
-                CharacteristicType.BatteryLevel,
-                CharacteristicType.InputConsumptionInWatts,
-                CharacteristicType.OutputConsumptionInWatts,
-              ],
-            },
-          },
-        } as DeviceConfig);
-
-        expect(actual).toEqual([
-          CharacteristicType.BatteryLevel,
-          CharacteristicType.InputConsumptionInWatts,
-          CharacteristicType.OutputConsumptionInWatts,
-        ]);
-      });
-
-      it('should initialize BAT outlet service with additional characteristics when battery settings are not defined in config', () => {
-        const actual = run('BAT', batteryOutletServiceMock, {
-          powerStream: {
-            battery: {} as BatteryDeviceConfig,
-          },
-        } as DeviceConfig);
-
-        expect(actual).toBeUndefined();
-      });
-
-      it('should initialize BAT outlet service with additional characteristics when powerStream settings are not defined in config', () => {
-        const actual = run('BAT', batteryOutletServiceMock, {} as DeviceConfig);
-
-        expect(actual).toBeUndefined();
-      });
-    });
-
-    describe('INV', () => {
-      it('should initialize INV outlet service with additional characteristics when they are defined in config', () => {
-        const actual = run('INV', inverterOutletServiceMock, {
-          powerStream: {
-            inverter: {
-              additionalCharacteristics: [
-                CharacteristicType.InputConsumptionInWatts,
-                CharacteristicType.OutputConsumptionInWatts,
-              ],
-            },
-          },
-        } as DeviceConfig);
-
-        expect(actual).toEqual([
-          CharacteristicType.InputConsumptionInWatts,
-          CharacteristicType.OutputConsumptionInWatts,
-        ]);
-      });
-
-      it('should initialize INV outlet service with additional characteristics when inverter settings are not defined in config', () => {
-        const actual = run('INV', inverterOutletServiceMock, {
-          powerStream: {
-            inverter: {} as BatteryDeviceConfig,
-          },
-        } as DeviceConfig);
-
-        expect(actual).toBeUndefined();
-      });
-
-      it('should initialize INV outlet service with additional characteristics when powerStream settings are not defined in config', () => {
-        const actual = run('INV', inverterOutletServiceMock, {} as DeviceConfig);
-
-        expect(actual).toBeUndefined();
-      });
-    });
-  });
-
   describe('initialize', () => {
     it('should add required services when initializing accessory', async () => {
       await accessory.initialize();
@@ -305,8 +170,233 @@ describe('PowerStreamAccessory', () => {
       expect(solarOutletServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(batteryOutletServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(inverterOutletServiceMock.initialize).toHaveBeenCalledTimes(1);
-      expect(inverterLightBulbServiceMock.initialize).toHaveBeenCalledTimes(1);
+      expect(inverterIndicatorServiceMock.initialize).toHaveBeenCalledTimes(1);
+      expect(inverterPowerDemandServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(accessoryInformationServiceMock.initialize).toHaveBeenCalledTimes(1);
+    });
+
+    describe('outletServices', () => {
+      function run<TService>(
+        expectedServiceSubType: string,
+        mock: jest.Mocked<TService>,
+        deviceConfig: DeviceConfig
+      ): CharacteristicType[] | undefined {
+        let actual: CharacteristicType[] | undefined;
+        (OutletService as jest.Mock).mockImplementation(
+          (_: EcoFlowAccessoryBase, serviceSubType: string, additionalCharacteristics?: CharacteristicType[]) => {
+            if (serviceSubType === expectedServiceSubType) {
+              actual = additionalCharacteristics;
+              return mock;
+            }
+            return undefined;
+          }
+        );
+        (OutletInvService as jest.Mock).mockImplementation(
+          (_: EcoFlowAccessoryBase, additionalCharacteristics?: CharacteristicType[]) => {
+            if (expectedServiceSubType === 'INV') {
+              actual = additionalCharacteristics;
+              return mock;
+            }
+            return undefined;
+          }
+        );
+        new PowerStreamAccessory(
+          platformMock,
+          accessoryMock,
+          deviceConfig,
+          logMock,
+          httpApiManagerMock,
+          mqttApiManagerMock
+        );
+        return actual;
+      }
+
+      describe('additionalCharacteristics PV', () => {
+        it('should initialize PV outlet service with additional characteristics when they are defined in config', () => {
+          const actual = run('PV', solarOutletServiceMock, {
+            powerStream: {
+              pv: {
+                additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
+              },
+            },
+          } as DeviceConfig);
+
+          expect(actual).toEqual([CharacteristicType.OutputConsumptionInWatts]);
+        });
+
+        it('should initialize PV outlet service with additional characteristics when pv settings are not defined in config', () => {
+          const actual = run('PV', solarOutletServiceMock, {
+            powerStream: {
+              pv: {} as BatteryDeviceConfig,
+            },
+          } as DeviceConfig);
+
+          expect(actual).toBeUndefined();
+        });
+
+        it(`should initialize PV outlet service with additional characteristics
+          when powerStream settings are not defined in config`, () => {
+          const actual = run('PV', solarOutletServiceMock, {} as DeviceConfig);
+
+          expect(actual).toBeUndefined();
+        });
+      });
+
+      describe('additionalCharacteristics BAT', () => {
+        it('should initialize BAT outlet service with additional characteristics when they are defined in config', () => {
+          const actual = run('BAT', batteryOutletServiceMock, {
+            powerStream: {
+              battery: {
+                additionalCharacteristics: [
+                  CharacteristicType.BatteryLevel,
+                  CharacteristicType.InputConsumptionInWatts,
+                  CharacteristicType.OutputConsumptionInWatts,
+                ],
+              },
+            },
+          } as DeviceConfig);
+
+          expect(actual).toEqual([
+            CharacteristicType.BatteryLevel,
+            CharacteristicType.InputConsumptionInWatts,
+            CharacteristicType.OutputConsumptionInWatts,
+          ]);
+        });
+
+        it('should initialize BAT outlet service with additional characteristics when battery settings are not defined in config', () => {
+          const actual = run(
+            'BAT',
+            batteryOutletServiceMock as unknown as jest.Mocked<OutletServiceBase>,
+            {
+              powerStream: {
+                battery: {} as BatteryDeviceConfig,
+              },
+            } as DeviceConfig
+          );
+
+          expect(actual).toBeUndefined();
+        });
+
+        it(`should initialize BAT outlet service with additional characteristics
+          when powerStream settings are not defined in config`, () => {
+          const actual = run('BAT', batteryOutletServiceMock, {} as DeviceConfig);
+
+          expect(actual).toBeUndefined();
+        });
+      });
+
+      describe('additionalCharacteristics INV', () => {
+        it('should initialize INV outlet service with additional characteristics when they are defined in config', () => {
+          const actual = run('INV', inverterOutletServiceMock, {
+            powerStream: {
+              inverter: {
+                additionalCharacteristics: [
+                  CharacteristicType.InputConsumptionInWatts,
+                  CharacteristicType.OutputConsumptionInWatts,
+                ],
+              },
+            },
+          } as DeviceConfig);
+
+          expect(actual).toEqual([
+            CharacteristicType.InputConsumptionInWatts,
+            CharacteristicType.OutputConsumptionInWatts,
+          ]);
+        });
+
+        it('should initialize INV outlet service with additional characteristics when inverter settings are not defined in config', () => {
+          const actual = run('INV', inverterOutletServiceMock, {
+            powerStream: {
+              inverter: {} as BatteryDeviceConfig,
+            },
+          } as DeviceConfig);
+
+          expect(actual).toBeUndefined();
+        });
+
+        it(`should initialize INV outlet service with additional characteristics
+          when powerStream settings are not defined in config`, () => {
+          const actual = run('INV', inverterOutletServiceMock, {} as DeviceConfig);
+
+          expect(actual).toBeUndefined();
+        });
+      });
+    });
+
+    describe('indicatorService', () => {
+      function run(deviceConfig: DeviceConfig): number | undefined {
+        let actual: number | undefined;
+        (IndicatorService as jest.Mock).mockImplementation((_: EcoFlowAccessoryBase, maxBrightness: number) => {
+          actual = maxBrightness;
+          return inverterIndicatorServiceMock;
+        });
+
+        new PowerStreamAccessory(
+          platformMock,
+          accessoryMock,
+          deviceConfig,
+          logMock,
+          httpApiManagerMock,
+          mqttApiManagerMock
+        );
+        return actual;
+      }
+
+      describe('maxBrightness', () => {
+        it('should initialize indicator service with permanent max brightness when it is created', () => {
+          const actual = run(config);
+
+          expect(actual).toEqual(1023);
+        });
+      });
+    });
+
+    describe('powerDemandService', () => {
+      function run(deviceConfig: DeviceConfig): number | undefined {
+        let actual: number | undefined;
+        (PowerDemandService as jest.Mock).mockImplementation((_: EcoFlowAccessoryBase, maxPowerDemand: number) => {
+          actual = maxPowerDemand;
+          return inverterPowerDemandServiceMock;
+        });
+
+        new PowerStreamAccessory(
+          platformMock,
+          accessoryMock,
+          deviceConfig,
+          logMock,
+          httpApiManagerMock,
+          mqttApiManagerMock
+        );
+        return actual;
+      }
+      describe('maxPowerDemand', () => {
+        it('should initialize indicator service with default max power demand when powerStream settings are not defined in config', () => {
+          const actual = run({} as DeviceConfig);
+
+          expect(actual).toEqual(6000);
+        });
+
+        it(`should initialize indicator service with default max power demand
+          when powerStream.type settings are not defined in config`, () => {
+          const actual = run({ powerStream: {} } as DeviceConfig);
+
+          expect(actual).toEqual(6000);
+        });
+
+        it(`should initialize indicator service with 6000 max power demand
+          when powerStream.type is 600W`, () => {
+          const actual = run({ powerStream: { type: PowerStreamConsumptionType.W600 } } as DeviceConfig);
+
+          expect(actual).toEqual(6000);
+        });
+
+        it(`should initialize indicator service with 8000 max power demand
+          when powerStream.type is 800W`, () => {
+          const actual = run({ powerStream: { type: PowerStreamConsumptionType.W800 } } as DeviceConfig);
+
+          expect(actual).toEqual(8000);
+        });
+      });
     });
   });
 
@@ -599,6 +689,7 @@ describe('PowerStreamAccessory', () => {
           processQuotaMessage(message);
 
           expect(inverterOutletServiceMock.updateState).toHaveBeenCalledWith(true);
+          expect(inverterPowerDemandServiceMock.updateState).toHaveBeenCalledWith(true);
         });
 
         it('should update INV brightness when Hearbeat message is received with invBrightness', async () => {
@@ -612,8 +703,23 @@ describe('PowerStreamAccessory', () => {
 
           processQuotaMessage(message);
 
-          expect(inverterLightBulbServiceMock.updateState).toHaveBeenCalledWith(true);
-          expect(inverterLightBulbServiceMock.updateBrightness).toHaveBeenCalledWith(23.4);
+          expect(inverterIndicatorServiceMock.updateState).toHaveBeenCalledWith(true);
+          expect(inverterIndicatorServiceMock.updateBrightness).toHaveBeenCalledWith(23.4);
+        });
+
+        it('should update INV power demand when Hearbeat message is received with permanentWatts', async () => {
+          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
+            cmdId: MqttPowerStreamMessageType.Heartbeat,
+            param: {
+              permanentWatts: 4500,
+            },
+          };
+
+          processQuotaMessage(message);
+
+          expect(inverterPowerDemandServiceMock.updateState).not.toHaveBeenCalled();
+          expect(inverterPowerDemandServiceMock.updateRotationSpeed).toHaveBeenCalledWith(450);
         });
       });
     });
@@ -630,6 +736,8 @@ describe('PowerStreamAccessory', () => {
           pv1InputWatts: 10,
           pv2InputWatts: 20,
           invOnOff: true,
+          permanentWatts: 7000,
+          invBrightness: 431,
         },
       };
     });
@@ -734,8 +842,8 @@ describe('PowerStreamAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(inverterLightBulbServiceMock.updateState).not.toHaveBeenCalled();
-        expect(inverterLightBulbServiceMock.updateBrightness).not.toHaveBeenCalled();
+        expect(inverterIndicatorServiceMock.updateState).toHaveBeenCalledWith(true);
+        expect(inverterIndicatorServiceMock.updateBrightness).toHaveBeenCalledWith(431);
       });
 
       it(`should update INV brightness-related characteristics
@@ -744,8 +852,29 @@ describe('PowerStreamAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(inverterLightBulbServiceMock.updateState).not.toHaveBeenCalled();
-        expect(inverterLightBulbServiceMock.updateBrightness).not.toHaveBeenCalled();
+        expect(inverterIndicatorServiceMock.updateState).not.toHaveBeenCalled();
+        expect(inverterIndicatorServiceMock.updateBrightness).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('updatePowerDemand INV', () => {
+      it('should update INV brightness-related characteristics when initializing default values', async () => {
+        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
+
+        await accessory.initializeDefaultValues();
+
+        expect(inverterPowerDemandServiceMock.updateState).toHaveBeenCalledWith(true);
+        expect(inverterPowerDemandServiceMock.updateRotationSpeed).toHaveBeenCalledWith(700);
+      });
+
+      it(`should update INV power demand-related characteristics
+        when initializing default values with quotas were not initialized properly for it`, async () => {
+        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as PowerStreamAllQuotaData);
+
+        await accessory.initializeDefaultValues();
+
+        expect(inverterPowerDemandServiceMock.updateState).not.toHaveBeenCalled();
+        expect(inverterPowerDemandServiceMock.updateRotationSpeed).not.toHaveBeenCalled();
       });
     });
   });

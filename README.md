@@ -184,11 +184,14 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 | Outlet BAT          | Output Consumption, W | 🔲       | Read       |
 | Lightbulb Indicator | On                    | ✅       | Read       |
 | Lightbulb Indicator | Brightness            | ✅       | Read/write |
+| Fan PowerDemand     | On                    | ✅       | Read       |
+| Fan PowerDemand     | RotationSpeed         | ✅       | Read/write |
 
 #### Configuration
 
 The following additional characteristics is available:
 
+- type (600, 800)
 - battery:
   - Input Consumption, W
   - Output Consumption, W
@@ -207,6 +210,7 @@ The following additional characteristics is available:
       ...
       "model": "PowerStream",
       "powerStream": {
+        "type": "800",
         "battery": {
           "additionalCharacteristics": [
             "Battery Level, %",

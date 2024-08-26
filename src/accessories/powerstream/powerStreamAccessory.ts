@@ -9,13 +9,14 @@ import {
   MqttPowerStreamQuotaMessage,
   MqttPowerStreamQuotaMessageWithParams,
 } from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
-import { LightBulbInvService } from '@ecoflow/accessories/powerstream/services/lightBulbInvService';
+import { IndicatorService } from '@ecoflow/accessories/powerstream/services/indicatorService';
 import { OutletInvService } from '@ecoflow/accessories/powerstream/services/outletInvService';
 import { OutletService } from '@ecoflow/accessories/powerstream/services/outletService';
+import { PowerDemandService } from '@ecoflow/accessories/powerstream/services/powerDemandService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
-import { DeviceConfig } from '@ecoflow/config';
+import { DeviceConfig, PowerStreamConsumptionType } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
@@ -24,7 +25,8 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
   private readonly inverterOutletService: OutletInvService;
   private readonly solarOutletService: OutletService;
   private readonly batteryOutletService: OutletService;
-  private readonly inverterLightBulbService: LightBulbInvService;
+  private readonly inverterIndicatorService: IndicatorService;
+  private readonly inverterPowerDemandService: PowerDemandService;
 
   constructor(
     platform: EcoFlowHomebridgePlatform,
@@ -35,15 +37,15 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
     mqttApiManager: EcoFlowMqttApiManager
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
-    this.inverterOutletService = new OutletInvService(
-      this,
-      'INV',
-      config.powerStream?.inverter?.additionalCharacteristics
-    );
+
+    this.inverterOutletService = new OutletInvService(this, config.powerStream?.inverter?.additionalCharacteristics);
     this.solarOutletService = new OutletService(this, 'PV', config.powerStream?.pv?.additionalCharacteristics);
     this.batteryOutletService = new OutletService(this, 'BAT', config.powerStream?.battery?.additionalCharacteristics);
-
-    this.inverterLightBulbService = new LightBulbInvService(this);
+    this.inverterIndicatorService = new IndicatorService(this, 1023);
+    this.inverterPowerDemandService = new PowerDemandService(
+      this,
+      (config.powerStream?.type ?? PowerStreamConsumptionType.W600) * 10
+    );
   }
 
   protected override getServices(): ServiceBase[] {
@@ -51,7 +53,8 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
       this.inverterOutletService,
       this.solarOutletService,
       this.batteryOutletService,
-      this.inverterLightBulbService,
+      this.inverterIndicatorService,
+      this.inverterPowerDemandService,
     ];
   }
 
@@ -130,11 +133,16 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
 
     if (params.invOnOff !== undefined) {
       this.inverterOutletService.updateState(params.invOnOff);
+      this.inverterPowerDemandService.updateState(params.invOnOff);
     }
 
     if (params.invBrightness !== undefined) {
-      this.inverterLightBulbService.updateState(true);
-      this.inverterLightBulbService.updateBrightness(params.invBrightness);
+      this.inverterIndicatorService.updateState(true);
+      this.inverterIndicatorService.updateBrightness(params.invBrightness);
+    }
+
+    if (params.permanentWatts !== undefined) {
+      this.inverterPowerDemandService.updateRotationSpeed(params.permanentWatts * 0.1);
     }
   }
 }

@@ -14,7 +14,7 @@ export interface Heartbeat {
 
   // Settings
   supplyPriority?: number; //Power supply priority: 0: prioritize power supply; 1: prioritize power storage (read/write)
-  permanentWatts?: number; //Custom load power (power of loads not connected to smart plugs),  0–600W (read/write)
+  permanentWatts?: number; //0.1 W; Custom load power (power of loads not connected to smart plugs),  0–600W (read/write)
   upperLimit?: number; //Upper Charge limit, 1-30% (read/write)
   lowerLimit?: number; //Discharge limit, 70-100% (read/write)
 }

@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge EcoFlow",
   "name": "@pietrolubini/homebridge-ecoflow",
-  "version": "1.3.0-beta.3",
+  "version": "1.3.0-beta.6",
   "description": "Homebridge plugin for EcoFlow devices",
   "license": "MIT",
   "author": "PietroLubini",
@@ -32,7 +32,12 @@
     "homebridge-plugin",
     "homebridge-ecoflow",
     "ecoflow",
-    "delta 2 max"
+    "delta 2 max",
+    "delta2 max",
+    "delta2max",
+    "delta 2",
+    "delta2",
+    "powerstream"
   ],
   "_moduleAliases": {
     "@ecoflow": "dist"

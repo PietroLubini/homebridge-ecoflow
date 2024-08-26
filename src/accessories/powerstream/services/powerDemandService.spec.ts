@@ -1,7 +1,7 @@
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/httpApiPowerStreamContracts';
 import { MqttPowerStreamSetCmdCodeType } from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
-import { LightBulbInvService } from '@ecoflow/accessories/powerstream/services/lightBulbInvService';
+import { PowerDemandService } from '@ecoflow/accessories/powerstream/services/powerDemandService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
@@ -12,8 +12,8 @@ enum HAPStatus {
   READ_ONLY_CHARACTERISTIC = -70404,
 }
 
-describe('LightBulbInvService', () => {
-  let service: LightBulbInvService;
+describe('PowerDemandService', () => {
+  let service: PowerDemandService;
   let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
@@ -59,8 +59,8 @@ describe('LightBulbInvService', () => {
       quota: {},
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
-    service = new LightBulbInvService(ecoFlowAccessoryMock);
-    hapService = new HapService('Accessory Bulb Name', HapService.Lightbulb.UUID);
+    service = new PowerDemandService(ecoFlowAccessoryMock, 8000);
+    hapService = new HapService('Accessory Fan Name', HapService.Lightbulb.UUID);
   });
 
   describe('setOn', () => {
@@ -95,48 +95,48 @@ describe('LightBulbInvService', () => {
       const actual = characteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug).toHaveBeenCalledWith('Indicator State ->', true);
+      expect(logMock.debug).toHaveBeenCalledWith('PowerDemand State ->', true);
     });
   });
 
-  describe('updateBrightness', () => {
+  describe('updatePowerDemand', () => {
     let characteristic: Characteristic;
 
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
-      characteristic = service.service.getCharacteristic(HapCharacteristic.Brightness);
+      characteristic = service.service.getCharacteristic(HapCharacteristic.RotationSpeed);
     });
 
-    it('should set 100% brightness when maximum value is set', () => {
-      service.updateBrightness(1023);
+    it('should set 100% power demand when maximum value is set', () => {
+      service.updateRotationSpeed(8000);
 
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug).toHaveBeenCalledWith('Indicator Brightness ->', 100);
+      expect(logMock.debug).toHaveBeenCalledWith('PowerDemand RotationSpeed ->', 100);
     });
 
-    it('should set 0% brightness when minimum value is set', () => {
-      service.updateBrightness(0);
+    it('should set 0% power demand when minimum value is set', () => {
+      service.updateRotationSpeed(0);
 
       const actual = characteristic.value;
 
       expect(actual).toEqual(0);
-      expect(logMock.debug).toHaveBeenCalledWith('Indicator Brightness ->', 0);
+      expect(logMock.debug).toHaveBeenCalledWith('PowerDemand RotationSpeed ->', 0);
     });
 
-    it('should set brightness when it is requested', () => {
-      service.updateBrightness(468.0225);
+    it('should set power demand when it is requested', () => {
+      service.updateRotationSpeed(2500);
 
       const actual = characteristic.value;
 
-      expect(actual).toEqual(46);
-      expect(logMock.debug).toHaveBeenCalledWith('Indicator Brightness ->', 45.75);
+      expect(actual).toEqual(31);
+      expect(logMock.debug).toHaveBeenCalledWith('PowerDemand RotationSpeed ->', 31.25);
     });
 
-    it('should revert changing of Brightness state to value set from UI when sending Set command to device is failed', () => {
-      service.updateBrightness(1023);
+    it('should revert changing of power demand to value set from UI when sending Set command to device is failed', () => {
+      service.updateRotationSpeed(8000);
       logMock.debug.mockReset();
 
       characteristic.setValue(20);
@@ -145,7 +145,7 @@ describe('LightBulbInvService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug.mock.calls).toEqual([['Indicator Brightness ->', 100]]);
+      expect(logMock.debug.mock.calls).toEqual([['PowerDemand RotationSpeed ->', 100]]);
     });
   });
 
@@ -167,31 +167,31 @@ describe('LightBulbInvService', () => {
     });
   });
 
-  describe('onBrightnessSet', () => {
+  describe('onPowerDemandSet', () => {
     let characteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
-      characteristic = service.service.getCharacteristic(HapCharacteristic.Brightness);
+      characteristic = service.service.getCharacteristic(HapCharacteristic.RotationSpeed);
     });
 
-    it('should send Set command to device when Brightness value was changed', () => {
+    it('should send Set command to device when Power Demand value was changed', () => {
       characteristic.setValue(30);
 
       expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
         {
           id: 0,
           version: '',
-          cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
+          cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_PERMANENT_WATTS_PACK,
           params: {
-            brightness: 306.9,
+            permanentWatts: 2400,
           },
         },
         expect.any(Function)
       );
     });
 
-    it('should revert changing of Brightness state when sending Set command to device is failed', () => {
+    it('should revert changing of Power Demand when sending Set command to device is failed', () => {
       characteristic.setValue(100);
       ecoFlowAccessoryMock.sendSetCommand.mockReset();
       logMock.debug.mockReset();
@@ -202,7 +202,7 @@ describe('LightBulbInvService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug.mock.calls).toEqual([['Indicator Brightness ->', 100]]);
+      expect(logMock.debug.mock.calls).toEqual([['PowerDemand RotationSpeed ->', 100]]);
     });
   });
 });

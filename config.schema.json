@@ -83,6 +83,14 @@
               "title": "PowerStream Settings",
               "type": "object",
               "properties": {
+                "type": {
+                  "title": "Type",
+                  "type": "string",
+                  "default": "600",
+                  "enum": ["600", "800"],
+                  "description": "Maximum power, W"
+                },
+
                 "battery": {
                   "title": "Battery Settings",
                   "type": "object",

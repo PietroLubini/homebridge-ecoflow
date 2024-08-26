@@ -59,13 +59,13 @@ describe('OutletInvService', () => {
       quota: {},
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
-    service = new OutletInvService(ecoFlowAccessoryMock, 'INV');
+    service = new OutletInvService(ecoFlowAccessoryMock);
     hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
   });
 
   describe('updateOutputConsumption', () => {
     it('should set OutputConsumption when it is enabled in configuration', () => {
-      service = new OutletInvService(ecoFlowAccessoryMock, 'INV', [CharacteristicType.OutputConsumptionInWatts]);
+      service = new OutletInvService(ecoFlowAccessoryMock, [CharacteristicType.OutputConsumptionInWatts]);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -84,7 +84,7 @@ describe('OutletInvService', () => {
 
     it('should not set OutputConsumption when it is disabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletInvService(ecoFlowAccessoryMock, 'INV');
+      service = new OutletInvService(ecoFlowAccessoryMock);
       service.initialize();
 
       service.updateOutputConsumption(34.6);
@@ -101,7 +101,7 @@ describe('OutletInvService', () => {
   describe('updateInputConsumption', () => {
     it('should set InputConsumption when it is enabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletInvService(ecoFlowAccessoryMock, 'INV', [CharacteristicType.InputConsumptionInWatts]);
+      service = new OutletInvService(ecoFlowAccessoryMock, [CharacteristicType.InputConsumptionInWatts]);
       service.initialize();
 
       service.updateInputConsumption(41.1);
@@ -116,7 +116,7 @@ describe('OutletInvService', () => {
 
     it('should not set InputConsumption when it is disabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletInvService(ecoFlowAccessoryMock, 'INV');
+      service = new OutletInvService(ecoFlowAccessoryMock);
       service.initialize();
 
       service.updateInputConsumption(41.1);
@@ -133,7 +133,7 @@ describe('OutletInvService', () => {
   describe('updateBatteryLevel', () => {
     it('should set BatteryLevel when it is enabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletInvService(ecoFlowAccessoryMock, 'INV', [CharacteristicType.BatteryLevel]);
+      service = new OutletInvService(ecoFlowAccessoryMock, [CharacteristicType.BatteryLevel]);
       service.initialize();
 
       service.updateBatteryLevel(87.4);
@@ -146,7 +146,7 @@ describe('OutletInvService', () => {
 
     it('should not set BatteryLevel when it is disabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletInvService(ecoFlowAccessoryMock, 'INV');
+      service = new OutletInvService(ecoFlowAccessoryMock);
       service.initialize();
 
       service.updateBatteryLevel(87.4);

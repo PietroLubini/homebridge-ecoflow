@@ -6,9 +6,9 @@ import {
 } from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
 import { LightBulbServiceBase } from '@ecoflow/services/lightBulbServiceBase';
 
-export class LightBulbInvService extends LightBulbServiceBase {
-  constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
-    super(ecoFlowAccessory, 1023, 'Indicator');
+export class IndicatorService extends LightBulbServiceBase {
+  constructor(ecoFlowAccessory: EcoFlowAccessoryBase, maxBrightness: number) {
+    super(ecoFlowAccessory, maxBrightness, 'Indicator');
   }
 
   protected override setOn(): Promise<void> {
@@ -21,7 +21,7 @@ export class LightBulbInvService extends LightBulbServiceBase {
       version: '',
       cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
       params: {
-        brightness: this.covertPercentToBrightness(value),
+        brightness: value,
       },
     };
     return this.ecoFlowAccessory.sendSetCommand(message, revert);

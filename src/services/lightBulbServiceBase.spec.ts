@@ -13,7 +13,7 @@ enum HAPStatus {
   READ_ONLY_CHARACTERISTIC = -70404,
 }
 
-class MockLightBulbInvService extends LightBulbServiceBase {
+class MockLightBulbService extends LightBulbServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
     super(ecoFlowAccessory, 1023, 'MOCK');
   }
@@ -24,7 +24,7 @@ class MockLightBulbInvService extends LightBulbServiceBase {
 }
 
 describe('LightBulbServiceBase', () => {
-  let service: MockLightBulbInvService;
+  let service: MockLightBulbService;
   let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
@@ -85,7 +85,7 @@ describe('LightBulbServiceBase', () => {
       quota: {},
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
-    service = new MockLightBulbInvService(ecoFlowAccessoryMock);
+    service = new MockLightBulbService(ecoFlowAccessoryMock);
     hapService = new HapService('Accessory Bulb Name', HapService.Lightbulb.UUID);
   });
 
@@ -194,7 +194,7 @@ describe('LightBulbServiceBase', () => {
       expect(logMock.debug).toHaveBeenCalledWith('MOCK Brightness ->', 45.75);
     });
 
-    it('should revert changing of Brightness state to value set from UI when sending Set command to device is failed', () => {
+    it('should revert changing of brightness to value set from UI when sending Set command to device is failed', () => {
       service.updateBrightness(1023);
       logMock.debug.mockReset();
       const setBrightnessMock = jest.fn();
@@ -243,7 +243,7 @@ describe('LightBulbServiceBase', () => {
       characteristic = service.service.getCharacteristic(HapCharacteristic.Brightness);
     });
 
-    it('should revert changing of Brightness state when sending Set command to device is failed', () => {
+    it('should revert changing of brightness when sending Set command to device is failed', () => {
       characteristic.setValue(100);
       logMock.debug.mockReset();
       const setBrightnessMock = jest.fn();

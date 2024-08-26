@@ -49,7 +49,13 @@ export enum AdditionalBatteryCharacteristicType {
   OutputConsumptionInWatts = 'Output Consumption, W',
 }
 
+export enum PowerStreamConsumptionType {
+  W600 = 600,
+  W800 = 800,
+}
+
 export interface PowerStreamDeviceConfig {
+  type: PowerStreamConsumptionType;
   battery?: BatteryDeviceConfig;
   pv?: BatteryDeviceConfig;
   inverter?: BatteryDeviceConfig;
