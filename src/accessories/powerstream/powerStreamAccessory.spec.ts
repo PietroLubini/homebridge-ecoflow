@@ -410,7 +410,7 @@ describe('PowerStreamAccessory', () => {
             cmdFunc: MqttPowerStreamMessageFuncType.Func20,
             cmdId: MqttPowerStreamMessageType.Heartbeat,
             param: {
-              pv1InputWatts: 4.5,
+              pv1InputWatts: 45,
             },
           };
 
@@ -440,14 +440,14 @@ describe('PowerStreamAccessory', () => {
             cmdFunc: MqttPowerStreamMessageFuncType.Func20,
             cmdId: MqttPowerStreamMessageType.Heartbeat,
             param: {
-              pv2InputWatts: 5.6,
+              pv2InputWatts: 56,
             },
           };
 
           processQuotaMessage(message);
 
           expect(solarOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
-          expect(solarOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(5.6);
+          expect(solarOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(56 * 0.1);
         });
 
         it('should update PV Output Consumption when Hearbeat message is received with all pv-related parameters', async () => {
@@ -455,15 +455,15 @@ describe('PowerStreamAccessory', () => {
             cmdFunc: MqttPowerStreamMessageFuncType.Func20,
             cmdId: MqttPowerStreamMessageType.Heartbeat,
             param: {
-              pv1InputWatts: 4.5,
-              pv2InputWatts: 5.6,
+              pv1InputWatts: 45,
+              pv2InputWatts: 56,
             },
           };
 
           processQuotaMessage(message);
 
           expect(solarOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
-          expect(solarOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(10.1);
+          expect(solarOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(101 * 0.1);
         });
       });
 
@@ -486,7 +486,7 @@ describe('PowerStreamAccessory', () => {
             cmdFunc: MqttPowerStreamMessageFuncType.Func20,
             cmdId: MqttPowerStreamMessageType.Heartbeat,
             param: {
-              batInputWatts: 12.4,
+              batInputWatts: 124,
             },
           };
 
@@ -516,7 +516,7 @@ describe('PowerStreamAccessory', () => {
             cmdFunc: MqttPowerStreamMessageFuncType.Func20,
             cmdId: MqttPowerStreamMessageType.Heartbeat,
             param: {
-              batInputWatts: -45.6,
+              batInputWatts: -456,
             },
           };
 
@@ -547,7 +547,7 @@ describe('PowerStreamAccessory', () => {
             cmdFunc: MqttPowerStreamMessageFuncType.Func20,
             cmdId: MqttPowerStreamMessageType.Heartbeat,
             param: {
-              invOutputWatts: 12.41,
+              invOutputWatts: 124.1,
             },
           };
 
@@ -577,13 +577,13 @@ describe('PowerStreamAccessory', () => {
             cmdFunc: MqttPowerStreamMessageFuncType.Func20,
             cmdId: MqttPowerStreamMessageType.Heartbeat,
             param: {
-              invOutputWatts: -45.61,
+              invOutputWatts: -456.1,
             },
           };
 
           processQuotaMessage(message);
 
-          expect(inverterOutletServiceMock.updateInputConsumption).toHaveBeenCalledWith(45.61);
+          expect(inverterOutletServiceMock.updateInputConsumption).toHaveBeenCalledWith(456.1 * 0.1);
           expect(inverterOutletServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
         });
 
@@ -624,11 +624,11 @@ describe('PowerStreamAccessory', () => {
     beforeEach(() => {
       quota = {
         '20_1': {
-          batInputWatts: -12,
+          batInputWatts: -120,
           batSoc: 34.1,
-          invOutputWatts: 5,
-          pv1InputWatts: 1,
-          pv2InputWatts: 2,
+          invOutputWatts: 50,
+          pv1InputWatts: 10,
+          pv2InputWatts: 20,
           invOnOff: true,
         },
       };

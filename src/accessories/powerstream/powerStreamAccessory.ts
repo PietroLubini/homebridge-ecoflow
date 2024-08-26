@@ -96,18 +96,19 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
 
   private updateSolarValues(params: Heartbeat): void {
     if (params.pv1InputWatts !== undefined || params.pv2InputWatts !== undefined) {
-      const pvWatts = this.sum(params.pv1InputWatts, params.pv2InputWatts);
+      const pvWatts = this.sum(params.pv1InputWatts, params.pv2InputWatts) * 0.1;
       this.solarOutletService.updateOutputConsumption(pvWatts);
     }
   }
 
   private updateBatteryValues(params: Heartbeat): void {
     if (params.batInputWatts !== undefined) {
-      if (params.batInputWatts >= 0) {
-        this.batteryOutletService.updateOutputConsumption(params.batInputWatts);
+      const batInputWatts = params.batInputWatts * 0.1;
+      if (batInputWatts >= 0) {
+        this.batteryOutletService.updateOutputConsumption(batInputWatts);
       }
-      if (params.batInputWatts <= 0) {
-        const watts = Math.abs(params.batInputWatts);
+      if (batInputWatts <= 0) {
+        const watts = Math.abs(batInputWatts);
         this.batteryOutletService.updateInputConsumption(watts);
       }
     }
@@ -118,11 +119,12 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
 
   private updateInverterValues(params: Heartbeat): void {
     if (params.invOutputWatts !== undefined) {
-      if (params.invOutputWatts >= 0) {
-        this.inverterOutletService.updateOutputConsumption(params.invOutputWatts);
+      const invOutputWatts = params.invOutputWatts * 0.1;
+      if (invOutputWatts >= 0) {
+        this.inverterOutletService.updateOutputConsumption(invOutputWatts);
       }
-      if (params.invOutputWatts <= 0) {
-        this.inverterOutletService.updateInputConsumption(Math.abs(params.invOutputWatts));
+      if (invOutputWatts <= 0) {
+        this.inverterOutletService.updateInputConsumption(Math.abs(invOutputWatts));
       }
     }
 
