@@ -8,7 +8,7 @@ import { FanServiceBase } from '@ecoflow/services/fanServiceBase';
 
 export class PowerDemandService extends FanServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryBase, maxPowerDemand: number) {
-    super(ecoFlowAccessory, maxPowerDemand, 'PowerDemand');
+    super(ecoFlowAccessory, maxPowerDemand, 'Power Demand');
   }
 
   protected override setOn(): Promise<void> {

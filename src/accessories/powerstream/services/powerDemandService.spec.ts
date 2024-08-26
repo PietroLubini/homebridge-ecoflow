@@ -95,7 +95,7 @@ describe('PowerDemandService', () => {
       const actual = characteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug).toHaveBeenCalledWith('PowerDemand State ->', true);
+      expect(logMock.debug).toHaveBeenCalledWith('Power Demand State ->', true);
     });
   });
 
@@ -114,7 +114,7 @@ describe('PowerDemandService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug).toHaveBeenCalledWith('PowerDemand RotationSpeed ->', 100);
+      expect(logMock.debug).toHaveBeenCalledWith('Power Demand RotationSpeed ->', 100);
     });
 
     it('should set 0% power demand when minimum value is set', () => {
@@ -123,7 +123,7 @@ describe('PowerDemandService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(0);
-      expect(logMock.debug).toHaveBeenCalledWith('PowerDemand RotationSpeed ->', 0);
+      expect(logMock.debug).toHaveBeenCalledWith('Power Demand RotationSpeed ->', 0);
     });
 
     it('should set power demand when it is requested', () => {
@@ -132,7 +132,7 @@ describe('PowerDemandService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(31);
-      expect(logMock.debug).toHaveBeenCalledWith('PowerDemand RotationSpeed ->', 31.25);
+      expect(logMock.debug).toHaveBeenCalledWith('Power Demand RotationSpeed ->', 31.25);
     });
 
     it('should revert changing of power demand to value set from UI when sending Set command to device is failed', () => {
@@ -145,7 +145,7 @@ describe('PowerDemandService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug.mock.calls).toEqual([['PowerDemand RotationSpeed ->', 100]]);
+      expect(logMock.debug.mock.calls).toEqual([['Power Demand RotationSpeed ->', 100]]);
     });
   });
 
@@ -202,7 +202,7 @@ describe('PowerDemandService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug.mock.calls).toEqual([['PowerDemand RotationSpeed ->', 100]]);
+      expect(logMock.debug.mock.calls).toEqual([['Power Demand RotationSpeed ->', 100]]);
     });
   });
 });

@@ -184,8 +184,8 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 | Outlet BAT          | Output Consumption, W | 🔲       | Read       |
 | Lightbulb Indicator | On                    | ✅       | Read       |
 | Lightbulb Indicator | Brightness            | ✅       | Read/write |
-| Fan PowerDemand     | On                    | ✅       | Read       |
-| Fan PowerDemand     | RotationSpeed         | ✅       | Read/write |
+| Fan Power Demand    | On                    | ✅       | Read       |
+| Fan Power Demand    | RotationSpeed         | ✅       | Read/write |
 
 #### Configuration
 
