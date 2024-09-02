@@ -2,6 +2,8 @@
   "pluginAlias": "EcoFlowHomebridge",
   "pluginType": "platform",
   "singular": true,
+  "customUi": true,
+  "customUiPath": "./dist/homebridge-ui",
   "schema": {
     "type": "object",
     "properties": {
@@ -12,6 +14,7 @@
         "required": true
       },
       "devices": {
+        "title": "Devices",
         "type": "array",
         "required": true,
         "uniqueItems": true,
@@ -67,7 +70,7 @@
               "type": "object",
               "properties": {
                 "additionalCharacteristics": {
-                  "title": "Additional characteristics",
+                  "title": "Battery Additional Characteristics",
                   "description": "List of additional characteristics for battery",
                   "type": "array",
                   "uniqueItems": true,
@@ -89,56 +92,37 @@
                   "enum": ["600", "800"],
                   "description": "Maximum power, W"
                 },
-
-                "battery": {
-                  "title": "Battery Settings",
-                  "type": "object",
-                  "properties": {
-                    "additionalCharacteristics": {
-                      "title": "Additional characteristics",
-                      "description": "List of additional characteristics for Battery connected to PowerStream",
-                      "type": "array",
-                      "uniqueItems": true,
-                      "items": {
-                        "title": "Characteristic",
-                        "type": "string",
-                        "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W"]
-                      }
-                    }
+                "batteryAdditionalCharacteristics": {
+                  "title": "Battery Additional Characteristics",
+                  "description": "List of additional characteristics for Battery connected to PowerStream",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "title": "Characteristic",
+                    "type": "string",
+                    "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W"]
                   }
                 },
-                "pv": {
-                  "title": "PV Settings",
-                  "type": "object",
-                  "properties": {
-                    "additionalCharacteristics": {
-                      "title": "Additional characteristics",
-                      "description": "List of additional characteristics for PVs connected for PowerStream",
-                      "type": "array",
-                      "uniqueItems": true,
-                      "items": {
-                        "title": "Characteristic",
-                        "type": "string",
-                        "enum": ["Output Consumption, W"]
-                      }
-                    }
+                "pvAdditionalCharacteristics": {
+                  "title": "PV Additional Characteristics",
+                  "description": "List of additional characteristics for PVs connected for PowerStream",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "title": "Characteristic",
+                    "type": "string",
+                    "enum": ["Output Consumption, W"]
                   }
                 },
-                "inverter": {
-                  "title": "Inverter Settings",
-                  "type": "object",
-                  "properties": {
-                    "additionalCharacteristics": {
-                      "title": "Additional characteristics",
-                      "description": "List of additional characteristics for PowerStream",
-                      "type": "array",
-                      "uniqueItems": true,
-                      "items": {
-                        "title": "Characteristic",
-                        "type": "string",
-                        "enum": ["Input Consumption, W", "Output Consumption, W"]
-                      }
-                    }
+                "inverterAdditionalCharacteristics": {
+                  "title": "Inverter Additional Characteristics",
+                  "description": "List of additional characteristics for PowerStream",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "title": "Characteristic",
+                    "type": "string",
+                    "enum": ["Input Consumption, W", "Output Consumption, W"]
                   }
                 }
               }

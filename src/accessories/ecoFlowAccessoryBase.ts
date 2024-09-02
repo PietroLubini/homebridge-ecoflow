@@ -37,7 +37,7 @@ export abstract class EcoFlowAccessoryBase {
     this._services = this.getServices();
     this._services.push(new AccessoryInformationService(this));
     this.initializeServices();
-    await this.connectMqtt();
+    // await this.connectMqtt();
   }
 
   public abstract initializeDefaultValues(): Promise<void>;
