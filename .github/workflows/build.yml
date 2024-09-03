@@ -13,7 +13,7 @@ on:
 
   # Run workflow for all PRs where target branch is one of
   pull_request:
-    branches: [main, 17-powerstream-support]
+    branches: [main, task/17-powerstream-support]
     paths-ignore:
       - '.github/ISSUE_TEMPLATE/**'
       - '.github/Pull_Request_Template.md'
