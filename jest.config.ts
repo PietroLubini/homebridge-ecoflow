@@ -1,12 +1,10 @@
 import type { Config } from '@jest/types';
 
-const config: Config.InitialOptions = {
+const commonProjectSettings: Config.InitialOptions = {
   rootDir: 'src',
   preset: 'ts-jest',
   moduleDirectories: ['node_modules', 'src'],
-  moduleFileExtensions: ['js', 'json', 'ts'],
-  testRegex: '.*\\.spec\\.ts$',
-  coveragePathIgnorePatterns: ['helpers/tests/', 'Simulator.ts', 'simulator.ts'],
+  moduleFileExtensions: ['js', 'json', 'ts', 'node'],
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
@@ -16,7 +14,6 @@ const config: Config.InitialOptions = {
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
   testEnvironment: 'node',
-  verbose: true,
   coverageThreshold: {
     global: {
       branches: 100,
@@ -25,6 +22,26 @@ const config: Config.InitialOptions = {
       statements: 100,
     },
   },
+};
+
+const config: Config.InitialOptions = {
+  projects: [
+    {
+      ...commonProjectSettings,
+      displayName: 'plugin-tests',
+      testEnvironment: 'node',
+      testMatch: ['**/*.spec.ts'],
+      testPathIgnorePatterns: ['<rootDir>/homebridge-ui/'],
+      coveragePathIgnorePatterns: ['helpers/tests/', 'Simulator.ts', 'simulator.ts'],
+    },
+    {
+      ...commonProjectSettings,
+      displayName: 'homebridge-ui-tests',
+      testEnvironment: 'jsdom',
+      testMatch: ['<rootDir>/homebridge-ui/**/*.spec.ts'],
+      coveragePathIgnorePatterns: ['webpack.config.ts'],
+    },
+  ],
 };
 
 export default config;

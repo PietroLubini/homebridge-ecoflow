@@ -1,5 +1,14 @@
-export class SettingsManagerBase {
-  renderTextBox($parent, id, schemaProperty, value, onChangeCallback) {
+import { ChangedCallbackHandler } from '../interfaces/contracts';
+import { PluginConfigSchemaEnum, PluginConfigSchemaObject } from '../interfaces/homebridge';
+
+export class CommonRenderer {
+  public renderTextBox(
+    $parent: JQuery,
+    id: string,
+    schemaProperty: PluginConfigSchemaObject,
+    value: string,
+    onChangeCallback: ChangedCallbackHandler
+  ): void {
     const template = `
     <div class="form-group">
       <label for="device{id}" class="{requiredClass}">{title}</label>
@@ -16,10 +25,16 @@ export class SettingsManagerBase {
 
     const $control = $(`#device${id}`, $parent);
     $control.val(value);
-    $control.change(() => onChangeCallback($control.val()));
+    $control.on('change', () => onChangeCallback($control.val()?.toString() || ''));
   }
 
-  renderDropDown($parent, id, schemaProperty, value, onChangeCallback) {
+  public renderDropDown(
+    $parent: JQuery,
+    id: string,
+    schemaProperty: PluginConfigSchemaEnum,
+    value: string,
+    onChangeCallback: ChangedCallbackHandler
+  ): void {
     const template = `
     <div class="form-group">
       <label for="device{id}" class="{requiredClass}">{title}</label>
@@ -32,35 +47,14 @@ export class SettingsManagerBase {
       .replace(/{required}/g, (schemaProperty.required ?? false).toString());
     $parent.append(html);
 
-    if (schemaProperty.enum) {
-      const $control = $(`#device${id}`, $parent);
-      schemaProperty.enum.forEach(enumValue => {
-        const $option = $('<option>').val(enumValue).text(enumValue);
-        $control.append($option);
-      });
-      if (value !== undefined) {
-        $control.val(value);
-      }
-      $control.change(() => onChangeCallback($control.val()));
+    const $control = $(`#device${id}`, $parent);
+    schemaProperty.enum.forEach((enumValue: string) => {
+      const $option = $('<option>').val(enumValue).text(enumValue);
+      $control.append($option);
+    });
+    if (value !== undefined) {
+      $control.val(value);
     }
-  }
-
-  async updatePluginConfig(configuration) {
-    const changes = this.clone(configuration);
-    delete changes.platform;
-    await homebridge.updatePluginConfig([changes]);
-  }
-
-  clone(obj) {
-    return JSON.parse(JSON.stringify(obj));
-  }
-
-  applyChanges(target, source, readOnlyProperties) {
-    Object.assign(target, source);
-    for (const key in target) {
-      if (source[key] === undefined && !readOnlyProperties.includes(key)) {
-        delete target[key];
-      }
-    }
+    $control.on('change', () => onChangeCallback($control.val()?.toString() || ''));
   }
 }
