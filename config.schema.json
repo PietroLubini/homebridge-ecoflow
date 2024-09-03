@@ -30,6 +30,7 @@
             "model": {
               "title": "Model",
               "type": "string",
+              "default": "Delta 2",
               "required": true,
               "enum": ["Delta 2", "Delta 2 Max", "PowerStream"]
             },
@@ -89,6 +90,7 @@
                 "type": {
                   "title": "Type",
                   "type": "string",
+                  "required": true,
                   "enum": ["600", "800"],
                   "description": "Maximum power, W"
                 },

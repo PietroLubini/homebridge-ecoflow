@@ -32,4 +32,8 @@
     "@typescript-eslint/semi": ["warn"],
     "@typescript-eslint/member-delimiter-style": ["warn"],
   },
+  "globals": {
+    "$": "readonly",
+    "homebridge": "readonly",
+  },
 }

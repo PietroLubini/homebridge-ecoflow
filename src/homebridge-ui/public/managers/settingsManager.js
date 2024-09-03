@@ -1,21 +1,21 @@
 import { SettingsManagerBase } from './settingsManagerBase.js';
 
 export class SettingsManager extends SettingsManagerBase {
-  render(configuration, configSchema) {
-    this.renderGeneralSettings({ configuration, configSchema, propertiesNames: ['name'] });
-    this.renderDevicesSettings({
-      configuration,
-      configSchema,
-      propertiesNames: ['name', 'model', 'serialNumber', 'location', 'accessKey', 'secretKey', 'simulate'],
-    });
+  render(configuration, configSchema, hideDeviceSettingsPerModel) {
+    this.renderGeneralSettings(configuration, configSchema);
+    this.renderDevicesSettings({ configuration, configSchema, hideDeviceSettingsPerModel });
   }
 
-  renderGeneralSettings(context) {
-    this.renderProperties(
+  renderGeneralSettings(configuration, configSchema) {
+    this.renderTextBox(
       $('#generalSettings'),
-      context,
-      context.configSchema.schema.properties,
-      context.configuration
+      'name',
+      configSchema.schema.properties['name'],
+      this.getName(configuration),
+      async newValue => {
+        this.setName(configuration, newValue);
+        await this.updatePluginConfig(configuration);
+      }
     );
   }
 
@@ -23,57 +23,62 @@ export class SettingsManager extends SettingsManagerBase {
     $('#devicesLabel').text(context.configSchema.schema.properties['devices'].title);
     const activeIndex = !activeDeviceIndex || activeDeviceIndex < 0 ? 0 : activeDeviceIndex;
     this.renderDeviceTabs(context, activeIndex);
-    this.renderDeviceTabPanels(context, activeIndex);
-
-    const myForm = homebridge.createForm(context.configSchema, context.configuration);
-    myForm.onChange(change => {
-      console.log('[a] form change: ', change);
-    });
   }
 
   renderDeviceTabs(context, activeIndex) {
+    const { $tabs, $tabPanels } = this.clearDeviceTabs();
+
     const tabTemplate = `
-    <li class="nav-item">
-      <a class="nav-link {activeClass}" data-toggle="tab" href="#deviceTabPanel{index}" id="deviceTab{index}">{name}</a>
-    </li>
-  `;
-    const $tabs = $('#devicesTabs');
-    $tabs.empty();
-    context.configuration.devices.forEach((device, index) => {
+      <li class="nav-item">
+        <a class="nav-link {activeClass}" data-toggle="tab" href="#deviceTabPanel{index}" id="deviceTab{index}">{name}</a>
+      </li>
+    `;
+
+    context.configuration.devices.forEach((deviceConfiguration, index) => {
       const activeTabClass = index === activeIndex ? 'active' : '';
 
       const tabHtml = tabTemplate
         .replace(/{activeClass}/g, activeTabClass)
         .replace(/{index}/g, index.toString())
-        .replace(/{name}/g, device.name ?? `Device${index + 1}`);
+        .replace(/{name}/g, deviceConfiguration.name ?? `Device${index + 1}`);
 
       $tabs.append(tabHtml);
+
+      this.renderDeviceTabPanel(
+        context,
+        deviceConfiguration,
+        index,
+        activeIndex,
+        $(`#deviceTab${index}`, $tabs),
+        $tabPanels
+      );
     });
-    this.renderAddDeviceTab($tabs, tabTemplate, context);
+
+    this.renderAddNewDeviceTab($tabs, tabTemplate, context);
   }
 
-  renderAddDeviceTab($parent, template, context) {
+  clearDeviceTabs() {
+    const $tabs = $('#devicesTabs');
+    const $tabPanels = $('#devicesPanels');
+    $tabs.empty();
+    $tabPanels.empty();
+    return { $tabs, $tabPanels };
+  }
+
+  renderAddNewDeviceTab($parent, template, context) {
     const html = template
       .replace(/{activeClass}/g, '')
       .replace(/{index}/g, 'Add')
       .replace(/{name}/g, 'Add Device');
     $parent.append(html);
     const $addButton = $('#deviceTabAdd', $parent);
-    $addButton.click(async () => {
-      const defaultDeviceConfiguration = {};
-      const properties = context.configSchema.schema.properties.devices.items.properties;
-      Object.keys(properties)
-        .filter(propertyName => !!properties[propertyName].default)
-        .forEach(propertyName => {
-          defaultDeviceConfiguration[propertyName] = properties[propertyName].default;
-        });
-      context.configuration.devices.push(defaultDeviceConfiguration);
-      await this.updatePluginConfig(context.configuration);
+    $addButton.click(() => {
+      context.configuration.devices.push(this.getDefaultDeviceConfiguration(context.configSchema));
       this.renderDevicesSettings(context, context.configuration.devices.length - 1);
     });
   }
 
-  renderDeviceTabPanels(context, activeIndex) {
+  renderDeviceTabPanel(context, deviceConfiguration, index, activeIndex, $tab, $tabPanels) {
     const tabPanelTemplate = `
     <div class="tab-pane container fade {activeClass} card card-body list-group-item" id="deviceTabPanel{index}">
       <button type="button" class="close pull-right" id="deviceTabPanelClose{index}">
@@ -82,41 +87,89 @@ export class SettingsManager extends SettingsManagerBase {
       </button>
     </div>
   `;
-    const $tabPanels = $('#devicesPanels');
-    $tabPanels.empty();
-    context.configuration.devices.forEach((deviceConfiguration, index) => {
-      const activeTabPanelClass = index === activeIndex ? 'in show active' : '';
-      const tabPanelHtml = tabPanelTemplate
-        .replace(/{activeClass}/g, activeTabPanelClass)
-        .replace(/{index}/g, index.toString());
 
-      $tabPanels.append(tabPanelHtml);
+    const activeTabPanelClass = index === activeIndex ? 'in show active' : '';
+    const tabPanelHtml = tabPanelTemplate
+      .replace(/{activeClass}/g, activeTabPanelClass)
+      .replace(/{index}/g, index.toString());
 
-      const $tabPanel = $(`#deviceTabPanel${index}`, $tabPanels);
-      this.renderProperties(
-        $tabPanel,
-        context,
-        context.configSchema.schema.properties.devices.items.properties,
-        deviceConfiguration,
-        index
-      );
-      const $removeButton = $(`#deviceTabPanelClose${index}`, $tabPanels);
-      this.addRemoveDeviceHandler($removeButton, index, context);
+    $tabPanels.append(tabPanelHtml);
+    const $tabPanel = $(`#deviceTabPanel${index}`, $tabPanels);
+
+    const deviceSchema = this.clone(context.configSchema.schema.properties.devices.items);
+    const modelSchema = deviceSchema.properties.model;
+    this.renderModelDropDown($tabPanel, index, context, modelSchema, deviceConfiguration);
+    this.renderRemoveButton($tabPanel, index, context);
+    this.renderForm($tab, index, activeIndex, context, deviceSchema, deviceConfiguration);
+  }
+
+  renderModelDropDown($parent, index, context, modelSchema, deviceConfiguration) {
+    this.renderDropDown($parent, 'model' + index, modelSchema, this.getDeviceModel(deviceConfiguration), newValue => {
+      this.setDeviceModel(deviceConfiguration, newValue);
+      this.renderDevicesSettings(context, index);
     });
   }
 
-  addRemoveDeviceHandler($removeButton, index, context) {
-    $removeButton.click(async () => {
+  renderRemoveButton($parent, index, context) {
+    const $removeButton = $(`#deviceTabPanelClose${index}`, $parent);
+    $removeButton.click(() => {
       context.configuration.devices.splice(index, 1);
-      await this.updatePluginConfig(context.configuration);
       this.renderDevicesSettings(context, index - 1);
     });
   }
 
-  async updateChanges(context, index, propertyNamePath) {
-    await this.updatePluginConfig(context.configuration);
-    if (index !== undefined && propertyNamePath in ['name', 'model']) {
-      this.renderDevicesSettings(context, index);
+  renderForm($tab, index, activeIndex, context, deviceSchema, deviceConfiguration) {
+    delete deviceSchema.properties.model;
+    const model = this.getDeviceModel(deviceConfiguration);
+    context.hideDeviceSettingsPerModel[model].forEach(propertyName => {
+      delete deviceSchema.properties[propertyName];
+    });
+
+    $tab.click(() => {
+      const form = homebridge.createForm({ schema: deviceSchema }, deviceConfiguration);
+      form.onChange(async newDeviceConfiguration => {
+        const oldName = this.getDeviceName(context.configuration.devices[index]);
+        this.applyChanges(context.configuration.devices[index], newDeviceConfiguration, ['model']);
+        await this.updatePluginConfig(context.configuration);
+
+        if (this.getDeviceName(newDeviceConfiguration) !== oldName) {
+          $tab.text(this.getDeviceName(newDeviceConfiguration));
+        }
+      });
+    });
+    if (index === activeIndex) {
+      $tab.click();
     }
+  }
+
+  getDefaultDeviceConfiguration(configSchema) {
+    const result = {};
+    const properties = configSchema.schema.properties.devices.items.properties;
+    Object.keys(properties)
+      .filter(propertyName => !!properties[propertyName].default)
+      .forEach(propertyName => {
+        result[propertyName] = properties[propertyName].default;
+      });
+    return result;
+  }
+
+  getName(configuration) {
+    return configuration['name'];
+  }
+
+  setName(configuration, value) {
+    configuration['name'] = value;
+  }
+
+  getDeviceName(deviceConfiguration) {
+    return deviceConfiguration['name'];
+  }
+
+  getDeviceModel(deviceConfiguration) {
+    return deviceConfiguration['model'];
+  }
+
+  setDeviceModel(deviceConfiguration, value) {
+    deviceConfiguration['model'] = value;
   }
 }

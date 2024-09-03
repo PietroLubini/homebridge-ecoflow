@@ -27,7 +27,7 @@
     "lint:fix": "eslint \"src/**/*.ts\" --max-warnings=0 --fix",
     "watch": "npm run build && npm link && nodemon",
     "build": "rimraf ./dist && tsc -p tsconfig.build.json && npm run build:ui",
-    "build:ui": "npx webpack --mode development",
+    "build:ui": "npx webpack --mode production",
     "test": "jest --forceExit",
     "test:cov": "jest --coverage",
     "test:ci": "jest --coverage --ci --json --coverage --testLocationInResults --outputFile=coverage/new_report.json --reporters=default --reporters=jest-junit --forceExit",
