@@ -38,9 +38,9 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
 
-    this.inverterOutletService = new OutletInvService(this, config.powerStream?.inverter?.additionalCharacteristics);
-    this.solarOutletService = new OutletService(this, 'PV', config.powerStream?.pv?.additionalCharacteristics);
-    this.batteryOutletService = new OutletService(this, 'BAT', config.powerStream?.battery?.additionalCharacteristics);
+    this.inverterOutletService = new OutletInvService(this, config.powerStream?.inverterAdditionalCharacteristics);
+    this.solarOutletService = new OutletService(this, 'PV', config.powerStream?.pvAdditionalCharacteristics);
+    this.batteryOutletService = new OutletService(this, 'BAT', config.powerStream?.batteryAdditionalCharacteristics);
     this.inverterIndicatorService = new IndicatorService(this, 1023);
     this.inverterPowerDemandService = new PowerDemandService(
       this,

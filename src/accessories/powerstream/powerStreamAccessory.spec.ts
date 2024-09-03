@@ -17,7 +17,6 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import {
-  BatteryDeviceConfig,
   AdditionalBatteryCharacteristicType as CharacteristicType,
   DeviceConfig,
   PowerStreamConsumptionType,
@@ -215,9 +214,7 @@ describe('PowerStreamAccessory', () => {
         it('should initialize PV outlet service with additional characteristics when they are defined in config', () => {
           const actual = run('PV', solarOutletServiceMock, {
             powerStream: {
-              pv: {
-                additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
-              },
+              pvAdditionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
             },
           } as DeviceConfig);
 
@@ -226,9 +223,7 @@ describe('PowerStreamAccessory', () => {
 
         it('should initialize PV outlet service with additional characteristics when pv settings are not defined in config', () => {
           const actual = run('PV', solarOutletServiceMock, {
-            powerStream: {
-              pv: {} as BatteryDeviceConfig,
-            },
+            powerStream: {},
           } as DeviceConfig);
 
           expect(actual).toBeUndefined();
@@ -246,13 +241,11 @@ describe('PowerStreamAccessory', () => {
         it('should initialize BAT outlet service with additional characteristics when they are defined in config', () => {
           const actual = run('BAT', batteryOutletServiceMock, {
             powerStream: {
-              battery: {
-                additionalCharacteristics: [
-                  CharacteristicType.BatteryLevel,
-                  CharacteristicType.InputConsumptionInWatts,
-                  CharacteristicType.OutputConsumptionInWatts,
-                ],
-              },
+              batteryAdditionalCharacteristics: [
+                CharacteristicType.BatteryLevel,
+                CharacteristicType.InputConsumptionInWatts,
+                CharacteristicType.OutputConsumptionInWatts,
+              ],
             },
           } as DeviceConfig);
 
@@ -268,9 +261,7 @@ describe('PowerStreamAccessory', () => {
             'BAT',
             batteryOutletServiceMock as unknown as jest.Mocked<OutletServiceBase>,
             {
-              powerStream: {
-                battery: {} as BatteryDeviceConfig,
-              },
+              powerStream: {},
             } as DeviceConfig
           );
 
@@ -289,12 +280,10 @@ describe('PowerStreamAccessory', () => {
         it('should initialize INV outlet service with additional characteristics when they are defined in config', () => {
           const actual = run('INV', inverterOutletServiceMock, {
             powerStream: {
-              inverter: {
-                additionalCharacteristics: [
-                  CharacteristicType.InputConsumptionInWatts,
-                  CharacteristicType.OutputConsumptionInWatts,
-                ],
-              },
+              inverterAdditionalCharacteristics: [
+                CharacteristicType.InputConsumptionInWatts,
+                CharacteristicType.OutputConsumptionInWatts,
+              ],
             },
           } as DeviceConfig);
 
@@ -306,9 +295,7 @@ describe('PowerStreamAccessory', () => {
 
         it('should initialize INV outlet service with additional characteristics when inverter settings are not defined in config', () => {
           const actual = run('INV', inverterOutletServiceMock, {
-            powerStream: {
-              inverter: {} as BatteryDeviceConfig,
-            },
+            powerStream: {},
           } as DeviceConfig);
 
           expect(actual).toBeUndefined();
