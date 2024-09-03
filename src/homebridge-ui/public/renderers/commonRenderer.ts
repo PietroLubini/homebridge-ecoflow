@@ -52,9 +52,7 @@ export class CommonRenderer {
       const $option = $('<option>').val(enumValue).text(enumValue);
       $control.append($option);
     });
-    if (value !== undefined) {
-      $control.val(value);
-    }
+    $control.val(value);
     $control.on('change', () => onChangeCallback($control.val()?.toString() || ''));
   }
 }

@@ -1,6 +1,84 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CommonRenderer renderTextBox should render a text box when schema contains required attribute set to true 1`] = `
+exports[`CommonRenderer renderDropDown should render a dropdown with required attribute when schema contains required attribute set to true 1`] = `
+<div>
+  
+    
+  <div
+    class="form-group"
+  >
+    
+      
+    <label
+      class="required-label"
+      for="device1"
+    >
+      Device Name
+    </label>
+    
+      
+    <select
+      class="form-control"
+      id="device1"
+      required="true"
+    >
+      <option
+        value="option1"
+      >
+        option1
+      </option>
+      <option
+        value="option2"
+      >
+        option2
+      </option>
+    </select>
+    
+    
+  </div>
+</div>
+`;
+
+exports[`CommonRenderer renderDropDown should render a dropdown without required attribute when schema does not contain required attribute 1`] = `
+<div>
+  
+    
+  <div
+    class="form-group"
+  >
+    
+      
+    <label
+      class=""
+      for="device1"
+    >
+      Device Name
+    </label>
+    
+      
+    <select
+      class="form-control"
+      id="device1"
+      required="false"
+    >
+      <option
+        value="option1"
+      >
+        option1
+      </option>
+      <option
+        value="option2"
+      >
+        option2
+      </option>
+    </select>
+    
+    
+  </div>
+</div>
+`;
+
+exports[`CommonRenderer renderTextBox should render a textbox with required attribute when schema contains required attribute set to true 1`] = `
 <div>
   
     
@@ -30,7 +108,7 @@ exports[`CommonRenderer renderTextBox should render a text box when schema conta
 </div>
 `;
 
-exports[`CommonRenderer renderTextBox should render a text box without required attribute when schema does not contain required attribute 1`] = `
+exports[`CommonRenderer renderTextBox should render a textbox without required attribute when schema does not contain required attribute 1`] = `
 <div>
   
     

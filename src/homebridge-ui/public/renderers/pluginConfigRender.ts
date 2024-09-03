@@ -1,5 +1,6 @@
 import { IContext, IDeviceContext } from '../interfaces/contracts';
 import {
+  IForm,
   IHomebridge,
   PluginConfig,
   PluginConfigSchema,
@@ -10,6 +11,8 @@ import {
 import { CommonRenderer } from './commonRenderer';
 
 export class PluginConfigRenderer {
+  private form: IForm | undefined;
+
   constructor(private readonly commonRenderer: CommonRenderer) {}
 
   public render(
@@ -78,6 +81,7 @@ export class PluginConfigRenderer {
     const $tabPanels = $('#devicesPanels');
     $tabs.empty();
     $tabPanels.empty();
+    this.form?.end();
     return { $tabs, $tabPanels };
   }
 
@@ -161,8 +165,8 @@ export class PluginConfigRenderer {
     });
 
     $tab.on('click', () => {
-      const form = context.homebridgeProvider.createForm({ schema: deviceSchema }, deviceConfiguration);
-      form.onChange(async newDeviceConfiguration => {
+      this.form = context.homebridgeProvider.createForm({ schema: deviceSchema }, deviceConfiguration);
+      this.form.onChange(async newDeviceConfiguration => {
         const oldName = context.configuration.devices[index].name;
         this.applyChanges(context.configuration.devices[index], newDeviceConfiguration, ['model']);
         await this.updatePluginConfig(context);

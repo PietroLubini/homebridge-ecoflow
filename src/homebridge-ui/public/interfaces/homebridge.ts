@@ -28,7 +28,7 @@ export interface PluginConfigSchema {
 
 export interface PluginConfigSchemaObject {
   title: string;
-  description: string;
+  description?: string;
   default?: string;
   required?: boolean;
 }
@@ -54,4 +54,5 @@ export interface PluginConfigSchemaDevice {
 
 export interface IForm {
   onChange: (callback: (newConfiguration: PluginDeviceConfig) => void) => Promise<void>;
+  end: () => void;
 }
