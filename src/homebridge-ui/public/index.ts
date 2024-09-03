@@ -1,5 +1,5 @@
-import { CommonRenderer } from '@ecoflow/homebridge-ui/public/renderers/commonRenderer';
 import { IHomebridge } from './interfaces/homebridge';
+import { CommonRenderer } from './renderers/commonRenderer';
 import { PluginConfigRenderer } from './renderers/pluginConfigRender';
 
 export async function renderEcoFlowPluginConfig(homebridgeProvider: IHomebridge) {
