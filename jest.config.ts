@@ -13,15 +13,6 @@ const commonProjectSettings: Config.InitialOptions = {
   },
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
-  testEnvironment: 'node',
-  coverageThreshold: {
-    global: {
-      branches: 100,
-      functions: 100,
-      lines: 100,
-      statements: 100,
-    },
-  },
 };
 
 const config: Config.InitialOptions = {
@@ -42,6 +33,14 @@ const config: Config.InitialOptions = {
       coveragePathIgnorePatterns: ['webpack.config.ts'],
     },
   ],
+  coverageThreshold: {
+    global: {
+      branches: 100,
+      functions: 100,
+      lines: 100,
+      statements: 100,
+    },
+  },
 };
 
 export default config;
