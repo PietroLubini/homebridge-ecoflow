@@ -6,6 +6,7 @@
   "files.eol": "\n",
   "files.exclude": {
     "**/*.js": { "when": "$(basename).ts" },
+    "**/*.d.ts": { "when": "$(basename).ts" },
     "**/*.js.map": true,
     "**/node_modules": true,
     "**/coverage": true
