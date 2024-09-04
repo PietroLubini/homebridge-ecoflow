@@ -12,8 +12,13 @@ import { CommonRenderer } from './commonRenderer';
 
 export class PluginConfigRenderer {
   private form: IForm | undefined;
+  private readonly $tabs: JQuery;
+  private readonly $tabPanels: JQuery;
 
-  constructor(private readonly commonRenderer: CommonRenderer) {}
+  constructor(private readonly commonRenderer: CommonRenderer) {
+    this.$tabs = $('#devicesTabs');
+    this.$tabPanels = $('#devicesPanels');
+  }
 
   public render(
     homebridgeProvider: IHomebridge,
@@ -45,7 +50,7 @@ export class PluginConfigRenderer {
   }
 
   private renderDeviceTabs(context: IDeviceContext, activeIndex: number): void {
-    const { $tabs, $tabPanels } = this.clearDeviceTabs();
+    this.clearDeviceTabs();
 
     const tabTemplate = `
       <li class="nav-item">
@@ -61,37 +66,27 @@ export class PluginConfigRenderer {
         .replace(/{index}/g, index.toString())
         .replace(/{name}/g, deviceConfiguration.name ?? `Device${index + 1}`);
 
-      $tabs.append(tabHtml);
+      this.$tabs.append(tabHtml);
 
-      this.renderDeviceTabPanel(
-        context,
-        deviceConfiguration,
-        index,
-        activeIndex,
-        $(`#deviceTab${index}`, $tabs),
-        $tabPanels
-      );
+      this.renderDeviceTabPanel(context, deviceConfiguration, index, activeIndex, $(`#deviceTab${index}`, this.$tabs));
     });
 
-    this.renderAddNewDeviceTab($tabs, tabTemplate, context);
+    this.renderAddNewDeviceTab(tabTemplate, context);
   }
 
-  private clearDeviceTabs(): { $tabs: JQuery; $tabPanels: JQuery } {
-    const $tabs = $('#devicesTabs');
-    const $tabPanels = $('#devicesPanels');
-    $tabs.empty();
-    $tabPanels.empty();
+  private clearDeviceTabs(): void {
+    this.$tabs.empty();
+    this.$tabPanels.empty();
     this.form?.end();
-    return { $tabs, $tabPanels };
   }
 
-  private renderAddNewDeviceTab($parent: JQuery, template: string, context: IDeviceContext): void {
+  private renderAddNewDeviceTab(template: string, context: IDeviceContext): void {
     const html = template
       .replace(/{activeClass}/g, '')
       .replace(/{index}/g, 'Add')
       .replace(/{name}/g, 'Add Device');
-    $parent.append(html);
-    const $addButton = $('#deviceTabAdd', $parent);
+    this.$tabs.append(html);
+    const $addButton = $('#deviceTabAdd', this.$tabs);
     $addButton.on('click', () => {
       context.configuration.devices.push(this.getDefaultDeviceConfiguration(context.configSchema));
       this.renderDevicesSettings(context, context.configuration.devices.length - 1);
@@ -103,8 +98,7 @@ export class PluginConfigRenderer {
     deviceConfiguration: PluginDeviceConfig,
     index: number,
     activeIndex: number,
-    $tab: JQuery,
-    $tabPanels: JQuery
+    $tab: JQuery
   ): void {
     const tabPanelTemplate = `
     <div class="tab-pane container fade {activeClass} card card-body list-group-item" id="deviceTabPanel{index}">
@@ -120,26 +114,28 @@ export class PluginConfigRenderer {
       .replace(/{activeClass}/g, activeTabPanelClass)
       .replace(/{index}/g, index.toString());
 
-    $tabPanels.append(tabPanelHtml);
-    const $tabPanel = $(`#deviceTabPanel${index}`, $tabPanels);
+    this.$tabPanels.append(tabPanelHtml);
+    const $tabPanel = $(`#deviceTabPanel${index}`, this.$tabPanels);
 
     const deviceSchema = this.clone(context.configSchema.schema.properties.devices.items);
     const modelSchema = deviceSchema.properties.model;
-    this.renderModelDropDown($tabPanel, index, context, modelSchema!, deviceConfiguration);
+    this.renderModelDropDown($tab, $tabPanel, index, context, deviceSchema, modelSchema!, deviceConfiguration);
     this.renderRemoveButton($tabPanel, index, context);
     this.renderForm($tab, index, activeIndex, context, deviceSchema, deviceConfiguration);
   }
 
   private renderModelDropDown(
-    $parent: JQuery,
+    $tab: JQuery,
+    $tabPanel: JQuery,
     index: number,
     context: IDeviceContext,
+    deviceSchema: PluginConfigSchemaDevicesItems,
     modelSchema: PluginConfigSchemaEnum,
     deviceConfiguration: PluginDeviceConfig
   ) {
-    this.commonRenderer.renderDropDown($parent, 'model' + index, modelSchema, deviceConfiguration.model, newValue => {
+    this.commonRenderer.renderDropDown($tabPanel, 'model' + index, modelSchema, deviceConfiguration.model, newValue => {
       deviceConfiguration.model = newValue;
-      this.renderDevicesSettings(context, index);
+      this.renderForm($tab, index, index, context, deviceSchema, deviceConfiguration);
     });
   }
 
@@ -159,12 +155,14 @@ export class PluginConfigRenderer {
     deviceSchema: PluginConfigSchemaDevicesItems,
     deviceConfiguration: PluginDeviceConfig
   ): void {
+    deviceSchema = this.clone(deviceSchema);
     delete deviceSchema.properties.model;
     context.hideDeviceSettingsPerModel[deviceConfiguration.model].forEach(propertyName => {
       delete deviceSchema.properties[propertyName];
     });
 
-    $tab.on('click', () => {
+    $tab.off('click').on('click', () => {
+      this.form?.end();
       this.form = context.homebridgeProvider.createForm({ schema: deviceSchema }, deviceConfiguration);
       this.form.onChange(async newDeviceConfiguration => {
         const oldName = context.configuration.devices[index].name;
