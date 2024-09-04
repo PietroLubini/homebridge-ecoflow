@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CommonRenderer renderDropDown should render a dropdown with required attribute when schema contains required attribute set to true 1`] = `
+exports[`ComponentRenderer renderDropDown should render a dropdown with required attribute when schema contains required attribute set to true 1`] = `
 <div>
   
     
@@ -39,7 +39,7 @@ exports[`CommonRenderer renderDropDown should render a dropdown with required at
 </div>
 `;
 
-exports[`CommonRenderer renderDropDown should render a dropdown without required attribute when schema does not contain required attribute 1`] = `
+exports[`ComponentRenderer renderDropDown should render a dropdown without required attribute when schema does not contain required attribute 1`] = `
 <div>
   
     
@@ -78,7 +78,7 @@ exports[`CommonRenderer renderDropDown should render a dropdown without required
 </div>
 `;
 
-exports[`CommonRenderer renderTextBox should render a textbox with required attribute when schema contains required attribute set to true 1`] = `
+exports[`ComponentRenderer renderTextBox should render a textbox with required attribute when schema contains required attribute set to true 1`] = `
 <div>
   
     
@@ -108,7 +108,7 @@ exports[`CommonRenderer renderTextBox should render a textbox with required attr
 </div>
 `;
 
-exports[`CommonRenderer renderTextBox should render a textbox without required attribute when schema does not contain required attribute 1`] = `
+exports[`ComponentRenderer renderTextBox should render a textbox without required attribute when schema does not contain required attribute 1`] = `
 <div>
   
     

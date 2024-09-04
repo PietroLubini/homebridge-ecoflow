@@ -11,3 +11,7 @@ export interface IDeviceContext extends IContext {
 }
 
 export type ChangedCallbackHandler = (value: string) => void;
+
+export interface IRenderer {
+  render(context: IContext): void;
+}

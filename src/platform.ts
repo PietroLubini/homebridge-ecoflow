@@ -97,6 +97,25 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     this.accessories.push(accessory);
   }
 
+  private validateDeviceConfig(config: DeviceConfig): string | undefined {
+    if (config.name === undefined) {
+      return "Device's 'name' must be configured";
+    }
+
+    if (config.serialNumber === undefined) {
+      return "Device's 'serialNumber' must be configured";
+    }
+
+    if (config.accessKey === undefined) {
+      return "Device's 'accessKey' must be configured";
+    }
+
+    if (config.secretKey === undefined) {
+      return "Device's 'secretKey' must be configured";
+    }
+    return undefined;
+  }
+
   private registerDevices(): void {
     const logs: Record<string, Logging> = {};
     const configuredAccessories: PlatformAccessory[] = [];
@@ -107,6 +126,12 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     }
     for (const config of this.ecoFlowConfig.devices) {
       const log = Logger.create(this.commonLog, config.name);
+      const validationMessage = this.validateDeviceConfig(config);
+      if (validationMessage !== undefined) {
+        log.warn(`${validationMessage}. Ignoring the device`);
+        continue;
+      }
+
       const existingAccessory = configuredAccessories.find(
         accessory => accessory.context.deviceConfig.serialNumber === config.serialNumber
       );

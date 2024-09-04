@@ -1,9 +1,9 @@
 import { PluginConfigSchemaEnum, PluginConfigSchemaObject } from '@ecoflow/homebridge-ui/public/interfaces/homebridge';
-import { CommonRenderer } from '@ecoflow/homebridge-ui/public/renderers/commonRenderer';
+import { ComponentRenderer } from '@ecoflow/homebridge-ui/public/renderers/componentRenderer';
 import $ from 'jquery';
 
-describe('CommonRenderer', () => {
-  let renderer: CommonRenderer;
+describe('ComponentRenderer', () => {
+  let renderer: ComponentRenderer;
   let onChangeCallbackMock: jest.Mock;
   let $parent: JQuery<HTMLElement>;
 
@@ -20,7 +20,7 @@ describe('CommonRenderer', () => {
   beforeEach(() => {
     onChangeCallbackMock = jest.fn();
     $parent = $('<div></div>');
-    renderer = new CommonRenderer();
+    renderer = new ComponentRenderer();
   });
 
   describe('renderTextBox', () => {

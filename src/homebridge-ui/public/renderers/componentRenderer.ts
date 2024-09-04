@@ -1,7 +1,7 @@
 import { ChangedCallbackHandler } from '../interfaces/contracts';
 import { PluginConfigSchemaEnum, PluginConfigSchemaObject } from '../interfaces/homebridge';
 
-export class CommonRenderer {
+export class ComponentRenderer {
   public renderTextBox(
     $parent: JQuery,
     id: string,
@@ -23,7 +23,7 @@ export class CommonRenderer {
       .replace(/{required}/g, (schemaProperty.required ?? false).toString());
     $parent.append(html);
 
-    const $control = $(`#device${id}`, $parent);
+    const $control = $parent.find(`#device${id}`);
     $control.val(value);
     $control.on('change', () => onChangeCallback($control.val()?.toString() || ''));
   }
@@ -47,7 +47,7 @@ export class CommonRenderer {
       .replace(/{required}/g, (schemaProperty.required ?? false).toString());
     $parent.append(html);
 
-    const $control = $(`#device${id}`, $parent);
+    const $control = $parent.find(`#device${id}`);
     schemaProperty.enum.forEach((enumValue: string) => {
       const $option = $('<option>').val(enumValue).text(enumValue);
       $control.append($option);

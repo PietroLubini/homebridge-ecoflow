@@ -52,7 +52,9 @@ export interface PluginConfigSchemaDevice {
   [name: string]: PluginConfigSchemaObject | undefined;
 }
 
+export type FormOnChangeCallback = (newConfiguration: PluginDeviceConfig) => Promise<void>;
+
 export interface IForm {
-  onChange: (callback: (newConfiguration: PluginDeviceConfig) => void) => Promise<void>;
+  onChange: (callback: FormOnChangeCallback) => void;
   end: () => void;
 }

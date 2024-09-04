@@ -1,46 +1,36 @@
 import { IContext, IDeviceContext } from '../interfaces/contracts';
 import {
   IForm,
-  IHomebridge,
-  PluginConfig,
   PluginConfigSchema,
   PluginConfigSchemaDevicesItems,
   PluginConfigSchemaEnum,
   PluginDeviceConfig,
 } from '../interfaces/homebridge';
-import { CommonRenderer } from './commonRenderer';
+import { ComponentRenderer } from './componentRenderer';
+import { PluginConfigRendererBase } from './pluginConfigRendererBase';
 
-export class PluginConfigRenderer {
+export class PluginConfigDevicesRenderer extends PluginConfigRendererBase {
   private form: IForm | undefined;
   private readonly $tabs: JQuery;
   private readonly $tabPanels: JQuery;
 
-  constructor(private readonly commonRenderer: CommonRenderer) {
+  constructor(componentRenderer: ComponentRenderer) {
+    super(componentRenderer);
     this.$tabs = $('#devicesTabs');
     this.$tabPanels = $('#devicesPanels');
   }
 
-  public render(
-    homebridgeProvider: IHomebridge,
-    configuration: PluginConfig,
-    configSchema: PluginConfigSchema,
-    hideDeviceSettingsPerModel: Record<string, string[]>
-  ): void {
-    this.renderGeneralSettings({ homebridgeProvider, configuration, configSchema });
-    this.renderDevicesSettings({ homebridgeProvider, configSchema, configuration, hideDeviceSettingsPerModel });
-  }
-
-  private renderGeneralSettings(context: IContext): void {
-    this.commonRenderer.renderTextBox(
-      $('#generalSettings'),
-      'name',
-      context.configSchema.schema.properties.name,
-      context.configuration.name,
-      async newValue => {
-        context.configuration.name = newValue;
-        await this.updatePluginConfig(context);
-      }
-    );
+  public render(context: IContext): void {
+    this.renderDevicesSettings({
+      homebridgeProvider: context.homebridgeProvider,
+      configSchema: context.configSchema,
+      configuration: context.configuration,
+      hideDeviceSettingsPerModel: {
+        'Delta 2': ['powerStream'],
+        'Delta 2 Max': ['powerStream'],
+        PowerStream: ['battery'],
+      },
+    });
   }
 
   private renderDevicesSettings(context: IDeviceContext, activeDeviceIndex?: number): void {
@@ -68,7 +58,13 @@ export class PluginConfigRenderer {
 
       this.$tabs.append(tabHtml);
 
-      this.renderDeviceTabPanel(context, deviceConfiguration, index, activeIndex, $(`#deviceTab${index}`, this.$tabs));
+      this.renderDeviceTabPanel(
+        context,
+        deviceConfiguration,
+        index,
+        activeIndex,
+        this.$tabs.find(`#deviceTab${index}`)
+      );
     });
 
     this.renderAddNewDeviceTab(tabTemplate, context);
@@ -86,7 +82,7 @@ export class PluginConfigRenderer {
       .replace(/{index}/g, 'Add')
       .replace(/{name}/g, 'Add Device');
     this.$tabs.append(html);
-    const $addButton = $('#deviceTabAdd', this.$tabs);
+    const $addButton = this.$tabs.find('#deviceTabAdd');
     $addButton.on('click', () => {
       context.configuration.devices.push(this.getDefaultDeviceConfiguration(context.configSchema));
       this.renderDevicesSettings(context, context.configuration.devices.length - 1);
@@ -115,7 +111,7 @@ export class PluginConfigRenderer {
       .replace(/{index}/g, index.toString());
 
     this.$tabPanels.append(tabPanelHtml);
-    const $tabPanel = $(`#deviceTabPanel${index}`, this.$tabPanels);
+    const $tabPanel = this.$tabPanels.find(`#deviceTabPanel${index}`);
 
     const deviceSchema = this.clone(context.configSchema.schema.properties.devices.items);
     const modelSchema = deviceSchema.properties.model;
@@ -133,14 +129,20 @@ export class PluginConfigRenderer {
     modelSchema: PluginConfigSchemaEnum,
     deviceConfiguration: PluginDeviceConfig
   ) {
-    this.commonRenderer.renderDropDown($tabPanel, 'model' + index, modelSchema, deviceConfiguration.model, newValue => {
-      deviceConfiguration.model = newValue;
-      this.renderForm($tab, index, index, context, deviceSchema, deviceConfiguration);
-    });
+    this.componentRenderer.renderDropDown(
+      $tabPanel,
+      'model' + index,
+      modelSchema,
+      deviceConfiguration.model,
+      newValue => {
+        deviceConfiguration.model = newValue;
+        this.renderForm($tab, index, index, context, deviceSchema, deviceConfiguration);
+      }
+    );
   }
 
   private renderRemoveButton($parent: JQuery, index: number, context: IDeviceContext) {
-    const $removeButton = $(`#deviceTabPanelClose${index}`, $parent);
+    const $removeButton = $parent.find(`#deviceTabPanelClose${index}`);
     $removeButton.on('click', () => {
       context.configuration.devices.splice(index, 1);
       this.renderDevicesSettings(context, index - 1);
@@ -188,16 +190,6 @@ export class PluginConfigRenderer {
         result[propertyName] = properties[propertyName]?.default;
       });
     return result;
-  }
-
-  private async updatePluginConfig(context: IContext): Promise<void> {
-    const changes = this.clone(context.configuration);
-    delete changes.platform;
-    await context.homebridgeProvider.updatePluginConfig([changes]);
-  }
-
-  private clone<TObject>(obj: TObject): TObject {
-    return JSON.parse(JSON.stringify(obj));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
