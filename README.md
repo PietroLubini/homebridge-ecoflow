@@ -211,24 +211,18 @@ The following additional characteristics is available:
       "model": "PowerStream",
       "powerStream": {
         "type": "800",
-        "battery": {
-          "additionalCharacteristics": [
-            "Battery Level, %",
-            "Input Consumption, W",
-            "Output Consumption, W"
-          ]
-        },
-        "pv": {
-          "additionalCharacteristics": [
-            "Output Consumption, W"
-          ]
-        },
-        "inverter": {
-          "additionalCharacteristics": [
-            "Input Consumption, W",
-            "Output Consumption, W"
-          ]
-        }
+        "batteryAdditionalCharacteristics": [
+          "Battery Level, %",
+          "Input Consumption, W",
+          "Output Consumption, W"
+        ],
+        "pvAdditionalCharacteristics": [
+          "Output Consumption, W"
+        ],
+        "inverterAdditionalCharacteristics": [
+          "Input Consumption, W",
+          "Output Consumption, W"
+        ]
       }
     }
   ],
