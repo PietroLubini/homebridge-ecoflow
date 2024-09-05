@@ -5,6 +5,10 @@
   "description": "Homebridge plugin for EcoFlow devices",
   "license": "MIT",
   "author": "PietroLubini",
+  "funding": {
+    "type": "donation",
+    "url": "https://commerce.coinbase.com/checkout/d56df2da-7609-41a3-af91-289cb6ec4d9b"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PietroLubini/homebridge-ecoflow.git"
