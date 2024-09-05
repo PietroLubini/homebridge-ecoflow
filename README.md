@@ -10,7 +10,7 @@
 
 </span>
 
-`homebridge-ecoflow` is a plugin for homebridge which allows you to control EcoFlow devices!
+`@pietrolubini/homebridge-ecoflow` is a plugin for homebridge which allows you to control EcoFlow devices!
 The goal is to add HomeKit support to EcoFlow devices and make them fully controllable from the native HomeKit iOS app and Siri.
 
 > Feedback and contribution is helpful and will improve the plugin!
