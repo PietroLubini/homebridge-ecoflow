@@ -1,21 +1,21 @@
-import {
-  AcEnableType,
-  AcOutFrequencyType,
-  AcOutVoltageIgnore,
-  AcXBoostType,
-  Delta2AllQuotaData,
-} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
+import { Delta2AllQuotaData } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
 import {
   Delta2MqttSetAcOnMessageParams,
   Delta2MqttSetModuleType,
   Delta2MqttSetOperationType,
 } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
 import { Delta2OutletServiceBase } from '@ecoflow/accessories/batteries/delta2/services/delta2OutletServiceBase';
+import {
+  AcEnableType,
+  AcOutFrequencyType,
+  AcOutVoltageIgnore,
+  AcXBoostType,
+} from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 
 export class OutletAcService extends Delta2OutletServiceBase {
   constructor(
-    protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<Delta2AllQuotaData>,
+    ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<Delta2AllQuotaData>,
     private readonly setModuleType: Delta2MqttSetModuleType
   ) {
     super(ecoFlowAccessory, 'AC', ecoFlowAccessory.config.battery?.additionalCharacteristics);

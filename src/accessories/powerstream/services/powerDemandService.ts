@@ -1,9 +1,9 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import {
-  MqttPowerStreamSetCmdCodeType,
-  MqttPowerStreamSetMessageWithParams,
-  MqttPowerStreamSetPermanentWattsMessageParams,
-} from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
+  PowerStreamMqttSetCmdCodeType,
+  PowerStreamMqttSetMessageWithParams,
+  PowerStreamMqttSetPermanentWattsMessageParams,
+} from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
 import { FanServiceBase } from '@ecoflow/services/fanServiceBase';
 
 export class PowerDemandService extends FanServiceBase {
@@ -16,10 +16,10 @@ export class PowerDemandService extends FanServiceBase {
   }
 
   protected override setRotationSpeed(value: number, revert: () => void): Promise<void> {
-    const message: MqttPowerStreamSetMessageWithParams<MqttPowerStreamSetPermanentWattsMessageParams> = {
+    const message: PowerStreamMqttSetMessageWithParams<PowerStreamMqttSetPermanentWattsMessageParams> = {
       id: 0,
       version: '',
-      cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_PERMANENT_WATTS_PACK,
+      cmdCode: PowerStreamMqttSetCmdCodeType.WN511_SET_PERMANENT_WATTS_PACK,
       params: {
         permanentWatts: value,
       },

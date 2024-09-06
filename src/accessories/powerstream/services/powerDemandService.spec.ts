@@ -1,6 +1,6 @@
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/httpApiPowerStreamContracts';
-import { MqttPowerStreamSetCmdCodeType } from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
+import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
+import { PowerStreamMqttSetCmdCodeType } from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
 import { PowerDemandService } from '@ecoflow/accessories/powerstream/services/powerDemandService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
@@ -182,7 +182,7 @@ describe('PowerDemandService', () => {
         {
           id: 0,
           version: '',
-          cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_PERMANENT_WATTS_PACK,
+          cmdCode: PowerStreamMqttSetCmdCodeType.WN511_SET_PERMANENT_WATTS_PACK,
           params: {
             permanentWatts: 2400,
           },

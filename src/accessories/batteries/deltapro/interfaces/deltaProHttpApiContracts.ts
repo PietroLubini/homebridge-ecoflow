@@ -6,20 +6,17 @@ import {
 } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 
 // Battery management system status
-export interface BmsStatus {
+export interface BmsMasterStatus {
   f32ShowSoc?: number; //Battery level (read)
 }
 
-export interface StatusAc {
-  cfgAcEnabled?: AcEnableType; //AC switch: 0: off; 1: on; 0xff: ignored (read/write)
+// AC invertor status
+export interface InvStatusAc {
+  outputWatts?: number; //Discharging power (W) (read)
+  cfgAcEnabled?: AcEnableType; //AC switch: 0: off; 1: on (read/write)
   cfgAcXboost?: AcXBoostType; //X-Boost switch: 0: off; 1: on; 0xff: ignored (read/write)
   cfgAcOutFreq?: AcOutFrequencyType; //Output frequency configured for the inverter (Hz) (read/write)
-  cfgAcOutVol?: number; //Output voltage configured for the inverter (V): 0xffffffff: ignored (read/write)
-}
-
-// AC invertor status
-export interface InvStatusAc extends StatusAc {
-  outputWatts?: number; //Discharging power (W) (read)
+  cfgAcOutVoltage?: number; //Output voltage configured for the inverter (V): 0xffffffff: ignored (read/write)
 }
 
 // Invertor status
@@ -44,13 +41,8 @@ export interface PdStatusUsb {
 
 export interface PdStatus extends PdStatusUsb, PdStatusCar {}
 
-export interface Delta2AllQuotaData {
-  bms_bmsStatus: BmsStatus;
+export interface DeltaProAllQuotaData {
+  bmsMaster: BmsMasterStatus;
   inv: InvStatus;
   pd: PdStatus;
-  mppt: MpptStatus;
 }
-
-// Applicable for Delta 2 only
-export interface MpptStatus extends StatusAc {}
-// Applicable for Delta 2 only

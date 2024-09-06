@@ -1,9 +1,5 @@
-import { Delta2AllQuotaData } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
-import {
-  Delta2MqttSetModuleType,
-  Delta2MqttSetOperationType,
-} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
-import { SwitchXboostService } from '@ecoflow/accessories/batteries/delta2/services/switchXboostService';
+import { DeltaProAllQuotaData } from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProHttpApiContracts';
+import { SwitchXboostService } from '@ecoflow/accessories/batteries/deltapro/services/switchXboostService';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
@@ -13,7 +9,7 @@ import { Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
 describe('SwitchXboostService', () => {
   let service: SwitchXboostService;
-  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<Delta2AllQuotaData>>;
+  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<DeltaProAllQuotaData>>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
@@ -46,8 +42,8 @@ describe('SwitchXboostService', () => {
       },
       httpApiManager: httpApiManagerMock,
       sendSetCommand: jest.fn(),
-    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<Delta2AllQuotaData>>;
-    service = new SwitchXboostService(ecoFlowAccessoryMock, Delta2MqttSetModuleType.INV);
+    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<DeltaProAllQuotaData>>;
+    service = new SwitchXboostService(ecoFlowAccessoryMock);
     hapService = new HapService('Accessory Switch Name', HapService.Switch.UUID);
   });
 
@@ -57,9 +53,7 @@ describe('SwitchXboostService', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
     });
 
-    it(`should send Set command of MPPT moduleType to device
-      when X-Boost value was changed to true and service was initialized with MPPT setAcModuleType`, () => {
-      service = new SwitchXboostService(ecoFlowAccessoryMock, Delta2MqttSetModuleType.MPPT);
+    it('should send Set command to device when X-Boost value was changed to true', () => {
       service.initialize();
       onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
 
@@ -69,11 +63,10 @@ describe('SwitchXboostService', () => {
         {
           id: 0,
           version: '',
-          moduleType: 5,
-          operateType: Delta2MqttSetOperationType.AcOutCfg,
+          operateType: 'TCP',
           params: {
-            out_voltage: 0xffffffff,
-            out_freq: 0xff,
+            cmdSet: 32,
+            id: 66,
             xboost: 1,
             enabled: 0xff,
           },
@@ -82,31 +75,7 @@ describe('SwitchXboostService', () => {
       );
     });
 
-    it(`should send Set command of INV moduleType to device
-      when X-Boost value was changed to true and service was initialized with INV setAcModuleType`, () => {
-      service.initialize();
-      onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
-
-      onCharacteristic.setValue(true);
-
-      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
-        {
-          id: 0,
-          version: '',
-          moduleType: 3,
-          operateType: Delta2MqttSetOperationType.AcOutCfg,
-          params: {
-            out_voltage: 0xffffffff,
-            out_freq: 0xff,
-            xboost: 1,
-            enabled: 0xff,
-          },
-        },
-        expect.any(Function)
-      );
-    });
-
-    it('should send Set command of INV moduleType to device when X-Boost value was changed to false', () => {
+    it('should send Set command to device when X-Boost value was changed to false', () => {
       service.initialize();
       onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
 
@@ -116,11 +85,10 @@ describe('SwitchXboostService', () => {
         {
           id: 0,
           version: '',
-          moduleType: 3,
-          operateType: Delta2MqttSetOperationType.AcOutCfg,
+          operateType: 'TCP',
           params: {
-            out_voltage: 0xffffffff,
-            out_freq: 0xff,
+            cmdSet: 32,
+            id: 66,
             xboost: 0,
             enabled: 0xff,
           },

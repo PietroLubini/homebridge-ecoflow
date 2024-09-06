@@ -1,22 +1,23 @@
+import { Delta2AllQuotaData } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
+import {
+  Delta2MqttSetAcOnMessageParams,
+  Delta2MqttSetMessageParams,
+  Delta2MqttSetMessageWithParams,
+  Delta2MqttSetModuleType,
+  Delta2MqttSetOperationType,
+} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
 import {
   AcEnableType,
   AcOutFrequencyType,
   AcOutVoltageIgnore,
   AcXBoostType,
-  Delta2AllQuotaData,
-} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
-import {
-  Delta2MqttSetAcOnMessageParams,
-  Delta2MqttSetModuleType,
-  Delta2MqttSetOperationType,
-  MqttDelta2SetMessageWithParams,
-} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
+} from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { SwitchXboostServiceBase } from '@ecoflow/services/switchXboostServiceBase';
 
 export class SwitchXboostService extends SwitchXboostServiceBase {
   constructor(
-    protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<Delta2AllQuotaData>,
+    ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<Delta2AllQuotaData>,
     private readonly setAcModuleType: Delta2MqttSetModuleType
   ) {
     super(ecoFlowAccessory);
@@ -36,13 +37,13 @@ export class SwitchXboostService extends SwitchXboostServiceBase {
     );
   }
 
-  private sendOn<TParams>(
+  private sendOn<TParams extends Delta2MqttSetMessageParams>(
     moduleType: Delta2MqttSetModuleType,
     operateType: Delta2MqttSetOperationType,
     params: TParams,
     revert: () => void
   ): Promise<void> {
-    const message: MqttDelta2SetMessageWithParams<TParams> = {
+    const message: Delta2MqttSetMessageWithParams<TParams> = {
       id: 0,
       version: '',
       moduleType,

@@ -1,4 +1,4 @@
-import { EnableType } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
+import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import {
   Delta2MqttSetModuleType,
   Delta2MqttSetOnMessageParams,

@@ -1,9 +1,9 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import {
-  MqttPowerStreamSetBrightnessMessageParams,
-  MqttPowerStreamSetCmdCodeType,
-  MqttPowerStreamSetMessageWithParams,
-} from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
+  PowerStreamMqttSetBrightnessMessageParams,
+  PowerStreamMqttSetCmdCodeType,
+  PowerStreamMqttSetMessageWithParams,
+} from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
 import { LightBulbServiceBase } from '@ecoflow/services/lightBulbServiceBase';
 
 export class IndicatorService extends LightBulbServiceBase {
@@ -16,10 +16,10 @@ export class IndicatorService extends LightBulbServiceBase {
   }
 
   protected override setBrightness(value: number, revert: () => void): Promise<void> {
-    const message: MqttPowerStreamSetMessageWithParams<MqttPowerStreamSetBrightnessMessageParams> = {
+    const message: PowerStreamMqttSetMessageWithParams<PowerStreamMqttSetBrightnessMessageParams> = {
       id: 0,
       version: '',
-      cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
+      cmdCode: PowerStreamMqttSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
       params: {
         brightness: value,
       },

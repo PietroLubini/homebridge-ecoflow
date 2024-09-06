@@ -1,26 +1,15 @@
-import { Delta2AccessoryBase } from '@ecoflow/accessories/batteries/delta2/delta2AccessoryBase';
-import {
-  BmsStatus,
-  Delta2AllQuotaData,
-  InvStatus,
-  MpptStatus,
-  PdStatus,
-} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
-import {
-  Delta2MqttMessageType,
-  Delta2MqttQuotaMessageWithParams,
-  Delta2MqttSetModuleType,
-} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
-import { OutletAcService } from '@ecoflow/accessories/batteries/delta2/services/outletAcService';
-import { OutletCarService } from '@ecoflow/accessories/batteries/delta2/services/outletCarService';
-import { OutletUsbService } from '@ecoflow/accessories/batteries/delta2/services/outletUsbService';
-import { SwitchXboostService } from '@ecoflow/accessories/batteries/delta2/services/switchXboostService';
+import { DeltaProAccessoryBase } from '@ecoflow/accessories/batteries/deltapro/deltaProAccessoryBase';
+import { DeltaProAllQuotaData } from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProHttpApiContracts';
+import { DeltaProMqttQuotaMessageWithParams } from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProMqttApiContracts';
+import { OutletAcService } from '@ecoflow/accessories/batteries/deltapro/services/outletAcService';
+import { OutletCarService } from '@ecoflow/accessories/batteries/deltapro/services/outletCarService';
+import { OutletUsbService } from '@ecoflow/accessories/batteries/deltapro/services/outletUsbService';
+import { SwitchXboostService } from '@ecoflow/accessories/batteries/deltapro/services/switchXboostService';
 import {
   AcEnableType,
   AcXBoostType,
   EnableType,
 } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
-import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
@@ -34,15 +23,15 @@ import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 jest.mock('@ecoflow/services/batteryStatusService');
-jest.mock('@ecoflow/accessories/batteries/delta2/services/outletUsbService');
-jest.mock('@ecoflow/accessories/batteries/delta2/services/outletAcService');
-jest.mock('@ecoflow/accessories/batteries/delta2/services/outletCarService');
-jest.mock('@ecoflow/accessories/batteries/delta2/services/switchXboostService');
+jest.mock('@ecoflow/accessories/batteries/deltapro/services/outletUsbService');
+jest.mock('@ecoflow/accessories/batteries/deltapro/services/outletAcService');
+jest.mock('@ecoflow/accessories/batteries/deltapro/services/outletCarService');
+jest.mock('@ecoflow/accessories/batteries/deltapro/services/switchXboostService');
 jest.mock('@ecoflow/services/accessoryInformationService');
 
-class MockAccessory extends Delta2AccessoryBase {}
+class MockAccessory extends DeltaProAccessoryBase {}
 
-describe('Delta2AccessoryBase', () => {
+describe('DeltaProAccessoryBase', () => {
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
   let logMock: jest.Mocked<Logging>;
@@ -111,22 +100,15 @@ describe('Delta2AccessoryBase', () => {
       mock.updateChargingState.mockReset();
     });
     outletUsbServiceMock = initOutletService(OutletUsbService, new OutletUsbService(accessory));
-    outletAcServiceMock = initOutletService(
-      OutletAcService,
-      new OutletAcService(accessory, Delta2MqttSetModuleType.INV)
-    );
+    outletAcServiceMock = initOutletService(OutletAcService, new OutletAcService(accessory));
     outletCarServiceMock = initOutletService(OutletCarService, new OutletCarService(accessory));
     accessoryInformationServiceMock = initService(
       AccessoryInformationService,
       new AccessoryInformationService(accessory)
     );
-    switchXboostServiceMock = initService(
-      SwitchXboostService,
-      new SwitchXboostService(accessory, Delta2MqttSetModuleType.MPPT),
-      mock => {
-        mock.updateState.mockReset();
-      }
-    );
+    switchXboostServiceMock = initService(SwitchXboostService, new SwitchXboostService(accessory), mock => {
+      mock.updateState.mockReset();
+    });
 
     accessoryMock = { services: jest.fn(), removeService: jest.fn() } as unknown as jest.Mocked<PlatformAccessory>;
     platformMock = {} as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
@@ -143,15 +125,7 @@ describe('Delta2AccessoryBase', () => {
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
-    accessory = new MockAccessory(
-      platformMock,
-      accessoryMock,
-      config,
-      logMock,
-      httpApiManagerMock,
-      mqttApiManagerMock,
-      { setAcModuleType: Delta2MqttSetModuleType.BMS }
-    );
+    accessory = new MockAccessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock);
   });
 
   describe('initialize', () => {
@@ -167,79 +141,49 @@ describe('Delta2AccessoryBase', () => {
       expect(switchXboostServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(accessoryInformationServiceMock.initialize).toHaveBeenCalledTimes(1);
     });
-
-    it('should create OutletAcService with MPPT setModuleType when initializing accessory MPPT setModuleType', async () => {
-      let actual: Delta2MqttSetModuleType | undefined;
-      (OutletAcService as jest.Mock).mockImplementation(
-        (_ecoFlowAccessory: EcoFlowAccessoryBase, setAcModuleType: Delta2MqttSetModuleType) => {
-          actual = setAcModuleType;
-          return outletAcServiceMock;
-        }
-      );
-
-      new MockAccessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock, {
-        setAcModuleType: Delta2MqttSetModuleType.MPPT,
-      });
-
-      expect(actual).toBe(Delta2MqttSetModuleType.MPPT);
-    });
-
-    it('should create SwitchXboostService with INV setModuleType when initializing accessory INV setModuleType', async () => {
-      let actual: Delta2MqttSetModuleType | undefined;
-      (SwitchXboostService as jest.Mock).mockImplementation(
-        (_ecoFlowAccessory: EcoFlowAccessoryBase, setAcModuleType: Delta2MqttSetModuleType) => {
-          actual = setAcModuleType;
-          return switchXboostServiceMock;
-        }
-      );
-
-      new MockAccessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock, {
-        setAcModuleType: Delta2MqttSetModuleType.INV,
-      });
-
-      expect(actual).toBe(Delta2MqttSetModuleType.INV);
-    });
   });
 
   describe('processQuotaMessage', () => {
-    let quota: Delta2AllQuotaData;
+    let quota: DeltaProAllQuotaData;
 
     beforeEach(() => {
-      quota = {} as Delta2AllQuotaData;
+      quota = {} as DeltaProAllQuotaData;
       httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
       mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
     });
 
-    describe('BmsStatus', () => {
+    describe('BmsMasterStatus', () => {
       let processQuotaMessage: (value: MqttQuotaMessage) => void;
       beforeEach(async () => {
-        quota.bms_bmsStatus = {};
+        quota.bmsMaster = {};
         await accessory.initialize();
         await accessory.initializeDefaultValues(false);
         processQuotaMessage = mqttApiManagerMock.subscribeOnQuotaMessage.mock.calls[0][1]!;
       });
 
       it('should update bms status in quota when BmsStatus message is received', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<BmsStatus> = {
-          typeCode: Delta2MqttMessageType.BMS,
-          params: {
-            f32ShowSoc: 34.67,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            bmsMaster: {
+              f32ShowSoc: 34.67,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
-        const actual = quota.bms_bmsStatus;
+        const actual = quota.bmsMaster;
 
-        expect(actual).toEqual(message.params);
+        expect(actual).toEqual(message.data.bmsMaster);
       });
 
       it('should update battery level when BmsStatus message is received with f32ShowSoc', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<BmsStatus> = {
-          typeCode: Delta2MqttMessageType.BMS,
-          params: {
-            f32ShowSoc: 34.67,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            bmsMaster: {
+              f32ShowSoc: 34.67,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -251,9 +195,8 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should not update any characteristic when BmsStatus message is received with undefined status', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<BmsStatus> = {
-          typeCode: Delta2MqttMessageType.BMS,
-          params: {},
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {} as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -275,26 +218,28 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update inv status in quota when InvStatus message is received', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: Delta2MqttMessageType.INV,
-          params: {
-            inputWatts: 12.34,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            inv: {
+              inputWatts: 12.34,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
         const actual = quota.inv;
 
-        expect(actual).toEqual(message.params);
+        expect(actual).toEqual(message.data.inv);
       });
 
       it(`should update charging state to true
         when InvStatus message is received with non zero inputWatts and without outputWatts`, async () => {
-        const message: Delta2MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: Delta2MqttMessageType.INV,
-          params: {
-            inputWatts: 12.34,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            inv: {
+              inputWatts: 12.34,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -304,12 +249,13 @@ describe('Delta2AccessoryBase', () => {
 
       it(`should update charging state to true
         when InvStatus message is received with non zero inputWatts and non equal to it outputWatts`, async () => {
-        const message: Delta2MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: Delta2MqttMessageType.INV,
-          params: {
-            inputWatts: 12.34,
-            outputWatts: 30.45,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            inv: {
+              inputWatts: 12.34,
+              outputWatts: 30.45,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -319,12 +265,13 @@ describe('Delta2AccessoryBase', () => {
 
       it(`should update charging state to false
         when InvStatus message is received with zero inputWatts and non equal to it outputWatts`, async () => {
-        const message: Delta2MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: Delta2MqttMessageType.INV,
-          params: {
-            inputWatts: 0,
-            outputWatts: 30.45,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            inv: {
+              inputWatts: 0,
+              outputWatts: 30.45,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -334,12 +281,13 @@ describe('Delta2AccessoryBase', () => {
 
       it(`should update charging state to false
         when InvStatus message is received with zero inputWatts and outputWatts`, async () => {
-        const message: Delta2MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: Delta2MqttMessageType.INV,
-          params: {
-            inputWatts: 0,
-            outputWatts: 0,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            inv: {
+              inputWatts: 0,
+              outputWatts: 0,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -348,11 +296,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update AC, USB, CAR input consumptions when InvStatus message is received with inputWatts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: Delta2MqttMessageType.INV,
-          params: {
-            inputWatts: 12.34,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            inv: {
+              inputWatts: 12.34,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -363,11 +312,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update AC state when InvStatus message is received with cfgAcEnabled', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: Delta2MqttMessageType.INV,
-          params: {
-            cfgAcEnabled: AcEnableType.On,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            inv: {
+              cfgAcEnabled: AcEnableType.On,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -377,11 +327,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update X-Boost state when InvStatus message is received with cfgAcXboost', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: Delta2MqttMessageType.INV,
-          params: {
-            cfgAcXboost: AcXBoostType.On,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            inv: {
+              cfgAcXboost: AcXBoostType.On,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -391,11 +342,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update AC output watts consumption when InvStatus message is received with outputWatts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: Delta2MqttMessageType.INV,
-          params: {
-            outputWatts: 45.67,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            inv: {
+              outputWatts: 45.67,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -404,9 +356,8 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should not update any characteristic when InvStatus message is received with undefined status', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<InvStatus> = {
-          typeCode: Delta2MqttMessageType.INV,
-          params: {},
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: { inv: {} } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -431,25 +382,27 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update pd status in quota when PdStatus message is received', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            carWatts: 34.12,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              carWatts: 34.12,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
         const actual = quota.pd;
 
-        expect(actual).toEqual(message.params);
+        expect(actual).toEqual(message.data.pd);
       });
 
       it('should update CAR state when PdStatus message is received with carState', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            carState: EnableType.On,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              carState: EnableType.On,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -458,11 +411,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update CAR output consumption when PdStatus message is received with carWatts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            carWatts: 64.89,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              carWatts: 64.89,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -471,11 +425,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB state when PdStatus message is received with dcOutState', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            dcOutState: EnableType.On,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              dcOutState: EnableType.On,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -484,11 +439,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption with 0 when PdStatus message received with 0 usb1Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            usb1Watts: 0,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              usb1Watts: 0,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -497,11 +453,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption when PdStatus message is received with usb1Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            usb1Watts: 1.1,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              usb1Watts: 1.1,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -510,11 +467,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption when PdStatus message is received with usb2Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            usb2Watts: 2.2,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              usb2Watts: 2.2,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -523,11 +481,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption with 0 when PdStatus message received with 0 usb2Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            usb2Watts: 0,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              usb2Watts: 0,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -536,11 +495,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption when PdStatus message is received with qcUsb1Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            qcUsb1Watts: 3.3,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              qcUsb1Watts: 3.3,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -549,11 +509,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption with 0 when PdStatus message received with 0 qcUsb1Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            qcUsb1Watts: 0,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              qcUsb1Watts: 0,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -562,11 +523,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption when PdStatus message is received with qcUsb2Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            qcUsb2Watts: 4.4,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              qcUsb2Watts: 4.4,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -575,11 +537,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption with 0 when PdStatus message received with 0 qcUsb2Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            qcUsb2Watts: 0,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              qcUsb2Watts: 0,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -588,11 +551,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption when PdStatus message is received with typec1Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            typec1Watts: 5.5,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              typec1Watts: 5.5,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -601,11 +565,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption with 0 when PdStatus message received with 0 typec1Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            typec1Watts: 0,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              typec1Watts: 0,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -614,11 +579,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption when PdStatus message is received with typec2Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            typec2Watts: 6.6,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              typec2Watts: 6.6,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -627,11 +593,12 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption with 0 when PdStatus message received with 0 typec2Watts', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            typec2Watts: 0,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              typec2Watts: 0,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -640,16 +607,17 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update USB output consumption when PdStatus message is received with all usb-related parameters', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {
-            usb1Watts: 1.1,
-            usb2Watts: 2.2,
-            qcUsb1Watts: 3.3,
-            qcUsb2Watts: 4.4,
-            typec1Watts: 5.5,
-            typec2Watts: 6.6,
-          },
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {
+            pd: {
+              usb1Watts: 1.1,
+              usb2Watts: 2.2,
+              qcUsb1Watts: 3.3,
+              qcUsb2Watts: 4.4,
+              typec1Watts: 5.5,
+              typec2Watts: 6.6,
+            },
+          } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -658,9 +626,8 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should not update any characteristic when PdStatus message is received with undefined status', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
-          typeCode: Delta2MqttMessageType.PD,
-          params: {},
+        const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
+          data: {} as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
@@ -671,77 +638,13 @@ describe('Delta2AccessoryBase', () => {
         expect(outletUsbServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
       });
     });
-
-    describe('MpptStatus', () => {
-      let processQuotaMessage: (value: MqttQuotaMessage) => void;
-      beforeEach(async () => {
-        quota.mppt = {};
-        await accessory.initialize();
-        await accessory.initializeDefaultValues(false);
-        processQuotaMessage = mqttApiManagerMock.subscribeOnQuotaMessage.mock.calls[0][1]!;
-      });
-
-      it('should update mppt status in quota when MpptStatus message is received', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<MpptStatus> = {
-          typeCode: Delta2MqttMessageType.MPPT,
-          params: {
-            cfgAcEnabled: AcEnableType.On,
-          },
-        };
-
-        processQuotaMessage(message);
-        const actual = quota.mppt;
-
-        expect(actual).toEqual(message.params);
-      });
-
-      it('should update AC state when MpptStatus message is received with cfgAcEnabled', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<MpptStatus> = {
-          typeCode: Delta2MqttMessageType.MPPT,
-          params: {
-            cfgAcEnabled: AcEnableType.On,
-          },
-        };
-
-        processQuotaMessage(message);
-
-        expect(outletAcServiceMock.updateState).toHaveBeenCalledWith(true);
-        expect(switchXboostServiceMock.updateState).not.toHaveBeenCalled();
-      });
-
-      it('should update X-Boost state when MpptStatus message is received with cfgAcXboost', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<MpptStatus> = {
-          typeCode: Delta2MqttMessageType.MPPT,
-          params: {
-            cfgAcXboost: AcXBoostType.On,
-          },
-        };
-
-        processQuotaMessage(message);
-
-        expect(switchXboostServiceMock.updateState).toHaveBeenCalledWith(true);
-        expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
-      });
-
-      it('should not update any characteristic when MpptStatus message is received with undefined status', async () => {
-        const message: Delta2MqttQuotaMessageWithParams<MpptStatus> = {
-          typeCode: Delta2MqttMessageType.MPPT,
-          params: {},
-        };
-
-        processQuotaMessage(message);
-
-        expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
-        expect(switchXboostServiceMock.updateState).not.toHaveBeenCalled();
-      });
-    });
   });
 
   describe('initializeDefaultValues', () => {
-    let quota: Delta2AllQuotaData;
+    let quota: DeltaProAllQuotaData;
     beforeEach(() => {
       quota = {
-        bms_bmsStatus: {
+        bmsMaster: {
           f32ShowSoc: 1.1,
         },
         inv: {
@@ -757,15 +660,11 @@ describe('Delta2AccessoryBase', () => {
           qcUsb1Watts: 4,
           typec2Watts: 5,
         },
-        mppt: {
-          cfgAcEnabled: AcEnableType.Off,
-          cfgAcXboost: AcXBoostType.On,
-        },
       };
     });
 
     it('should initialize quota when is called before initializeDefaultValues', async () => {
-      const expected: Delta2AllQuotaData = { bms_bmsStatus: {}, inv: {}, pd: {}, mppt: {} };
+      const expected: DeltaProAllQuotaData = { bmsMaster: {}, inv: {}, pd: {} };
 
       const actual = accessory.quota;
 
@@ -785,7 +684,7 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update BmsStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
-        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as Delta2AllQuotaData);
+        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as DeltaProAllQuotaData);
 
         await accessory.initializeDefaultValues();
 
@@ -812,7 +711,7 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update InvStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
-        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as Delta2AllQuotaData);
+        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as DeltaProAllQuotaData);
 
         await accessory.initializeDefaultValues();
 
@@ -839,7 +738,7 @@ describe('Delta2AccessoryBase', () => {
       });
 
       it('should update PdStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
-        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as Delta2AllQuotaData);
+        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as DeltaProAllQuotaData);
 
         await accessory.initializeDefaultValues();
 
@@ -847,26 +746,6 @@ describe('Delta2AccessoryBase', () => {
         expect(outletUsbServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
         expect(outletCarServiceMock.updateState).not.toHaveBeenCalled();
         expect(outletCarServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('MpptStatus', () => {
-      it('should update MpptStatus-related characteristics when is requested', async () => {
-        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
-
-        await accessory.initializeDefaultValues();
-
-        expect(outletAcServiceMock.updateState).toHaveBeenCalledWith(false);
-        expect(switchXboostServiceMock.updateState).toHaveBeenCalledWith(true);
-      });
-
-      it('should update MpptStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
-        httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as Delta2AllQuotaData);
-
-        await accessory.initializeDefaultValues();
-
-        expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
-        expect(switchXboostServiceMock.updateState).not.toHaveBeenCalled();
       });
     });
   });

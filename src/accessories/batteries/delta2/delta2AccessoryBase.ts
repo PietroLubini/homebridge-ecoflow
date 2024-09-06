@@ -1,10 +1,7 @@
 import { Delta2Configuration } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2Configuration';
 import {
-  AcEnableType,
-  AcXBoostType,
   BmsStatus,
   Delta2AllQuotaData,
-  EnableType,
   InvStatus,
   MpptStatus,
   PdStatus,
@@ -19,6 +16,11 @@ import { OutletAcService } from '@ecoflow/accessories/batteries/delta2/services/
 import { OutletCarService } from '@ecoflow/accessories/batteries/delta2/services/outletCarService';
 import { OutletUsbService } from '@ecoflow/accessories/batteries/delta2/services/outletUsbService';
 import { SwitchXboostService } from '@ecoflow/accessories/batteries/delta2/services/switchXboostService';
+import {
+  AcEnableType,
+  AcXBoostType,
+  EnableType,
+} from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
@@ -105,6 +107,7 @@ export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<
     this.updateBmsInitialValues(initialData.bms_bmsStatus);
     this.updateInvInitialValues(initialData.inv);
     this.updatePdInitialValues(initialData.pd);
+    this.updateMpptInitialValues(initialData.mppt);
   }
 
   private updateBmsInitialValues(params: BmsStatus): void {
@@ -126,6 +129,14 @@ export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<
   private updatePdInitialValues(params: PdStatus): void {
     const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
       typeCode: Delta2MqttMessageType.PD,
+      params,
+    };
+    this.processQuotaMessage(message);
+  }
+
+  private updateMpptInitialValues(params: MpptStatus): void {
+    const message: Delta2MqttQuotaMessageWithParams<MpptStatus> = {
+      typeCode: Delta2MqttMessageType.MPPT,
       params,
     };
     this.processQuotaMessage(message);

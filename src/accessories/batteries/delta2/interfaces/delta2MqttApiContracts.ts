@@ -1,7 +1,4 @@
-import {
-  AcOutFrequencyType,
-  AcXBoostType,
-} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
+import { AcOutFrequencyType, AcXBoostType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import {
   MqttQuotaMessage,
   MqttQuotaMessageWithParams,
@@ -15,7 +12,6 @@ export enum Delta2MqttMessageType {
   MPPT = 'mpptStatus',
   INV = 'invStatus',
   BMS = 'bmsStatus',
-  EMS = 'emsStatus',
 }
 
 export interface Delta2MqttQuotaMessage extends MqttQuotaMessage {
@@ -44,11 +40,13 @@ export interface Delta2MqttSetMessage extends MqttSetMessage {
   moduleType: Delta2MqttSetModuleType;
 }
 
-export interface MqttDelta2SetMessageWithParams<TParams>
+export interface Delta2MqttSetMessageParams {}
+
+export interface Delta2MqttSetMessageWithParams<TParams extends Delta2MqttSetMessageParams>
   extends MqttSetMessageWithParams<TParams>,
     Delta2MqttSetMessage {}
 
-export interface Delta2MqttSetOnMessageParams {
+export interface Delta2MqttSetOnMessageParams extends Delta2MqttSetMessageParams {
   enabled: number;
 }
 

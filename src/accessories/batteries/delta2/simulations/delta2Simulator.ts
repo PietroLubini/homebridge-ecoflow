@@ -1,9 +1,5 @@
 import {
-  AcEnableType,
-  AcOutFrequencyType,
-  AcXBoostType,
   BmsStatus,
-  EnableType,
   InvStatus,
   MpptStatus,
   PdStatus,
@@ -14,6 +10,12 @@ import {
   Delta2MqttSetMessage,
   Delta2MqttSetReplyMessage,
 } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
+import {
+  AcEnableType,
+  AcOutFrequencyType,
+  AcXBoostType,
+  EnableType,
+} from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { SimulatorTyped } from '@ecoflow/apis/simulations/simulator';
 
 export class Delta2Simulator extends SimulatorTyped<Delta2MqttSetMessage> {

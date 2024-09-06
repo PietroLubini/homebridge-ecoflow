@@ -1,6 +1,6 @@
+import { DeltaProAllQuotaData } from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProHttpApiContracts';
+import { OutletUsbService } from '@ecoflow/accessories/batteries/deltapro/services/outletUsbService';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
-import { OutletInvService } from '@ecoflow/accessories/powerstream/services/outletInvService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
@@ -12,9 +12,9 @@ enum HAPStatus {
   READ_ONLY_CHARACTERISTIC = -70404,
 }
 
-describe('OutletInvService', () => {
-  let service: OutletInvService;
-  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
+describe('OutletUsbService', () => {
+  let service: OutletUsbService;
+  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<DeltaProAllQuotaData>>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
@@ -58,14 +58,17 @@ describe('OutletInvService', () => {
       httpApiManager: httpApiManagerMock,
       quota: {},
       sendSetCommand: jest.fn(),
-    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
-    service = new OutletInvService(ecoFlowAccessoryMock);
+    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<DeltaProAllQuotaData>>;
+    service = new OutletUsbService(ecoFlowAccessoryMock);
     hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
   });
 
   describe('updateOutputConsumption', () => {
     it('should set OutputConsumption when it is enabled in configuration', () => {
-      service = new OutletInvService(ecoFlowAccessoryMock, [CharacteristicType.OutputConsumptionInWatts]);
+      ecoFlowAccessoryMock.config.battery = {
+        additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
+      };
+      service = new OutletUsbService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -77,14 +80,13 @@ describe('OutletInvService', () => {
 
       expect(actual).toEqual(35);
       expect(logMock.debug.mock.calls).toEqual([
-        ['INV InUse ->', true],
-        ['INV Output Consumption, W ->', 34.6],
+        ['USB InUse ->', true],
+        ['USB Output Consumption, W ->', 34.6],
       ]);
     });
 
     it('should not set OutputConsumption when it is disabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletInvService(ecoFlowAccessoryMock);
       service.initialize();
 
       service.updateOutputConsumption(34.6);
@@ -94,14 +96,17 @@ describe('OutletInvService', () => {
       ).value;
 
       expect(actual).toEqual(0);
-      expect(logMock.debug.mock.calls).toEqual([['INV InUse ->', true]]);
+      expect(logMock.debug.mock.calls).toEqual([['USB InUse ->', true]]);
     });
   });
 
   describe('updateInputConsumption', () => {
     it('should set InputConsumption when it is enabled in configuration', () => {
+      ecoFlowAccessoryMock.config.battery = {
+        additionalCharacteristics: [CharacteristicType.InputConsumptionInWatts],
+      };
+      service = new OutletUsbService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletInvService(ecoFlowAccessoryMock, [CharacteristicType.InputConsumptionInWatts]);
       service.initialize();
 
       service.updateInputConsumption(41.1);
@@ -111,12 +116,11 @@ describe('OutletInvService', () => {
       ).value;
 
       expect(actual).toEqual(41);
-      expect(logMock.debug.mock.calls).toEqual([['INV Input Consumption, W ->', 41.1]]);
+      expect(logMock.debug.mock.calls).toEqual([['USB Input Consumption, W ->', 41.1]]);
     });
 
     it('should not set InputConsumption when it is disabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletInvService(ecoFlowAccessoryMock);
       service.initialize();
 
       service.updateInputConsumption(41.1);
@@ -132,8 +136,11 @@ describe('OutletInvService', () => {
 
   describe('updateBatteryLevel', () => {
     it('should set BatteryLevel when it is enabled in configuration', () => {
+      ecoFlowAccessoryMock.config.battery = {
+        additionalCharacteristics: [CharacteristicType.BatteryLevel],
+      };
+      service = new OutletUsbService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletInvService(ecoFlowAccessoryMock, [CharacteristicType.BatteryLevel]);
       service.initialize();
 
       service.updateBatteryLevel(87.4);
@@ -141,12 +148,11 @@ describe('OutletInvService', () => {
       const actual = service.service.getCharacteristic(HapCharacteristic.BatteryLevel).value;
 
       expect(actual).toEqual(87);
-      expect(logMock.debug.mock.calls).toEqual([['INV Battery Level, % ->', 87.4]]);
+      expect(logMock.debug.mock.calls).toEqual([['USB Battery Level, % ->', 87.4]]);
     });
 
     it('should not set BatteryLevel when it is disabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletInvService(ecoFlowAccessoryMock);
       service.initialize();
 
       service.updateBatteryLevel(87.4);
