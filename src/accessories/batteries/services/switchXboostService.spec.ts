@@ -3,17 +3,16 @@ import {
   MqttBatterySetModuleType,
   MqttBatterySetOperationType,
 } from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
-import { OutletAcService } from '@ecoflow/accessories/batteries/services/outletAcService';
+import { SwitchXboostService } from '@ecoflow/accessories/batteries/services/switchXboostService';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
-import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-describe('OutletAcService', () => {
-  let service: OutletAcService;
+describe('SwitchXboostService', () => {
+  let service: SwitchXboostService;
   let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<BatteryAllQuotaData>>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
@@ -54,109 +53,8 @@ describe('OutletAcService', () => {
       quota: {},
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<BatteryAllQuotaData>>;
-    service = new OutletAcService(ecoFlowAccessoryMock, MqttBatterySetModuleType.INV);
-    hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
-  });
-
-  describe('updateOutputConsumption', () => {
-    it('should set OutputConsumption when it is enabled in configuration', () => {
-      ecoFlowAccessoryMock.config.battery = {
-        additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
-      };
-      service = new OutletAcService(ecoFlowAccessoryMock, MqttBatterySetModuleType.MPPT);
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-
-      service.updateOutputConsumption(34.6);
-
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.OutputConsumptionWatts
-      ).value;
-
-      expect(actual).toEqual(35);
-      expect(logMock.debug.mock.calls).toEqual([
-        ['AC InUse ->', true],
-        ['AC Output Consumption, W ->', 34.6],
-      ]);
-    });
-
-    it('should not set OutputConsumption when it is disabled in configuration', () => {
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-
-      service.updateOutputConsumption(34.6);
-
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.OutputConsumptionWatts
-      ).value;
-
-      expect(actual).toEqual(0);
-      expect(logMock.debug.mock.calls).toEqual([['AC InUse ->', true]]);
-    });
-  });
-
-  describe('updateInputConsumption', () => {
-    it('should set InputConsumption when it is enabled in configuration', () => {
-      ecoFlowAccessoryMock.config.battery = {
-        additionalCharacteristics: [CharacteristicType.InputConsumptionInWatts],
-      };
-      service = new OutletAcService(ecoFlowAccessoryMock, MqttBatterySetModuleType.MPPT);
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-
-      service.updateInputConsumption(41.1);
-
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.InputConsumptionWatts
-      ).value;
-
-      expect(actual).toEqual(41);
-      expect(logMock.debug.mock.calls).toEqual([['AC Input Consumption, W ->', 41.1]]);
-    });
-
-    it('should not set InputConsumption when it is disabled in configuration', () => {
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-
-      service.updateInputConsumption(41.1);
-
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.InputConsumptionWatts
-      ).value;
-
-      expect(actual).toEqual(0);
-      expect(logMock.debug).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('updateBatteryLevel', () => {
-    it('should set BatteryLevel when it is enabled in configuration', () => {
-      ecoFlowAccessoryMock.config.battery = {
-        additionalCharacteristics: [CharacteristicType.BatteryLevel],
-      };
-      service = new OutletAcService(ecoFlowAccessoryMock, MqttBatterySetModuleType.MPPT);
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-
-      service.updateBatteryLevel(87.4);
-
-      const actual = service.service.getCharacteristic(HapCharacteristic.BatteryLevel).value;
-
-      expect(actual).toEqual(87);
-      expect(logMock.debug.mock.calls).toEqual([['AC Battery Level, % ->', 87.4]]);
-    });
-
-    it('should not set BatteryLevel when it is disabled in configuration', () => {
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-
-      service.updateBatteryLevel(87.4);
-
-      const actual = service.service.getCharacteristic(HapCharacteristic.BatteryLevel).value;
-
-      expect(actual).toEqual(0);
-      expect(logMock.debug).not.toHaveBeenCalled();
-    });
+    service = new SwitchXboostService(ecoFlowAccessoryMock, MqttBatterySetModuleType.INV);
+    hapService = new HapService('Accessory Switch Name', HapService.Switch.UUID);
   });
 
   describe('onOnSet', () => {
@@ -167,13 +65,13 @@ describe('OutletAcService', () => {
         inputWatts: 0,
         cfgAcOutVol: 47.9,
         cfgAcOutFreq: 50,
-        cfgAcXboost: false,
+        cfgAcEnabled: false,
       };
     });
 
     it(`should send Set command of MPPT moduleType to device
-      when Enabled value was changed to true and service was initialized with MPPT setAcModuleType`, () => {
-      service = new OutletAcService(ecoFlowAccessoryMock, MqttBatterySetModuleType.MPPT);
+      when X-Boost value was changed to true and service was initialized with MPPT setAcModuleType`, () => {
+      service = new SwitchXboostService(ecoFlowAccessoryMock, MqttBatterySetModuleType.MPPT);
       service.initialize();
       onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
 
@@ -188,43 +86,19 @@ describe('OutletAcService', () => {
           params: {
             out_voltage: 47.9,
             out_freq: 50,
-            xboost: 0,
-            enabled: 1,
+            xboost: 1,
+            enabled: 0,
           },
         },
         expect.any(Function)
       );
     });
 
-    it('should send Set command of INV moduleType to device when Enabled value was changed to true', () => {
+    it('should send Set command of INV moduleType to device when X-Boost value was changed to true', () => {
       service.initialize();
       onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
 
       onCharacteristic.setValue(true);
-
-      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
-        {
-          id: 0,
-          version: '',
-          moduleType: 3,
-          operateType: MqttBatterySetOperationType.AcOutCfg,
-          params: {
-            out_voltage: 47.9,
-            out_freq: 50,
-            xboost: 0,
-            enabled: 1,
-          },
-        },
-        expect.any(Function)
-      );
-    });
-
-    it('should send Set command of INV moduleType to device when Enabled value was changed to false', () => {
-      service.initialize();
-      onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
-      ecoFlowAccessoryMock.quota.inv.cfgAcXboost = true;
-
-      onCharacteristic.setValue(false);
 
       expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
         {
@@ -243,7 +117,31 @@ describe('OutletAcService', () => {
       );
     });
 
-    it(`should send Set command of INV moduleType to device with cfgAcOutVol set to 220000 when Enabled value was changed and
+    it('should send Set command of INV moduleType to device when X-Boost value was changed to false', () => {
+      service.initialize();
+      onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
+      ecoFlowAccessoryMock.quota.inv.cfgAcXboost = true;
+
+      onCharacteristic.setValue(false);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          moduleType: 3,
+          operateType: MqttBatterySetOperationType.AcOutCfg,
+          params: {
+            out_voltage: 47.9,
+            out_freq: 50,
+            xboost: 0,
+            enabled: 0,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+
+    it(`should send Set command of INV moduleType to device with cfgAcOutVol set to 220000 when X-Boost value was changed and
       there is no cfgAcOutVol value in quota`, () => {
       service.initialize();
       onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
@@ -268,7 +166,7 @@ describe('OutletAcService', () => {
       );
     });
 
-    it(`should send Set command of INV moduleType to device with cfgAcOutFreq set to 1 when Enabled value was changed and
+    it(`should send Set command of INV moduleType to device with cfgAcOutFreq set to 1 when X-Boost value was changed and
       there is no cfgAcOutFreq value in quota`, () => {
       service.initialize();
       onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
@@ -293,11 +191,11 @@ describe('OutletAcService', () => {
       );
     });
 
-    it(`should send Set command of INV moduleType to device with X-Boost set to true
-      when Enabled value was changed and there is no X-Boost value in quota`, () => {
+    it(`should send Set command of INV moduleType to device with Enabled set to false
+      when X-Boost value was changed and there is no Enabled value in quota`, () => {
       service.initialize();
       onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
-      ecoFlowAccessoryMock.quota.inv.cfgAcXboost = undefined;
+      ecoFlowAccessoryMock.quota.inv.cfgAcEnabled = undefined;
 
       onCharacteristic.setValue(false);
 
@@ -310,7 +208,7 @@ describe('OutletAcService', () => {
           params: {
             out_voltage: 47.9,
             out_freq: 50,
-            xboost: 1,
+            xboost: 0,
             enabled: 0,
           },
         },
@@ -318,7 +216,7 @@ describe('OutletAcService', () => {
       );
     });
 
-    it('should revert changing of Enabled state when sending Set command to device is failed', () => {
+    it('should revert changing of X-Boost state when sending Set command to device is failed', () => {
       service.initialize();
       onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
       onCharacteristic.updateValue(true);
@@ -329,7 +227,7 @@ describe('OutletAcService', () => {
       const actual = onCharacteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug.mock.calls).toEqual([['AC State ->', true]]);
+      expect(logMock.debug.mock.calls).toEqual([['X-Boost State ->', true]]);
     });
   });
 });

@@ -1,23 +1,24 @@
 import { AcOutFrequency, BatteryAllQuotaData } from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
 import {
   MqttBatterySetAcOnMessageParams,
+  MqttBatterySetMessageWithParams,
   MqttBatterySetModuleType,
   MqttBatterySetOperationType,
 } from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
-import { OutletBatteryServiceBase } from '@ecoflow/accessories/batteries/services/outletBatteryServiceBase';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
+import { SwitchXboostServiceBase } from '@ecoflow/services/switchXboostServiceBase';
 
-export class OutletAcService extends OutletBatteryServiceBase {
+export class SwitchXboostService extends SwitchXboostServiceBase {
   constructor(
     protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<BatteryAllQuotaData>,
-    private readonly setModuleType: MqttBatterySetModuleType
+    private readonly setAcModuleType: MqttBatterySetModuleType
   ) {
-    super(ecoFlowAccessory, 'AC', ecoFlowAccessory.config.battery?.additionalCharacteristics);
+    super(ecoFlowAccessory);
   }
 
-  protected override setOn(value: boolean, revert: () => void): Promise<void> {
+  protected setOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<MqttBatterySetAcOnMessageParams>(
-      this.setModuleType,
+      this.setAcModuleType,
       MqttBatterySetOperationType.AcOutCfg,
       {
         out_voltage:
@@ -28,12 +29,31 @@ export class OutletAcService extends OutletBatteryServiceBase {
           this.ecoFlowAccessory.quota.inv.cfgAcOutFreq !== undefined
             ? this.ecoFlowAccessory.quota.inv.cfgAcOutFreq
             : AcOutFrequency['50 Hz'],
-        xboost: Number(
-          this.ecoFlowAccessory.quota.inv.cfgAcXboost !== undefined ? this.ecoFlowAccessory.quota.inv.cfgAcXboost : true
+        xboost: Number(value),
+        enabled: Number(
+          this.ecoFlowAccessory.quota.inv.cfgAcEnabled !== undefined
+            ? this.ecoFlowAccessory.quota.inv.cfgAcEnabled
+            : false
         ),
-        enabled: Number(value),
       },
       revert
     );
+  }
+
+  private sendOn<TParams>(
+    moduleType: MqttBatterySetModuleType,
+    operateType: MqttBatterySetOperationType,
+    params: TParams,
+    revert: () => void
+  ): Promise<void> {
+    const message: MqttBatterySetMessageWithParams<TParams> = {
+      id: 0,
+      version: '',
+      moduleType,
+      operateType,
+      params,
+    };
+
+    return this.ecoFlowAccessory.sendSetCommand(message, revert);
   }
 }

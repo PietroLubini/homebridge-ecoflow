@@ -109,26 +109,27 @@ Quota is sent every 10 seconds with random values in this mode.
 
 #### Services
 
-| Service    | Characteristic        | Standard | Permission |
-| ---------- | --------------------- | -------- | ---------- |
-| Battery    | BatteryLevel          | ✅       | Read       |
-| Battery    | ChargingState         | ✅       | Read       |
-| Battery    | StatusLowBattery      | ✅       | Read       |
-| Outlet AC  | On                    | ✅       | Read/Write |
-| Outlet AC  | OutletInUse           | ✅       | Read       |
-| Outlet AC  | Battery Level, %      | 🔲       | Read       |
-| Outlet AC  | Input Consumption, W  | 🔲       | Read       |
-| Outlet AC  | Output Consumption, W | 🔲       | Read       |
-| Outlet CAR | On                    | ✅       | Read/Write |
-| Outlet CAR | OutletInUse           | ✅       | Read       |
-| Outlet CAR | Battery Level, %      | 🔲       | Read       |
-| Outlet CAR | Input Consumption, W  | 🔲       | Read       |
-| Outlet CAR | Output Consumption, W | 🔲       | Read       |
-| Outlet USB | On                    | ✅       | Read/Write |
-| Outlet USB | OutletInUse           | ✅       | Read       |
-| Outlet USB | Battery Level, %      | 🔲       | Read       |
-| Outlet USB | Input Consumption, W  | 🔲       | Read       |
-| Outlet USB | Output Consumption, W | 🔲       | Read       |
+| Service        | Characteristic        | Standard | Permission |
+| -------------- | --------------------- | -------- | ---------- |
+| Battery        | BatteryLevel          | ✅       | Read       |
+| Battery        | ChargingState         | ✅       | Read       |
+| Battery        | StatusLowBattery      | ✅       | Read       |
+| Outlet AC      | On                    | ✅       | Read/Write |
+| Outlet AC      | OutletInUse           | ✅       | Read       |
+| Outlet AC      | Battery Level, %      | 🔲       | Read       |
+| Outlet AC      | Input Consumption, W  | 🔲       | Read       |
+| Outlet AC      | Output Consumption, W | 🔲       | Read       |
+| Outlet CAR     | On                    | ✅       | Read/Write |
+| Outlet CAR     | OutletInUse           | ✅       | Read       |
+| Outlet CAR     | Battery Level, %      | 🔲       | Read       |
+| Outlet CAR     | Input Consumption, W  | 🔲       | Read       |
+| Outlet CAR     | Output Consumption, W | 🔲       | Read       |
+| Outlet USB     | On                    | ✅       | Read/Write |
+| Outlet USB     | OutletInUse           | ✅       | Read       |
+| Outlet USB     | Battery Level, %      | 🔲       | Read       |
+| Outlet USB     | Input Consumption, W  | 🔲       | Read       |
+| Outlet USB     | Output Consumption, W | 🔲       | Read       |
+| Switch X-Boost | On                    | ✅       | Read/Write |
 
 #### Configuration
 

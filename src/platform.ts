@@ -11,7 +11,7 @@ import {
 } from 'homebridge';
 
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2Accessory';
-import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2maxAccessory';
+import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2MaxAccessory';
 import { BatterySimulator } from '@ecoflow/accessories/batteries/simulations/batterySimulator';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';

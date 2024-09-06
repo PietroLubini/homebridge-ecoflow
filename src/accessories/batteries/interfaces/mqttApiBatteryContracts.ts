@@ -1,3 +1,4 @@
+import { AcOutFrequency } from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
 import {
   MqttQuotaMessage,
   MqttQuotaMessageWithParams,
@@ -28,9 +29,16 @@ export enum MqttBatterySetOperationType {
   AcOutCfg = 'acOutCfg',
 }
 
+export enum MqttBatterySetModuleType {
+  PD = 1,
+  BMS = 2,
+  INV = 3,
+  MPPT = 5,
+}
+
 export interface MqttBatterySetMessage extends MqttSetMessage {
   operateType: MqttBatterySetOperationType;
-  moduleType: number;
+  moduleType: MqttBatterySetModuleType;
 }
 
 export interface MqttBatterySetMessageWithParams<TParams>
@@ -43,11 +51,11 @@ export interface MqttBatterySetOnMessageParams {
 
 export interface MqttBatterySetAcOnMessageParams extends MqttBatterySetOnMessageParams {
   out_voltage: number;
-  out_freq: number;
+  out_freq: AcOutFrequency;
   xboost: number;
 }
 
 export interface MqttBatterySetReplyMessage extends MqttSetReplyMessage {
   operateType: MqttBatterySetOperationType;
-  moduleType: number;
+  moduleType: MqttBatterySetModuleType;
 }

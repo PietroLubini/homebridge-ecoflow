@@ -1,4 +1,5 @@
 import {
+  MqttBatterySetModuleType,
   MqttBatterySetOnMessageParams,
   MqttBatterySetOperationType,
 } from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
@@ -12,7 +13,7 @@ export class OutletUsbService extends OutletBatteryServiceBase {
 
   protected override setOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<MqttBatterySetOnMessageParams>(
-      1,
+      MqttBatterySetModuleType.PD,
       MqttBatterySetOperationType.DcOutCfg,
       { enabled: Number(value) },
       revert

@@ -3,15 +3,19 @@ import {
   BatteryAllQuotaData,
   BmsStatus,
   InvStatus,
+  MpptStatus,
   PdStatus,
 } from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
 import {
   MqttBatteryMessageType,
   MqttBatteryQuotaMessageWithParams,
+  MqttBatterySetModuleType,
 } from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
 import { OutletAcService } from '@ecoflow/accessories/batteries/services/outletAcService';
 import { OutletCarService } from '@ecoflow/accessories/batteries/services/outletCarService';
 import { OutletUsbService } from '@ecoflow/accessories/batteries/services/outletUsbService';
+import { SwitchXboostService } from '@ecoflow/accessories/batteries/services/switchXboostService';
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
@@ -28,6 +32,7 @@ jest.mock('@ecoflow/services/batteryStatusService');
 jest.mock('@ecoflow/accessories/batteries/services/outletUsbService');
 jest.mock('@ecoflow/accessories/batteries/services/outletAcService');
 jest.mock('@ecoflow/accessories/batteries/services/outletCarService');
+jest.mock('@ecoflow/accessories/batteries/services/switchXboostService');
 jest.mock('@ecoflow/services/accessoryInformationService');
 
 class MockAccessory extends BatteryAccessoryBase {}
@@ -44,6 +49,7 @@ describe('BatteryAccessory', () => {
   let outletUsbServiceMock: jest.Mocked<OutletUsbService>;
   let outletAcServiceMock: jest.Mocked<OutletAcService>;
   let outletCarServiceMock: jest.Mocked<OutletCarService>;
+  let switchXboostServiceMock: jest.Mocked<SwitchXboostService>;
   let accessoryInformationServiceMock: jest.Mocked<AccessoryInformationService>;
   const expectedServices: MockService[] = [
     {
@@ -59,17 +65,20 @@ describe('BatteryAccessory', () => {
       Name: 'OutletCarService',
     },
     {
+      Name: 'SwitchXboostService',
+    },
+    {
       Name: 'AccessoryInformationService',
     },
   ];
 
   beforeEach(() => {
-    function createService<TService extends ServiceBase, TModule extends ServiceBase>(
-      Service: new (ecoFlowAccessory: MockAccessory) => TService,
-      Module: new (ecoFlowAccessory: MockAccessory) => TModule,
+    function initService<TService extends ServiceBase>(
+      Module: object,
+      service: TService,
       mockResetCallback: ((serviceMock: jest.Mocked<TService>) => void) | null = null
     ): jest.Mocked<TService> {
-      const serviceMock = new Service(accessory) as jest.Mocked<TService>;
+      const serviceMock = service as jest.Mocked<TService>;
       const serviceBaseMock = serviceMock as jest.Mocked<ServiceBase>;
       serviceBaseMock.initialize.mockReset();
       serviceBaseMock.cleanupCharacteristics.mockReset();
@@ -80,11 +89,11 @@ describe('BatteryAccessory', () => {
       return serviceMock;
     }
 
-    function createOutletService<TService extends OutletServiceBase, TModule extends OutletServiceBase>(
-      Service: new (ecoFlowAccessory: MockAccessory) => TService,
-      Module: new (ecoFlowAccessory: MockAccessory) => TModule
+    function initOutletService<TService extends OutletServiceBase>(
+      Module: object,
+      service: TService
     ): jest.Mocked<TService> {
-      return createService(Service, Module, mock => {
+      return initService(Module, service, mock => {
         const mockOutletBase = mock as jest.Mocked<OutletServiceBase>;
         mockOutletBase.updateBatteryLevel.mockReset();
         mockOutletBase.updateInputConsumption.mockReset();
@@ -92,14 +101,27 @@ describe('BatteryAccessory', () => {
         mockOutletBase.updateState.mockReset();
       });
     }
-    batteryStatusServiceMock = createService(BatteryStatusService, BatteryStatusService, mock => {
+    batteryStatusServiceMock = initService(BatteryStatusService, new BatteryStatusService(accessory), mock => {
       mock.updateBatteryLevel.mockReset();
       mock.updateChargingState.mockReset();
     });
-    outletUsbServiceMock = createOutletService(OutletUsbService, OutletUsbService);
-    outletAcServiceMock = createOutletService(OutletAcService, OutletAcService);
-    outletCarServiceMock = createOutletService(OutletCarService, OutletCarService);
-    accessoryInformationServiceMock = createService(AccessoryInformationService, AccessoryInformationService);
+    outletUsbServiceMock = initOutletService(OutletUsbService, new OutletUsbService(accessory));
+    outletAcServiceMock = initOutletService(
+      OutletAcService,
+      new OutletAcService(accessory, MqttBatterySetModuleType.INV)
+    );
+    outletCarServiceMock = initOutletService(OutletCarService, new OutletCarService(accessory));
+    accessoryInformationServiceMock = initService(
+      AccessoryInformationService,
+      new AccessoryInformationService(accessory)
+    );
+    switchXboostServiceMock = initService(
+      SwitchXboostService,
+      new SwitchXboostService(accessory, MqttBatterySetModuleType.MPPT),
+      mock => {
+        mock.updateState.mockReset();
+      }
+    );
 
     accessoryMock = { services: jest.fn(), removeService: jest.fn() } as unknown as jest.Mocked<PlatformAccessory>;
     platformMock = {} as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
@@ -116,7 +138,15 @@ describe('BatteryAccessory', () => {
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
-    accessory = new MockAccessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock);
+    accessory = new MockAccessory(
+      platformMock,
+      accessoryMock,
+      config,
+      logMock,
+      httpApiManagerMock,
+      mqttApiManagerMock,
+      { setAcModuleType: MqttBatterySetModuleType.BMS }
+    );
   });
 
   describe('initialize', () => {
@@ -129,7 +159,40 @@ describe('BatteryAccessory', () => {
       expect(outletUsbServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(outletAcServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(outletCarServiceMock.initialize).toHaveBeenCalledTimes(1);
+      expect(switchXboostServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(accessoryInformationServiceMock.initialize).toHaveBeenCalledTimes(1);
+    });
+
+    it('should create OutletAcService with MPPT setModuleType when initializing accessory MPPT setModuleType', async () => {
+      let actual: MqttBatterySetModuleType | undefined;
+      (OutletAcService as jest.Mock).mockImplementation(
+        (_ecoFlowAccessory: EcoFlowAccessoryBase, setAcModuleType: MqttBatterySetModuleType) => {
+          actual = setAcModuleType;
+          return outletAcServiceMock;
+        }
+      );
+
+      new MockAccessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock, {
+        setAcModuleType: MqttBatterySetModuleType.MPPT,
+      });
+
+      expect(actual).toBe(MqttBatterySetModuleType.MPPT);
+    });
+
+    it('should create SwitchXboostService with INV setModuleType when initializing accessory INV setModuleType', async () => {
+      let actual: MqttBatterySetModuleType | undefined;
+      (SwitchXboostService as jest.Mock).mockImplementation(
+        (_ecoFlowAccessory: EcoFlowAccessoryBase, setAcModuleType: MqttBatterySetModuleType) => {
+          actual = setAcModuleType;
+          return switchXboostServiceMock;
+        }
+      );
+
+      new MockAccessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock, {
+        setAcModuleType: MqttBatterySetModuleType.INV,
+      });
+
+      expect(actual).toBe(MqttBatterySetModuleType.INV);
     });
   });
 
@@ -146,7 +209,7 @@ describe('BatteryAccessory', () => {
     describe('BmsStatus', () => {
       let processQuotaMessage: (value: MqttQuotaMessage) => void;
       beforeEach(async () => {
-        quota.bms_bmsStatus = {} as BmsStatus;
+        quota.bms_bmsStatus = {};
         await accessory.initialize();
         await accessory.initializeDefaultValues(false);
         processQuotaMessage = mqttApiManagerMock.subscribeOnQuotaMessage.mock.calls[0][1]!;
@@ -185,7 +248,7 @@ describe('BatteryAccessory', () => {
       it('should not update any characteristic when BmsStatus message is received with undefined status', async () => {
         const message: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
           typeCode: MqttBatteryMessageType.BMS,
-          params: {} as BmsStatus,
+          params: {},
         };
 
         processQuotaMessage(message);
@@ -200,7 +263,7 @@ describe('BatteryAccessory', () => {
     describe('InvStatus', () => {
       let processQuotaMessage: (value: MqttQuotaMessage) => void;
       beforeEach(async () => {
-        quota.inv = {} as InvStatus;
+        quota.inv = {};
         await accessory.initialize();
         await accessory.initializeDefaultValues(false);
         processQuotaMessage = mqttApiManagerMock.subscribeOnQuotaMessage.mock.calls[0][1]!;
@@ -220,6 +283,65 @@ describe('BatteryAccessory', () => {
         expect(actual).toEqual(message.params);
       });
 
+      it(`should update charging state to true
+        when InvStatus message is received with non zero inputWatts and without outputWatts`, async () => {
+        const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
+          typeCode: MqttBatteryMessageType.INV,
+          params: {
+            inputWatts: 12.34,
+          },
+        };
+
+        processQuotaMessage(message);
+
+        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+      });
+
+      it(`should update charging state to true
+        when InvStatus message is received with non zero inputWatts and non equal to it outputWatts`, async () => {
+        const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
+          typeCode: MqttBatteryMessageType.INV,
+          params: {
+            inputWatts: 12.34,
+            outputWatts: 30.45,
+          },
+        };
+
+        processQuotaMessage(message);
+
+        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+      });
+
+      it(`should update charging state to false
+        when InvStatus message is received with zero inputWatts and non equal to it outputWatts`, async () => {
+        const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
+          typeCode: MqttBatteryMessageType.INV,
+          params: {
+            inputWatts: 0,
+            outputWatts: 30.45,
+          },
+        };
+
+        processQuotaMessage(message);
+
+        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+      });
+
+      it(`should update charging state to false
+        when InvStatus message is received with zero inputWatts and outputWatts`, async () => {
+        const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
+          typeCode: MqttBatteryMessageType.INV,
+          params: {
+            inputWatts: 0,
+            outputWatts: 0,
+          },
+        };
+
+        processQuotaMessage(message);
+
+        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+      });
+
       it('should update AC, USB, CAR input consumptions when InvStatus message is received with inputWatts', async () => {
         const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
           typeCode: MqttBatteryMessageType.INV,
@@ -230,7 +352,6 @@ describe('BatteryAccessory', () => {
 
         processQuotaMessage(message);
 
-        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(12.34);
         expect(outletAcServiceMock.updateInputConsumption).toHaveBeenCalledWith(12.34);
         expect(outletUsbServiceMock.updateInputConsumption).toHaveBeenCalledWith(12.34);
         expect(outletCarServiceMock.updateInputConsumption).toHaveBeenCalledWith(12.34);
@@ -241,12 +362,27 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.INV,
           params: {
             cfgAcEnabled: true,
-          } as InvStatus,
+          },
         };
 
         processQuotaMessage(message);
 
         expect(outletAcServiceMock.updateState).toHaveBeenCalledWith(true);
+        expect(switchXboostServiceMock.updateState).not.toHaveBeenCalled();
+      });
+
+      it('should update X-Boost state when InvStatus message is received with cfgAcXboost', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
+          typeCode: MqttBatteryMessageType.INV,
+          params: {
+            cfgAcXboost: true,
+          },
+        };
+
+        processQuotaMessage(message);
+
+        expect(switchXboostServiceMock.updateState).toHaveBeenCalledWith(true);
+        expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
       });
 
       it('should update AC output watts consumption when InvStatus message is received with outputWatts', async () => {
@@ -254,7 +390,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.INV,
           params: {
             outputWatts: 45.67,
-          } as InvStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -265,7 +401,7 @@ describe('BatteryAccessory', () => {
       it('should not update any characteristic when InvStatus message is received with undefined status', async () => {
         const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
           typeCode: MqttBatteryMessageType.INV,
-          params: {} as InvStatus,
+          params: {},
         };
 
         processQuotaMessage(message);
@@ -276,13 +412,14 @@ describe('BatteryAccessory', () => {
         expect(outletAcServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
         expect(outletUsbServiceMock.updateInputConsumption).not.toHaveBeenCalled();
         expect(outletCarServiceMock.updateInputConsumption).not.toHaveBeenCalled();
+        expect(switchXboostServiceMock.updateState).not.toHaveBeenCalled();
       });
     });
 
     describe('PdStatus', () => {
       let processQuotaMessage: (value: MqttQuotaMessage) => void;
       beforeEach(async () => {
-        quota.pd = {} as PdStatus;
+        quota.pd = {};
         await accessory.initialize();
         await accessory.initializeDefaultValues(false);
         processQuotaMessage = mqttApiManagerMock.subscribeOnQuotaMessage.mock.calls[0][1]!;
@@ -320,7 +457,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             carWatts: 64.89,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -333,7 +470,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             dcOutState: true,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -346,7 +483,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             usb1Watts: 0,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -359,7 +496,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             usb1Watts: 1.1,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -372,7 +509,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             usb2Watts: 2.2,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -385,7 +522,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             usb2Watts: 0,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -398,7 +535,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             qcUsb1Watts: 3.3,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -411,7 +548,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             qcUsb1Watts: 0,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -424,7 +561,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             qcUsb2Watts: 4.4,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -450,7 +587,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             typec1Watts: 5.5,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -463,7 +600,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             typec1Watts: 0,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -476,7 +613,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             typec2Watts: 6.6,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -489,7 +626,7 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.PD,
           params: {
             typec2Watts: 0,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -507,7 +644,7 @@ describe('BatteryAccessory', () => {
             qcUsb2Watts: 4.4,
             typec1Watts: 5.5,
             typec2Watts: 6.6,
-          } as PdStatus,
+          },
         };
 
         processQuotaMessage(message);
@@ -518,7 +655,7 @@ describe('BatteryAccessory', () => {
       it('should not update any characteristic when PdStatus message is received with undefined status', async () => {
         const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
           typeCode: MqttBatteryMessageType.PD,
-          params: {} as PdStatus,
+          params: {},
         };
 
         processQuotaMessage(message);
@@ -527,6 +664,70 @@ describe('BatteryAccessory', () => {
         expect(outletCarServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
         expect(outletUsbServiceMock.updateState).not.toHaveBeenCalled();
         expect(outletUsbServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('MpptStatus', () => {
+      let processQuotaMessage: (value: MqttQuotaMessage) => void;
+      beforeEach(async () => {
+        quota.mppt = {};
+        await accessory.initialize();
+        await accessory.initializeDefaultValues(false);
+        processQuotaMessage = mqttApiManagerMock.subscribeOnQuotaMessage.mock.calls[0][1]!;
+      });
+
+      it('should update mppt status in quota when MpptStatus message is received', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<MpptStatus> = {
+          typeCode: MqttBatteryMessageType.MPPT,
+          params: {
+            cfgAcEnabled: true,
+          },
+        };
+
+        processQuotaMessage(message);
+        const actual = quota.mppt;
+
+        expect(actual).toEqual(message.params);
+      });
+
+      it('should update AC state when MpptStatus message is received with cfgAcEnabled', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<MpptStatus> = {
+          typeCode: MqttBatteryMessageType.MPPT,
+          params: {
+            cfgAcEnabled: true,
+          },
+        };
+
+        processQuotaMessage(message);
+
+        expect(outletAcServiceMock.updateState).toHaveBeenCalledWith(true);
+        expect(switchXboostServiceMock.updateState).not.toHaveBeenCalled();
+      });
+
+      it('should update X-Boost state when MpptStatus message is received with cfgAcXboost', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<MpptStatus> = {
+          typeCode: MqttBatteryMessageType.MPPT,
+          params: {
+            cfgAcXboost: true,
+          },
+        };
+
+        processQuotaMessage(message);
+
+        expect(switchXboostServiceMock.updateState).toHaveBeenCalledWith(true);
+        expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
+      });
+
+      it('should not update any characteristic when MpptStatus message is received with undefined status', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<MpptStatus> = {
+          typeCode: MqttBatteryMessageType.MPPT,
+          params: {},
+        };
+
+        processQuotaMessage(message);
+
+        expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
+        expect(switchXboostServiceMock.updateState).not.toHaveBeenCalled();
       });
     });
   });
@@ -550,11 +751,14 @@ describe('BatteryAccessory', () => {
           qcUsb1Watts: 4,
           typec2Watts: 5,
         },
+        mppt: {
+          cfgAcEnabled: false,
+        },
       };
     });
 
     it('should initialize quota when is called before initializeDefaultValues', async () => {
-      const expected: BatteryAllQuotaData = { bms_bmsStatus: {}, inv: {}, pd: {} };
+      const expected: BatteryAllQuotaData = { bms_bmsStatus: {}, inv: {}, pd: {}, mppt: {} };
 
       const actual = accessory.quota;
 
@@ -591,7 +795,7 @@ describe('BatteryAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(2.1);
+        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
         expect(outletAcServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
         expect(outletAcServiceMock.updateState).toHaveBeenCalledWith(true);
         expect(outletAcServiceMock.updateOutputConsumption).toHaveBeenCalledWith(2.2);

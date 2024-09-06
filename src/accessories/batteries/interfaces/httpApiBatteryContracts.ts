@@ -34,8 +34,24 @@ export interface PdStatusUsb {
 
 export interface PdStatus extends PdStatusUsb, PdStatusCar {}
 
+// Applicable for Delta 2
+export interface MpptStatusAc {
+  cfgAcEnabled?: boolean; //AC switch: 0: off; 1: on (read/write)
+  cfgAcXboost?: boolean; //X-Boost switch: 0: off; 1: on (read/write)
+  cfgAcOutFreq?: AcOutFrequency; //Output frequency configured for the inverter (Hz) (read/write)
+  cfgAcOutVol?: number; //Output voltage configured for the inverter (V) (read)
+}
+
+export interface MpptStatus extends MpptStatusAc {}
+
 export interface BatteryAllQuotaData {
   bms_bmsStatus: BmsStatus;
   inv: InvStatus;
   pd: PdStatus;
+  mppt: MpptStatus;
+}
+
+export enum AcOutFrequency {
+  '50 Hz' = 1,
+  '60 Hz' = 2,
 }
