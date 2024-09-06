@@ -1,6 +1,6 @@
-import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2Accessory';
-import { MqttBatterySetModuleType } from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
-import { OutletAcService } from '@ecoflow/accessories/batteries/services/outletAcService';
+import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2/delta2Accessory';
+import { Delta2MqttSetModuleType } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
+import { OutletAcService } from '@ecoflow/accessories/batteries/delta2/services/outletAcService';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
@@ -9,10 +9,10 @@ import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 jest.mock('@ecoflow/services/batteryStatusService');
-jest.mock('@ecoflow/accessories/batteries/services/outletUsbService');
-jest.mock('@ecoflow/accessories/batteries/services/outletAcService');
-jest.mock('@ecoflow/accessories/batteries/services/outletCarService');
-jest.mock('@ecoflow/accessories/batteries/services/switchXboostService');
+jest.mock('@ecoflow/accessories/batteries/delta2/services/outletUsbService');
+jest.mock('@ecoflow/accessories/batteries/delta2/services/outletAcService');
+jest.mock('@ecoflow/accessories/batteries/delta2/services/outletCarService');
+jest.mock('@ecoflow/accessories/batteries/delta2/services/switchXboostService');
 jest.mock('@ecoflow/services/accessoryInformationService');
 
 describe('Delta2Accessory', () => {
@@ -34,9 +34,9 @@ describe('Delta2Accessory', () => {
 
   describe('initialize', () => {
     it('should use Delta2-specific configuration when initializing accessory', () => {
-      let actual: MqttBatterySetModuleType | undefined;
+      let actual: Delta2MqttSetModuleType | undefined;
       (OutletAcService as jest.Mock).mockImplementation(
-        (_accessory: EcoFlowAccessoryBase, setAcModuleType: MqttBatterySetModuleType) => {
+        (_accessory: EcoFlowAccessoryBase, setAcModuleType: Delta2MqttSetModuleType) => {
           actual = setAcModuleType;
           return undefined;
         }
@@ -44,7 +44,7 @@ describe('Delta2Accessory', () => {
 
       new Delta2Accessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock);
 
-      expect(actual).toBe(MqttBatterySetModuleType.MPPT);
+      expect(actual).toBe(Delta2MqttSetModuleType.MPPT);
     });
   });
 });

@@ -1,20 +1,24 @@
-import { BatteryConfiguration } from '@ecoflow/accessories/batteries/interfaces/batteryConfiguration';
+import { Delta2Configuration } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2Configuration';
 import {
-  BatteryAllQuotaData,
+  AcEnableType,
+  AcXBoostType,
   BmsStatus,
+  Delta2AllQuotaData,
+  EnableType,
   InvStatus,
   MpptStatus,
   PdStatus,
-} from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
+  StatusAc,
+} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
 import {
-  MqttBatteryMessageType,
-  MqttBatteryQuotaMessage,
-  MqttBatteryQuotaMessageWithParams,
-} from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
-import { OutletAcService } from '@ecoflow/accessories/batteries/services/outletAcService';
-import { OutletCarService } from '@ecoflow/accessories/batteries/services/outletCarService';
-import { OutletUsbService } from '@ecoflow/accessories/batteries/services/outletUsbService';
-import { SwitchXboostService } from '@ecoflow/accessories/batteries/services/switchXboostService';
+  Delta2MqttMessageType,
+  Delta2MqttQuotaMessage,
+  Delta2MqttQuotaMessageWithParams,
+} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
+import { OutletAcService } from '@ecoflow/accessories/batteries/delta2/services/outletAcService';
+import { OutletCarService } from '@ecoflow/accessories/batteries/delta2/services/outletCarService';
+import { OutletUsbService } from '@ecoflow/accessories/batteries/delta2/services/outletUsbService';
+import { SwitchXboostService } from '@ecoflow/accessories/batteries/delta2/services/switchXboostService';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
@@ -25,7 +29,7 @@ import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
-export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase<BatteryAllQuotaData> {
+export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<Delta2AllQuotaData> {
   private readonly batteryStatusService: BatteryStatusService;
   private readonly outletUsbService: OutletUsbService;
   private readonly outletAcService: OutletAcService;
@@ -39,7 +43,7 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
     log: Logging,
     httpApiManager: EcoFlowHttpApiManager,
     mqttApiManager: EcoFlowMqttApiManager,
-    configuration: BatteryConfiguration
+    configuration: Delta2Configuration
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
     this.batteryStatusService = new BatteryStatusService(this);
@@ -60,28 +64,28 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
-    const batteryMessage = message as MqttBatteryQuotaMessage;
-    if (batteryMessage.typeCode === MqttBatteryMessageType.BMS) {
+    const batteryMessage = message as Delta2MqttQuotaMessage;
+    if (batteryMessage.typeCode === Delta2MqttMessageType.BMS) {
       const bmsStatus = (message as MqttQuotaMessageWithParams<BmsStatus>).params;
       Object.assign(this.quota.bms_bmsStatus, bmsStatus);
       this.updateBmsValues(bmsStatus);
-    } else if (batteryMessage.typeCode === MqttBatteryMessageType.INV) {
+    } else if (batteryMessage.typeCode === Delta2MqttMessageType.INV) {
       const invStatus = (message as MqttQuotaMessageWithParams<InvStatus>).params;
       Object.assign(this.quota.inv, invStatus);
       this.updateInvValues(invStatus);
-    } else if (batteryMessage.typeCode === MqttBatteryMessageType.PD) {
+    } else if (batteryMessage.typeCode === Delta2MqttMessageType.PD) {
       const pdStatus = (message as MqttQuotaMessageWithParams<PdStatus>).params;
       Object.assign(this.quota.pd, pdStatus);
       this.updatePdValues(pdStatus);
-    } else if (batteryMessage.typeCode === MqttBatteryMessageType.MPPT) {
+    } else if (batteryMessage.typeCode === Delta2MqttMessageType.MPPT) {
       const mpptStatus = (message as MqttQuotaMessageWithParams<MpptStatus>).params;
       Object.assign(this.quota.mppt, mpptStatus);
       this.updateMpptValues(mpptStatus);
     }
   }
 
-  protected override initializeQuota(quota: BatteryAllQuotaData | null): BatteryAllQuotaData {
-    const result = quota ?? ({} as BatteryAllQuotaData);
+  protected override initializeQuota(quota: Delta2AllQuotaData | null): Delta2AllQuotaData {
+    const result = quota ?? ({} as Delta2AllQuotaData);
     if (!result.bms_bmsStatus) {
       result.bms_bmsStatus = {};
     }
@@ -97,31 +101,31 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
     return result;
   }
 
-  protected override updateInitialValues(initialData: BatteryAllQuotaData): void {
+  protected override updateInitialValues(initialData: Delta2AllQuotaData): void {
     this.updateBmsInitialValues(initialData.bms_bmsStatus);
     this.updateInvInitialValues(initialData.inv);
     this.updatePdInitialValues(initialData.pd);
   }
 
   private updateBmsInitialValues(params: BmsStatus): void {
-    const message: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
-      typeCode: MqttBatteryMessageType.BMS,
+    const message: Delta2MqttQuotaMessageWithParams<BmsStatus> = {
+      typeCode: Delta2MqttMessageType.BMS,
       params,
     };
     this.processQuotaMessage(message);
   }
 
   private updateInvInitialValues(params: InvStatus): void {
-    const message: MqttBatteryQuotaMessageWithParams<InvStatus> = {
-      typeCode: MqttBatteryMessageType.INV,
+    const message: Delta2MqttQuotaMessageWithParams<InvStatus> = {
+      typeCode: Delta2MqttMessageType.INV,
       params,
     };
     this.processQuotaMessage(message);
   }
 
   private updatePdInitialValues(params: PdStatus): void {
-    const message: MqttBatteryQuotaMessageWithParams<PdStatus> = {
-      typeCode: MqttBatteryMessageType.PD,
+    const message: Delta2MqttQuotaMessageWithParams<PdStatus> = {
+      typeCode: Delta2MqttMessageType.PD,
       params,
     };
     this.processQuotaMessage(message);
@@ -145,26 +149,21 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
       this.outletUsbService.updateInputConsumption(params.inputWatts);
       this.outletCarService.updateInputConsumption(params.inputWatts);
     }
-    if (params.cfgAcEnabled !== undefined) {
-      this.outletAcService.updateState(params.cfgAcEnabled);
-    }
-    if (params.cfgAcXboost !== undefined) {
-      this.switchXboostService.updateState(params.cfgAcXboost);
-    }
     if (params.outputWatts !== undefined) {
       this.outletAcService.updateOutputConsumption(params.outputWatts);
     }
+    this.updateAcValues(params);
   }
 
   private updatePdValues(params: PdStatus): void {
     if (params.carState !== undefined) {
-      this.outletCarService.updateState(params.carState);
+      this.outletCarService.updateState(params.carState === EnableType.On);
     }
     if (params.carWatts !== undefined) {
       this.outletCarService.updateOutputConsumption(params.carWatts);
     }
     if (params.dcOutState !== undefined) {
-      this.outletUsbService.updateState(params.dcOutState);
+      this.outletUsbService.updateState(params.dcOutState === EnableType.On);
     }
     if (
       params.usb1Watts !== undefined ||
@@ -187,11 +186,15 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
   }
 
   private updateMpptValues(params: MpptStatus): void {
-    if (params.cfgAcEnabled !== undefined) {
-      this.outletAcService.updateState(params.cfgAcEnabled);
+    this.updateAcValues(params);
+  }
+
+  private updateAcValues(params: StatusAc): void {
+    if (params.cfgAcEnabled !== undefined && params.cfgAcEnabled !== AcEnableType.Ignore) {
+      this.outletAcService.updateState(params.cfgAcEnabled === AcEnableType.On);
     }
-    if (params.cfgAcXboost !== undefined) {
-      this.switchXboostService.updateState(params.cfgAcXboost);
+    if (params.cfgAcXboost !== undefined && params.cfgAcXboost !== AcXBoostType.Ignore) {
+      this.switchXboostService.updateState(params.cfgAcXboost === AcXBoostType.On);
     }
   }
 }

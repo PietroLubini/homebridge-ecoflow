@@ -1,5 +1,5 @@
-import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2Accessory';
-import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2MaxAccessory';
+import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2/delta2Accessory';
+import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2/delta2MaxAccessory';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
@@ -13,8 +13,8 @@ import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { API, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-jest.mock('@ecoflow/accessories/batteries/delta2Accessory');
-jest.mock('@ecoflow/accessories/batteries/delta2MaxAccessory');
+jest.mock('@ecoflow/accessories/batteries/delta2/delta2Accessory');
+jest.mock('@ecoflow/accessories/batteries/delta2/delta2MaxAccessory');
 jest.mock('@ecoflow/accessories/powerstream/powerStreamAccessory');
 jest.mock('@ecoflow/apis/ecoFlowHttpApiManager');
 jest.mock('@ecoflow/apis/ecoFlowMqttApiManager');

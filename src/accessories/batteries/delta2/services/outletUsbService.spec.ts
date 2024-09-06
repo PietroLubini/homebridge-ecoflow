@@ -1,5 +1,5 @@
-import { MqttBatterySetOperationType } from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
-import { OutletUsbService } from '@ecoflow/accessories/batteries/services/outletUsbService';
+import { Delta2MqttSetOperationType } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
+import { OutletUsbService } from '@ecoflow/accessories/batteries/delta2/services/outletUsbService';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
@@ -171,7 +171,7 @@ describe('OutletUsbService', () => {
           id: 0,
           version: '',
           moduleType: 1,
-          operateType: MqttBatterySetOperationType.DcOutCfg,
+          operateType: Delta2MqttSetOperationType.DcOutCfg,
           params: {
             enabled: 1,
           },
@@ -188,7 +188,7 @@ describe('OutletUsbService', () => {
           id: 0,
           version: '',
           moduleType: 1,
-          operateType: MqttBatterySetOperationType.DcOutCfg,
+          operateType: Delta2MqttSetOperationType.DcOutCfg,
           params: {
             enabled: 0,
           },

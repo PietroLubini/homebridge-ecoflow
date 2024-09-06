@@ -1,6 +1,10 @@
-import { MqttBatterySetOperationType } from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
-import { OutletCarService } from '@ecoflow/accessories/batteries/services/outletCarService';
-import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
+import { Delta2AllQuotaData } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
+import {
+  Delta2MqttSetModuleType,
+  Delta2MqttSetOperationType,
+} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
+import { OutletAcService } from '@ecoflow/accessories/batteries/delta2/services/outletAcService';
+import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
@@ -8,9 +12,9 @@ import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-describe('OutletCarService', () => {
-  let service: OutletCarService;
-  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryBase>;
+describe('OutletAcService', () => {
+  let service: OutletAcService;
+  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<Delta2AllQuotaData>>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
@@ -47,10 +51,9 @@ describe('OutletCarService', () => {
         name: 'accessory1',
       },
       httpApiManager: httpApiManagerMock,
-      quota: {},
       sendSetCommand: jest.fn(),
-    } as unknown as jest.Mocked<EcoFlowAccessoryBase>;
-    service = new OutletCarService(ecoFlowAccessoryMock);
+    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<Delta2AllQuotaData>>;
+    service = new OutletAcService(ecoFlowAccessoryMock, Delta2MqttSetModuleType.INV);
     hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
   });
 
@@ -59,7 +62,7 @@ describe('OutletCarService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
       };
-      service = new OutletCarService(ecoFlowAccessoryMock);
+      service = new OutletAcService(ecoFlowAccessoryMock, Delta2MqttSetModuleType.MPPT);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -71,8 +74,8 @@ describe('OutletCarService', () => {
 
       expect(actual).toEqual(35);
       expect(logMock.debug.mock.calls).toEqual([
-        ['CAR InUse ->', true],
-        ['CAR Output Consumption, W ->', 34.6],
+        ['AC InUse ->', true],
+        ['AC Output Consumption, W ->', 34.6],
       ]);
     });
 
@@ -87,7 +90,7 @@ describe('OutletCarService', () => {
       ).value;
 
       expect(actual).toEqual(0);
-      expect(logMock.debug.mock.calls).toEqual([['CAR InUse ->', true]]);
+      expect(logMock.debug.mock.calls).toEqual([['AC InUse ->', true]]);
     });
   });
 
@@ -96,7 +99,7 @@ describe('OutletCarService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.InputConsumptionInWatts],
       };
-      service = new OutletCarService(ecoFlowAccessoryMock);
+      service = new OutletAcService(ecoFlowAccessoryMock, Delta2MqttSetModuleType.MPPT);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -107,7 +110,7 @@ describe('OutletCarService', () => {
       ).value;
 
       expect(actual).toEqual(41);
-      expect(logMock.debug.mock.calls).toEqual([['CAR Input Consumption, W ->', 41.1]]);
+      expect(logMock.debug.mock.calls).toEqual([['AC Input Consumption, W ->', 41.1]]);
     });
 
     it('should not set InputConsumption when it is disabled in configuration', () => {
@@ -130,7 +133,7 @@ describe('OutletCarService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.BatteryLevel],
       };
-      service = new OutletCarService(ecoFlowAccessoryMock);
+      service = new OutletAcService(ecoFlowAccessoryMock, Delta2MqttSetModuleType.MPPT);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -139,7 +142,7 @@ describe('OutletCarService', () => {
       const actual = service.service.getCharacteristic(HapCharacteristic.BatteryLevel).value;
 
       expect(actual).toEqual(87);
-      expect(logMock.debug.mock.calls).toEqual([['CAR Battery Level, % ->', 87.4]]);
+      expect(logMock.debug.mock.calls).toEqual([['AC Battery Level, % ->', 87.4]]);
     });
 
     it('should not set BatteryLevel when it is disabled in configuration', () => {
@@ -159,11 +162,14 @@ describe('OutletCarService', () => {
     let onCharacteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-      onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
     });
 
-    it('should send Set command to device when On value was changed to true', () => {
+    it(`should send Set command of MPPT moduleType to device
+      when Enabled value was changed to true and service was initialized with MPPT setAcModuleType`, () => {
+      service = new OutletAcService(ecoFlowAccessoryMock, Delta2MqttSetModuleType.MPPT);
+      service.initialize();
+      onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
+
       onCharacteristic.setValue(true);
 
       expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
@@ -171,8 +177,11 @@ describe('OutletCarService', () => {
           id: 0,
           version: '',
           moduleType: 5,
-          operateType: MqttBatterySetOperationType.MpptCar,
+          operateType: Delta2MqttSetOperationType.AcOutCfg,
           params: {
+            out_voltage: 0xffffffff,
+            out_freq: 0xff,
+            xboost: 0xff,
             enabled: 1,
           },
         },
@@ -180,16 +189,46 @@ describe('OutletCarService', () => {
       );
     });
 
-    it('should send Set command to device when On value was changed to false', () => {
+    it(`should send Set command of INV moduleType to device
+      when Enabled value was changed to true and service was initialized with INV setAcModuleType`, () => {
+      service.initialize();
+      onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
+
+      onCharacteristic.setValue(true);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          moduleType: 3,
+          operateType: Delta2MqttSetOperationType.AcOutCfg,
+          params: {
+            out_voltage: 0xffffffff,
+            out_freq: 0xff,
+            xboost: 0xff,
+            enabled: 1,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('should send Set command of INV moduleType to device when Enabled value was changed to false', () => {
+      service.initialize();
+      onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
+
       onCharacteristic.setValue(false);
 
       expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
         {
           id: 0,
           version: '',
-          moduleType: 5,
-          operateType: MqttBatterySetOperationType.MpptCar,
+          moduleType: 3,
+          operateType: Delta2MqttSetOperationType.AcOutCfg,
           params: {
+            out_voltage: 0xffffffff,
+            out_freq: 0xff,
+            xboost: 0xff,
             enabled: 0,
           },
         },
@@ -197,7 +236,9 @@ describe('OutletCarService', () => {
       );
     });
 
-    it('should revert changing of On state when sending Set command to device is failed', () => {
+    it('should revert changing of Enabled state when sending Set command to device is failed', () => {
+      service.initialize();
+      onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
       onCharacteristic.updateValue(true);
 
       onCharacteristic.setValue(false);
@@ -206,7 +247,7 @@ describe('OutletCarService', () => {
       const actual = onCharacteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug.mock.calls).toEqual([['CAR State ->', true]]);
+      expect(logMock.debug.mock.calls).toEqual([['AC State ->', true]]);
     });
   });
 });

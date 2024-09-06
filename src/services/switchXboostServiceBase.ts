@@ -1,6 +1,6 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
-import { Characteristic } from 'homebridge';
+import { Characteristic, CharacteristicValue } from 'homebridge';
 
 export abstract class SwitchXboostServiceBase extends ServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
@@ -13,7 +13,7 @@ export abstract class SwitchXboostServiceBase extends ServiceBase {
 
   protected override addCharacteristics(): Characteristic[] {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
-    onCharacteristic.onSet(value => {
+    onCharacteristic.onSet((value: CharacteristicValue) => {
       const newValue = value as boolean;
       this.setOn(newValue, () => this.updateState(!newValue));
     });
