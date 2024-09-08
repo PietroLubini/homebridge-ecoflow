@@ -9,6 +9,7 @@ export enum DeviceModel {
   Delta2Max = 'Delta 2 Max',
   Delta2 = 'Delta 2',
   DeltaPro = 'Delta Pro',
+  DeltaProUltra = 'Delta Pro Ultra',
   PowerStream = 'PowerStream',
 }
 

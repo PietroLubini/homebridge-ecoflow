@@ -136,6 +136,22 @@ describe('PluginConfigDevicesRenderer', () => {
     return JSON.parse(JSON.stringify(obj));
   }
 
+  describe('hideDeviceSettingsPerModel', () => {
+    it('should contain proper hideDeviceSettingsPerModel configuration', () => {
+      const expected = {
+        'Delta 2': ['powerStream'],
+        'Delta 2 Max': ['powerStream'],
+        'Delta Pro': ['powerStream'],
+        'Delta Pro Ultra': ['powerStream'],
+        PowerStream: ['battery'],
+      };
+
+      const actual = renderer.hideDeviceSettingsPerModel;
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
   describe('render', () => {
     function activateTab(index: number): void {
       const tab = $(devicesTabsElement).find(`#deviceTab${index}`);

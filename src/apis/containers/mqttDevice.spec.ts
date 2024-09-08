@@ -56,7 +56,7 @@ describe('MqttDevice', () => {
     it('should log message when it is received', () => {
       device.processReceivedMessage(MqttTopicType.Quota, message);
 
-      expect(logMock.debug).toHaveBeenCalledWith('Received messasge:', message);
+      expect(logMock.debug).toHaveBeenCalledWith('Received message:', message);
     });
   });
 
