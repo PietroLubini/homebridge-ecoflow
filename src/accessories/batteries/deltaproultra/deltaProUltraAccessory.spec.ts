@@ -1,6 +1,12 @@
 import { DeltaProUltraAccessory } from '@ecoflow/accessories/batteries/deltaproultra/deltaProUltraAccessory';
-import { DeltaProUltraAllQuotaData } from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraHttpApiContracts';
-import { DeltaProUltraMqttQuotaMessageWithParams } from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraMqttApiContracts';
+import {
+  DeltaProUltraAllQuotaData,
+  PdStatus,
+} from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraHttpApiContracts';
+import {
+  DeltaProUltraMqttMessageAddrType,
+  DeltaProUltraMqttQuotaMessageWithParams,
+} from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraMqttApiContracts';
 import { OutletAcService } from '@ecoflow/accessories/batteries/deltaproultra/services/outletAcService';
 import { OutletUsbService } from '@ecoflow/accessories/batteries/deltaproultra/services/outletUsbService';
 import { SwitchXboostService } from '@ecoflow/accessories/batteries/deltaproultra/services/switchXboostService';
@@ -155,23 +161,23 @@ describe('DeltaProUltraAccessory', () => {
       });
 
       it('should update pd status in quota when PdStatus message is received', async () => {
-        const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-          data: {
-            hs_yj751_pd_appshow_addr: {
-              soc: 34.67,
-            },
-          } as DeltaProUltraAllQuotaData,
+        const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+          addr: DeltaProUltraMqttMessageAddrType.PD,
+          param: {
+            soc: 34.67,
+          },
         };
 
         processQuotaMessage(message);
         const actual = quota.hs_yj751_pd_appshow_addr;
 
-        expect(actual).toEqual(message.data.hs_yj751_pd_appshow_addr);
+        expect(actual).toEqual(message.param);
       });
 
       it('should not update any characteristic when PdStatus message is received with undefined status', async () => {
-        const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-          data: { hs_yj751_pd_appshow_addr: {} } as DeltaProUltraAllQuotaData,
+        const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+          addr: DeltaProUltraMqttMessageAddrType.PD,
+          param: {},
         };
 
         processQuotaMessage(message);
@@ -190,12 +196,11 @@ describe('DeltaProUltraAccessory', () => {
 
       describe('BatteryLevel', () => {
         it('should update battery level when PdStatus message is received with soc', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                soc: 34.67,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              soc: 34.67,
+            },
           };
 
           processQuotaMessage(message);
@@ -206,8 +211,9 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should not update any characteristic when PdStatus message is received with undefined status', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {} as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {},
           };
 
           processQuotaMessage(message);
@@ -221,12 +227,11 @@ describe('DeltaProUltraAccessory', () => {
       describe('ChargingState', () => {
         it(`should update charging state to true
           when PdStatus message is received with non zero wattsInSum and without wattsOutSum`, async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                wattsInSum: 12.34,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              wattsInSum: 12.34,
+            },
           };
 
           processQuotaMessage(message);
@@ -236,13 +241,12 @@ describe('DeltaProUltraAccessory', () => {
 
         it(`should update charging state to true
           when PdStatus message is received with non zero wattsInSum and non equal to it wattsOutSum`, async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                wattsInSum: 12.34,
-                wattsOutSum: 30.45,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              wattsInSum: 12.34,
+              wattsOutSum: 30.45,
+            },
           };
 
           processQuotaMessage(message);
@@ -252,13 +256,12 @@ describe('DeltaProUltraAccessory', () => {
 
         it(`should update charging state to false
           when PdStatus message is received with zero wattsInSum and non equal to it wattsOutSum`, async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                wattsInSum: 0,
-                wattsOutSum: 30.45,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              wattsInSum: 0,
+              wattsOutSum: 30.45,
+            },
           };
 
           processQuotaMessage(message);
@@ -268,13 +271,12 @@ describe('DeltaProUltraAccessory', () => {
 
         it(`should update charging state to false
           when PdStatus message is received with zero wattsInSum and wattsOutSum`, async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                wattsInSum: 0,
-                wattsOutSum: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              wattsInSum: 0,
+              wattsOutSum: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -283,12 +285,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC, USB input consumptions when PdStatus message is received with wattsInSum', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                wattsInSum: 12.34,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              wattsInSum: 12.34,
+            },
           };
 
           processQuotaMessage(message);
@@ -300,24 +301,23 @@ describe('DeltaProUltraAccessory', () => {
 
       describe('AC', () => {
         // it('should update AC state when InvStatus message is received with cfgAcEnabled', async () => {
-        //   const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-        //     data: {
+        //   const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+        //     param: {
         //       hs_yj751_pd_appshow_addr: {
         //         acOutState: AcEnableType.On,
         //       },
-        //     } as DeltaProUltraAllQuotaData,
+        //     },
         //   };
         //   processQuotaMessage(message);
         //   expect(outletAcServiceMock.updateState).toHaveBeenCalledWith(true);
         // });
 
         it('should update AC output consumption when PdStatus message is received with outAcL11Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcL11Pwr: 1.1,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcL11Pwr: 1.1,
+            },
           };
 
           processQuotaMessage(message);
@@ -326,12 +326,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption with 0 when PdStatus message received with 0 outAcL11Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcL11Pwr: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcL11Pwr: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -340,12 +339,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption when PdStatus message is received with outAcL12Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcL12Pwr: 2.2,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcL12Pwr: 2.2,
+            },
           };
 
           processQuotaMessage(message);
@@ -354,12 +352,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption with 0 when PdStatus message received with 0 outAcL12Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcL12Pwr: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcL12Pwr: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -368,12 +365,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption when PdStatus message is received with outAcL21Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcL21Pwr: 3.3,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcL21Pwr: 3.3,
+            },
           };
 
           processQuotaMessage(message);
@@ -382,12 +378,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption with 0 when PdStatus message received with 0 outAcL21Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcL21Pwr: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcL21Pwr: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -396,12 +391,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption when PdStatus message is received with outAcL22Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcL22Pwr: 4.4,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcL22Pwr: 4.4,
+            },
           };
 
           processQuotaMessage(message);
@@ -410,12 +404,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption with 0 when PdStatus message received with 0 outAcL22Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcL22Pwr: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcL22Pwr: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -424,12 +417,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption when PdStatus message is received with outAcTtPwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcTtPwr: 5.5,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcTtPwr: 5.5,
+            },
           };
 
           processQuotaMessage(message);
@@ -438,12 +430,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption with 0 when PdStatus message received with 0 outAcTtPwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcTtPwr: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcTtPwr: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -452,12 +443,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption when PdStatus message is received with outAcL14Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcL14Pwr: 6.6,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcL14Pwr: 6.6,
+            },
           };
 
           processQuotaMessage(message);
@@ -466,12 +456,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption with 0 when PdStatus message received with 0 outAcL14Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcL14Pwr: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcL14Pwr: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -480,12 +469,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption when PdStatus message is received with outAc5p8Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAc5p8Pwr: 7.7,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAc5p8Pwr: 7.7,
+            },
           };
 
           processQuotaMessage(message);
@@ -494,12 +482,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption with 0 when PdStatus message received with 0 outAc5p8Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAc5p8Pwr: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAc5p8Pwr: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -508,18 +495,17 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update AC output consumption when PdStatus message is received with all ac-related parameters', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outAcL11Pwr: 1.1,
-                outAcL12Pwr: 2.2,
-                outAcL21Pwr: 3.3,
-                outAcL22Pwr: 4.4,
-                outAcTtPwr: 5.5,
-                outAcL14Pwr: 6.6,
-                outAc5p8Pwr: 7.7,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outAcL11Pwr: 1.1,
+              outAcL12Pwr: 2.2,
+              outAcL21Pwr: 3.3,
+              outAcL22Pwr: 4.4,
+              outAcTtPwr: 5.5,
+              outAcL14Pwr: 6.6,
+              outAc5p8Pwr: 7.7,
+            },
           };
 
           processQuotaMessage(message);
@@ -530,24 +516,23 @@ describe('DeltaProUltraAccessory', () => {
 
       describe('USB', () => {
         // it('should update USB state when PdStatus message is received with dcOutState', async () => {
-        //   const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-        //     data: {
+        //   const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+        //     param: {
         //       hs_yj751_pd_appshow_addr: {
         //         dcOutState: EnableType.On,
         //       },
-        //     } as DeltaProUltraAllQuotaData,
+        //     },
         //   };
         //   processQuotaMessage(message);
         //   expect(outletUsbServiceMock.updateState).toHaveBeenCalledWith(true);
         // });
 
         it('should update USB output consumption when PdStatus message is received with outUsb1Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outUsb1Pwr: 1.1,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outUsb1Pwr: 1.1,
+            },
           };
 
           processQuotaMessage(message);
@@ -556,12 +541,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update USB output consumption with 0 when PdStatus message received with 0 outUsb1Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outUsb1Pwr: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outUsb1Pwr: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -570,12 +554,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update USB output consumption when PdStatus message is received with outUsb2Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outUsb2Pwr: 2.2,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outUsb2Pwr: 2.2,
+            },
           };
 
           processQuotaMessage(message);
@@ -584,12 +567,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update USB output consumption with 0 when PdStatus message received with 0 outUsb2Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outUsb2Pwr: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outUsb2Pwr: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -598,12 +580,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update USB output consumption when PdStatus message is received with outTypec1Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outTypec1Pwr: 3.3,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outTypec1Pwr: 3.3,
+            },
           };
 
           processQuotaMessage(message);
@@ -612,12 +593,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update USB output consumption with 0 when PdStatus message received with 0 outTypec1Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outTypec1Pwr: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outTypec1Pwr: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -626,12 +606,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update USB output consumption when PdStatus message is received with outTypec2Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outTypec2Pwr: 4.4,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outTypec2Pwr: 4.4,
+            },
           };
 
           processQuotaMessage(message);
@@ -640,12 +619,11 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update USB output consumption with 0 when PdStatus message received with 0 outTypec2Pwr', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outTypec2Pwr: 0,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outTypec2Pwr: 0,
+            },
           };
 
           processQuotaMessage(message);
@@ -654,15 +632,14 @@ describe('DeltaProUltraAccessory', () => {
         });
 
         it('should update USB output consumption when PdStatus message is received with all usb-related parameters', async () => {
-          const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-            data: {
-              hs_yj751_pd_appshow_addr: {
-                outUsb1Pwr: 1.1,
-                outUsb2Pwr: 2.2,
-                outTypec1Pwr: 3.3,
-                outTypec2Pwr: 4.5,
-              },
-            } as DeltaProUltraAllQuotaData,
+          const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+            addr: DeltaProUltraMqttMessageAddrType.PD,
+            param: {
+              outUsb1Pwr: 1.1,
+              outUsb2Pwr: 2.2,
+              outTypec1Pwr: 3.3,
+              outTypec2Pwr: 4.5,
+            },
           };
 
           processQuotaMessage(message);
@@ -682,8 +659,9 @@ describe('DeltaProUltraAccessory', () => {
       });
 
       it('should not update any characteristic when PdSetStatus message is received with undefined status', async () => {
-        const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-          data: { hs_yj751_pd_app_set_info_addr: {} } as DeltaProUltraAllQuotaData,
+        const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+          addr: DeltaProUltraMqttMessageAddrType.PD,
+          param: {},
         };
 
         processQuotaMessage(message);
@@ -692,12 +670,12 @@ describe('DeltaProUltraAccessory', () => {
       });
 
       // it('should update X-Boost state when PdSetStatus message is received with cfgAcXboost', async () => {
-      //   const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-      //     data: {
+      //   const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+      //     param: {
       //       inv: {
       //         acXboost: AcXBoostType.On,
       //       },
-      //     } as DeltaProUltraAllQuotaData,
+      //     },
       //   };
 
       //   processQuotaMessage(message);

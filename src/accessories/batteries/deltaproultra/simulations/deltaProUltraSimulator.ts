@@ -1,8 +1,10 @@
 import {
   AcOutFrequencyType,
-  DeltaProUltraAllQuotaData,
+  PdSetStatus,
+  PdStatus,
 } from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraHttpApiContracts';
 import {
+  DeltaProUltraMqttMessageAddrType,
   DeltaProUltraMqttQuotaMessageWithParams,
   DeltaProUltraMqttSetMessage,
   DeltaProUltraMqttSetMessageParams,
@@ -15,9 +17,11 @@ export class DeltaProUltraSimulator extends SimulatorTyped<
   DeltaProUltraMqttSetMessageWithParams<DeltaProUltraMqttSetMessageParams>
 > {
   public override generateQuota(): object {
-    const quota: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-      data: {
-        hs_yj751_pd_appshow_addr: {
+    const quotaType = this.getRandomNumber(0, 100);
+    if (quotaType >= 0 && quotaType < 50) {
+      const quotaPdStatus: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+        addr: DeltaProUltraMqttMessageAddrType.PD,
+        param: {
           soc: this.getRandomNumber(0, 100),
           //acEnabled: this.getRandomBoolean() ? EnableType.On : EnableType.Off,
           wattsInSum: this.getRandomNumber(0, 1000),
@@ -28,13 +32,18 @@ export class DeltaProUltraSimulator extends SimulatorTyped<
           outUsb1Pwr: this.getRandomNumber(0, 100),
           outTypec1Pwr: this.getRandomNumber(0, 100),
         },
-        hs_yj751_pd_app_set_info_addr: {
+      };
+      return quotaPdStatus;
+    } else {
+      const quotaPdSetStatus: DeltaProUltraMqttQuotaMessageWithParams<PdSetStatus> = {
+        addr: DeltaProUltraMqttMessageAddrType.PD_SET,
+        param: {
           acOutFreq: AcOutFrequencyType['50 Hz'],
           // acXboost: this.getRandomBoolean() ? AcXBoostType.On : AcXBoostType.Off,
         },
-      },
-    };
-    return quota;
+      };
+      return quotaPdSetStatus;
+    }
   }
 
   public override generateSetReplyTyped(message: DeltaProUltraMqttSetMessage): object {

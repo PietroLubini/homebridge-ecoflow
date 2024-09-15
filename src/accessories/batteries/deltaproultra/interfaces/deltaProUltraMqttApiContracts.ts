@@ -2,15 +2,22 @@ import { AcOutFrequencyType } from '@ecoflow/accessories/batteries/deltaproultra
 import { AcXBoostType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import {
   MqttQuotaMessage,
-  MqttQuotaMessageWithData,
+  MqttQuotaMessageWithParam,
   MqttSetMessage,
   MqttSetMessageWithParams,
 } from '@ecoflow/apis/interfaces/mqttApiContracts';
 
-export interface DeltaProUltraMqttQuotaMessage extends MqttQuotaMessage {}
+export enum DeltaProUltraMqttMessageAddrType {
+  PD = 'hs_yj751_pd_appshow_addr',
+  PD_SET = 'hs_yj751_pd_app_set_info_addr',
+}
+
+export interface DeltaProUltraMqttQuotaMessage extends MqttQuotaMessage {
+  addr: DeltaProUltraMqttMessageAddrType;
+}
 
 export interface DeltaProUltraMqttQuotaMessageWithParams<TParams>
-  extends MqttQuotaMessageWithData<TParams>,
+  extends MqttQuotaMessageWithParam<TParams>,
     DeltaProUltraMqttQuotaMessage {}
 
 export enum DeltaProUltraMqttSetCmdCodeType {

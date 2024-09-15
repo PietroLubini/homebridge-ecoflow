@@ -1,12 +1,17 @@
 import {
   DeltaProUltraAllQuotaData,
+  PdSetStatus,
   PdStatus,
   PdStatusAc,
   PdStatusSoc,
   PdStatusUsb,
   PdStatusWatts,
 } from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraHttpApiContracts';
-import { DeltaProUltraMqttQuotaMessageWithParams } from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraMqttApiContracts';
+import {
+  DeltaProUltraMqttMessageAddrType,
+  DeltaProUltraMqttQuotaMessage,
+  DeltaProUltraMqttQuotaMessageWithParams,
+} from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraMqttApiContracts';
 import { OutletAcService } from '@ecoflow/accessories/batteries/deltaproultra/services/outletAcService';
 import { OutletUsbService } from '@ecoflow/accessories/batteries/deltaproultra/services/outletUsbService';
 import { SwitchXboostService } from '@ecoflow/accessories/batteries/deltaproultra/services/switchXboostService';
@@ -46,34 +51,46 @@ export class DeltaProUltraAccessory extends EcoFlowAccessoryWithQuotaBase<DeltaP
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
-    const data = (message as DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData>).data;
-    if (data.hs_yj751_pd_appshow_addr !== undefined && Object.keys(data.hs_yj751_pd_appshow_addr).length > 0) {
-      Object.assign(this.quota.hs_yj751_pd_appshow_addr, data.hs_yj751_pd_appshow_addr);
-      this.updatePdValues(data.hs_yj751_pd_appshow_addr);
+    const accessoryMessage = message as DeltaProUltraMqttQuotaMessage;
+    if (accessoryMessage.addr === DeltaProUltraMqttMessageAddrType.PD) {
+      const pdStatus = (message as DeltaProUltraMqttQuotaMessageWithParams<PdStatus>).param;
+      Object.assign(this.quota.hs_yj751_pd_appshow_addr, pdStatus);
+      this.updatePdValues(pdStatus);
+    } else if (accessoryMessage.addr === DeltaProUltraMqttMessageAddrType.PD_SET) {
+      const pdSetStatus = (message as DeltaProUltraMqttQuotaMessageWithParams<PdSetStatus>).param;
+      Object.assign(this.quota.hs_yj751_pd_app_set_info_addr, pdSetStatus);
+      // this.updatePdSetValues(pdSetStatus);
     }
-    // if (
-    //   data.hs_yj751_pd_app_set_info_addr !== undefined &&
-    //   Object.keys(data.hs_yj751_pd_app_set_info_addr).length > 0
-    // ) {
-    //   Object.assign(this.quota.hs_yj751_pd_app_set_info_addr, data.hs_yj751_pd_app_set_info_addr);
-    //   this.updatePdSetValues(data.hs_yj751_pd_app_set_info_addr);
-    // }
   }
 
   protected override initializeQuota(quota: DeltaProUltraAllQuotaData | null): DeltaProUltraAllQuotaData {
     const result = quota ?? ({} as DeltaProUltraAllQuotaData);
-    if (!result.hs_yj751_pd_app_set_info_addr) {
-      result.hs_yj751_pd_app_set_info_addr = {};
-    }
     if (!result.hs_yj751_pd_appshow_addr) {
       result.hs_yj751_pd_appshow_addr = {};
+    }
+    if (!result.hs_yj751_pd_app_set_info_addr) {
+      result.hs_yj751_pd_app_set_info_addr = {};
     }
     return result;
   }
 
-  protected override updateInitialValues(data: DeltaProUltraAllQuotaData): void {
-    const message: DeltaProUltraMqttQuotaMessageWithParams<DeltaProUltraAllQuotaData> = {
-      data,
+  protected override updateInitialValues(initialData: DeltaProUltraAllQuotaData): void {
+    this.updatePdStatusInitialValues(initialData.hs_yj751_pd_appshow_addr);
+    this.updatePdSetStatusInitialValues(initialData.hs_yj751_pd_app_set_info_addr);
+  }
+
+  private updatePdStatusInitialValues(params: PdStatus): void {
+    const message: DeltaProUltraMqttQuotaMessageWithParams<PdStatus> = {
+      param: params,
+      addr: DeltaProUltraMqttMessageAddrType.PD,
+    };
+    this.processQuotaMessage(message);
+  }
+
+  private updatePdSetStatusInitialValues(params: PdSetStatus): void {
+    const message: DeltaProUltraMqttQuotaMessageWithParams<PdSetStatus> = {
+      param: params,
+      addr: DeltaProUltraMqttMessageAddrType.PD_SET,
     };
     this.processQuotaMessage(message);
   }
