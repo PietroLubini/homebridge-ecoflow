@@ -51,6 +51,7 @@ export class EcoFlowHttpApiManager {
     );
     if (!response.failed) {
       const data = this.convertData<TData>(response.data);
+      deviceInfo.log.debug('Received all quotas', data);
       return data;
     }
     return null;

@@ -94,7 +94,11 @@ export abstract class EcoFlowAccessoryBase {
     }
     this.log.debug('Received "SetReply" response:', message);
     delete this.setReplies[messageKey];
-    if (message.data.ack) {
+    if (
+      (message.data.ack === undefined && message.data.result === undefined) ||
+      (message.data.ack !== undefined && message.data.ack !== false) ||
+      (message.data.result !== undefined && message.data.result !== false)
+    ) {
       this.log.warn('Failed to set a value. Reverts value back for:', command.requestMessage.id);
       command.revert();
     } else {

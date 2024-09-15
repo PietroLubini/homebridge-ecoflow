@@ -36,26 +36,28 @@ export interface PowerStreamMqttSetMessage extends MqttSetMessage {
   cmdCode: PowerStreamMqttSetCmdCodeType;
 }
 
-export interface PowerStreamMqttSetMessageWithParams<TParams>
+export interface PowerStreamMqttSetMessageParams {}
+
+export interface PowerStreamMqttSetMessageWithParams<TParams extends PowerStreamMqttSetMessageParams>
   extends MqttSetMessageWithParams<TParams>,
     PowerStreamMqttSetMessage {}
 
-export interface PowerStreamMqttSetSupplyPriorityMessageParams {
+export interface PowerStreamMqttSetSupplyPriorityMessageParams extends PowerStreamMqttSetMessageParams {
   supplyPriority: SupplyPriorityType;
 }
 
-export interface PowerStreamMqttSetPermanentWattsMessageParams {
+export interface PowerStreamMqttSetPermanentWattsMessageParams extends PowerStreamMqttSetMessageParams {
   permanentWatts: number;
 }
 
-export interface PowerStreamMqttSetLowerLimitMessageParams {
+export interface PowerStreamMqttSetLowerLimitMessageParams extends PowerStreamMqttSetMessageParams {
   lowerLimit: number;
 }
 
-export interface PowerStreamMqttSetUpperLimitMessageParams {
+export interface PowerStreamMqttSetUpperLimitMessageParams extends PowerStreamMqttSetMessageParams {
   upperLimit: number;
 }
 
-export interface PowerStreamMqttSetBrightnessMessageParams {
+export interface PowerStreamMqttSetBrightnessMessageParams extends PowerStreamMqttSetMessageParams {
   brightness: number;
 }

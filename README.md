@@ -29,6 +29,7 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 - [Delta 2](#delta-2)
 - [Delta 2 Max](#delta-2-max)
 - [Delta Pro](#delta-pro)
+- [Delta Pro Ultra](#delta-pro-ultra)
 - [PowerStream Micro-inverter](#powerstream-micro-inverter)
 
 For a full list of devices that could be potentially added check [here](https://developer-eu.ecoflow.com/us/document/introduction)
@@ -208,6 +209,54 @@ The following additional characteristics is available:
     {
       ...
       "model": "Delta Pro",
+      "battery": {
+        "additionalCharacteristics": [
+          "Battery Level, %",
+          "Input Consumption, W",
+          "Output Consumption, W"
+        ]
+      }
+    }
+  ],
+}
+```
+
+### Delta Pro Ultra
+
+#### Services
+
+| Service        | Characteristic        | Standard | Permission |
+| -------------- | --------------------- | -------- | ---------- |
+| Battery        | BatteryLevel          | ✅       | Read       |
+| Battery        | ChargingState         | ✅       | Read       |
+| Battery        | StatusLowBattery      | ✅       | Read       |
+| Outlet AC      | On                    | ✅       | Read/Write |
+| Outlet AC      | OutletInUse           | ✅       | Read       |
+| Outlet AC      | Battery Level, %      | 🔲       | Read       |
+| Outlet AC      | Input Consumption, W  | 🔲       | Read       |
+| Outlet AC      | Output Consumption, W | 🔲       | Read       |
+| Outlet USB     | On                    | ✅       | Read       |
+| Outlet USB     | OutletInUse           | ✅       | Read       |
+| Outlet USB     | Battery Level, %      | 🔲       | Read       |
+| Outlet USB     | Input Consumption, W  | 🔲       | Read       |
+| Outlet USB     | Output Consumption, W | 🔲       | Read       |
+| Switch X-Boost | On                    | ✅       | Read/Write |
+
+#### Configuration
+
+The following additional characteristics is available:
+
+- Input Consumption, W
+- Output Consumption, W
+- Battery Level, %
+
+```json
+{
+  ...
+  "devices": [
+    {
+      ...
+      "model": "Delta Pro Ultra",
       "battery": {
         "additionalCharacteristics": [
           "Battery Level, %",

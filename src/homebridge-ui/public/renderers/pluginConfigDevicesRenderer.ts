@@ -13,11 +13,23 @@ export class PluginConfigDevicesRenderer extends PluginConfigRendererBase {
   private form: IForm | undefined;
   private readonly $tabs: JQuery;
   private readonly $tabPanels: JQuery;
+  private readonly _hideDeviceSettingsPerModel: Record<string, string[]>;
 
   constructor(componentRenderer: ComponentRenderer) {
     super(componentRenderer);
     this.$tabs = $('#devicesTabs');
     this.$tabPanels = $('#devicesPanels');
+    this._hideDeviceSettingsPerModel = {
+      'Delta 2': ['powerStream'],
+      'Delta 2 Max': ['powerStream'],
+      'Delta Pro': ['powerStream'],
+      'Delta Pro Ultra': ['powerStream'],
+      PowerStream: ['battery'],
+    };
+  }
+
+  public get hideDeviceSettingsPerModel(): Record<string, string[]> {
+    return this._hideDeviceSettingsPerModel;
   }
 
   public render(context: IContext): void {
@@ -25,12 +37,7 @@ export class PluginConfigDevicesRenderer extends PluginConfigRendererBase {
       homebridgeProvider: context.homebridgeProvider,
       configSchema: context.configSchema,
       configuration: context.configuration,
-      hideDeviceSettingsPerModel: {
-        'Delta 2': ['powerStream'],
-        'Delta 2 Max': ['powerStream'],
-        'Delta Pro': ['powerStream'],
-        PowerStream: ['battery'],
-      },
+      hideDeviceSettingsPerModel: this.hideDeviceSettingsPerModel,
     });
   }
 

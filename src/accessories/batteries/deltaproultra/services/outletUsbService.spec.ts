@@ -1,5 +1,6 @@
-import { DeltaProAllQuotaData } from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProHttpApiContracts';
-import { OutletUsbService } from '@ecoflow/accessories/batteries/deltapro/services/outletUsbService';
+import { DeltaProUltraAllQuotaData } from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraHttpApiContracts';
+import { DeltaProUltraMqttSetCmdCodeType } from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraMqttApiContracts';
+import { OutletUsbService } from '@ecoflow/accessories/batteries/deltaproultra/services/outletUsbService';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
@@ -10,7 +11,7 @@ import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
 describe('OutletUsbService', () => {
   let service: OutletUsbService;
-  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<DeltaProAllQuotaData>>;
+  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<DeltaProUltraAllQuotaData>>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
@@ -53,7 +54,7 @@ describe('OutletUsbService', () => {
       httpApiManager: httpApiManagerMock,
       quota: {},
       sendSetCommand: jest.fn(),
-    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<DeltaProAllQuotaData>>;
+    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<DeltaProUltraAllQuotaData>>;
     service = new OutletUsbService(ecoFlowAccessoryMock);
     hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
   });
@@ -160,20 +161,55 @@ describe('OutletUsbService', () => {
   });
 
   describe('onOnSet', () => {
-    let characteristic: Characteristic;
+    let onCharacteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
-      characteristic = service.service.getCharacteristic(HapCharacteristic.On);
+      onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
     });
 
-    it('should not allow to set ON value', () => {
-      characteristic.value = 1;
+    it('should send Set command to device when On value was changed to true', () => {
+      onCharacteristic.setValue(true);
 
-      characteristic.setValue(true);
-      const actual = characteristic.value;
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          cmdCode: DeltaProUltraMqttSetCmdCodeType.YJ751_PD_DC_SWITCH_SET,
+          params: {
+            enabled: 1,
+          },
+        },
+        expect.any(Function)
+      );
+    });
 
-      expect(actual).toEqual(1);
+    it('should send Set command to device when On value was changed to false', () => {
+      onCharacteristic.setValue(false);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          cmdCode: DeltaProUltraMqttSetCmdCodeType.YJ751_PD_DC_SWITCH_SET,
+          params: {
+            enabled: 0,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('should revert changing of On state when sending Set command to device is failed', () => {
+      onCharacteristic.updateValue(true);
+
+      onCharacteristic.setValue(false);
+      const revertFunc = ecoFlowAccessoryMock.sendSetCommand.mock.calls[0][1];
+      revertFunc();
+      const actual = onCharacteristic.value;
+
+      expect(actual).toBeTruthy();
+      expect(logMock.debug.mock.calls).toEqual([['USB State ->', true]]);
     });
   });
 });
