@@ -373,28 +373,28 @@ describe('PowerStreamAccessory', () => {
         it('should initialize indicator service with default max power demand when powerStream settings are not defined in config', () => {
           const actual = run({} as DeviceConfig);
 
-          expect(actual).toEqual(600);
+          expect(actual).toEqual(6000);
         });
 
         it(`should initialize indicator service with default max power demand
           when powerStream.type settings are not defined in config`, () => {
           const actual = run({ powerStream: {} } as DeviceConfig);
 
-          expect(actual).toEqual(600);
+          expect(actual).toEqual(6000);
         });
 
         it(`should initialize indicator service with 6000 max power demand
           when powerStream.type is 600W`, () => {
           const actual = run({ powerStream: { type: PowerStreamConsumptionType.W600 } } as DeviceConfig);
 
-          expect(actual).toEqual(600);
+          expect(actual).toEqual(6000);
         });
 
         it(`should initialize indicator service with 8000 max power demand
           when powerStream.type is 800W`, () => {
           const actual = run({ powerStream: { type: PowerStreamConsumptionType.W800 } } as DeviceConfig);
 
-          expect(actual).toEqual(800);
+          expect(actual).toEqual(8000);
         });
       });
     });
@@ -711,7 +711,7 @@ describe('PowerStreamAccessory', () => {
             cmdFunc: MqttPowerStreamMessageFuncType.Func20,
             cmdId: MqttPowerStreamMessageType.Heartbeat,
             param: {
-              permanentWatts: 4500,
+              permanentWatts: 450,
             },
           };
 
@@ -719,6 +719,21 @@ describe('PowerStreamAccessory', () => {
 
           expect(inverterPowerDemandServiceMock.updateState).toHaveBeenCalledWith(true);
           expect(inverterPowerDemandServiceMock.updateRotationSpeed).toHaveBeenCalledWith(450);
+        });
+
+        it('should update INV power demand when Hearbeat message is received with permanentWatts equal to 0', async () => {
+          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
+            cmdId: MqttPowerStreamMessageType.Heartbeat,
+            param: {
+              permanentWatts: 0,
+            },
+          };
+
+          processQuotaMessage(message);
+
+          expect(inverterPowerDemandServiceMock.updateState).toHaveBeenCalledWith(false);
+          expect(inverterPowerDemandServiceMock.updateRotationSpeed).toHaveBeenCalledWith(0);
         });
       });
     });
@@ -863,7 +878,7 @@ describe('PowerStreamAccessory', () => {
         await accessory.initializeDefaultValues();
 
         expect(inverterPowerDemandServiceMock.updateState).toHaveBeenCalledWith(true);
-        expect(inverterPowerDemandServiceMock.updateRotationSpeed).toHaveBeenCalledWith(700);
+        expect(inverterPowerDemandServiceMock.updateRotationSpeed).toHaveBeenCalledWith(7000);
       });
 
       it(`should update INV power demand-related characteristics

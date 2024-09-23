@@ -18,6 +18,12 @@
         "items": {
           "type": "object",
           "properties": {
+            "disabled": {
+              "title": "Disabled",
+              "type": "boolean",
+              "required": false,
+              "description": "A value indicating whether device should be ignored"
+            },
             "name": {
               "title": "Name",
               "type": "string",

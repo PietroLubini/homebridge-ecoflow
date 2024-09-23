@@ -216,6 +216,16 @@ describe('EcoFlowHomebridgePlatform', () => {
         expect(commonLogMock.warn).toHaveBeenCalledWith('Devices are not configured');
       });
 
+      it('should not register device when it is disabled', () => {
+        delta2Config.disabled = true;
+        accessory1Mock.context.deviceConfig = delta2Config;
+        config.devices = [delta2Config];
+
+        registerDevices();
+
+        expect(log1Mock.warn).toHaveBeenCalledWith('Device is disabled. Ignoring the device');
+      });
+
       it('should not register device when serial number is duplicated', () => {
         delta2MaxConfig.serialNumber = 'sn1';
         accessory2Mock.UUID = 'id1';

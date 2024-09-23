@@ -35,6 +35,7 @@ export interface DeviceAccessConfig extends DeviceInfoConfig {
 }
 
 export interface DeviceConfig extends AccessoryConfig, DeviceAccessConfig {
+  disabled: boolean;
   battery?: BatteryDeviceConfig;
   powerStream?: PowerStreamDeviceConfig;
 }

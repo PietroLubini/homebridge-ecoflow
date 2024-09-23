@@ -11,17 +11,18 @@ export class IndicatorService extends LightBulbServiceBase {
     super(ecoFlowAccessory, maxBrightness, 'Indicator');
   }
 
-  protected override setOn(): Promise<void> {
-    throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.READ_ONLY_CHARACTERISTIC);
+  protected override processOnSetOn(state: boolean): Promise<void> {
+    this.setBrightness(state ? 100 : 0);
+    return Promise.resolve();
   }
 
-  protected override setBrightness(value: number, revert: () => void): Promise<void> {
+  protected override processOnSetBrightness(value: number, revert: () => void): Promise<void> {
     const message: MqttPowerStreamSetMessageWithParams<MqttPowerStreamSetBrightnessMessageParams> = {
       id: 0,
       version: '',
       cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
       params: {
-        brightness: value,
+        brightness: Math.round(value),
       },
     };
     return this.ecoFlowAccessory.sendSetCommand(message, revert);

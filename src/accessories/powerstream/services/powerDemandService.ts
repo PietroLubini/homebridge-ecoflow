@@ -11,11 +11,12 @@ export class PowerDemandService extends FanServiceBase {
     super(ecoFlowAccessory, maxPowerDemand, 'Power Demand');
   }
 
-  protected override setOn(): Promise<void> {
-    throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.READ_ONLY_CHARACTERISTIC);
+  protected override processOnSetOn(state: boolean): Promise<void> {
+    this.setRotationSpeed(state ? 100 : 0);
+    return Promise.resolve();
   }
 
-  protected override setRotationSpeed(value: number, revert: () => void): Promise<void> {
+  protected override processOnSetRotationSpeed(value: number, revert: () => void): Promise<void> {
     const message: MqttPowerStreamSetMessageWithParams<MqttPowerStreamSetPermanentWattsMessageParams> = {
       id: 0,
       version: '',

@@ -108,26 +108,26 @@ Quota is sent every 10 seconds with random values in this mode.
 
 #### Services
 
-| Service    | Characteristic        | Standard | Permission |
-| ---------- | --------------------- | -------- | ---------- |
-| Battery    | BatteryLevel          | ✅       | Read       |
-| Battery    | ChargingState         | ✅       | Read       |
-| Battery    | StatusLowBattery      | ✅       | Read       |
-| Outlet AC  | On                    | ✅       | Read/Write |
-| Outlet AC  | OutletInUse           | ✅       | Read       |
-| Outlet AC  | Battery Level, %      | 🔲       | Read       |
-| Outlet AC  | Input Consumption, W  | 🔲       | Read       |
-| Outlet AC  | Output Consumption, W | 🔲       | Read       |
-| Outlet CAR | On                    | ✅       | Read/Write |
-| Outlet CAR | OutletInUse           | ✅       | Read       |
-| Outlet CAR | Battery Level, %      | 🔲       | Read       |
-| Outlet CAR | Input Consumption, W  | 🔲       | Read       |
-| Outlet CAR | Output Consumption, W | 🔲       | Read       |
-| Outlet USB | On                    | ✅       | Read/Write |
-| Outlet USB | OutletInUse           | ✅       | Read       |
-| Outlet USB | Battery Level, %      | 🔲       | Read       |
-| Outlet USB | Input Consumption, W  | 🔲       | Read       |
-| Outlet USB | Output Consumption, W | 🔲       | Read       |
+| EcoFlow Parameter | Service | Characteristic        | Standard | Permission |
+| ----------------- | ------- | --------------------- | -------- | ---------- |
+| Battery Level     | Battery | BatteryLevel          | ✅       | Read       |
+| Input             | Battery | ChargingState         | ✅       | Read       |
+| Battery Level     | Battery | StatusLowBattery      | ✅       | Read       |
+| AC                | Outlet  | On                    | ✅       | Read/Write |
+| AC Output         | Outlet  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
+| 12V DC            | Outlet  | On                    | ✅       | Read/Write |
+| 12V DC Output     | Outlet  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
+| USB               | Outlet  | On                    | ✅       | Read/Write |
+| USB Output        | Outlet  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
 
 #### Configuration
 
@@ -168,24 +168,24 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 
 #### Services
 
-| Service             | Characteristic        | Standard | Permission |
-| ------------------- | --------------------- | -------- | ---------- |
-| Outlet INV          | On                    | ✅       | Read       |
-| Outlet INV          | OutletInUse           | ✅       | Read       |
-| Outlet INV          | Input Consumption, W  | 🔲       | Read       |
-| Outlet INV          | Output Consumption, W | 🔲       | Read       |
-| Outlet PV           | On                    | ✅       | -          |
-| Outlet PV           | OutletInUse           | ✅       | Read       |
-| Outlet PV           | Output Consumption, W | 🔲       | Read       |
-| Outlet BAT          | On                    | ✅       | -          |
-| Outlet BAT          | OutletInUse           | ✅       | Read       |
-| Outlet BAT          | Battery Level, %      | 🔲       | Read       |
-| Outlet BAT          | Input Consumption, W  | 🔲       | Read       |
-| Outlet BAT          | Output Consumption, W | 🔲       | Read       |
-| Lightbulb Indicator | On                    | ✅       | Read       |
-| Lightbulb Indicator | Brightness            | ✅       | Read/write |
-| Fan Power Demand    | On                    | ✅       | Read       |
-| Fan Power Demand    | RotationSpeed         | ✅       | Read/write |
+| EcoFlow Parameter   | Service   | Characteristic        | Standard | Permission                                               |
+| ------------------- | --------- | --------------------- | -------- | -------------------------------------------------------- |
+| INV                 | Outlet    | On                    | ✅       | Read                                                     |
+| INV                 | Outlet    | OutletInUse           | ✅       | Read                                                     |
+| INV                 | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
+| INV                 | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
+| PV                  | Outlet    | On                    | ✅       | -                                                        |
+| PV                  | Outlet    | OutletInUse           | ✅       | Read                                                     |
+| PV                  | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
+| BAT                 | Outlet    | On                    | ✅       | -                                                        |
+| BAT                 | Outlet    | OutletInUse           | ✅       | Read                                                     |
+| BAT                 | Outlet    | Battery Level, %      | 🔲       | Read                                                     |
+| BAT                 | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
+| BAT                 | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
+| Lighting brightness | Lightbulb | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
+| Lighting brightness | Lightbulb | Brightness            | ✅       | Read/write                                               |
+| Power demand        | Fan       | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
+| Power demand        | Fan       | RotationSpeed         | ✅       | Read/write                                               |
 
 #### Configuration
 

@@ -107,6 +107,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     }
     for (const config of this.ecoFlowConfig.devices) {
       const log = Logger.create(this.commonLog, config.name);
+      if (config.disabled === true) {
+        log.warn('Device is disabled. Ignoring the device');
+        continue;
+      }
       const existingAccessory = configuredAccessories.find(
         accessory => accessory.context.deviceConfig.serialNumber === config.serialNumber
       );
