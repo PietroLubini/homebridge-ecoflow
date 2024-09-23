@@ -1,10 +1,5 @@
 import { MqttDevice } from '@ecoflow/apis/containers/mqttDevice';
-import {
-  MqttMessageType,
-  MqttQuotaMessage,
-  MqttSetReplyMessage,
-  MqttTopicType,
-} from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { MqttQuotaMessage, MqttSetReplyMessage, MqttTopicType } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceInfoConfig } from '@ecoflow/config';
 import { Logging } from 'homebridge';
 import { Observable, Subscription } from 'rxjs';
@@ -17,7 +12,7 @@ describe('MqttDevice', () => {
   let setReplyCallbackMock: jest.Mock;
 
   beforeEach(() => {
-    logMock = { warn: jest.fn() } as unknown as jest.Mocked<Logging>;
+    logMock = { debug: jest.fn(), warn: jest.fn() } as unknown as jest.Mocked<Logging>;
     config = { name: 'name1', serialNumber: 'sn1' };
     device = new MqttDevice(config, logMock);
 
@@ -57,6 +52,12 @@ describe('MqttDevice', () => {
       expect(setReplyCallbackMock).toHaveBeenCalledWith(message);
       expect(quotaCallbackMock).not.toHaveBeenCalled();
     });
+
+    it('should log message when it is received', () => {
+      device.processReceivedMessage(MqttTopicType.Quota, message);
+
+      expect(logMock.debug).toHaveBeenCalledWith('Received messasge:', message);
+    });
   });
 
   describe('subscribeOnMessage', () => {
@@ -89,7 +90,7 @@ describe('MqttDevice', () => {
     });
 
     it('should subscribe on quota$ observable when subscribing on quota topic', () => {
-      const quotaMessage: MqttQuotaMessage = { typeCode: MqttMessageType.EMS };
+      const quotaMessage: MqttQuotaMessage = { param1: '1' };
       quotaMock.subscribe.mockReturnValueOnce({} as jest.Mocked<Subscription>);
 
       device.subscribeOnMessage(MqttTopicType.Quota, quotaCallbackMock);
@@ -100,7 +101,7 @@ describe('MqttDevice', () => {
     });
 
     it('should subscribe on setReply$ observable when subscribing on set_reply topic', () => {
-      const setReplyMessage: MqttSetReplyMessage = { id: 1, data: { ack: false }, operateType: 'ot1', version: 'v1' };
+      const setReplyMessage: MqttSetReplyMessage = { id: 1, data: { ack: false }, version: 'v1' };
       setReplyMock.subscribe.mockReturnValueOnce({} as jest.Mocked<Subscription>);
 
       device.subscribeOnMessage(MqttTopicType.SetReply, setReplyCallbackMock);

@@ -1,4 +1,4 @@
-import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic, CharacteristicValue, Logging, Service, WithUUID } from 'homebridge';
 
@@ -8,7 +8,11 @@ export abstract class ServiceBase {
   protected characteristics: Characteristic[] = [];
   private _service: Service | null = null;
 
-  constructor(protected readonly ecoFlowAccessory: EcoFlowAccessory) {
+  constructor(
+    private readonly serviceType: WithUUID<typeof Service>,
+    protected readonly ecoFlowAccessory: EcoFlowAccessoryBase,
+    protected readonly serviceSubType?: string
+  ) {
     this.log = ecoFlowAccessory.log;
     this.platform = ecoFlowAccessory.platform;
   }
@@ -37,7 +41,15 @@ export abstract class ServiceBase {
     return this._service;
   }
 
-  protected abstract createService(): Service;
+  protected get serviceName(): string {
+    return `${this.ecoFlowAccessory.config.name} ${this.serviceSubType}`;
+  }
+
+  protected createService(): Service {
+    return this.serviceSubType
+      ? this.getOrAddServiceById(this.serviceType, this.serviceName, this.serviceSubType)
+      : this.getOrAddService(this.serviceType, this.ecoFlowAccessory.config.name);
+  }
 
   protected abstract addCharacteristics(): Characteristic[];
 
@@ -71,7 +83,16 @@ export abstract class ServiceBase {
     name: string,
     value: CharacteristicValue
   ): void {
-    this.log.debug(`${name} ->`, value);
+    const newName = this.serviceSubType !== undefined ? `${this.serviceSubType} ${name}` : name;
+    this.log.debug(`${newName} ->`, value);
     this.service.getCharacteristic(characteristic).updateValue(value);
+  }
+
+  protected covertPercentsToValue(percents: number, maxValue: number): number {
+    return (percents * maxValue) / 100;
+  }
+
+  protected covertValueToPercents(value: number, maxValue: number): number {
+    return (value * 100) / maxValue;
   }
 }

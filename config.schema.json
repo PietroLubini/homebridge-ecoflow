@@ -18,6 +18,12 @@
         "items": {
           "type": "object",
           "properties": {
+            "disabled": {
+              "title": "Disabled",
+              "type": "boolean",
+              "required": false,
+              "description": "A value indicating whether device should be ignored"
+            },
             "name": {
               "title": "Name",
               "type": "string",
@@ -28,7 +34,7 @@
               "title": "Model",
               "type": "string",
               "required": true,
-              "enum": ["Delta 2", "Delta 2 Max"]
+              "enum": ["Delta 2", "Delta 2 Max", "PowerStream"]
             },
             "serialNumber": {
               "title": "Serial Number",
@@ -56,6 +62,12 @@
               "required": true,
               "description": "Secret Key from \"EcoFlow IoT Developer Platform\" (https://developer-eu.ecoflow.com)"
             },
+            "simulate": {
+              "title": "Simulate",
+              "type": "boolean",
+              "required": false,
+              "description": "A value indicating whether device should be simulated"
+            },
             "battery": {
               "title": "Battery Settings",
               "type": "object",
@@ -69,6 +81,70 @@
                     "title": "Characteristic",
                     "type": "string",
                     "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W"]
+                  }
+                }
+              }
+            },
+            "powerStream": {
+              "title": "PowerStream Settings",
+              "type": "object",
+              "properties": {
+                "type": {
+                  "title": "Type",
+                  "type": "string",
+                  "enum": ["600", "800"],
+                  "description": "Maximum power, W"
+                },
+
+                "battery": {
+                  "title": "Battery Settings",
+                  "type": "object",
+                  "properties": {
+                    "additionalCharacteristics": {
+                      "title": "Additional characteristics",
+                      "description": "List of additional characteristics for Battery connected to PowerStream",
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "title": "Characteristic",
+                        "type": "string",
+                        "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W"]
+                      }
+                    }
+                  }
+                },
+                "pv": {
+                  "title": "PV Settings",
+                  "type": "object",
+                  "properties": {
+                    "additionalCharacteristics": {
+                      "title": "Additional characteristics",
+                      "description": "List of additional characteristics for PVs connected for PowerStream",
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "title": "Characteristic",
+                        "type": "string",
+                        "enum": ["Output Consumption, W"]
+                      }
+                    }
+                  }
+                },
+                "inverter": {
+                  "title": "Inverter Settings",
+                  "type": "object",
+                  "properties": {
+                    "additionalCharacteristics": {
+                      "title": "Additional characteristics",
+                      "description": "List of additional characteristics for PowerStream",
+                      "type": "array",
+                      "uniqueItems": true,
+                      "items": {
+                        "title": "Characteristic",
+                        "type": "string",
+                        "enum": ["Input Consumption, W", "Output Consumption, W"]
+                      }
+                    }
                   }
                 }
               }

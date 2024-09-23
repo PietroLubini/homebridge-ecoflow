@@ -1,12 +1,7 @@
 import { DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
-import {
-  MqttQuotaMessage,
-  MqttSetMessage,
-  MqttSetMessageWithParams,
-  MqttSetReplyMessage,
-} from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { MqttQuotaMessage, MqttSetMessage, MqttSetReplyMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
@@ -14,7 +9,7 @@ import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 import { Subscription } from 'rxjs';
 
-export abstract class EcoFlowAccessory {
+export abstract class EcoFlowAccessoryBase {
   private _services: ServiceBase[] = [];
   private reconnectMqttTimeoutId: NodeJS.Timeout | null = null;
   private isMqttConnected: boolean = false;
@@ -52,7 +47,10 @@ export abstract class EcoFlowAccessory {
     this.accessory.services
       .filter(service => !services.includes(service))
       .forEach(service => {
-        this.log.warn('Removing obsolete service from accessory:', service.displayName);
+        this.log.warn(
+          'Removing obsolete service from accessory:',
+          service.displayName === undefined || service.displayName === '' ? service.name : service.displayName
+        );
         this.accessory.removeService(service);
       });
     this.services
@@ -68,21 +66,11 @@ export abstract class EcoFlowAccessory {
     this.subscriptions.forEach(subscription => subscription.unsubscribe());
   }
 
-  public async sendSetCommand<TParams>(
-    moduleType: number,
-    operateType: string,
-    params: TParams,
-    revert: () => void
-  ): Promise<void> {
-    const requestMessage: MqttSetMessageWithParams<TParams> = {
-      id: Math.floor(Math.random() * 1000000),
-      version: '1.0',
-      moduleType,
-      operateType,
-      params,
-    };
-    this.setReplies[this.getMqttSetMessageKey(requestMessage)] = { requestMessage, revert };
-    await this.mqttApiManager.sendSetCommand(this.deviceInfo, requestMessage);
+  public async sendSetCommand(message: MqttSetMessage, revert: () => void): Promise<void> {
+    message.id = Math.floor(Math.random() * 1000000);
+    message.version = '1.0';
+    this.setReplies[this.getMqttSetMessageKey(message)] = { requestMessage: message, revert };
+    await this.mqttApiManager.sendSetCommand(this.deviceInfo, message);
   }
 
   protected abstract getServices(): ServiceBase[];
@@ -107,15 +95,15 @@ export abstract class EcoFlowAccessory {
     this.log.debug('Received "SetReply" response:', message);
     delete this.setReplies[messageKey];
     if (message.data.ack) {
-      this.log.warn('Failed to set a value. Reverts value back for:', command.requestMessage.operateType);
+      this.log.warn('Failed to set a value. Reverts value back for:', command.requestMessage.id);
       command.revert();
     } else {
-      this.log.debug('Setting of a value was successful for:', command.requestMessage.operateType);
+      this.log.debug('Setting of a value was successful for:', command.requestMessage.id);
     }
   }
 
   private getMqttSetMessageKey(message: MqttSetMessage): string {
-    return `${message.operateType}_${message.id}`;
+    return message.id.toString();
   }
 
   private initializeServices(): void {
@@ -143,44 +131,4 @@ export abstract class EcoFlowAccessory {
       this.subscriptions = this.subscribeOnParameterUpdates();
     }
   }
-}
-
-export abstract class EcoFlowAccessoryWithQuota<TAllQuotaData> extends EcoFlowAccessory {
-  private _quota: TAllQuotaData | null = null;
-
-  constructor(
-    platform: EcoFlowHomebridgePlatform,
-    accessory: PlatformAccessory,
-    config: DeviceConfig,
-    log: Logging,
-    httpApiManager: EcoFlowHttpApiManager,
-    mqttApiManager: EcoFlowMqttApiManager
-  ) {
-    super(platform, accessory, config, log, httpApiManager, mqttApiManager);
-  }
-
-  public override async initializeDefaultValues(shouldUpdateInitialValues: boolean = true): Promise<void> {
-    if (!this._quota) {
-      this._quota = await this.httpApiManager.getAllQuotas<TAllQuotaData>(this.deviceInfo);
-    }
-    const quotaReceived = !!this._quota;
-    this._quota = this.initializeQuota(this._quota);
-    if (!quotaReceived) {
-      this.log.warn('Quotas were not received');
-    }
-    if (quotaReceived && shouldUpdateInitialValues) {
-      this.updateInitialValues(this.quota);
-    }
-  }
-
-  public get quota(): TAllQuotaData {
-    if (!this._quota) {
-      this._quota = this.initializeQuota(this._quota);
-    }
-    return this._quota;
-  }
-
-  protected abstract updateInitialValues(quota: TAllQuotaData): void;
-
-  protected abstract initializeQuota(quota: TAllQuotaData | null): TAllQuotaData;
 }

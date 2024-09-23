@@ -23,10 +23,11 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 - Fully customizable HomeKit accessories
 - HomeKit automations for your EcoFlow devices
 
-## Supported device types
+## Supported Device Types
 
-- Delta 2
-- Delta 2 Max
+- [Delta 2](#delta-2)
+- [Delta 2 Max](#delta-2-max)
+- [PowerStream Micro-inverter](#powerstream-micro-inverter)
 
 For a full list of devices that could be potentially added check [here](https://developer-eu.ecoflow.com/us/document/introduction)
 
@@ -44,12 +45,13 @@ sudo npm install -g @pietrolubini/homebridge-ecoflow
 
 Add the `EcoFlowHomebridge` platform in `config.json` in your home directory inside `.homebridge`. Add your devices in the `devices` array. Example of configuration:
 
-```js
+```json
 {
   "platforms": [
     {
       "devices": [
         {
+          "disabled": false,
           "name": "Battery",
           "model": "Delta 2 Max",
           "serialNumber": "R123ABCDEGHI321",
@@ -59,26 +61,90 @@ Add the `EcoFlowHomebridge` platform in `config.json` in your home directory ins
         }
       ],
       "name": "Homebridge EcoFlow",
-      "platform": "EcoFlowHomebridge",
+      "platform": "EcoFlowHomebridge"
     }
   ]
 }
 ```
 
-### Battery-specific Configuration
+### AccessKey and SecretKey
 
-If `devices`.`model` is one of [`Delta 2`, `Delta 2 Max`] it is possible to set turn on/off additional characteristics:
+For the plugin to work EcoFlow account's `AccessKey` and `SecretKey` is required. To retrieve them
+
+- Register on [EcoFlow IoT Developer Platform](https://developer-eu.ecoflow.com/)
+- Wait until your request will be approved
+- Generate `AccessKey`/`SecretKey` pair [here](https://developer-eu.ecoflow.com/us/security)
+
+### Simulate Accessory
+
+It is possible to simulate accessory by adding `simulate` property to device's configuration (`accessKey` and `secretKey` could contain mock values).
+Quota is sent every 10 seconds with random values in this mode.
+
+> 🛈 Each simulated device should have fake unique `serialNumber`, `accessKey` and `secretKey`
+
+```json
+{
+  "platforms": [
+    {
+      "devices": [
+        {
+          "disabled": false,
+          "name": "Battery",
+          "model": "Delta 2 Max",
+          "serialNumber": "R123ABCDEGHI321",
+          "accessKey": "key1",
+          "secretKey": "key2",
+          "simulate": true
+        }
+      ],
+      "name": "Homebridge EcoFlow",
+      "platform": "EcoFlowHomebridge"
+    }
+  ]
+}
+```
+
+## Supported Devices
+
+### Delta 2
+
+#### Services
+
+| EcoFlow Parameter | Service | Characteristic        | Standard | Permission |
+| ----------------- | ------- | --------------------- | -------- | ---------- |
+| Battery Level     | Battery | BatteryLevel          | ✅       | Read       |
+| Input             | Battery | ChargingState         | ✅       | Read       |
+| Battery Level     | Battery | StatusLowBattery      | ✅       | Read       |
+| AC                | Outlet  | On                    | ✅       | Read/Write |
+| AC Output         | Outlet  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
+| 12V DC            | Outlet  | On                    | ✅       | Read/Write |
+| 12V DC Output     | Outlet  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
+| USB               | Outlet  | On                    | ✅       | Read/Write |
+| USB Output        | Outlet  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
+
+#### Configuration
+
+The following additional characteristics is available:
 
 - Input Consumption, W
 - Output Consumption, W
 - Battery Level, %
 
-```js
+```json
 {
   ...
   "devices": [
     {
-      ...,
+      ...
       "model": "Delta 2 Max",
       "battery": {
         "additionalCharacteristics": [
@@ -96,13 +162,80 @@ The characteristics could be used as conditions in HomeKit Automation that uses 
 
 <img src="docs/images/BatteryAdditionalCharacteristics.jpg" alt="Battery Additional Characteristics" width="300">
 
-### AccessKey and SecretKey
+### Delta 2 Max
 
-For the plugin to work EcoFlow account's `AccessKey` and `SecretKey` is required. To retrieve them
+Supported services and configuration are the same as for [Delta 2](#delta-2)
 
-- Register on [EcoFlow IoT Developer Platform](https://developer-eu.ecoflow.com/)
-- Wait until your request will be approved
-- Generate `AccessKey`/`SecretKey` pair [here](https://developer-eu.ecoflow.com/us/security)
+### PowerStream Micro-inverter
+
+#### Services
+
+| EcoFlow Parameter   | Service   | Characteristic        | Standard | Permission                                               |
+| ------------------- | --------- | --------------------- | -------- | -------------------------------------------------------- |
+| Inverter            | Outlet    | On                    | ✅       | Read                                                     |
+| Inverter Output     | Outlet    | OutletInUse           | ✅       | Read                                                     |
+| Inverter Input      | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
+| Inverter Output     | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
+| Solar               | Outlet    | On                    | ✅       | -                                                        |
+| Solar Output        | Outlet    | OutletInUse           | ✅       | Read                                                     |
+| Solar Output        | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
+| Battery             | Outlet    | On                    | ✅       | -                                                        |
+| Battery Output      | Outlet    | OutletInUse           | ✅       | Read                                                     |
+| Battery Level       | Outlet    | Battery Level, %      | 🔲       | Read                                                     |
+| Battery Input       | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
+| Battery Output      | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
+| Lighting brightness | Lightbulb | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
+| Lighting brightness | Lightbulb | Brightness            | ✅       | Read/write                                               |
+| Power demand        | Fan       | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
+| Power demand        | Fan       | RotationSpeed         | ✅       | Read/write                                               |
+
+#### Configuration
+
+The following additional characteristics is available:
+
+- type (600, 800)
+- battery:
+  - Input Consumption, W
+  - Output Consumption, W
+  - Battery Level, %
+- pv:
+  - Output Consumption, W
+- inverter:
+  - Input Consumption, W
+  - Output Consumption, W
+
+```json
+{
+  ...
+  "devices": [
+    {
+      ...
+      "model": "PowerStream",
+      "powerStream": {
+        "type": "800",
+        "battery": {
+          "additionalCharacteristics": [
+            "Battery Level, %",
+            "Input Consumption, W",
+            "Output Consumption, W"
+          ]
+        },
+        "pv": {
+          "additionalCharacteristics": [
+            "Output Consumption, W"
+          ]
+        },
+        "inverter": {
+          "additionalCharacteristics": [
+            "Input Consumption, W",
+            "Output Consumption, W"
+          ]
+        }
+      }
+    }
+  ],
+}
+```
 
 ## Troubleshooting
 

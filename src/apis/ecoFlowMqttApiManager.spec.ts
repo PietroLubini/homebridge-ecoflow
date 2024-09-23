@@ -5,12 +5,12 @@ import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { AcquireCertificateData } from '@ecoflow/apis/interfaces/httpApiContracts';
 import {
   MqttMessage,
-  MqttMessageType,
   MqttQuotaMessage,
   MqttSetReplyMessage,
   MqttTopicType,
 } from '@ecoflow/apis/interfaces/mqttApiContracts';
-import { DeviceAccessConfig, DeviceConfig, LocationType } from '@ecoflow/config';
+import { MockMqttClient } from '@ecoflow/apis/simulations/mockMqttClient';
+import { DeviceAccessConfig, DeviceConfig, DeviceModel, LocationType } from '@ecoflow/config';
 import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
 import { Logging } from 'homebridge';
 import { connectAsync, IClientOptions, IPublishPacket, MqttClient, OnMessageCallback } from 'mqtt';
@@ -18,6 +18,7 @@ import { Subscription } from 'rxjs';
 
 jest.mock('mqtt');
 jest.mock('@ecoflow/apis/containers/mqttDevice');
+jest.mock('@ecoflow/apis/simulations/mockMqttClient');
 
 describe('EcoFlowMqttApiManager', () => {
   let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
@@ -27,6 +28,7 @@ describe('EcoFlowMqttApiManager', () => {
   let machineIdProviderMock: jest.Mocked<MachineIdProvider>;
   let client1Mock: jest.Mocked<MqttClient>;
   let client3Mock: jest.Mocked<MqttClient>;
+  let mockClientMock: jest.Mocked<MockMqttClient>;
   let manager: EcoFlowMqttApiManager;
   let config1: DeviceAccessConfig;
   let config2: DeviceAccessConfig;
@@ -40,6 +42,7 @@ describe('EcoFlowMqttApiManager', () => {
   let subscription1: jest.Mocked<Subscription>;
   let subscription2: jest.Mocked<Subscription>;
   let subscription3: jest.Mocked<Subscription>;
+  let actualOptions: IClientOptions;
   const connectAsyncMock: jest.Mock = connectAsync as jest.Mock;
   const certificateData1: AcquireCertificateData = {
     certificateAccount: 'account1',
@@ -62,6 +65,20 @@ describe('EcoFlowMqttApiManager', () => {
     Object.defineProperty(mqttDevice, 'log', { value: log, configurable: true });
     mqttDevice.subscribeOnMessage.mockReset();
     return mqttDevice;
+  }
+
+  function createMockMqttClient(): jest.Mocked<MockMqttClient> {
+    const clientMock = new MockMqttClient(deviceInfo1, {} as IClientOptions) as jest.Mocked<MockMqttClient>;
+    clientMock.connect.mockReset();
+    clientMock.subscribeAsync.mockReset();
+    clientMock.publishAsync.mockReset();
+    clientMock.endAsync.mockReset();
+    (MockMqttClient as unknown as jest.Mock).mockImplementation((_: DeviceInfo, options: IClientOptions) => {
+      actualOptions = options;
+      return clientMock;
+    });
+
+    return clientMock;
   }
 
   beforeEach(() => {
@@ -91,13 +108,14 @@ describe('EcoFlowMqttApiManager', () => {
       publishAsync: jest.fn(),
       subscribeAsync: jest.fn(),
       unsubscribeAsync: jest.fn(),
-      end: jest.fn(),
+      endAsync: jest.fn(),
     } as unknown as jest.Mocked<MqttClient>;
     client3Mock = {
       subscribeAsync: jest.fn(),
       unsubscribeAsync: jest.fn(),
-      end: jest.fn(),
+      endAsync: jest.fn(),
     } as unknown as jest.Mocked<MqttClient>;
+    mockClientMock = createMockMqttClient();
     manager = new EcoFlowMqttApiManager(httpApiManagerMock, machineIdProviderMock);
 
     connectAsyncMock.mockReset();
@@ -122,16 +140,18 @@ describe('EcoFlowMqttApiManager', () => {
 
     config1 = {
       name: 'accessory1',
-      secretKey: 'secretKey1',
       accessKey: 'accessKey1',
+      secretKey: 'secretKey1',
       serialNumber: 'sn1',
+      model: DeviceModel.Delta2,
       location: LocationType.EU,
     };
     config2 = {
       name: 'accessory2',
-      secretKey: 'secretKey1',
       accessKey: 'accessKey1',
+      secretKey: 'secretKey1',
       serialNumber: 'sn2',
+      model: DeviceModel.Delta2,
       location: LocationType.EU,
     };
     config3 = {
@@ -139,6 +159,7 @@ describe('EcoFlowMqttApiManager', () => {
       secretKey: 'secretKey3',
       accessKey: 'accessKey3',
       serialNumber: 'sn3',
+      model: DeviceModel.Delta2,
       location: LocationType.EU,
     };
     deviceInfo1 = new DeviceInfo(config1, log1Mock);
@@ -174,7 +195,6 @@ describe('EcoFlowMqttApiManager', () => {
       await manager.sendSetCommand(deviceInfo1, {
         id: 20,
         version: 'v1',
-        operateType: 'ot1',
       });
 
       expect(machineIdProviderMock.getMachineId).not.toHaveBeenCalled();
@@ -185,7 +205,6 @@ describe('EcoFlowMqttApiManager', () => {
       await manager.sendSetCommand(deviceInfo1, {
         id: 20,
         version: 'v1',
-        operateType: 'ot1',
       });
 
       expect(connectAsyncMock).toHaveBeenCalledWith('mqtts://url1:8765', {
@@ -200,12 +219,10 @@ describe('EcoFlowMqttApiManager', () => {
       await manager.sendSetCommand(deviceInfo1, {
         id: 20,
         version: 'v1',
-        operateType: 'ot1',
       });
       await manager.sendSetCommand(deviceInfo1, {
         id: 21,
         version: 'v2',
-        operateType: 'ot2',
       });
 
       expect(connectAsyncMock).toHaveBeenCalledTimes(1);
@@ -216,12 +233,10 @@ describe('EcoFlowMqttApiManager', () => {
       await manager.sendSetCommand(deviceInfo1, {
         id: 20,
         version: 'v1',
-        operateType: 'ot1',
       });
       await manager.sendSetCommand(deviceInfo1, {
         id: 21,
         version: 'v2',
-        operateType: 'ot2',
       });
 
       expect(log1Mock.info).toHaveBeenCalledWith('Connected to EcoFlow MQTT Service');
@@ -231,10 +246,39 @@ describe('EcoFlowMqttApiManager', () => {
       await manager.sendSetCommand(deviceInfo1, {
         id: 20,
         version: 'v1',
-        operateType: 'ot1',
       });
 
       expect(client1Mock.on).toHaveBeenCalledWith('message', expect.any(Function));
+    });
+
+    describe('simulate', () => {
+      it('should connect to mock mqtt server when simulation is activated in config', async () => {
+        deviceInfo1.config.simulate = true;
+        await manager.sendSetCommand(deviceInfo1, {
+          id: 20,
+          version: 'v1',
+        });
+
+        expect(mockClientMock.publishAsync).toHaveBeenCalled();
+      });
+
+      it('should acquire fake ceritifcate when simulation is activated in config', async () => {
+        const expected: IClientOptions = {
+          username: 'accessKey1',
+          password: 'secretKey1',
+          clientId: 'HOMEBRIDGE_MACHINEID1_accessKey1',
+          protocolVersion: 5,
+        };
+        deviceInfo1.config.simulate = true;
+
+        await manager.sendSetCommand(deviceInfo1, {
+          id: 20,
+          version: 'v1',
+        });
+
+        expect(actualOptions).toEqual(expected);
+        expect(httpApiManagerMock.acquireCertificate).not.toHaveBeenCalled();
+      });
     });
   });
 
@@ -248,7 +292,6 @@ describe('EcoFlowMqttApiManager', () => {
         await manager.sendSetCommand(deviceInfo, {
           id: 20,
           version: 'v1',
-          operateType: 'ot1',
         });
       }
     }
@@ -265,7 +308,7 @@ describe('EcoFlowMqttApiManager', () => {
     }
 
     it('should process quota message in all devices that shares single mqtt client', async () => {
-      const message: MqttQuotaMessage = { typeCode: MqttMessageType.EMS };
+      const message: MqttQuotaMessage = { param1: '123' };
       await connect(deviceInfo1, deviceInfo2, deviceInfo3);
 
       processReceivedMessage(MqttTopicType.Quota, message, client1Mock);
@@ -276,7 +319,7 @@ describe('EcoFlowMqttApiManager', () => {
     });
 
     it('should process set_reply message in all devices that shares single mqtt client', async () => {
-      const message: MqttSetReplyMessage = { id: 123, operateType: 'ot1', version: 'v1', data: { ack: false } };
+      const message: MqttSetReplyMessage = { id: 123, version: 'v1', data: { ack: false } };
       await connect(deviceInfo1, deviceInfo2, deviceInfo3);
 
       processReceivedMessage(MqttTopicType.SetReply, message, client1Mock);
@@ -476,9 +519,9 @@ describe('EcoFlowMqttApiManager', () => {
       await manager.destroy();
 
       expect(client1Mock.unsubscribeAsync).not.toHaveBeenCalled();
-      expect(client1Mock.end).not.toHaveBeenCalled();
+      expect(client1Mock.endAsync).not.toHaveBeenCalled();
       expect(client3Mock.unsubscribeAsync).not.toHaveBeenCalled();
-      expect(client3Mock.end).not.toHaveBeenCalled();
+      expect(client3Mock.endAsync).not.toHaveBeenCalled();
       expect(log1Mock.debug).not.toHaveBeenCalled();
     });
 
@@ -490,7 +533,7 @@ describe('EcoFlowMqttApiManager', () => {
       await manager.destroy();
 
       expect(client1Mock.unsubscribeAsync).toHaveBeenCalledWith('#');
-      expect(client1Mock.end).toHaveBeenCalledTimes(1);
+      expect(client1Mock.endAsync).toHaveBeenCalledTimes(1);
       expect(log1Mock.debug.mock.calls).toEqual([
         ['Subscribed to topic:', '/open/account1/sn1/set_reply'],
         ['Unsubscribed from all topics'],
@@ -502,7 +545,7 @@ describe('EcoFlowMqttApiManager', () => {
         ['Disconnected from EcoFlow MQTT Service'],
       ]);
       expect(client3Mock.unsubscribeAsync).not.toHaveBeenCalledWith('#');
-      expect(client3Mock.end).not.toHaveBeenCalled();
+      expect(client3Mock.endAsync).not.toHaveBeenCalled();
       expect(log3Mock.debug).not.toHaveBeenCalled();
     });
 
@@ -514,14 +557,14 @@ describe('EcoFlowMqttApiManager', () => {
       await manager.destroy();
 
       expect(client1Mock.unsubscribeAsync).toHaveBeenCalledWith('#');
-      expect(client1Mock.end).toHaveBeenCalledTimes(1);
+      expect(client1Mock.endAsync).toHaveBeenCalledTimes(1);
       expect(log1Mock.debug.mock.calls).toEqual([
         ['Subscribed to topic:', '/open/account1/sn1/set_reply'],
         ['Unsubscribed from all topics'],
         ['Disconnected from EcoFlow MQTT Service'],
       ]);
       expect(client3Mock.unsubscribeAsync).toHaveBeenCalledWith('#');
-      expect(client3Mock.end).toHaveBeenCalledTimes(1);
+      expect(client3Mock.endAsync).toHaveBeenCalledTimes(1);
       expect(log3Mock.debug.mock.calls).toEqual([
         ['Subscribed to topic:', '/open/account3/sn3/quota'],
         ['Unsubscribed from all topics'],

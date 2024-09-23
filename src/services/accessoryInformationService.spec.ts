@@ -1,4 +1,4 @@
-import { EcoFlowAccessory } from '@ecoflow/accessories/ecoFlowAccessory';
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
@@ -10,7 +10,7 @@ jest.mock('fs');
 
 describe('AccessoryInformationService', () => {
   let service: AccessoryInformationService;
-  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessory>;
+  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryBase>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
@@ -63,8 +63,9 @@ describe('AccessoryInformationService', () => {
       config: {
         model: 'Delta 2 Max',
         serialNumber: 'R123ABCDEGHI321',
+        name: 'Accessory1',
       },
-    } as unknown as jest.Mocked<EcoFlowAccessory>;
+    } as unknown as jest.Mocked<EcoFlowAccessoryBase>;
     service = new AccessoryInformationService(ecoFlowAccessoryMock);
     jest.spyOn(fs, 'readFileSync').mockReturnValueOnce('{"version": "1.2.3"}');
     hapService = new HapService('Information Service', HapService.AccessoryInformation.UUID);
@@ -87,7 +88,7 @@ describe('AccessoryInformationService', () => {
       expect(actual).toEqual(expected);
       expect(accessoryMock.addService).toHaveBeenCalledWith(
         HapService.AccessoryInformation,
-        'Information',
+        'Accessory1',
         HapService.AccessoryInformation.UUID
       );
     });
@@ -128,8 +129,8 @@ describe('AccessoryInformationService', () => {
 
       expect(actual).toEqual(expectedCharacteristics);
       expect(logMock.warn.mock.calls).toEqual([
-        ['[Information] Removing obsolete characteristic:', 'On'],
-        ['[Information] Removing obsolete characteristic:', 'In Use'],
+        ['[Accessory1] Removing obsolete characteristic:', 'On'],
+        ['[Accessory1] Removing obsolete characteristic:', 'In Use'],
       ]);
     });
   });

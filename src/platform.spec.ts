@@ -1,6 +1,7 @@
-import { BatteryAccessory } from '@ecoflow/accessories/batteries/batteryAccessory';
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2Accessory';
 import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2maxAccessory';
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
+import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
@@ -14,6 +15,7 @@ import { API, HAP, Logging, PlatformAccessory } from 'homebridge';
 
 jest.mock('@ecoflow/accessories/batteries/delta2Accessory');
 jest.mock('@ecoflow/accessories/batteries/delta2maxAccessory');
+jest.mock('@ecoflow/accessories/powerstream/powerStreamAccessory');
 jest.mock('@ecoflow/apis/ecoFlowHttpApiManager');
 jest.mock('@ecoflow/apis/ecoFlowMqttApiManager');
 jest.mock('@ecoflow/helpers/machineIdProvider');
@@ -101,15 +103,15 @@ describe('EcoFlowHomebridgePlatform', () => {
     let log2Mock: jest.Mocked<Logging>;
     let accessory1Mock: jest.Mocked<PlatformAccessory>;
     let accessory2Mock: jest.Mocked<PlatformAccessory>;
-    let ecoflowAccessory1Mock: jest.Mocked<Delta2Accessory>;
-    let ecoflowAccessory2Mock: jest.Mocked<Delta2MaxAccessory>;
+    let delta2AccessoryMock: jest.Mocked<Delta2Accessory>;
+    let delta2MaxAccessoryMock: jest.Mocked<Delta2MaxAccessory>;
     let machineIdProviderMock: jest.Mocked<MachineIdProvider>;
     let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
     let mqttApiManagerMock: jest.Mocked<EcoFlowMqttApiManager>;
-    let device1Config: DeviceConfig;
-    let device2Config: DeviceConfig;
+    let delta2Config: DeviceConfig;
+    let delta2MaxConfig: DeviceConfig;
 
-    function createAccessory<TAccessory extends BatteryAccessory>(
+    function createAccessory<TAccessory extends EcoFlowAccessoryBase>(
       Accessory: new (
         platform: EcoFlowHomebridgePlatform,
         accessory: PlatformAccessory,
@@ -118,6 +120,7 @@ describe('EcoFlowHomebridgePlatform', () => {
         httpApiManager: EcoFlowHttpApiManager,
         mqttApiManager: EcoFlowMqttApiManager
       ) => TAccessory,
+      deviceConfig: DeviceConfig,
       logMock: jest.Mocked<Logging>,
       accessoryMock: jest.Mocked<PlatformAccessory>
     ): jest.Mocked<TAccessory> {
@@ -129,10 +132,12 @@ describe('EcoFlowHomebridgePlatform', () => {
         httpApiManagerMock,
         mqttApiManagerMock
       ) as jest.Mocked<TAccessory>;
-      const accessoryBaseMock = ecoFlowAccessoryMock as jest.Mocked<BatteryAccessory>;
+      const accessoryBaseMock = ecoFlowAccessoryMock as jest.Mocked<EcoFlowAccessoryBase>;
       accessoryBaseMock.initialize = jest.fn().mockResolvedValue(undefined);
+      accessoryBaseMock.initializeDefaultValues.mockReset();
       accessoryBaseMock.cleanupServices.mockReset();
       Object.defineProperty(ecoFlowAccessoryMock, 'accessory', { value: accessoryMock, configurable: true });
+      Object.defineProperty(ecoFlowAccessoryMock, 'config', { value: deviceConfig, configurable: true });
       (Accessory as jest.Mock).mockImplementation(() => ecoFlowAccessoryMock);
 
       return ecoFlowAccessoryMock;
@@ -143,12 +148,12 @@ describe('EcoFlowHomebridgePlatform', () => {
     }
 
     beforeEach(() => {
-      device1Config = {
+      delta2Config = {
         name: 'device1',
         model: DeviceModel.Delta2,
         serialNumber: 'sn1',
       } as unknown as DeviceConfig;
-      device2Config = {
+      delta2MaxConfig = {
         name: 'device2',
         model: DeviceModel.Delta2Max,
         serialNumber: 'sn2',
@@ -171,8 +176,8 @@ describe('EcoFlowHomebridgePlatform', () => {
         httpApiManagerMock,
         machineIdProviderMock
       ) as jest.Mocked<EcoFlowMqttApiManager>;
-      ecoflowAccessory1Mock = createAccessory(Delta2Accessory, log1Mock, accessory1Mock);
-      ecoflowAccessory2Mock = createAccessory(Delta2MaxAccessory, log2Mock, accessory2Mock);
+      delta2AccessoryMock = createAccessory(Delta2Accessory, delta2Config, log1Mock, accessory1Mock);
+      delta2MaxAccessoryMock = createAccessory(Delta2MaxAccessory, delta2MaxConfig, log2Mock, accessory2Mock);
       platform = new EcoFlowHomebridgePlatform(commonLogMock, config, apiMock);
       registerDevices = apiMock.on.mock.calls[0][1];
       uuidGenerateMock.mockImplementation((serialNumber: string) => {
@@ -211,11 +216,21 @@ describe('EcoFlowHomebridgePlatform', () => {
         expect(commonLogMock.warn).toHaveBeenCalledWith('Devices are not configured');
       });
 
+      it('should not register device when it is disabled', () => {
+        delta2Config.disabled = true;
+        accessory1Mock.context.deviceConfig = delta2Config;
+        config.devices = [delta2Config];
+
+        registerDevices();
+
+        expect(log1Mock.warn).toHaveBeenCalledWith('Device is disabled. Ignoring the device');
+      });
+
       it('should not register device when serial number is duplicated', () => {
-        device2Config.serialNumber = 'sn1';
+        delta2MaxConfig.serialNumber = 'sn1';
         accessory2Mock.UUID = 'id1';
-        accessory1Mock.context.deviceConfig = device1Config;
-        config.devices = [device1Config, device2Config];
+        accessory1Mock.context.deviceConfig = delta2Config;
+        config.devices = [delta2Config, delta2MaxConfig];
 
         registerDevices();
 
@@ -240,16 +255,16 @@ describe('EcoFlowHomebridgePlatform', () => {
 
     describe('newDevice', () => {
       it('should register device when accessory is not in cache yet', () => {
-        config.devices = [device1Config];
+        config.devices = [delta2Config];
 
         registerDevices();
 
-        expect(accessory1Mock.context.deviceConfig).toBe(device1Config);
+        expect(accessory1Mock.context.deviceConfig).toBe(delta2Config);
         expect(log1Mock.info.mock.calls).toEqual([['Adding new accessory'], ['Initializing accessory']]);
       });
 
       it('should register platform accessory when new device is created', () => {
-        config.devices = [device1Config, device2Config];
+        config.devices = [delta2Config, delta2MaxConfig];
 
         registerDevices();
 
@@ -260,24 +275,74 @@ describe('EcoFlowHomebridgePlatform', () => {
       });
 
       it('should initialize device when registering non cached devices', async () => {
-        config.devices = [device1Config, device2Config];
+        config.devices = [delta2Config, delta2MaxConfig];
 
         registerDevices();
         await waitInitializationDone();
 
-        expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
-        expect(ecoflowAccessory1Mock.initializeDefaultValues).toHaveBeenCalled();
-        expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();
-        expect(ecoflowAccessory2Mock.initialize).toHaveBeenCalled();
-        expect(ecoflowAccessory2Mock.initializeDefaultValues).toHaveBeenCalled();
-        expect(ecoflowAccessory2Mock.cleanupServices).toHaveBeenCalled();
+        expect(delta2AccessoryMock.initialize).toHaveBeenCalled();
+        expect(delta2AccessoryMock.initializeDefaultValues).toHaveBeenCalled();
+        expect(delta2AccessoryMock.cleanupServices).toHaveBeenCalled();
+        expect(delta2MaxAccessoryMock.initialize).toHaveBeenCalled();
+        expect(delta2MaxAccessoryMock.initializeDefaultValues).toHaveBeenCalled();
+        expect(delta2MaxAccessoryMock.cleanupServices).toHaveBeenCalled();
+      });
+
+      it('should ignore initialization of default values when registering simulation of device', async () => {
+        delta2Config.simulate = true;
+        config.devices = [delta2Config];
+
+        registerDevices();
+        await waitInitializationDone();
+
+        expect(delta2AccessoryMock.initialize).toHaveBeenCalled();
+        expect(delta2AccessoryMock.initializeDefaultValues).not.toHaveBeenCalled();
+        expect(delta2AccessoryMock.cleanupServices).toHaveBeenCalled();
+      });
+    });
+
+    describe('createAccessory', () => {
+      it('should register Delta2 accessory when model is Delta2 in config', () => {
+        config.devices = [delta2Config];
+
+        registerDevices();
+
+        expect(delta2AccessoryMock.initialize).toHaveBeenCalled();
+      });
+
+      it('should register Delta2Max accessory when model is Delta2Max in config', () => {
+        config.devices = [delta2MaxConfig];
+
+        registerDevices();
+
+        expect(delta2MaxAccessoryMock.initialize).toHaveBeenCalled();
+      });
+
+      it('should register PowerStream accessory when model is PowerStream in config', () => {
+        config.devices = [
+          {
+            name: 'device3',
+            model: DeviceModel.PowerStream,
+            serialNumber: 'sn2',
+          } as unknown as DeviceConfig,
+        ];
+        const powerStreamAccessoryMock = createAccessory(
+          PowerStreamAccessory,
+          config.devices[0],
+          log2Mock,
+          accessory2Mock
+        );
+
+        registerDevices();
+
+        expect(powerStreamAccessoryMock.initialize).toHaveBeenCalled();
       });
     });
 
     describe('cachedDevice', () => {
       it('should register device when accessory is already cached', () => {
         platform.accessories.push(accessory1Mock);
-        config.devices = [device1Config];
+        config.devices = [delta2Config];
 
         registerDevices();
 
@@ -289,7 +354,7 @@ describe('EcoFlowHomebridgePlatform', () => {
 
       it('should not register platform accessory when cached device is created', () => {
         platform.accessories.push(accessory1Mock);
-        config.devices = [device1Config];
+        config.devices = [delta2Config];
 
         registerDevices();
 
@@ -298,33 +363,33 @@ describe('EcoFlowHomebridgePlatform', () => {
 
       it('should initialize device when registering cached device', async () => {
         platform.accessories.push(accessory1Mock);
-        config.devices = [device1Config];
+        config.devices = [delta2Config];
 
         registerDevices();
         await waitInitializationDone();
 
-        expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
-        expect(ecoflowAccessory1Mock.initializeDefaultValues).toHaveBeenCalled();
-        expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();
+        expect(delta2AccessoryMock.initialize).toHaveBeenCalled();
+        expect(delta2AccessoryMock.initializeDefaultValues).toHaveBeenCalled();
+        expect(delta2AccessoryMock.cleanupServices).toHaveBeenCalled();
       });
 
       it('should cleanupServices of initialized device when registering cached device', async () => {
         platform.accessories.push(accessory1Mock);
-        config.devices = [device1Config];
+        config.devices = [delta2Config];
 
         registerDevices();
         await waitInitializationDone();
 
-        expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
-        expect(ecoflowAccessory1Mock.initializeDefaultValues).toHaveBeenCalled();
-        expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();
+        expect(delta2AccessoryMock.initialize).toHaveBeenCalled();
+        expect(delta2AccessoryMock.initializeDefaultValues).toHaveBeenCalled();
+        expect(delta2AccessoryMock.cleanupServices).toHaveBeenCalled();
       });
     });
 
     describe('cleanupDevices', () => {
       it('should remove obsolete device when it is not specified in config', () => {
         platform.accessories.push(accessory1Mock);
-        config.devices = [device2Config];
+        config.devices = [delta2MaxConfig];
 
         registerDevices();
 

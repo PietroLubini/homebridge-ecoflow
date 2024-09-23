@@ -1,5 +1,5 @@
 import { DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
-import { LocationType } from '@ecoflow/config';
+import { DeviceModel, LocationType } from '@ecoflow/config';
 import { Logging } from 'homebridge';
 
 describe('DeviceInfo', () => {
@@ -11,6 +11,7 @@ describe('DeviceInfo', () => {
         {
           name: 'name1',
           accessKey: 'accessKey1',
+          model: DeviceModel.Delta2,
           location: LocationType.US,
           secretKey: 'secretKey1',
           serialNumber: 'sn1',
@@ -29,6 +30,7 @@ describe('DeviceInfo', () => {
         {
           name: 'name1',
           accessKey: 'accessKey1',
+          model: DeviceModel.Delta2,
           location: LocationType.US,
           secretKey: 'secretKey1',
           serialNumber: 'sn1',

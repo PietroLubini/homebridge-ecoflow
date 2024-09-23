@@ -1,13 +1,14 @@
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { readFileSync } from 'fs';
-import { Characteristic, Service } from 'homebridge';
+import { Characteristic } from 'homebridge';
 import { join } from 'path';
 
 const packageJsonPath = join(__dirname, '../../package.json');
 
 export class AccessoryInformationService extends ServiceBase {
-  protected override createService(): Service {
-    return this.getOrAddService(this.platform.Service.AccessoryInformation, 'Information');
+  constructor(protected readonly ecoFlowAccessory: EcoFlowAccessoryBase) {
+    super(ecoFlowAccessory.platform.Service.AccessoryInformation, ecoFlowAccessory);
   }
 
   protected override addCharacteristics(): Characteristic[] {
