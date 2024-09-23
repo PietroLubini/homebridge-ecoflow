@@ -30,7 +30,11 @@ export abstract class ServiceBase {
 
   // Getter for service
   public get service(): Service {
-    return this._service!;
+    if (!this._service) {
+      this.log.error('Service is not initialized:', this.constructor.name);
+      throw new Error(`Service is not initialized: ${this.constructor.name}`);
+    }
+    return this._service;
   }
 
   protected abstract createService(): Service;

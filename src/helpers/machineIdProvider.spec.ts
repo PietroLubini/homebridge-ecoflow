@@ -18,14 +18,14 @@ describe('MachineIdProvider', () => {
     logMock = {
       warn: jest.fn(),
     } as unknown as jest.Mocked<Logging>;
-    provider = new MachineIdProvider(logMock);
+    provider = new MachineIdProvider();
   });
 
   describe('getMachineId', () => {
     it('should return valid machineId when there are no issues', async () => {
       machineIdMock.mockResolvedValueOnce('test machine id');
 
-      const actual = await provider.getMachineId();
+      const actual = await provider.getMachineId(logMock);
 
       expect(actual).toEqual('test machine id');
     });
@@ -36,7 +36,7 @@ describe('MachineIdProvider', () => {
       });
       uuidV4Mock.mockResolvedValueOnce('00000000-0000-0000-0000-000000000001');
 
-      const actual = await provider.getMachineId();
+      const actual = await provider.getMachineId(logMock);
 
       expect(actual).toEqual('00000000-0000-0000-0000-000000000001');
     });
@@ -47,7 +47,7 @@ describe('MachineIdProvider', () => {
         throw error;
       });
 
-      await provider.getMachineId();
+      await provider.getMachineId(logMock);
 
       expect(logMock.warn).toHaveBeenCalledWith('Can not get Machine ID. Using UUID instead', error);
     });

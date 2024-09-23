@@ -1,11 +1,13 @@
-import { EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
-import { DeviceConfig, LocationType } from '@ecoflow/config';
+import { DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
+import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
+import { DeviceAccessConfig, LocationType } from '@ecoflow/config';
 import { Logging } from 'homebridge';
 
-describe('EcoFlowHttpApi', () => {
+describe('EcoFlowHttpApiManager', () => {
   let logMock: jest.Mocked<Logging>;
-  let api: EcoFlowHttpApi;
-  let config: DeviceConfig;
+  let manager: EcoFlowHttpApiManager;
+  let config: DeviceAccessConfig;
+  let deviceInfo: DeviceInfo;
   let headers: HeadersInit;
   const fetchMock = jest.fn();
   global.fetch = fetchMock;
@@ -15,8 +17,15 @@ describe('EcoFlowHttpApi', () => {
       debug: jest.fn(),
       error: jest.fn(),
     } as unknown as jest.Mocked<Logging>;
-    config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
-    api = new EcoFlowHttpApi(config, logMock);
+    config = {
+      name: 'accessory1',
+      secretKey: 'secretKey1',
+      accessKey: 'accessKey1',
+      serialNumber: 'sn1',
+      location: LocationType.EU,
+    };
+    deviceInfo = new DeviceInfo(config, logMock);
+    manager = new EcoFlowHttpApiManager();
 
     jest.spyOn(Math, 'random').mockReturnValue(0.5);
     jest.spyOn(Date, 'now').mockReturnValue(1723391079346);
@@ -39,7 +48,7 @@ describe('EcoFlowHttpApi', () => {
         throw fetchError;
       });
 
-      const actual = await api.acquireCertificate();
+      const actual = await manager.acquireCertificate(deviceInfo);
 
       expect(actual).toBeNull();
       expect(fetchMock).toHaveBeenCalledWith('https://api-e.ecoflow.com/iot-open/sign/certification', {
@@ -59,7 +68,7 @@ describe('EcoFlowHttpApi', () => {
       fetchMock.mockResolvedValueOnce(responseMock);
       responseMock.json.mockResolvedValueOnce({ code: '401' });
 
-      const actual = await api.acquireCertificate();
+      const actual = await manager.acquireCertificate(deviceInfo);
 
       expect(actual).toBeNull();
       expect(logMock.error).toHaveBeenCalledWith(
@@ -79,7 +88,7 @@ describe('EcoFlowHttpApi', () => {
         throw new Error('Server connection is failed');
       });
 
-      await new EcoFlowHttpApi(config, logMock).acquireCertificate();
+      await manager.acquireCertificate(deviceInfo);
       const actual = fetchMock.mock.calls[0][0];
 
       expect(actual).toEqual('https://api-a.ecoflow.com/iot-open/sign/certification');
@@ -91,7 +100,7 @@ describe('EcoFlowHttpApi', () => {
       fetchMock.mockResolvedValueOnce(responseMock);
       responseMock.json.mockResolvedValueOnce({ code: '0', data: expected });
 
-      const actual = await api.acquireCertificate();
+      const actual = await manager.acquireCertificate(deviceInfo);
 
       expect(actual).toEqual(expected);
       expect(logMock.error).not.toHaveBeenCalled();
@@ -114,7 +123,7 @@ describe('EcoFlowHttpApi', () => {
         throw fetchError;
       });
 
-      const actual = await api.getAllQuotas();
+      const actual = await manager.getAllQuotas(deviceInfo);
 
       expect(actual).toBeNull();
       expect(fetchMock).toHaveBeenCalledWith('https://api-e.ecoflow.com/iot-open/sign/device/quota/all?sn=sn1', {
@@ -134,10 +143,9 @@ describe('EcoFlowHttpApi', () => {
         data: { 'inv.cfgAcOutVol': 10.1, 'inv.cfgAcXboost': true, 'pd.carWatts': 45.67 },
       });
 
-      const actual = await api.getAllQuotas();
+      const actual = await manager.getAllQuotas(deviceInfo);
 
       expect(actual).toEqual(expected);
-      expect(logMock.debug).toHaveBeenCalledWith('All quotas:', expected);
       expect(logMock.error).not.toHaveBeenCalled();
     });
   });
@@ -159,7 +167,7 @@ describe('EcoFlowHttpApi', () => {
         throw fetchError;
       });
 
-      const actual = await api.getQuotas(quotas);
+      const actual = await manager.getQuotas(quotas, deviceInfo);
 
       expect(actual).toBeNull();
       expect(fetchMock).toHaveBeenCalledWith(
@@ -182,10 +190,9 @@ describe('EcoFlowHttpApi', () => {
         data: { 'inv.cfgAcOutVol': 10.1, 'pd.carWatts': 45.67 },
       });
 
-      const actual = await api.getQuotas(quotas);
+      const actual = await manager.getQuotas(quotas, deviceInfo);
 
       expect(actual).toEqual(expected);
-      expect(logMock.debug).toHaveBeenCalledWith('Quotas:', expected);
       expect(logMock.error).not.toHaveBeenCalled();
     });
   });

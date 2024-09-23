@@ -46,6 +46,7 @@ describe('AccessoryInformationService', () => {
   beforeEach(() => {
     logMock = {
       warn: jest.fn(),
+      error: jest.fn(),
     } as unknown as jest.Mocked<Logging>;
     platformMock = {
       Service: HapService,
@@ -70,6 +71,11 @@ describe('AccessoryInformationService', () => {
   });
 
   describe('initialize', () => {
+    it('should throw error when trying to access non initialized service', () => {
+      expect(() => service.service).toThrow('Service is not initialized: AccessoryInformationService');
+      expect(logMock.error).toHaveBeenCalledWith('Service is not initialized:', 'AccessoryInformationService');
+    });
+
     it('should add AccessoryInformation service when it is not added to accessory yet', () => {
       const expected = hapService;
       accessoryMock.getService.mockReturnValueOnce(undefined);

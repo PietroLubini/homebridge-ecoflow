@@ -1,6 +1,6 @@
 import { BatteryAllQuotaData } from '@ecoflow/accessories/batteries/batteryAccessory';
 import { EcoFlowAccessoryWithQuota } from '@ecoflow/accessories/ecoFlowAccessory';
-import { EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
+import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
@@ -15,7 +15,7 @@ describe('OutletAcService', () => {
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
-  let httpApiMock: jest.Mocked<EcoFlowHttpApi>;
+  let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
   let hapService: HapService;
 
   const hapMock = {
@@ -54,7 +54,7 @@ describe('OutletAcService', () => {
       getServiceById: jest.fn(),
       addService: jest.fn(),
     } as unknown as jest.Mocked<PlatformAccessory>;
-    httpApiMock = { getAllQuotas: jest.fn() } as unknown as jest.Mocked<EcoFlowHttpApi>;
+    httpApiManagerMock = { getAllQuotas: jest.fn() } as unknown as jest.Mocked<EcoFlowHttpApiManager>;
     ecoFlowAccessoryMock = {
       log: logMock,
       platform: platformMock,
@@ -62,7 +62,7 @@ describe('OutletAcService', () => {
       config: {
         name: 'accessory1',
       },
-      httpApi: httpApiMock,
+      httpApiManager: httpApiManagerMock,
       quota: {},
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessoryWithQuota<BatteryAllQuotaData>>;
@@ -375,6 +375,44 @@ describe('OutletAcService', () => {
           out_voltage: 47.9,
           out_freq: 50,
           xboost: 1,
+          enabled: 0,
+        },
+        expect.any(Function)
+      );
+    });
+
+    it(`should send Set command to device with cfgAcOutVol set to 220000 when On value was changed and
+      there is no cfgAcOutVol value in quota`, () => {
+      ecoFlowAccessoryMock.quota.inv.cfgAcOutVol = undefined;
+
+      onCharacteristic.setValue(false);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        3,
+        'acOutCfg',
+        {
+          out_voltage: 220000,
+          out_freq: 50,
+          xboost: 0,
+          enabled: 0,
+        },
+        expect.any(Function)
+      );
+    });
+
+    it(`should send Set command to device with cfgAcOutFreq set to 1 when On value was changed and
+      there is no cfgAcOutFreq value in quota`, () => {
+      ecoFlowAccessoryMock.quota.inv.cfgAcOutFreq = undefined;
+
+      onCharacteristic.setValue(false);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        3,
+        'acOutCfg',
+        {
+          out_voltage: 47.9,
+          out_freq: 1,
+          xboost: 0,
           enabled: 0,
         },
         expect.any(Function)

@@ -1,20 +1,21 @@
 import { BatteryAccessory } from '@ecoflow/accessories/batteries/batteryAccessory';
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2Accessory';
 import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2maxAccessory';
-import { EcoFlowHttpApi } from '@ecoflow/apis/ecoFlowHttpApi';
-import { EcoFlowMqttApi } from '@ecoflow/apis/ecoFlowMqttApi';
+import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
+import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from '@ecoflow/config';
 import { Logger } from '@ecoflow/helpers/logger';
 import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
+import { sleep } from '@ecoflow/helpers/tests/sleep';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { API, HAP, Logging, PlatformAccessory } from 'homebridge';
 
 jest.mock('@ecoflow/accessories/batteries/delta2Accessory');
 jest.mock('@ecoflow/accessories/batteries/delta2maxAccessory');
-jest.mock('@ecoflow/apis/ecoFlowHttpApi');
-jest.mock('@ecoflow/apis/ecoFlowMqttApi');
+jest.mock('@ecoflow/apis/ecoFlowHttpApiManager');
+jest.mock('@ecoflow/apis/ecoFlowMqttApiManager');
 jest.mock('@ecoflow/helpers/machineIdProvider');
 
 describe('EcoFlowHomebridgePlatform', () => {
@@ -103,8 +104,8 @@ describe('EcoFlowHomebridgePlatform', () => {
     let ecoflowAccessory1Mock: jest.Mocked<Delta2Accessory>;
     let ecoflowAccessory2Mock: jest.Mocked<Delta2MaxAccessory>;
     let machineIdProviderMock: jest.Mocked<MachineIdProvider>;
-    let httpApiMock: jest.Mocked<EcoFlowHttpApi>;
-    let mqttApiMock: jest.Mocked<EcoFlowMqttApi>;
+    let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
+    let mqttApiManagerMock: jest.Mocked<EcoFlowMqttApiManager>;
     let device1Config: DeviceConfig;
     let device2Config: DeviceConfig;
 
@@ -114,8 +115,8 @@ describe('EcoFlowHomebridgePlatform', () => {
         accessory: PlatformAccessory,
         config: DeviceConfig,
         log: Logging,
-        httpApi: EcoFlowHttpApi,
-        mqttApi: EcoFlowMqttApi
+        httpApiManager: EcoFlowHttpApiManager,
+        mqttApiManager: EcoFlowMqttApiManager
       ) => TAccessory,
       logMock: jest.Mocked<Logging>,
       accessoryMock: jest.Mocked<PlatformAccessory>
@@ -125,18 +126,20 @@ describe('EcoFlowHomebridgePlatform', () => {
         accessory1Mock,
         {} as DeviceConfig,
         logMock,
-        httpApiMock,
-        mqttApiMock
+        httpApiManagerMock,
+        mqttApiManagerMock
       ) as jest.Mocked<TAccessory>;
       const accessoryBaseMock = ecoFlowAccessoryMock as jest.Mocked<BatteryAccessory>;
       accessoryBaseMock.initialize = jest.fn().mockResolvedValue(undefined);
       accessoryBaseMock.cleanupServices.mockReset();
-      if (!ecoFlowAccessoryMock.accessory) {
-        Object.defineProperty(ecoFlowAccessoryMock, 'accessory', { value: accessoryMock });
-      }
+      Object.defineProperty(ecoFlowAccessoryMock, 'accessory', { value: accessoryMock, configurable: true });
       (Accessory as jest.Mock).mockImplementation(() => ecoFlowAccessoryMock);
 
       return ecoFlowAccessoryMock;
+    }
+
+    async function waitInitializationDone(): Promise<void> {
+      return sleep(50);
     }
 
     beforeEach(() => {
@@ -156,19 +159,18 @@ describe('EcoFlowHomebridgePlatform', () => {
         displayName: 'accessory1',
         UUID: 'id1',
         context: {},
-      } as unknown as jest.Mocked<PlatformAccessory>;
+      } as jest.Mocked<PlatformAccessory>;
       accessory2Mock = {
         displayName: 'accessory2',
         UUID: 'id2',
         context: {},
-      } as unknown as jest.Mocked<PlatformAccessory>;
-      machineIdProviderMock = new MachineIdProvider(log1Mock) as unknown as jest.Mocked<MachineIdProvider>;
-      httpApiMock = new EcoFlowHttpApi({} as DeviceConfig, log1Mock) as unknown as jest.Mocked<EcoFlowHttpApi>;
-      mqttApiMock = new EcoFlowMqttApi(
-        httpApiMock,
-        log1Mock,
+      } as jest.Mocked<PlatformAccessory>;
+      machineIdProviderMock = new MachineIdProvider() as jest.Mocked<MachineIdProvider>;
+      httpApiManagerMock = new EcoFlowHttpApiManager() as jest.Mocked<EcoFlowHttpApiManager>;
+      mqttApiManagerMock = new EcoFlowMqttApiManager(
+        httpApiManagerMock,
         machineIdProviderMock
-      ) as unknown as jest.Mocked<EcoFlowMqttApi>;
+      ) as jest.Mocked<EcoFlowMqttApiManager>;
       ecoflowAccessory1Mock = createAccessory(Delta2Accessory, log1Mock, accessory1Mock);
       ecoflowAccessory2Mock = createAccessory(Delta2MaxAccessory, log2Mock, accessory2Mock);
       platform = new EcoFlowHomebridgePlatform(commonLogMock, config, apiMock);
@@ -261,11 +263,13 @@ describe('EcoFlowHomebridgePlatform', () => {
         config.devices = [device1Config, device2Config];
 
         registerDevices();
-        await Promise.resolve(); // Wait for all pending promises to resolve
+        await waitInitializationDone();
 
         expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
+        expect(ecoflowAccessory1Mock.initializeDefaultValues).toHaveBeenCalled();
         expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();
         expect(ecoflowAccessory2Mock.initialize).toHaveBeenCalled();
+        expect(ecoflowAccessory2Mock.initializeDefaultValues).toHaveBeenCalled();
         expect(ecoflowAccessory2Mock.cleanupServices).toHaveBeenCalled();
       });
     });
@@ -297,9 +301,10 @@ describe('EcoFlowHomebridgePlatform', () => {
         config.devices = [device1Config];
 
         registerDevices();
-        await Promise.resolve(); // Wait for all pending promises to resolve
+        await waitInitializationDone();
 
         expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
+        expect(ecoflowAccessory1Mock.initializeDefaultValues).toHaveBeenCalled();
         expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();
       });
 
@@ -308,9 +313,10 @@ describe('EcoFlowHomebridgePlatform', () => {
         config.devices = [device1Config];
 
         registerDevices();
-        await Promise.resolve(); // Wait for all pending promises to resolve
+        await waitInitializationDone();
 
         expect(ecoflowAccessory1Mock.initialize).toHaveBeenCalled();
+        expect(ecoflowAccessory1Mock.initializeDefaultValues).toHaveBeenCalled();
         expect(ecoflowAccessory1Mock.cleanupServices).toHaveBeenCalled();
       });
     });
