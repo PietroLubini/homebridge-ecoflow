@@ -18,9 +18,9 @@ class MockLightBulbService extends LightBulbServiceBase {
     super(ecoFlowAccessory, 1023, 'MOCK');
   }
 
-  public override async setOn(): Promise<void> {}
+  public override async processOnSetOn(): Promise<void> {}
 
-  public override async setBrightness(): Promise<void> {}
+  public override async processOnSetBrightness(): Promise<void> {}
 }
 
 describe('LightBulbServiceBase', () => {
@@ -197,11 +197,11 @@ describe('LightBulbServiceBase', () => {
     it('should revert changing of brightness to value set from UI when sending Set command to device is failed', () => {
       service.updateBrightness(1023);
       logMock.debug.mockReset();
-      const setBrightnessMock = jest.fn();
-      service.setBrightness = setBrightnessMock;
+      const processOnSetBrightnessMock = jest.fn();
+      service.processOnSetBrightness = processOnSetBrightnessMock;
 
       characteristic.setValue(20);
-      const revertFunc = setBrightnessMock.mock.calls[0][1];
+      const revertFunc = processOnSetBrightnessMock.mock.calls[0][1];
       revertFunc();
       const actual = characteristic.value;
 
@@ -221,11 +221,11 @@ describe('LightBulbServiceBase', () => {
     it('should revert changing of On state when it is failed', () => {
       characteristic.setValue(true);
       logMock.debug.mockReset();
-      const setOnMock = jest.fn();
-      service.setOn = setOnMock;
+      const processOnSetOnMock = jest.fn();
+      service.processOnSetOn = processOnSetOnMock;
 
       characteristic.setValue(false);
-      const revertFunc = setOnMock.mock.calls[0][1];
+      const revertFunc = processOnSetOnMock.mock.calls[0][1];
       revertFunc();
 
       const actual = characteristic.value;
@@ -246,11 +246,11 @@ describe('LightBulbServiceBase', () => {
     it('should revert changing of brightness when sending Set command to device is failed', () => {
       characteristic.setValue(100);
       logMock.debug.mockReset();
-      const setBrightnessMock = jest.fn();
-      service.setBrightness = setBrightnessMock;
+      const processOnSetBrightnessMock = jest.fn();
+      service.processOnSetBrightness = processOnSetBrightnessMock;
 
       characteristic.setValue(20);
-      const revertFunc = setBrightnessMock.mock.calls[0][1];
+      const revertFunc = processOnSetBrightnessMock.mock.calls[0][1];
       revertFunc();
 
       const actual = characteristic.value;

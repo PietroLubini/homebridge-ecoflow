@@ -9,7 +9,7 @@ import {
   MqttPowerStreamQuotaMessage,
   MqttPowerStreamQuotaMessageWithParams,
 } from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
-import { IndicatorService } from '@ecoflow/accessories/powerstream/services/indicatorService';
+import { BrightnessService } from '@ecoflow/accessories/powerstream/services/brightnessService';
 import { OutletInvService } from '@ecoflow/accessories/powerstream/services/outletInvService';
 import { OutletService } from '@ecoflow/accessories/powerstream/services/outletService';
 import { PowerDemandService } from '@ecoflow/accessories/powerstream/services/powerDemandService';
@@ -25,7 +25,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
   private readonly inverterOutletService: OutletInvService;
   private readonly solarOutletService: OutletService;
   private readonly batteryOutletService: OutletService;
-  private readonly inverterIndicatorService: IndicatorService;
+  private readonly inverterBrightnessService: BrightnessService;
   private readonly inverterPowerDemandService: PowerDemandService;
 
   constructor(
@@ -41,10 +41,10 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
     this.inverterOutletService = new OutletInvService(this, config.powerStream?.inverterAdditionalCharacteristics);
     this.solarOutletService = new OutletService(this, 'PV', config.powerStream?.pvAdditionalCharacteristics);
     this.batteryOutletService = new OutletService(this, 'BAT', config.powerStream?.batteryAdditionalCharacteristics);
-    this.inverterIndicatorService = new IndicatorService(this, 1023);
+    this.inverterBrightnessService = new BrightnessService(this, 1023);
     this.inverterPowerDemandService = new PowerDemandService(
       this,
-      config.powerStream?.type ?? PowerStreamConsumptionType.W600
+      (config.powerStream?.type ?? PowerStreamConsumptionType.W600) * 10
     );
   }
 
@@ -53,7 +53,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
       this.inverterOutletService,
       this.solarOutletService,
       this.batteryOutletService,
-      this.inverterIndicatorService,
+      this.inverterBrightnessService,
       this.inverterPowerDemandService,
     ];
   }
@@ -136,13 +136,13 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
     }
 
     if (params.invBrightness !== undefined) {
-      this.inverterIndicatorService.updateState(true);
-      this.inverterIndicatorService.updateBrightness(params.invBrightness);
+      this.inverterBrightnessService.updateState(params.invBrightness > 0);
+      this.inverterBrightnessService.updateBrightness(params.invBrightness);
     }
 
     if (params.permanentWatts !== undefined) {
-      this.inverterPowerDemandService.updateState(true);
-      this.inverterPowerDemandService.updateRotationSpeed(params.permanentWatts * 0.1);
+      this.inverterPowerDemandService.updateState(params.permanentWatts > 0);
+      this.inverterPowerDemandService.updateRotationSpeed(params.permanentWatts);
     }
   }
 }
