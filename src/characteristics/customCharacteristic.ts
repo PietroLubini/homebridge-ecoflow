@@ -1,4 +1,4 @@
-import { Characteristic, Formats, HAP, Perms, Units, WithUUID } from 'homebridge';
+import { Characteristic, HAP, WithUUID } from 'homebridge';
 
 export const InputConsumptionWattFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
   return class InputConsumptionWatt extends hap.Characteristic {
@@ -6,11 +6,11 @@ export const InputConsumptionWattFactory = (hap: HAP): WithUUID<{ new (): Charac
     constructor() {
       super('Input Consumption', InputConsumptionWatt.UUID, {
         description: 'Input Consumption, W',
-        format: Formats.FLOAT,
-        perms: [Perms.NOTIFY, Perms.PAIRED_READ],
+        format: hap.Formats.FLOAT,
+        perms: [hap.Perms.NOTIFY, hap.Perms.PAIRED_READ],
         minValue: 0,
         minStep: 1,
-        unit: Units.CELSIUS, // To allow setting numeric value for conditions in ShortCuts
+        unit: hap.Units.CELSIUS, // To allow setting numeric value for conditions in ShortCuts
       });
       this.value = this.getDefaultValue();
     }
@@ -24,9 +24,9 @@ export const OutputConsumptionWattFactory = (hap: HAP): WithUUID<{ new (): Chara
     constructor() {
       super('Output Consumption', OutputConsumptionWatt.UUID, {
         description: 'Output Consumption, W',
-        format: Formats.FLOAT,
-        perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-        unit: Units.CELSIUS, // To allow setting numeric value for conditions in ShortCuts
+        format: hap.Formats.FLOAT,
+        perms: [hap.Perms.NOTIFY, hap.Perms.PAIRED_READ],
+        unit: hap.Units.CELSIUS, // To allow setting numeric value for conditions in ShortCuts
         minValue: 0,
         minStep: 1,
       });
