@@ -1,7 +1,7 @@
 import { BatteryAccessoryBase } from '@ecoflow/accessories/batteries/batteryAccessoryBase';
 import {
   BatteryAllQuotaData,
-  BmsStatus,
+  EmsStatus,
   InvStatus,
   PdStatus,
 } from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
@@ -143,34 +143,34 @@ describe('BatteryAccessory', () => {
       mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
     });
 
-    describe('BmsStatus', () => {
+    describe('EmsStatus', () => {
       let processQuotaMessage: (value: MqttQuotaMessage) => void;
       beforeEach(async () => {
-        quota.bms_bmsStatus = {} as BmsStatus;
+        quota.bms_emsStatus = {} as EmsStatus;
         await accessory.initialize();
         await accessory.initializeDefaultValues(false);
         processQuotaMessage = mqttApiManagerMock.subscribeOnQuotaMessage.mock.calls[0][1]!;
       });
 
-      it('should update bms status in quota when BmsStatus message is received', async () => {
-        const message: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
-          typeCode: MqttBatteryMessageType.BMS,
+      it('should update bms status in quota when EmsStatus message is received', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<EmsStatus> = {
+          typeCode: MqttBatteryMessageType.EMS,
           params: {
-            f32ShowSoc: 34.67,
+            f32LcdShowSoc: 34.67,
           },
         };
 
         processQuotaMessage(message);
-        const actual = quota.bms_bmsStatus;
+        const actual = quota.bms_emsStatus;
 
         expect(actual).toEqual(message.params);
       });
 
-      it('should update battery level when BmsStatus message is received with f32ShowSoc', async () => {
-        const message: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
-          typeCode: MqttBatteryMessageType.BMS,
+      it('should update battery level when EmsStatus message is received with f32LcdShowSoc', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<EmsStatus> = {
+          typeCode: MqttBatteryMessageType.EMS,
           params: {
-            f32ShowSoc: 34.67,
+            f32LcdShowSoc: 34.67,
           },
         };
 
@@ -182,10 +182,10 @@ describe('BatteryAccessory', () => {
         expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
       });
 
-      it('should not update any characteristic when BmsStatus message is received with undefined status', async () => {
-        const message: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
-          typeCode: MqttBatteryMessageType.BMS,
-          params: {} as BmsStatus,
+      it('should not update any characteristic when EmsStatus message is received with undefined status', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<EmsStatus> = {
+          typeCode: MqttBatteryMessageType.EMS,
+          params: {},
         };
 
         processQuotaMessage(message);
@@ -535,8 +535,8 @@ describe('BatteryAccessory', () => {
     let quota: BatteryAllQuotaData;
     beforeEach(() => {
       quota = {
-        bms_bmsStatus: {
-          f32ShowSoc: 1.1,
+        bms_emsStatus: {
+          f32LcdShowSoc: 1.1,
         },
         inv: {
           inputWatts: 2.1,
@@ -554,7 +554,7 @@ describe('BatteryAccessory', () => {
     });
 
     it('should initialize quota when is called before initializeDefaultValues', async () => {
-      const expected: BatteryAllQuotaData = { bms_bmsStatus: {}, inv: {}, pd: {} };
+      const expected: BatteryAllQuotaData = { bms_emsStatus: {}, inv: {}, pd: {} };
 
       const actual = accessory.quota;
 

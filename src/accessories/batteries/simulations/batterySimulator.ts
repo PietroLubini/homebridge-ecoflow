@@ -1,4 +1,4 @@
-import { BmsStatus, InvStatus, PdStatus } from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
+import { EmsStatus, InvStatus, PdStatus } from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
 import {
   MqttBatteryMessageType,
   MqttBatteryQuotaMessageWithParams,
@@ -11,10 +11,10 @@ export class BatterySimulator extends SimulatorTyped<MqttBatterySetMessage> {
   public override generateQuota(): object {
     const quotaType = this.getRandomNumber(0, 100);
     if (quotaType >= 0 && quotaType < 33) {
-      const quotaBmsStatus: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
-        typeCode: MqttBatteryMessageType.BMS,
+      const quotaBmsStatus: MqttBatteryQuotaMessageWithParams<EmsStatus> = {
+        typeCode: MqttBatteryMessageType.EMS,
         params: {
-          f32ShowSoc: this.getRandomNumber(0, 100),
+          f32LcdShowSoc: this.getRandomNumber(0, 100),
         },
       };
       return quotaBmsStatus;

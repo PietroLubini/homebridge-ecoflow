@@ -131,7 +131,7 @@ describe('EcoFlowHttpApiManager', () => {
         method: 'GET',
         headers: new Headers(headers),
       });
-      expect(logMock.debug).toHaveBeenCalledWith('Get all quotas');
+      expect(logMock.debug.mock.calls).toEqual([['Get all quotas']]);
       expect(logMock.error).toHaveBeenCalledWith('Request is failed:', fetchError);
     });
 
@@ -147,6 +147,20 @@ describe('EcoFlowHttpApiManager', () => {
       const actual = await manager.getAllQuotas(deviceInfo);
 
       expect(actual).toEqual(expected);
+      expect(logMock.debug.mock.calls).toEqual([
+        ['Get all quotas'],
+        [
+          `Received all quotas: {
+  "inv": {
+    "cfgAcOutVol": 10.1,
+    "cfgAcXboost": true
+  },
+  "pd": {
+    "carWatts": 45.67
+  }
+}`,
+        ],
+      ]);
       expect(logMock.error).not.toHaveBeenCalled();
     });
   });
