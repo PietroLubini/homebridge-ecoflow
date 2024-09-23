@@ -51,6 +51,7 @@ Add the `EcoFlowHomebridge` platform in `config.json` in your home directory ins
     {
       "devices": [
         {
+          "disabled": false,
           "name": "Battery",
           "model": "Delta 2 Max",
           "serialNumber": "R123ABCDEGHI321",
@@ -87,6 +88,7 @@ Quota is sent every 10 seconds with random values in this mode.
     {
       "devices": [
         {
+          "disabled": false,
           "name": "Battery",
           "model": "Delta 2 Max",
           "serialNumber": "R123ABCDEGHI321",
@@ -170,18 +172,18 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 
 | EcoFlow Parameter   | Service   | Characteristic        | Standard | Permission                                               |
 | ------------------- | --------- | --------------------- | -------- | -------------------------------------------------------- |
-| INV                 | Outlet    | On                    | ✅       | Read                                                     |
-| INV                 | Outlet    | OutletInUse           | ✅       | Read                                                     |
-| INV                 | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
-| INV                 | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
-| PV                  | Outlet    | On                    | ✅       | -                                                        |
-| PV                  | Outlet    | OutletInUse           | ✅       | Read                                                     |
-| PV                  | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
-| BAT                 | Outlet    | On                    | ✅       | -                                                        |
-| BAT                 | Outlet    | OutletInUse           | ✅       | Read                                                     |
-| BAT                 | Outlet    | Battery Level, %      | 🔲       | Read                                                     |
-| BAT                 | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
-| BAT                 | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
+| Inverter            | Outlet    | On                    | ✅       | Read                                                     |
+| Inverter Output     | Outlet    | OutletInUse           | ✅       | Read                                                     |
+| Inverter Input      | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
+| Inverter Output     | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
+| Solar               | Outlet    | On                    | ✅       | -                                                        |
+| Solar Output        | Outlet    | OutletInUse           | ✅       | Read                                                     |
+| Solar Output        | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
+| Battery             | Outlet    | On                    | ✅       | -                                                        |
+| Battery Output      | Outlet    | OutletInUse           | ✅       | Read                                                     |
+| Battery Level       | Outlet    | Battery Level, %      | 🔲       | Read                                                     |
+| Battery Input       | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
+| Battery Output      | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
 | Lighting brightness | Lightbulb | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
 | Lighting brightness | Lightbulb | Brightness            | ✅       | Read/write                                               |
 | Power demand        | Fan       | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
