@@ -112,26 +112,26 @@ Quota is sent every 10 seconds with random values in this mode.
 
 #### Services
 
-| EcoFlow Parameter | Service | Characteristic        | Standard | Permission |
-| ----------------- | ------- | --------------------- | -------- | ---------- |
-| Battery Level     | Battery | BatteryLevel          | ✅       | Read       |
-| Input             | Battery | ChargingState         | ✅       | Read       |
-| Battery Level     | Battery | StatusLowBattery      | ✅       | Read       |
-| AC                | Outlet  | On                    | ✅       | Read/Write |
-| AC Output         | Outlet  | OutletInUse           | ✅       | Read       |
-| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
-| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
-| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
-| 12V DC            | Outlet  | On                    | ✅       | Read/Write |
-| 12V DC Output     | Outlet  | OutletInUse           | ✅       | Read       |
-| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
-| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
-| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
-| USB               | Outlet  | On                    | ✅       | Read/Write |
-| USB Output        | Outlet  | OutletInUse           | ✅       | Read       |
-| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
-| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
-| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
+| EcoFlow Parameter | Service    | Characteristic        | Standard | Permission |
+| ----------------- | ---------- | --------------------- | -------- | ---------- |
+| Battery Level     | Battery    | BatteryLevel          | ✅       | Read       |
+| Input             | Battery    | ChargingState         | ✅       | Read       |
+| Battery Level     | Battery    | StatusLowBattery      | ✅       | Read       |
+| AC                | Outlet AC  | On                    | ✅       | Read/Write |
+| AC Output         | Outlet AC  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet AC  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet AC  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet AC  | Output Consumption, W | 🔲       | Read       |
+| 12V DC            | Outlet CAR | On                    | ✅       | Read/Write |
+| 12V DC Output     | Outlet CAR | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet CAR | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet CAR | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet CAR | Output Consumption, W | 🔲       | Read       |
+| USB               | Outlet USB | On                    | ✅       | Read/Write |
+| USB Output        | Outlet USB | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet USB | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet USB | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet USB | Output Consumption, W | 🔲       | Read       |
 
 #### Configuration
 
@@ -172,24 +172,24 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 
 #### Services
 
-| EcoFlow Parameter   | Service   | Characteristic        | Standard | Permission                                               |
-| ------------------- | --------- | --------------------- | -------- | -------------------------------------------------------- |
-| Inverter            | Outlet    | On                    | ✅       | Read                                                     |
-| Inverter Output     | Outlet    | OutletInUse           | ✅       | Read                                                     |
-| Inverter Input      | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
-| Inverter Output     | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
-| Solar               | Outlet    | On                    | ✅       | -                                                        |
-| Solar Output        | Outlet    | OutletInUse           | ✅       | Read                                                     |
-| Solar Output        | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
-| Battery             | Outlet    | On                    | ✅       | -                                                        |
-| Battery Output      | Outlet    | OutletInUse           | ✅       | Read                                                     |
-| Battery Level       | Outlet    | Battery Level, %      | 🔲       | Read                                                     |
-| Battery Input       | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
-| Battery Output      | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
-| Lighting brightness | Lightbulb | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
-| Lighting brightness | Lightbulb | Brightness            | ✅       | Read/write                                               |
-| Power demand        | Fan       | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
-| Power demand        | Fan       | RotationSpeed         | ✅       | Read/write                                               |
+| EcoFlow Parameter   | Service    | Characteristic        | Standard | Permission                                               |
+| ------------------- | ---------- | --------------------- | -------- | -------------------------------------------------------- |
+| Inverter            | Outlet INV | On                    | ✅       | Read                                                     |
+| Inverter Output     | Outlet INV | OutletInUse           | ✅       | Read                                                     |
+| Inverter Input      | Outlet INV | Input Consumption, W  | 🔲       | Read                                                     |
+| Inverter Output     | Outlet INV | Output Consumption, W | 🔲       | Read                                                     |
+| Solar               | Outlet PV  | On                    | ✅       | -                                                        |
+| Solar Output        | Outlet PV  | OutletInUse           | ✅       | Read                                                     |
+| Solar Output        | Outlet PV  | Output Consumption, W | 🔲       | Read                                                     |
+| Battery             | Outlet BAT | On                    | ✅       | -                                                        |
+| Battery Output      | Outlet BAT | OutletInUse           | ✅       | Read                                                     |
+| Battery Level       | Outlet BAT | Battery Level, %      | 🔲       | Read                                                     |
+| Battery Input       | Outlet BAT | Input Consumption, W  | 🔲       | Read                                                     |
+| Battery Output      | Outlet BAT | Output Consumption, W | 🔲       | Read                                                     |
+| Lighting brightness | Lightbulb  | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
+| Lighting brightness | Lightbulb  | Brightness            | ✅       | Read/write                                               |
+| Power demand        | Fan        | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
+| Power demand        | Fan        | RotationSpeed         | ✅       | Read/write                                               |
 
 #### Configuration
 
