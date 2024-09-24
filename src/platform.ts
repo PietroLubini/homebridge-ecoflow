@@ -100,6 +100,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   }
 
   private validateDeviceConfig(config: DeviceConfig): string | undefined {
+    if (config.disabled === true) {
+      return 'Device is disabled';
+    }
+
     if (config.name === undefined) {
       return "Device's 'name' must be configured";
     }

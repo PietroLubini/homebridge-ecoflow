@@ -157,13 +157,48 @@ describe('PowerDemandService', () => {
       characteristic = service.service.getCharacteristic(HapCharacteristic.On);
     });
 
-    it('should not allow to set ON value', () => {
-      characteristic.value = 1;
-
+    it('should send Set command with max demand value to device when On value was changed to true', () => {
       characteristic.setValue(true);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          cmdCode: PowerStreamMqttSetCmdCodeType.WN511_SET_PERMANENT_WATTS_PACK,
+          params: {
+            permanentWatts: 8000,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('should send Set command with min demand value to device when On value was changed to false', () => {
+      characteristic.setValue(false);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          cmdCode: PowerStreamMqttSetCmdCodeType.WN511_SET_PERMANENT_WATTS_PACK,
+          params: {
+            permanentWatts: 0,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('should revert changing of On state when sending Set command to device is failed', () => {
+      characteristic.updateValue(true);
+
+      characteristic.setValue(false);
+      const revertFunc = ecoFlowAccessoryMock.sendSetCommand.mock.calls[0][1];
+      revertFunc();
       const actual = characteristic.value;
 
-      expect(actual).toEqual(1);
+      expect(actual).toBeTruthy();
+      expect(logMock.debug.mock.calls).toEqual([['Power Demand RotationSpeed ->', 0]]);
     });
   });
 

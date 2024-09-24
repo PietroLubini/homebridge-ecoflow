@@ -1,20 +1,16 @@
-import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
-import { OutletService } from '@ecoflow/accessories/powerstream/services/outletService';
+import { MqttBatterySetOperationType } from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
+import { OutletCarService } from '@ecoflow/accessories/batteries/services/outletCarService';
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
-import { Characteristic as HapCharacteristic, Service as HapService, HapStatusError } from 'hap-nodejs';
+import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-enum HAPStatus {
-  READ_ONLY_CHARACTERISTIC = -70404,
-}
-
-describe('OutletService', () => {
-  let service: OutletService;
-  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
+describe('OutletCarService', () => {
+  let service: OutletCarService;
+  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryBase>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
@@ -23,8 +19,6 @@ describe('OutletService', () => {
 
   const hapMock = {
     Characteristic: HapCharacteristic,
-    HapStatusError: HapStatusError,
-    HAPStatus: HAPStatus,
   } as unknown as HAP;
   EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
 
@@ -39,9 +33,6 @@ describe('OutletService', () => {
         ...HapCharacteristic,
         ...CustomCharacteristics,
       } as unknown as typeof HapCharacteristic & typeof CustomCharacteristics,
-      api: {
-        hap: hapMock,
-      },
     } as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
     accessoryMock = {
       getServiceById: jest.fn(),
@@ -58,14 +49,17 @@ describe('OutletService', () => {
       httpApiManager: httpApiManagerMock,
       quota: {},
       sendSetCommand: jest.fn(),
-    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
-    service = new OutletService(ecoFlowAccessoryMock, 'PV');
+    } as unknown as jest.Mocked<EcoFlowAccessoryBase>;
+    service = new OutletCarService(ecoFlowAccessoryMock);
     hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
   });
 
   describe('updateOutputConsumption', () => {
     it('should set OutputConsumption when it is enabled in configuration', () => {
-      service = new OutletService(ecoFlowAccessoryMock, 'INV', [CharacteristicType.OutputConsumptionInWatts]);
+      ecoFlowAccessoryMock.config.battery = {
+        additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
+      };
+      service = new OutletCarService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -77,14 +71,13 @@ describe('OutletService', () => {
 
       expect(actual).toEqual(35);
       expect(logMock.debug.mock.calls).toEqual([
-        ['INV InUse ->', true],
-        ['INV Output Consumption, W ->', 34.6],
+        ['CAR InUse ->', true],
+        ['CAR Output Consumption, W ->', 34.6],
       ]);
     });
 
     it('should not set OutputConsumption when it is disabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletService(ecoFlowAccessoryMock, 'INV');
       service.initialize();
 
       service.updateOutputConsumption(34.6);
@@ -94,14 +87,17 @@ describe('OutletService', () => {
       ).value;
 
       expect(actual).toEqual(0);
-      expect(logMock.debug.mock.calls).toEqual([['INV InUse ->', true]]);
+      expect(logMock.debug.mock.calls).toEqual([['CAR InUse ->', true]]);
     });
   });
 
   describe('updateInputConsumption', () => {
     it('should set InputConsumption when it is enabled in configuration', () => {
+      ecoFlowAccessoryMock.config.battery = {
+        additionalCharacteristics: [CharacteristicType.InputConsumptionInWatts],
+      };
+      service = new OutletCarService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletService(ecoFlowAccessoryMock, 'BAT', [CharacteristicType.InputConsumptionInWatts]);
       service.initialize();
 
       service.updateInputConsumption(41.1);
@@ -111,12 +107,11 @@ describe('OutletService', () => {
       ).value;
 
       expect(actual).toEqual(41);
-      expect(logMock.debug.mock.calls).toEqual([['BAT Input Consumption, W ->', 41.1]]);
+      expect(logMock.debug.mock.calls).toEqual([['CAR Input Consumption, W ->', 41.1]]);
     });
 
     it('should not set InputConsumption when it is disabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletService(ecoFlowAccessoryMock, 'BAT');
       service.initialize();
 
       service.updateInputConsumption(41.1);
@@ -132,8 +127,11 @@ describe('OutletService', () => {
 
   describe('updateBatteryLevel', () => {
     it('should set BatteryLevel when it is enabled in configuration', () => {
+      ecoFlowAccessoryMock.config.battery = {
+        additionalCharacteristics: [CharacteristicType.BatteryLevel],
+      };
+      service = new OutletCarService(ecoFlowAccessoryMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletService(ecoFlowAccessoryMock, 'BAT', [CharacteristicType.BatteryLevel]);
       service.initialize();
 
       service.updateBatteryLevel(87.4);
@@ -141,12 +139,11 @@ describe('OutletService', () => {
       const actual = service.service.getCharacteristic(HapCharacteristic.BatteryLevel).value;
 
       expect(actual).toEqual(87);
-      expect(logMock.debug.mock.calls).toEqual([['BAT Battery Level, % ->', 87.4]]);
+      expect(logMock.debug.mock.calls).toEqual([['CAR Battery Level, % ->', 87.4]]);
     });
 
     it('should not set BatteryLevel when it is disabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service = new OutletService(ecoFlowAccessoryMock, 'BAT');
       service.initialize();
 
       service.updateBatteryLevel(87.4);
@@ -166,13 +163,50 @@ describe('OutletService', () => {
       onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
     });
 
-    it('should not allow to set ON value', () => {
-      onCharacteristic.value = 1;
-
+    it('should send Set command to device when On value was changed to true', () => {
       onCharacteristic.setValue(true);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          moduleType: 5,
+          operateType: MqttBatterySetOperationType.MpptCar,
+          params: {
+            enabled: 1,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('should send Set command to device when On value was changed to false', () => {
+      onCharacteristic.setValue(false);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          moduleType: 5,
+          operateType: MqttBatterySetOperationType.MpptCar,
+          params: {
+            enabled: 0,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('should revert changing of On state when sending Set command to device is failed', () => {
+      onCharacteristic.updateValue(true);
+
+      onCharacteristic.setValue(false);
+      const revertFunc = ecoFlowAccessoryMock.sendSetCommand.mock.calls[0][1];
+      revertFunc();
       const actual = onCharacteristic.value;
 
-      expect(actual).toEqual(1);
+      expect(actual).toBeTruthy();
+      expect(logMock.debug.mock.calls).toEqual([['CAR State ->', true]]);
     });
   });
 });

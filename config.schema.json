@@ -60,6 +60,12 @@
               "required": true,
               "description": "Secret Key from \"EcoFlow IoT Developer Platform\" (https://developer-eu.ecoflow.com)"
             },
+            "disabled": {
+              "title": "Disabled",
+              "type": "boolean",
+              "required": false,
+              "description": "A value indicating whether device should be ignored"
+            },
             "simulate": {
               "title": "Simulate",
               "type": "boolean",

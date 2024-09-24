@@ -1,7 +1,7 @@
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
-import { PowerStreamMqttSetCmdCodeType } from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
-import { IndicatorService } from '@ecoflow/accessories/powerstream/services/indicatorService';
+import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/httpApiPowerStreamContracts';
+import { MqttPowerStreamSetCmdCodeType } from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
+import { BrightnessService } from '@ecoflow/accessories/powerstream/services/brightnessService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
@@ -12,8 +12,8 @@ enum HAPStatus {
   READ_ONLY_CHARACTERISTIC = -70404,
 }
 
-describe('IndicatorService', () => {
-  let service: IndicatorService;
+describe('BrightnessService', () => {
+  let service: BrightnessService;
   let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
@@ -59,7 +59,7 @@ describe('IndicatorService', () => {
       quota: {},
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
-    service = new IndicatorService(ecoFlowAccessoryMock, 1023);
+    service = new BrightnessService(ecoFlowAccessoryMock, 1023);
     hapService = new HapService('Accessory Bulb Name', HapService.Lightbulb.UUID);
   });
 
@@ -95,7 +95,7 @@ describe('IndicatorService', () => {
       const actual = characteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug).toHaveBeenCalledWith('Indicator State ->', true);
+      expect(logMock.debug).toHaveBeenCalledWith('Brightness State ->', true);
     });
   });
 
@@ -114,7 +114,7 @@ describe('IndicatorService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug).toHaveBeenCalledWith('Indicator Brightness ->', 100);
+      expect(logMock.debug).toHaveBeenCalledWith('Brightness Brightness ->', 100);
     });
 
     it('should set 0% brightness when minimum value is set', () => {
@@ -123,7 +123,7 @@ describe('IndicatorService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(0);
-      expect(logMock.debug).toHaveBeenCalledWith('Indicator Brightness ->', 0);
+      expect(logMock.debug).toHaveBeenCalledWith('Brightness Brightness ->', 0);
     });
 
     it('should set brightness when it is requested', () => {
@@ -132,7 +132,7 @@ describe('IndicatorService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(46);
-      expect(logMock.debug).toHaveBeenCalledWith('Indicator Brightness ->', 45.75);
+      expect(logMock.debug).toHaveBeenCalledWith('Brightness Brightness ->', 45.75);
     });
 
     it('should revert changing of Brightness to value set from UI when sending Set command to device is failed', () => {
@@ -145,7 +145,7 @@ describe('IndicatorService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug.mock.calls).toEqual([['Indicator Brightness ->', 100]]);
+      expect(logMock.debug.mock.calls).toEqual([['Brightness Brightness ->', 100]]);
     });
   });
 
@@ -157,13 +157,48 @@ describe('IndicatorService', () => {
       characteristic = service.service.getCharacteristic(HapCharacteristic.On);
     });
 
-    it('should not allow to set ON value', () => {
-      characteristic.value = 1;
-
+    it('should send Set command with max brightness value to device when On value was changed to true', () => {
       characteristic.setValue(true);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
+          params: {
+            brightness: 1023,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('should send Set command with min brightness value to device when On value was changed to false', () => {
+      characteristic.setValue(false);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
+          params: {
+            brightness: 0,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('should revert changing of On state when sending Set command to device is failed', () => {
+      characteristic.updateValue(true);
+
+      characteristic.setValue(false);
+      const revertFunc = ecoFlowAccessoryMock.sendSetCommand.mock.calls[0][1];
+      revertFunc();
       const actual = characteristic.value;
 
-      expect(actual).toEqual(1);
+      expect(actual).toBeTruthy();
+      expect(logMock.debug.mock.calls).toEqual([['Brightness Brightness ->', 0]]);
     });
   });
 
@@ -182,9 +217,9 @@ describe('IndicatorService', () => {
         {
           id: 0,
           version: '',
-          cmdCode: PowerStreamMqttSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
+          cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
           params: {
-            brightness: 306.9,
+            brightness: 307,
           },
         },
         expect.any(Function)
@@ -202,7 +237,7 @@ describe('IndicatorService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug.mock.calls).toEqual([['Indicator Brightness ->', 100]]);
+      expect(logMock.debug.mock.calls).toEqual([['Brightness Brightness ->', 100]]);
     });
   });
 });
