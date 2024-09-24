@@ -1,16 +1,18 @@
 <span align="center">
 
-# homebridge-ecoflow
+# @pietrolubini/homebridge-ecoflow
 
 [![latest](https://img.shields.io/npm/v/@pietrolubini/homebridge-ecoflow.svg?label=stable)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow/v/latest)
 [![beta](https://img.shields.io/npm/v/@pietrolubini/homebridge-ecoflow/beta.svg?label=beta)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow/v/beta)
 [![downloads](https://img.shields.io/npm/dt/@pietrolubini/homebridge-ecoflow.svg)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow)
 [![build](https://github.com/pietrolubini/homebridge-ecoflow/actions/workflows/build.yml/badge.svg)](https://github.com/pietrolubini/homebridge-ecoflow/actions/workflows/build.yml)
 [![license](https://img.shields.io/npm/l/@pietrolubini/homebridge-ecoflow)](https://github.com/pietrolubini/homebridge-ecoflow/blob/main/LICENSE)
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+[![Donate](https://img.shields.io/badge/donate-Coinbase-blue)](https://commerce.coinbase.com/checkout/d56df2da-7609-41a3-af91-289cb6ec4d9b)
 
 </span>
 
-`homebridge-ecoflow` is a plugin for homebridge which allows you to control EcoFlow devices!
+`@pietrolubini/homebridge-ecoflow` is a plugin for homebridge which allows you to control EcoFlow devices!
 The goal is to add HomeKit support to EcoFlow devices and make them fully controllable from the native HomeKit iOS app and Siri.
 
 > Feedback and contribution is helpful and will improve the plugin!
@@ -110,26 +112,26 @@ Quota is sent every 10 seconds with random values in this mode.
 
 #### Services
 
-| EcoFlow Parameter | Service | Characteristic        | Standard | Permission |
-| ----------------- | ------- | --------------------- | -------- | ---------- |
-| Battery Level     | Battery | BatteryLevel          | ✅       | Read       |
-| Input             | Battery | ChargingState         | ✅       | Read       |
-| Battery Level     | Battery | StatusLowBattery      | ✅       | Read       |
-| AC                | Outlet  | On                    | ✅       | Read/Write |
-| AC Output         | Outlet  | OutletInUse           | ✅       | Read       |
-| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
-| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
-| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
-| 12V DC            | Outlet  | On                    | ✅       | Read/Write |
-| 12V DC Output     | Outlet  | OutletInUse           | ✅       | Read       |
-| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
-| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
-| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
-| USB               | Outlet  | On                    | ✅       | Read/Write |
-| USB Output        | Outlet  | OutletInUse           | ✅       | Read       |
-| Battery Level     | Outlet  | Battery Level, %      | 🔲       | Read       |
-| Input             | Outlet  | Input Consumption, W  | 🔲       | Read       |
-| Output            | Outlet  | Output Consumption, W | 🔲       | Read       |
+| EcoFlow Parameter | Service    | Characteristic        | Standard | Permission |
+| ----------------- | ---------- | --------------------- | -------- | ---------- |
+| Battery Level     | Battery    | BatteryLevel          | ✅       | Read       |
+| Input             | Battery    | ChargingState         | ✅       | Read       |
+| Battery Level     | Battery    | StatusLowBattery      | ✅       | Read       |
+| AC                | Outlet AC  | On                    | ✅       | Read/Write |
+| AC Output         | Outlet AC  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet AC  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet AC  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet AC  | Output Consumption, W | 🔲       | Read       |
+| 12V DC            | Outlet CAR | On                    | ✅       | Read/Write |
+| 12V DC Output     | Outlet CAR | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet CAR | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet CAR | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet CAR | Output Consumption, W | 🔲       | Read       |
+| USB               | Outlet USB | On                    | ✅       | Read/Write |
+| USB Output        | Outlet USB | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet USB | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet USB | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet USB | Output Consumption, W | 🔲       | Read       |
 
 #### Configuration
 
@@ -170,24 +172,24 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 
 #### Services
 
-| EcoFlow Parameter   | Service   | Characteristic        | Standard | Permission                                               |
-| ------------------- | --------- | --------------------- | -------- | -------------------------------------------------------- |
-| Inverter            | Outlet    | On                    | ✅       | Read                                                     |
-| Inverter Output     | Outlet    | OutletInUse           | ✅       | Read                                                     |
-| Inverter Input      | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
-| Inverter Output     | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
-| Solar               | Outlet    | On                    | ✅       | -                                                        |
-| Solar Output        | Outlet    | OutletInUse           | ✅       | Read                                                     |
-| Solar Output        | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
-| Battery             | Outlet    | On                    | ✅       | -                                                        |
-| Battery Output      | Outlet    | OutletInUse           | ✅       | Read                                                     |
-| Battery Level       | Outlet    | Battery Level, %      | 🔲       | Read                                                     |
-| Battery Input       | Outlet    | Input Consumption, W  | 🔲       | Read                                                     |
-| Battery Output      | Outlet    | Output Consumption, W | 🔲       | Read                                                     |
-| Lighting brightness | Lightbulb | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
-| Lighting brightness | Lightbulb | Brightness            | ✅       | Read/write                                               |
-| Power demand        | Fan       | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
-| Power demand        | Fan       | RotationSpeed         | ✅       | Read/write                                               |
+| EcoFlow Parameter   | Service    | Characteristic        | Standard | Permission                                           |
+| ------------------- | ---------- | --------------------- | -------- | ---------------------------------------------------- |
+| Inverter            | Outlet INV | On                    | ✅       | Read (Inverter AC Output > 0: ON)                    |
+| Inverter AC Output  | Outlet INV | OutletInUse           | ✅       | Read                                                 |
+| Inverter AC Input   | Outlet INV | Input Consumption, W  | 🔲       | Read                                                 |
+| Inverter AC Output  | Outlet INV | Output Consumption, W | 🔲       | Read                                                 |
+| Solar               | Outlet PV  | On                    | ✅       | Read (Solar Generation > 0: ON)                      |
+| Solar Generation    | Outlet PV  | OutletInUse           | ✅       | Read                                                 |
+| Solar Generation    | Outlet PV  | Output Consumption, W | 🔲       | Read                                                 |
+| Battery             | Outlet BAT | On                    | ✅       | Read (Battery Discharging > 0: ON)                   |
+| Battery Discharging | Outlet BAT | OutletInUse           | ✅       | Read                                                 |
+| Battery Level       | Outlet BAT | Battery Level, %      | 🔲       | Read                                                 |
+| Battery Charging    | Outlet BAT | Input Consumption, W  | 🔲       | Read                                                 |
+| Battery Discharging | Outlet BAT | Output Consumption, W | 🔲       | Read                                                 |
+| Lighting brightness | Lightbulb  | On                    | ✅       | Read (> 0%: ON; 0%: OFF) / write (ON: 100%; OFF: 0%) |
+| Lighting brightness | Lightbulb  | Brightness            | ✅       | Read/write                                           |
+| Power demand        | Fan        | On                    | ✅       | Read (> 0%: ON; 0%: OFF) / write (ON: 100%; OFF: 0%) |
+| Power demand        | Fan        | RotationSpeed         | ✅       | Read/write                                           |
 
 #### Configuration
 
@@ -213,24 +215,18 @@ The following additional characteristics is available:
       "model": "PowerStream",
       "powerStream": {
         "type": "800",
-        "battery": {
-          "additionalCharacteristics": [
-            "Battery Level, %",
-            "Input Consumption, W",
-            "Output Consumption, W"
-          ]
-        },
-        "pv": {
-          "additionalCharacteristics": [
-            "Output Consumption, W"
-          ]
-        },
-        "inverter": {
-          "additionalCharacteristics": [
-            "Input Consumption, W",
-            "Output Consumption, W"
-          ]
-        }
+        "batteryAdditionalCharacteristics": [
+          "Battery Level, %",
+          "Input Consumption, W",
+          "Output Consumption, W"
+        ],
+        "pvAdditionalCharacteristics": [
+          "Output Consumption, W"
+        ],
+        "inverterAdditionalCharacteristics": [
+          "Input Consumption, W",
+          "Output Consumption, W"
+        ]
       }
     }
   ],

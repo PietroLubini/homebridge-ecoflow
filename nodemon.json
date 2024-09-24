@@ -1,8 +1,8 @@
 {
   "watch": ["src"],
   "ext": "ts",
-  "ignore": [],
-  "exec": "tsc && homebridge -I -D",
+  "ignore": ["**/*.spec.ts"],
+  "exec": "npm run build:all && homebridge -I -D",
   "signal": "SIGTERM",
   "env": {
     "NODE_OPTIONS": "--trace-warnings"

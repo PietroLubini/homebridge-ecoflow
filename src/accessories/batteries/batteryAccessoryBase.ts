@@ -1,6 +1,6 @@
 import {
   BatteryAllQuotaData,
-  BmsStatus,
+  EmsStatus,
   InvStatus,
   PdStatus,
 } from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
@@ -49,10 +49,10 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
     const batteryMessage = message as MqttBatteryQuotaMessage;
-    if (batteryMessage.typeCode === MqttBatteryMessageType.BMS) {
-      const bmsStatus = (message as MqttQuotaMessageWithParams<BmsStatus>).params;
-      Object.assign(this.quota.bms_bmsStatus, bmsStatus);
-      this.updateBmsValues(bmsStatus);
+    if (batteryMessage.typeCode === MqttBatteryMessageType.EMS) {
+      const emsStatus = (message as MqttQuotaMessageWithParams<EmsStatus>).params;
+      Object.assign(this.quota.bms_emsStatus, emsStatus);
+      this.updateEmsValues(emsStatus);
     } else if (batteryMessage.typeCode === MqttBatteryMessageType.INV) {
       const invStatus = (message as MqttQuotaMessageWithParams<InvStatus>).params;
       Object.assign(this.quota.inv, invStatus);
@@ -66,8 +66,8 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
 
   protected override initializeQuota(quota: BatteryAllQuotaData | null): BatteryAllQuotaData {
     const result = quota ?? ({} as BatteryAllQuotaData);
-    if (!result.bms_bmsStatus) {
-      result.bms_bmsStatus = {};
+    if (!result.bms_emsStatus) {
+      result.bms_emsStatus = {};
     }
     if (!result.inv) {
       result.inv = {};
@@ -79,14 +79,14 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
   }
 
   protected override updateInitialValues(initialData: BatteryAllQuotaData): void {
-    this.updateBmsInitialValues(initialData.bms_bmsStatus);
+    this.updateEmsInitialValues(initialData.bms_emsStatus);
     this.updateInvInitialValues(initialData.inv);
     this.updatePdInitialValues(initialData.pd);
   }
 
-  private updateBmsInitialValues(params: BmsStatus): void {
-    const message: MqttBatteryQuotaMessageWithParams<BmsStatus> = {
-      typeCode: MqttBatteryMessageType.BMS,
+  private updateEmsInitialValues(params: EmsStatus): void {
+    const message: MqttBatteryQuotaMessageWithParams<EmsStatus> = {
+      typeCode: MqttBatteryMessageType.EMS,
       params,
     };
     this.processQuotaMessage(message);
@@ -108,12 +108,12 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
     this.processQuotaMessage(message);
   }
 
-  private updateBmsValues(params: BmsStatus): void {
-    if (params.f32ShowSoc !== undefined) {
-      this.batteryService.updateBatteryLevel(params.f32ShowSoc);
-      this.outletAcService.updateBatteryLevel(params.f32ShowSoc);
-      this.outletUsbService.updateBatteryLevel(params.f32ShowSoc);
-      this.outletCarService.updateBatteryLevel(params.f32ShowSoc);
+  private updateEmsValues(params: EmsStatus): void {
+    if (params.f32LcdShowSoc !== undefined) {
+      this.batteryService.updateBatteryLevel(params.f32LcdShowSoc);
+      this.outletAcService.updateBatteryLevel(params.f32LcdShowSoc);
+      this.outletUsbService.updateBatteryLevel(params.f32LcdShowSoc);
+      this.outletCarService.updateBatteryLevel(params.f32LcdShowSoc);
     }
   }
 

@@ -38,9 +38,9 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
 
-    this.inverterOutletService = new OutletInvService(this, config.powerStream?.inverter?.additionalCharacteristics);
-    this.solarOutletService = new OutletService(this, 'PV', config.powerStream?.pv?.additionalCharacteristics);
-    this.batteryOutletService = new OutletService(this, 'BAT', config.powerStream?.battery?.additionalCharacteristics);
+    this.inverterOutletService = new OutletInvService(this, config.powerStream?.inverterAdditionalCharacteristics);
+    this.solarOutletService = new OutletService(this, 'PV', config.powerStream?.pvAdditionalCharacteristics);
+    this.batteryOutletService = new OutletService(this, 'BAT', config.powerStream?.batteryAdditionalCharacteristics);
     this.inverterBrightnessService = new BrightnessService(this, 1023);
     this.inverterPowerDemandService = new PowerDemandService(
       this,
@@ -100,6 +100,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
   private updateSolarValues(params: Heartbeat): void {
     if (params.pv1InputWatts !== undefined || params.pv2InputWatts !== undefined) {
       const pvWatts = this.sum(params.pv1InputWatts, params.pv2InputWatts) * 0.1;
+      this.solarOutletService.updateState(pvWatts > 0);
       this.solarOutletService.updateOutputConsumption(pvWatts);
     }
   }
@@ -108,6 +109,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
     if (params.batInputWatts !== undefined) {
       const batInputWatts = params.batInputWatts * 0.1;
       if (batInputWatts >= 0) {
+        this.batteryOutletService.updateState(batInputWatts > 0);
         this.batteryOutletService.updateOutputConsumption(batInputWatts);
       }
       if (batInputWatts <= 0) {

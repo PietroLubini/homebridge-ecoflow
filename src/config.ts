@@ -57,7 +57,7 @@ export enum PowerStreamConsumptionType {
 
 export interface PowerStreamDeviceConfig {
   type: PowerStreamConsumptionType;
-  battery?: BatteryDeviceConfig;
-  pv?: BatteryDeviceConfig;
-  inverter?: BatteryDeviceConfig;
+  batteryAdditionalCharacteristics?: AdditionalBatteryCharacteristicType[];
+  pvAdditionalCharacteristics?: AdditionalBatteryCharacteristicType[];
+  inverterAdditionalCharacteristics?: AdditionalBatteryCharacteristicType[];
 }

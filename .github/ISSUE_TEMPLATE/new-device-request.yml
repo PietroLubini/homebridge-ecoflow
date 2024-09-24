@@ -13,7 +13,6 @@ body:
       label: Device
       options:
         - Choose a device...
-        - Delta Pro
         - Smart Home Panel
         - Smart Plug
         - Wave Air Conditioner

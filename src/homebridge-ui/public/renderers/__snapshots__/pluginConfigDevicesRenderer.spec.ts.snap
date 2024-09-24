@@ -1,0 +1,718 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PluginConfigDevicesRenderer render addNewDevice should render tab with default values when addDeviceTab is clicked 1`] = `
+<div>
+  <ul
+    id="devicesTabs"
+  >
+    
+      
+    <li
+      class="nav-item"
+    >
+      
+        
+      <a
+        class="nav-link "
+        data-toggle="tab"
+        href="#deviceTabPanel0"
+        id="deviceTab0"
+      >
+        First Device
+      </a>
+      
+      
+    </li>
+    
+    
+    
+      
+    <li
+      class="nav-item"
+    >
+      
+        
+      <a
+        class="nav-link "
+        data-toggle="tab"
+        href="#deviceTabPanel1"
+        id="deviceTab1"
+      >
+        Second Device
+      </a>
+      
+      
+    </li>
+    
+    
+    
+      
+    <li
+      class="nav-item"
+    >
+      
+        
+      <a
+        class="nav-link active"
+        data-toggle="tab"
+        href="#deviceTabPanel2"
+        id="deviceTab2"
+      >
+        Device3
+      </a>
+      
+      
+    </li>
+    
+    
+    
+      
+    <li
+      class="nav-item"
+    >
+      
+        
+      <a
+        class="nav-link "
+        data-toggle="tab"
+        href="#deviceTabPanelAdd"
+        id="deviceTabAdd"
+      >
+        Add Device
+      </a>
+      
+      
+    </li>
+    
+    
+  </ul>
+  <div
+    id="devicesPanels"
+  >
+    
+    
+    <div
+      class="tab-pane container fade  card card-body list-group-item"
+      id="deviceTabPanel0"
+    >
+      
+      
+      <button
+        class="close pull-right"
+        id="deviceTabPanelClose0"
+        type="button"
+      >
+        
+        
+        <span>
+          ×
+        </span>
+        
+        
+        <span
+          class="sr-only"
+        >
+          Close
+        </span>
+        
+      
+      </button>
+      
+    
+      
+    
+      <div
+        class="form-group"
+      >
+        
+      
+        <label
+          class="required-label"
+          for="devicemodel0"
+        >
+          Model
+        </label>
+        
+      
+        <select
+          class="form-control"
+          id="devicemodel0"
+          required="true"
+        >
+          <option
+            value="Delta 2"
+          >
+            Delta 2
+          </option>
+          <option
+            value="Delta 2 Max"
+          >
+            Delta 2 Max
+          </option>
+          <option
+            value="PowerStream"
+          >
+            PowerStream
+          </option>
+        </select>
+        
+    
+      </div>
+    </div>
+    
+  
+    
+    
+    <div
+      class="tab-pane container fade  card card-body list-group-item"
+      id="deviceTabPanel1"
+    >
+      
+      
+      <button
+        class="close pull-right"
+        id="deviceTabPanelClose1"
+        type="button"
+      >
+        
+        
+        <span>
+          ×
+        </span>
+        
+        
+        <span
+          class="sr-only"
+        >
+          Close
+        </span>
+        
+      
+      </button>
+      
+    
+      
+    
+      <div
+        class="form-group"
+      >
+        
+      
+        <label
+          class="required-label"
+          for="devicemodel1"
+        >
+          Model
+        </label>
+        
+      
+        <select
+          class="form-control"
+          id="devicemodel1"
+          required="true"
+        >
+          <option
+            value="Delta 2"
+          >
+            Delta 2
+          </option>
+          <option
+            value="Delta 2 Max"
+          >
+            Delta 2 Max
+          </option>
+          <option
+            value="PowerStream"
+          >
+            PowerStream
+          </option>
+        </select>
+        
+    
+      </div>
+    </div>
+    
+  
+    
+    
+    <div
+      class="tab-pane container fade in show active card card-body list-group-item"
+      id="deviceTabPanel2"
+    >
+      
+      
+      <button
+        class="close pull-right"
+        id="deviceTabPanelClose2"
+        type="button"
+      >
+        
+        
+        <span>
+          ×
+        </span>
+        
+        
+        <span
+          class="sr-only"
+        >
+          Close
+        </span>
+        
+      
+      </button>
+      
+    
+      
+    
+      <div
+        class="form-group"
+      >
+        
+      
+        <label
+          class="required-label"
+          for="devicemodel2"
+        >
+          Model
+        </label>
+        
+      
+        <select
+          class="form-control"
+          id="devicemodel2"
+          required="true"
+        >
+          <option
+            value="Delta 2"
+          >
+            Delta 2
+          </option>
+          <option
+            value="Delta 2 Max"
+          >
+            Delta 2 Max
+          </option>
+          <option
+            value="PowerStream"
+          >
+            PowerStream
+          </option>
+        </select>
+        
+    
+      </div>
+    </div>
+    
+  
+  </div>
+</div>
+`;
+
+exports[`PluginConfigDevicesRenderer render removeDevice should leave addNewDevice tab only when remove button is clicked for last device 1`] = `
+<div>
+  <ul
+    id="devicesTabs"
+  >
+    
+      
+    <li
+      class="nav-item"
+    >
+      
+        
+      <a
+        class="nav-link "
+        data-toggle="tab"
+        href="#deviceTabPanelAdd"
+        id="deviceTabAdd"
+      >
+        Add Device
+      </a>
+      
+      
+    </li>
+    
+    
+  </ul>
+  <div
+    id="devicesPanels"
+  />
+</div>
+`;
+
+exports[`PluginConfigDevicesRenderer render removeDevice should remove active tab when remove button is clicked 1`] = `
+<div>
+  <ul
+    id="devicesTabs"
+  >
+    
+      
+    <li
+      class="nav-item"
+    >
+      
+        
+      <a
+        class="nav-link active"
+        data-toggle="tab"
+        href="#deviceTabPanel0"
+        id="deviceTab0"
+      >
+        First Device
+      </a>
+      
+      
+    </li>
+    
+    
+    
+      
+    <li
+      class="nav-item"
+    >
+      
+        
+      <a
+        class="nav-link "
+        data-toggle="tab"
+        href="#deviceTabPanelAdd"
+        id="deviceTabAdd"
+      >
+        Add Device
+      </a>
+      
+      
+    </li>
+    
+    
+  </ul>
+  <div
+    id="devicesPanels"
+  >
+    
+    
+    <div
+      class="tab-pane container fade in show active card card-body list-group-item"
+      id="deviceTabPanel0"
+    >
+      
+      
+      <button
+        class="close pull-right"
+        id="deviceTabPanelClose0"
+        type="button"
+      >
+        
+        
+        <span>
+          ×
+        </span>
+        
+        
+        <span
+          class="sr-only"
+        >
+          Close
+        </span>
+        
+      
+      </button>
+      
+    
+      
+    
+      <div
+        class="form-group"
+      >
+        
+      
+        <label
+          class="required-label"
+          for="devicemodel0"
+        >
+          Model
+        </label>
+        
+      
+        <select
+          class="form-control"
+          id="devicemodel0"
+          required="true"
+        >
+          <option
+            value="Delta 2"
+          >
+            Delta 2
+          </option>
+          <option
+            value="Delta 2 Max"
+          >
+            Delta 2 Max
+          </option>
+          <option
+            value="PowerStream"
+          >
+            PowerStream
+          </option>
+        </select>
+        
+    
+      </div>
+    </div>
+    
+  
+  </div>
+</div>
+`;
+
+exports[`PluginConfigDevicesRenderer render tabPanelsRendering should render tab panels and activate first one when there are 2 devices in configuration 1`] = `
+<div
+  id="devicesPanels"
+>
+  
+    
+  <div
+    class="tab-pane container fade in show active card card-body list-group-item"
+    id="deviceTabPanel0"
+  >
+    
+      
+    <button
+      class="close pull-right"
+      id="deviceTabPanelClose0"
+      type="button"
+    >
+      
+        
+      <span>
+        ×
+      </span>
+      
+        
+      <span
+        class="sr-only"
+      >
+        Close
+      </span>
+      
+      
+    </button>
+    
+    
+    
+    
+    <div
+      class="form-group"
+    >
+      
+      
+      <label
+        class="required-label"
+        for="devicemodel0"
+      >
+        Model
+      </label>
+      
+      
+      <select
+        class="form-control"
+        id="devicemodel0"
+        required="true"
+      >
+        <option
+          value="Delta 2"
+        >
+          Delta 2
+        </option>
+        <option
+          value="Delta 2 Max"
+        >
+          Delta 2 Max
+        </option>
+        <option
+          value="PowerStream"
+        >
+          PowerStream
+        </option>
+      </select>
+      
+    
+    </div>
+  </div>
+  
+  
+  
+    
+  <div
+    class="tab-pane container fade  card card-body list-group-item"
+    id="deviceTabPanel1"
+  >
+    
+      
+    <button
+      class="close pull-right"
+      id="deviceTabPanelClose1"
+      type="button"
+    >
+      
+        
+      <span>
+        ×
+      </span>
+      
+        
+      <span
+        class="sr-only"
+      >
+        Close
+      </span>
+      
+      
+    </button>
+    
+    
+    
+    
+    <div
+      class="form-group"
+    >
+      
+      
+      <label
+        class="required-label"
+        for="devicemodel1"
+      >
+        Model
+      </label>
+      
+      
+      <select
+        class="form-control"
+        id="devicemodel1"
+        required="true"
+      >
+        <option
+          value="Delta 2"
+        >
+          Delta 2
+        </option>
+        <option
+          value="Delta 2 Max"
+        >
+          Delta 2 Max
+        </option>
+        <option
+          value="PowerStream"
+        >
+          PowerStream
+        </option>
+      </select>
+      
+    
+    </div>
+  </div>
+  
+  
+</div>
+`;
+
+exports[`PluginConfigDevicesRenderer render tabPanelsRendering should render tab panels when there are no devices in configuration 1`] = `
+<div
+  id="devicesPanels"
+/>
+`;
+
+exports[`PluginConfigDevicesRenderer render tabsRendering should render tabs when there are 2 devices in configuration 1`] = `
+<ul
+  id="devicesTabs"
+>
+  
+      
+  <li
+    class="nav-item"
+  >
+    
+        
+    <a
+      class="nav-link active"
+      data-toggle="tab"
+      href="#deviceTabPanel0"
+      id="deviceTab0"
+    >
+      First Device
+    </a>
+    
+      
+  </li>
+  
+    
+  
+      
+  <li
+    class="nav-item"
+  >
+    
+        
+    <a
+      class="nav-link "
+      data-toggle="tab"
+      href="#deviceTabPanel1"
+      id="deviceTab1"
+    >
+      Second Device
+    </a>
+    
+      
+  </li>
+  
+    
+  
+      
+  <li
+    class="nav-item"
+  >
+    
+        
+    <a
+      class="nav-link "
+      data-toggle="tab"
+      href="#deviceTabPanelAdd"
+      id="deviceTabAdd"
+    >
+      Add Device
+    </a>
+    
+      
+  </li>
+  
+    
+</ul>
+`;
+
+exports[`PluginConfigDevicesRenderer render tabsRendering should render tabs when there are no devices in configuration 1`] = `
+<ul
+  id="devicesTabs"
+>
+  
+      
+  <li
+    class="nav-item"
+  >
+    
+        
+    <a
+      class="nav-link "
+      data-toggle="tab"
+      href="#deviceTabPanelAdd"
+      id="deviceTabAdd"
+    >
+      Add Device
+    </a>
+    
+      
+  </li>
+  
+    
+</ul>
+`;

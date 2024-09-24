@@ -152,12 +152,16 @@ describe('EcoFlowHomebridgePlatform', () => {
         name: 'device1',
         model: DeviceModel.Delta2,
         serialNumber: 'sn1',
+        accessKey: 'key1',
+        secretKey: 'key1',
       } as unknown as DeviceConfig;
       delta2MaxConfig = {
         name: 'device2',
         model: DeviceModel.Delta2Max,
         serialNumber: 'sn2',
-      } as unknown as DeviceConfig;
+        accessKey: 'key2',
+        secretKey: 'key2',
+      } as DeviceConfig;
       log1Mock = { info: jest.fn(), warn: jest.fn() } as unknown as jest.Mocked<Logging>;
       log2Mock = { info: jest.fn(), warn: jest.fn() } as unknown as jest.Mocked<Logging>;
       accessory1Mock = {
@@ -226,6 +230,38 @@ describe('EcoFlowHomebridgePlatform', () => {
         expect(log1Mock.warn).toHaveBeenCalledWith('Device is disabled. Ignoring the device');
       });
 
+      it('should not register device when name is not defined', () => {
+        config.devices = [{ accessKey: 'key1', secretKey: 'key1', serialNumber: 'sn1' } as DeviceConfig];
+
+        registerDevices();
+
+        expect(log1Mock.warn).toHaveBeenCalledWith("Device's 'name' must be configured. Ignoring the device");
+      });
+
+      it('should not register device when serialNumber is not defined', () => {
+        config.devices = [{ accessKey: 'key1', secretKey: 'key1', name: 'name1' } as DeviceConfig];
+
+        registerDevices();
+
+        expect(log1Mock.warn).toHaveBeenCalledWith("Device's 'serialNumber' must be configured. Ignoring the device");
+      });
+
+      it('should not register device when secretKey is not defined', () => {
+        config.devices = [{ accessKey: 'key1', serialNumber: 'sn1', name: 'name1' } as DeviceConfig];
+
+        registerDevices();
+
+        expect(log1Mock.warn).toHaveBeenCalledWith("Device's 'secretKey' must be configured. Ignoring the device");
+      });
+
+      it('should not register device when accessKey is not defined', () => {
+        config.devices = [{ secretKey: 'key1', serialNumber: 'sn1', name: 'name1' } as DeviceConfig];
+
+        registerDevices();
+
+        expect(log1Mock.warn).toHaveBeenCalledWith("Device's 'accessKey' must be configured. Ignoring the device");
+      });
+
       it('should not register device when serial number is duplicated', () => {
         delta2MaxConfig.serialNumber = 'sn1';
         accessory2Mock.UUID = 'id1';
@@ -243,6 +279,8 @@ describe('EcoFlowHomebridgePlatform', () => {
             name: 'device1',
             model: 'DeltaMax',
             serialNumber: 'sn1',
+            accessKey: 'key1',
+            secretKey: 'key1',
           } as unknown as DeviceConfig,
         ];
 
@@ -324,7 +362,9 @@ describe('EcoFlowHomebridgePlatform', () => {
             name: 'device3',
             model: DeviceModel.PowerStream,
             serialNumber: 'sn2',
-          } as unknown as DeviceConfig,
+            accessKey: 'key1',
+            secretKey: 'key1',
+          } as DeviceConfig,
         ];
         const powerStreamAccessoryMock = createAccessory(
           PowerStreamAccessory,

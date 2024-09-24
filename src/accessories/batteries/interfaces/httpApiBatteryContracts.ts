@@ -1,6 +1,6 @@
 // Battery management system status
-export interface BmsStatus {
-  f32ShowSoc?: number; //Battery level
+export interface EmsStatus {
+  f32LcdShowSoc?: number; //Battery level
 }
 
 // AC invertor status
@@ -35,7 +35,7 @@ export interface PdStatusUsb {
 export interface PdStatus extends PdStatusUsb, PdStatusCar {}
 
 export interface BatteryAllQuotaData {
-  bms_bmsStatus: BmsStatus;
+  bms_emsStatus: EmsStatus;
   inv: InvStatus;
   pd: PdStatus;
 }

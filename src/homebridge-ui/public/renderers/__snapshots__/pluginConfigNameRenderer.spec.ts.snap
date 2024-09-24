@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PluginConfigNameRenderer render should render a textbox for name property when is called 1`] = `
+<div
+  id="generalSettings"
+>
+  
+    
+  <div
+    class="form-group"
+  >
+    
+      
+    <label
+      class=""
+      for="devicename"
+    >
+      Name Title
+    </label>
+    
+      
+    <input
+      class="form-control"
+      id="devicename"
+      placeholder=""
+      required="false"
+      type="text"
+    />
+    
+    
+  </div>
+</div>
+`;
