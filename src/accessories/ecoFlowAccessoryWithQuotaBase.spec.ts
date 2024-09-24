@@ -6,12 +6,6 @@ import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
-jest.mock('@ecoflow/services/batteryStatusService');
-jest.mock('@ecoflow/accessories/batteries/services/outletUsbService');
-jest.mock('@ecoflow/accessories/batteries/services/outletAcService');
-jest.mock('@ecoflow/accessories/batteries/services/outletCarService');
-jest.mock('@ecoflow/services/accessoryInformationService');
-
 interface MockAllQuotaContainer {
   param1?: number;
 }

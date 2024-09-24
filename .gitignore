@@ -123,5 +123,8 @@ dist
 # Webstorm
 .idea
 
+# VS
+.vs
+
 # Tests
 junit.xml

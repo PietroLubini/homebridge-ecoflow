@@ -1,14 +1,15 @@
+import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import {
   Heartbeat,
   PowerStreamAllQuotaData,
-} from '@ecoflow/accessories/powerstream/interfaces/httpApiPowerStreamContracts';
+} from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
 import {
-  MqttPowerStreamMessageFuncType,
-  MqttPowerStreamMessageType,
-  MqttPowerStreamQuotaMessage,
-  MqttPowerStreamQuotaMessageWithParams,
-} from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
+  PowerStreamMqttMessageFuncType,
+  PowerStreamMqttMessageType,
+  PowerStreamMqttQuotaMessage,
+  PowerStreamMqttQuotaMessageWithParams,
+} from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
 import { BrightnessService } from '@ecoflow/accessories/powerstream/services/brightnessService';
 import { OutletInvService } from '@ecoflow/accessories/powerstream/services/outletInvService';
 import { OutletService } from '@ecoflow/accessories/powerstream/services/outletService';
@@ -59,12 +60,12 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
-    const powerStreamMessage = message as MqttPowerStreamQuotaMessage;
+    const powerStreamMessage = message as PowerStreamMqttQuotaMessage;
     if (
-      powerStreamMessage.cmdFunc === MqttPowerStreamMessageFuncType.Func20 &&
-      powerStreamMessage.cmdId === MqttPowerStreamMessageType.Heartbeat
+      powerStreamMessage.cmdFunc === PowerStreamMqttMessageFuncType.Func20 &&
+      powerStreamMessage.cmdId === PowerStreamMqttMessageType.Heartbeat
     ) {
-      const heartbeat = (message as MqttPowerStreamQuotaMessageWithParams<Heartbeat>).param;
+      const heartbeat = (message as PowerStreamMqttQuotaMessageWithParams<Heartbeat>).param;
       Object.assign(this.quota['20_1'], heartbeat);
       this.updateHeartbeatValues(heartbeat);
     }
@@ -83,9 +84,9 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
   }
 
   private updateHeartbeatInitialValues(params: Heartbeat): void {
-    const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-      cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-      cmdId: MqttPowerStreamMessageType.Heartbeat,
+    const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+      cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+      cmdId: PowerStreamMqttMessageType.Heartbeat,
       param: params,
     };
     this.processQuotaMessage(message);
@@ -134,7 +135,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
     }
 
     if (params.invOnOff !== undefined) {
-      this.inverterOutletService.updateState(params.invOnOff);
+      this.inverterOutletService.updateState(params.invOnOff === EnableType.On);
     }
 
     if (params.invBrightness !== undefined) {

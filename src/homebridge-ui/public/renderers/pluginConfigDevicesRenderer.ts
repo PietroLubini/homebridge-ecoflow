@@ -28,6 +28,7 @@ export class PluginConfigDevicesRenderer extends PluginConfigRendererBase {
       hideDeviceSettingsPerModel: {
         'Delta 2': ['powerStream'],
         'Delta 2 Max': ['powerStream'],
+        'Delta Pro': ['powerStream'],
         PowerStream: ['battery'],
       },
     });
