@@ -172,24 +172,24 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 
 #### Services
 
-| EcoFlow Parameter   | Service    | Characteristic        | Standard | Permission                                               |
-| ------------------- | ---------- | --------------------- | -------- | -------------------------------------------------------- |
-| Inverter            | Outlet INV | On                    | ✅       | Read                                                     |
-| Inverter Output     | Outlet INV | OutletInUse           | ✅       | Read                                                     |
-| Inverter Input      | Outlet INV | Input Consumption, W  | 🔲       | Read                                                     |
-| Inverter Output     | Outlet INV | Output Consumption, W | 🔲       | Read                                                     |
-| Solar               | Outlet PV  | On                    | ✅       | -                                                        |
-| Solar Output        | Outlet PV  | OutletInUse           | ✅       | Read                                                     |
-| Solar Output        | Outlet PV  | Output Consumption, W | 🔲       | Read                                                     |
-| Battery             | Outlet BAT | On                    | ✅       | -                                                        |
-| Battery Output      | Outlet BAT | OutletInUse           | ✅       | Read                                                     |
-| Battery Level       | Outlet BAT | Battery Level, %      | 🔲       | Read                                                     |
-| Battery Input       | Outlet BAT | Input Consumption, W  | 🔲       | Read                                                     |
-| Battery Output      | Outlet BAT | Output Consumption, W | 🔲       | Read                                                     |
-| Lighting brightness | Lightbulb  | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
-| Lighting brightness | Lightbulb  | Brightness            | ✅       | Read/write                                               |
-| Power demand        | Fan        | On                    | ✅       | Read (on - > 0%, off - 0%) / write (on - 100%, off - 0%) |
-| Power demand        | Fan        | RotationSpeed         | ✅       | Read/write                                               |
+| EcoFlow Parameter   | Service    | Characteristic        | Standard | Permission                                           |
+| ------------------- | ---------- | --------------------- | -------- | ---------------------------------------------------- |
+| Inverter            | Outlet INV | On                    | ✅       | Read (Inverter AC Output > 0: ON)                    |
+| Inverter AC Output  | Outlet INV | OutletInUse           | ✅       | Read                                                 |
+| Inverter AC Input   | Outlet INV | Input Consumption, W  | 🔲       | Read                                                 |
+| Inverter AC Output  | Outlet INV | Output Consumption, W | 🔲       | Read                                                 |
+| Solar               | Outlet PV  | On                    | ✅       | Read (Solar Generation > 0: ON)                      |
+| Solar Generation    | Outlet PV  | OutletInUse           | ✅       | Read                                                 |
+| Solar Generation    | Outlet PV  | Output Consumption, W | 🔲       | Read                                                 |
+| Battery             | Outlet BAT | On                    | ✅       | Read (Battery Discharging > 0: ON)                   |
+| Battery Discharging | Outlet BAT | OutletInUse           | ✅       | Read                                                 |
+| Battery Level       | Outlet BAT | Battery Level, %      | 🔲       | Read                                                 |
+| Battery Charging    | Outlet BAT | Input Consumption, W  | 🔲       | Read                                                 |
+| Battery Discharging | Outlet BAT | Output Consumption, W | 🔲       | Read                                                 |
+| Lighting brightness | Lightbulb  | On                    | ✅       | Read (> 0%: ON; 0%: OFF) / write (ON: 100%; OFF: 0%) |
+| Lighting brightness | Lightbulb  | Brightness            | ✅       | Read/write                                           |
+| Power demand        | Fan        | On                    | ✅       | Read (> 0%: ON; 0%: OFF) / write (ON: 100%; OFF: 0%) |
+| Power demand        | Fan        | RotationSpeed         | ✅       | Read/write                                           |
 
 #### Configuration
 

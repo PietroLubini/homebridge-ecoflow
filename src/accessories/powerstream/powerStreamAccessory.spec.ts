@@ -494,6 +494,7 @@ describe('PowerStreamAccessory', () => {
           processQuotaMessage(message);
 
           expect(solarOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
+          expect(solarOutletServiceMock.updateState).toHaveBeenCalledWith(true);
           expect(solarOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(4.5);
         });
 
@@ -509,6 +510,7 @@ describe('PowerStreamAccessory', () => {
           processQuotaMessage(message);
 
           expect(solarOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
+          expect(solarOutletServiceMock.updateState).toHaveBeenCalledWith(false);
           expect(solarOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
         });
 
@@ -570,6 +572,7 @@ describe('PowerStreamAccessory', () => {
           processQuotaMessage(message);
 
           expect(batteryOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
+          expect(batteryOutletServiceMock.updateState).toHaveBeenCalledWith(true);
           expect(batteryOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(12.4);
         });
 
@@ -585,6 +588,7 @@ describe('PowerStreamAccessory', () => {
           processQuotaMessage(message);
 
           expect(batteryOutletServiceMock.updateInputConsumption).toHaveBeenCalledWith(0);
+          expect(batteryOutletServiceMock.updateState).toHaveBeenCalledWith(false);
           expect(batteryOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
         });
 
