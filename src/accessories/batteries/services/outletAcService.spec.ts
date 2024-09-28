@@ -5,6 +5,7 @@ import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAcces
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
@@ -16,6 +17,7 @@ describe('OutletAcService', () => {
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
   let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
+  let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   let hapService: HapService;
 
   const hapMock = {
@@ -51,7 +53,8 @@ describe('OutletAcService', () => {
       quota: {},
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<BatteryAllQuotaData>>;
-    service = new OutletAcService(ecoFlowAccessoryMock);
+    batteryStatusProviderMock = { getStatusLowBattery: jest.fn() } as jest.Mocked<BatteryStatusProvider>;
+    service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock);
     hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
   });
 
@@ -60,7 +63,7 @@ describe('OutletAcService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
       };
-      service = new OutletAcService(ecoFlowAccessoryMock);
+      service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -97,7 +100,7 @@ describe('OutletAcService', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.InputConsumptionInWatts],
       };
-      service = new OutletAcService(ecoFlowAccessoryMock);
+      service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
@@ -126,16 +129,54 @@ describe('OutletAcService', () => {
     });
   });
 
+  describe('updateStatusLowBattery', () => {
+    it('should set low battery level when it is less than 20', () => {
+      ecoFlowAccessoryMock.config.battery = {
+        additionalCharacteristics: [CharacteristicType.StatusLowBattery],
+      };
+      service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock);
+      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+      service.initialize();
+      batteryStatusProviderMock.getStatusLowBattery.mockReturnValue(
+        HapCharacteristic.StatusLowBattery.BATTERY_LEVEL_LOW
+      );
+
+      service.updateBatteryLevel(19.99, 20);
+      const actual = service.service.getCharacteristic(HapCharacteristic.StatusLowBattery).value;
+
+      expect(actual).toEqual(HapCharacteristic.StatusLowBattery.BATTERY_LEVEL_LOW);
+      expect(logMock.debug.mock.calls).toEqual([['AC StatusLowBattery ->', 1]]);
+    });
+
+    it('should set normal battery level when it is more than or equal to 20', () => {
+      ecoFlowAccessoryMock.config.battery = {
+        additionalCharacteristics: [CharacteristicType.StatusLowBattery],
+      };
+      service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock);
+      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+      service.initialize();
+      batteryStatusProviderMock.getStatusLowBattery.mockReturnValue(
+        HapCharacteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
+      );
+
+      service.updateBatteryLevel(20, 20);
+      const actual = service.service.getCharacteristic(HapCharacteristic.StatusLowBattery).value;
+
+      expect(actual).toEqual(HapCharacteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL);
+      expect(logMock.debug.mock.calls).toEqual([['AC StatusLowBattery ->', 0]]);
+    });
+  });
+
   describe('updateBatteryLevel', () => {
     it('should set BatteryLevel when it is enabled in configuration', () => {
       ecoFlowAccessoryMock.config.battery = {
         additionalCharacteristics: [CharacteristicType.BatteryLevel],
       };
-      service = new OutletAcService(ecoFlowAccessoryMock);
+      service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
-      service.updateBatteryLevel(87.4);
+      service.updateBatteryLevel(87.4, 10);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.BatteryLevel).value;
 
@@ -147,7 +188,7 @@ describe('OutletAcService', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
-      service.updateBatteryLevel(87.4);
+      service.updateBatteryLevel(87.4, 10);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.BatteryLevel).value;
 

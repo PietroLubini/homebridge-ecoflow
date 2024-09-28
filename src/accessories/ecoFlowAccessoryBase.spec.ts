@@ -4,6 +4,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage, MqttSetMessage, MqttSetReplyMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';
 import { sleep } from '@ecoflow/helpers/tests/sleep';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
@@ -26,10 +27,11 @@ class MockEcoFlowAccessory extends EcoFlowAccessoryBase {
     config: DeviceConfig,
     log: Logging,
     httpApiManager: EcoFlowHttpApiManager,
-    mqttApiManager: EcoFlowMqttApiManager
+    mqttApiManager: EcoFlowMqttApiManager,
+    batteryStatusProvider: BatteryStatusProvider
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
-    this.batteryService = new BatteryStatusService(this);
+    this.batteryService = new BatteryStatusService(this, batteryStatusProvider);
   }
 
   public override async initializeDefaultValues(): Promise<void> {}
@@ -50,6 +52,7 @@ describe('EcoFlowAccessoryBase', () => {
   let config: DeviceConfig;
   let batteryStatusServiceMock: jest.Mocked<BatteryStatusService>;
   let accessoryInformationServiceMock: jest.Mocked<AccessoryInformationService>;
+  let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   let deviceInfo: DeviceInfo;
   let accessory: MockEcoFlowAccessory;
   const expectedServices: MockService[] = [
@@ -67,10 +70,10 @@ describe('EcoFlowAccessoryBase', () => {
 
   beforeEach(() => {
     function createService<TService extends ServiceBase>(
-      Service: new (ecoFlowAccessory: MockEcoFlowAccessory) => TService,
+      Service: new (ecoFlowAccessory: MockEcoFlowAccessory, batteryStatusProvider: BatteryStatusProvider) => TService,
       mockResetCallback: ((serviceMock: jest.Mocked<TService>) => void) | null = null
     ): jest.Mocked<TService> {
-      const serviceMock = new Service(accessory) as jest.Mocked<TService>;
+      const serviceMock = new Service(accessory, batteryStatusProviderMock) as jest.Mocked<TService>;
       const serviceBaseMock = serviceMock as jest.Mocked<ServiceBase>;
       serviceBaseMock.initialize.mockReset();
       serviceBaseMock.cleanupCharacteristics.mockReset();
@@ -101,6 +104,7 @@ describe('EcoFlowAccessoryBase', () => {
       subscribeOnSetReplyMessage: jest.fn(),
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
+    batteryStatusProviderMock = {} as jest.Mocked<BatteryStatusProvider>;
     config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
     accessory = new MockEcoFlowAccessory(
       platformMock,
@@ -108,7 +112,8 @@ describe('EcoFlowAccessoryBase', () => {
       config,
       logMock,
       httpApiManagerMock,
-      mqttApiManagerMock
+      mqttApiManagerMock,
+      batteryStatusProviderMock
     );
     deviceInfo = new DeviceInfo(config, logMock);
   });

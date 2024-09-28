@@ -16,6 +16,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
@@ -44,6 +45,7 @@ describe('BatteryAccessory', () => {
   let outletUsbServiceMock: jest.Mocked<OutletUsbService>;
   let outletAcServiceMock: jest.Mocked<OutletAcService>;
   let outletCarServiceMock: jest.Mocked<OutletCarService>;
+  let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   let accessoryInformationServiceMock: jest.Mocked<AccessoryInformationService>;
   const expectedServices: MockService[] = [
     {
@@ -64,42 +66,41 @@ describe('BatteryAccessory', () => {
   ];
 
   beforeEach(() => {
-    function createService<TService extends ServiceBase, TModule extends ServiceBase>(
-      Service: new (ecoFlowAccessory: MockAccessory) => TService,
-      Module: new (ecoFlowAccessory: MockAccessory) => TModule,
+    function createService<TService extends ServiceBase>(
+      Service: new (ecoFlowAccessory: MockAccessory, batteryStatusProvider: BatteryStatusProvider) => TService,
       mockResetCallback: ((serviceMock: jest.Mocked<TService>) => void) | null = null
     ): jest.Mocked<TService> {
-      const serviceMock = new Service(accessory) as jest.Mocked<TService>;
+      const serviceMock = new Service(accessory, batteryStatusProviderMock) as jest.Mocked<TService>;
       const serviceBaseMock = serviceMock as jest.Mocked<ServiceBase>;
       serviceBaseMock.initialize.mockReset();
       serviceBaseMock.cleanupCharacteristics.mockReset();
       if (mockResetCallback) {
         mockResetCallback(serviceMock);
       }
-      (Module as jest.Mock).mockImplementation(() => serviceMock);
+      (Service as jest.Mock).mockImplementation(() => serviceMock);
       return serviceMock;
     }
 
-    function createOutletService<TService extends OutletServiceBase, TModule extends OutletServiceBase>(
-      Service: new (ecoFlowAccessory: MockAccessory) => TService,
-      Module: new (ecoFlowAccessory: MockAccessory) => TModule
+    function createOutletService<TService extends OutletServiceBase>(
+      Service: new (ecoFlowAccessory: MockAccessory, batteryStatusProvider: BatteryStatusProvider) => TService
     ): jest.Mocked<TService> {
-      return createService(Service, Module, mock => {
+      return createService(Service, mock => {
         const mockOutletBase = mock as jest.Mocked<OutletServiceBase>;
         mockOutletBase.updateBatteryLevel.mockReset();
+        mockOutletBase.updateChargingState.mockReset();
         mockOutletBase.updateInputConsumption.mockReset();
         mockOutletBase.updateOutputConsumption.mockReset();
         mockOutletBase.updateState.mockReset();
       });
     }
-    batteryStatusServiceMock = createService(BatteryStatusService, BatteryStatusService, mock => {
+    batteryStatusServiceMock = createService(BatteryStatusService, mock => {
       mock.updateBatteryLevel.mockReset();
       mock.updateChargingState.mockReset();
     });
-    outletUsbServiceMock = createOutletService(OutletUsbService, OutletUsbService);
-    outletAcServiceMock = createOutletService(OutletAcService, OutletAcService);
-    outletCarServiceMock = createOutletService(OutletCarService, OutletCarService);
-    accessoryInformationServiceMock = createService(AccessoryInformationService, AccessoryInformationService);
+    outletUsbServiceMock = createOutletService(OutletUsbService);
+    outletAcServiceMock = createOutletService(OutletAcService);
+    outletCarServiceMock = createOutletService(OutletCarService);
+    accessoryInformationServiceMock = createService(AccessoryInformationService);
 
     accessoryMock = { services: jest.fn(), removeService: jest.fn() } as unknown as jest.Mocked<PlatformAccessory>;
     platformMock = {} as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
@@ -116,7 +117,16 @@ describe('BatteryAccessory', () => {
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
-    accessory = new MockAccessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock);
+    accessory = new MockAccessory(
+      platformMock,
+      accessoryMock,
+      config,
+      logMock,
+      httpApiManagerMock,
+      mqttApiManagerMock,
+      batteryStatusProviderMock
+    );
+    batteryStatusProviderMock = {} as jest.Mocked<BatteryStatusProvider>;
   });
 
   describe('initialize', () => {
@@ -171,21 +181,54 @@ describe('BatteryAccessory', () => {
           typeCode: MqttBatteryMessageType.EMS,
           params: {
             f32LcdShowSoc: 34.67,
+            minDsgSoc: 5.2,
           },
         };
 
         processQuotaMessage(message);
 
-        expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
-        expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
-        expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
-        expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
+        expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 5.2);
+        expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 5.2);
+        expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 5.2);
+        expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 5.2);
       });
 
       it('should not update any characteristic when EmsStatus message is received with undefined status', async () => {
         const message: MqttBatteryQuotaMessageWithParams<EmsStatus> = {
           typeCode: MqttBatteryMessageType.EMS,
           params: {},
+        };
+
+        processQuotaMessage(message);
+
+        expect(batteryStatusServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        expect(outletAcServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        expect(outletUsbServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        expect(outletCarServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+      });
+
+      it('should not update any characteristic when EmsStatus message is received without f32LcdShowSoc', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<EmsStatus> = {
+          typeCode: MqttBatteryMessageType.EMS,
+          params: {
+            minDsgSoc: 5.2,
+          },
+        };
+
+        processQuotaMessage(message);
+
+        expect(batteryStatusServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        expect(outletAcServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        expect(outletUsbServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        expect(outletCarServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+      });
+
+      it('should not update any characteristic when EmsStatus message is received without minDsgSoc', async () => {
+        const message: MqttBatteryQuotaMessageWithParams<EmsStatus> = {
+          typeCode: MqttBatteryMessageType.EMS,
+          params: {
+            f32LcdShowSoc: 34.67,
+          },
         };
 
         processQuotaMessage(message);
@@ -537,6 +580,7 @@ describe('BatteryAccessory', () => {
       quota = {
         bms_emsStatus: {
           f32LcdShowSoc: 1.1,
+          minDsgSoc: 10.1,
         },
         inv: {
           inputWatts: 2.1,
@@ -561,16 +605,16 @@ describe('BatteryAccessory', () => {
       expect(actual).toEqual(expected);
     });
 
-    describe('BmsStatus', () => {
-      it('should update BmsStatus-related characteristics when is requested', async () => {
+    describe('EmsStatus', () => {
+      it('should update EmsStatus-related characteristics when is requested', async () => {
         httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
 
         await accessory.initializeDefaultValues();
 
-        expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
-        expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
-        expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
-        expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
+        expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 10.1);
+        expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 10.1);
+        expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 10.1);
+        expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 10.1);
       });
 
       it('should update BmsStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
@@ -592,6 +636,9 @@ describe('BatteryAccessory', () => {
         await accessory.initializeDefaultValues();
 
         expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(2.1);
+        expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(2.1);
+        expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(2.1);
+        expect(outletCarServiceMock.updateChargingState).toHaveBeenCalledWith(2.1);
         expect(outletAcServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
         expect(outletAcServiceMock.updateState).toHaveBeenCalledWith(true);
         expect(outletAcServiceMock.updateOutputConsumption).toHaveBeenCalledWith(2.2);
@@ -605,6 +652,9 @@ describe('BatteryAccessory', () => {
         await accessory.initializeDefaultValues();
 
         expect(batteryStatusServiceMock.updateChargingState).not.toHaveBeenCalled();
+        expect(outletAcServiceMock.updateChargingState).not.toHaveBeenCalled();
+        expect(outletUsbServiceMock.updateChargingState).not.toHaveBeenCalled();
+        expect(outletCarServiceMock.updateChargingState).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateInputConsumption).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateOutputConsumption).not.toHaveBeenCalled();

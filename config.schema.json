@@ -84,7 +84,13 @@
                   "items": {
                     "title": "Characteristic",
                     "type": "string",
-                    "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W"]
+                    "enum": [
+                      "Battery Level, %",
+                      "Input Consumption, W",
+                      "Output Consumption, W",
+                      "Charging State",
+                      "Status Low Battery"
+                    ]
                   }
                 }
               }
@@ -109,7 +115,13 @@
                   "items": {
                     "title": "Characteristic",
                     "type": "string",
-                    "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W"]
+                    "enum": [
+                      "Battery Level, %",
+                      "Input Consumption, W",
+                      "Output Consumption, W",
+                      "Charging State",
+                      "Status Low Battery"
+                    ]
                   }
                 },
                 "pvAdditionalCharacteristics": {
