@@ -1,10 +1,12 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic } from 'homebridge';
 
 export class BatteryStatusService extends ServiceBase {
   constructor(
     protected readonly ecoFlowAccessory: EcoFlowAccessoryBase,
+    private readonly batteryStatusProvider: BatteryStatusProvider,
     serviceSubType?: string
   ) {
     super(ecoFlowAccessory.platform.Service.Battery, ecoFlowAccessory, serviceSubType);
@@ -18,9 +20,9 @@ export class BatteryStatusService extends ServiceBase {
     ];
   }
 
-  public updateBatteryLevel(batteryLevel: number): void {
+  public updateBatteryLevel(batteryLevel: number, dischargeLimit: number): void {
     this.updateCharacteristic(this.platform.Characteristic.BatteryLevel, 'BatteryLevel', batteryLevel);
-    this.updateStatusLowBattery(batteryLevel);
+    this.updateStatusLowBattery(batteryLevel, dischargeLimit);
   }
 
   public updateChargingState(chargingPower: number): void {
@@ -28,11 +30,12 @@ export class BatteryStatusService extends ServiceBase {
     this.updateCharacteristic(this.platform.Characteristic.ChargingState, 'ChargingState', isCharging);
   }
 
-  private updateStatusLowBattery(batteryLevel: number): void {
-    const statusLowBattery =
-      batteryLevel < 20
-        ? this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_LOW
-        : this.platform.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
+  private updateStatusLowBattery(batteryLevel: number, dischargeLimit: number): void {
+    const statusLowBattery = this.batteryStatusProvider.getStatusLowBattery(
+      this.platform.Characteristic,
+      batteryLevel,
+      dischargeLimit
+    );
     this.updateCharacteristic(this.platform.Characteristic.StatusLowBattery, 'StatusLowBattery', statusLowBattery);
   }
 }

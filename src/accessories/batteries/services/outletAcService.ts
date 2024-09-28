@@ -5,10 +5,14 @@ import {
 } from '@ecoflow/accessories/batteries/interfaces/mqttApiBatteryContracts';
 import { OutletBatteryServiceBase } from '@ecoflow/accessories/batteries/services/outletBatteryServiceBase';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 
 export class OutletAcService extends OutletBatteryServiceBase {
-  constructor(protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<BatteryAllQuotaData>) {
-    super(ecoFlowAccessory, 'AC', ecoFlowAccessory.config.battery?.additionalCharacteristics);
+  constructor(
+    protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<BatteryAllQuotaData>,
+    batteryStatusProvider: BatteryStatusProvider
+  ) {
+    super(ecoFlowAccessory, batteryStatusProvider, 'AC', ecoFlowAccessory.config.battery?.additionalCharacteristics);
   }
 
   protected override setOn(value: boolean, revert: () => void): Promise<void> {

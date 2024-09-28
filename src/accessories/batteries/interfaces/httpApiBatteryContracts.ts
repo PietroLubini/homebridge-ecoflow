@@ -1,6 +1,7 @@
 // Battery management system status
 export interface EmsStatus {
   f32LcdShowSoc?: number; //Battery level
+  minDsgSoc?: number; //Discharge limit
 }
 
 // AC invertor status

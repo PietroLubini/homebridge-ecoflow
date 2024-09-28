@@ -25,6 +25,7 @@ import {
   OutputConsumptionWattFactory,
 } from '@ecoflow/characteristics/customCharacteristic';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { Logger } from '@ecoflow/helpers/logger';
 import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
 import { PLATFORM_NAME, PLUGIN_NAME } from '@ecoflow/settings';
@@ -50,6 +51,8 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     this.httpApiManager,
     new MachineIdProvider()
   );
+
+  private readonly batteryStatusProvider: BatteryStatusProvider = new BatteryStatusProvider();
 
   constructor(
     private readonly commonLog: Logging,
@@ -240,7 +243,15 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     config.simulator = EcoFlowAccessorySimulatorType;
     return EcoFlowAccessoryType === null
       ? null
-      : new EcoFlowAccessoryType(this, accessory, config, log, this.httpApiManager, this.mqttApiManager);
+      : new EcoFlowAccessoryType(
+          this,
+          accessory,
+          config,
+          log,
+          this.httpApiManager,
+          this.mqttApiManager,
+          this.batteryStatusProvider
+        );
   }
 }
 
@@ -250,7 +261,8 @@ type EcoFlowAccessoryType = new (
   config: DeviceConfig,
   log: Logging,
   httpApiManager: EcoFlowHttpApiManager,
-  mqttApiManager: EcoFlowMqttApiManager
+  mqttApiManager: EcoFlowMqttApiManager,
+  batteryStatusProvider: BatteryStatusProvider
 ) => EcoFlowAccessoryBase;
 
 type EcoFlowAccessorySimulatorType = new () => Simulator;

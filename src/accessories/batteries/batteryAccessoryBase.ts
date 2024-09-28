@@ -17,6 +17,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
@@ -34,13 +35,14 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
     config: DeviceConfig,
     log: Logging,
     httpApiManager: EcoFlowHttpApiManager,
-    mqttApiManager: EcoFlowMqttApiManager
+    mqttApiManager: EcoFlowMqttApiManager,
+    batteryStatusProvider: BatteryStatusProvider
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
-    this.batteryService = new BatteryStatusService(this);
-    this.outletUsbService = new OutletUsbService(this);
-    this.outletAcService = new OutletAcService(this);
-    this.outletCarService = new OutletCarService(this);
+    this.batteryService = new BatteryStatusService(this, batteryStatusProvider);
+    this.outletUsbService = new OutletUsbService(this, batteryStatusProvider);
+    this.outletAcService = new OutletAcService(this, batteryStatusProvider);
+    this.outletCarService = new OutletCarService(this, batteryStatusProvider);
   }
 
   protected override getServices(): ServiceBase[] {
@@ -109,17 +111,20 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
   }
 
   private updateEmsValues(params: EmsStatus): void {
-    if (params.f32LcdShowSoc !== undefined) {
-      this.batteryService.updateBatteryLevel(params.f32LcdShowSoc);
-      this.outletAcService.updateBatteryLevel(params.f32LcdShowSoc);
-      this.outletUsbService.updateBatteryLevel(params.f32LcdShowSoc);
-      this.outletCarService.updateBatteryLevel(params.f32LcdShowSoc);
+    if (params.f32LcdShowSoc !== undefined && params.minDsgSoc !== undefined) {
+      this.batteryService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
+      this.outletAcService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
+      this.outletUsbService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
+      this.outletCarService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
     }
   }
 
   private updateInvValues(params: InvStatus): void {
     if (params.inputWatts !== undefined) {
       this.batteryService.updateChargingState(params.inputWatts);
+      this.outletAcService.updateChargingState(params.inputWatts);
+      this.outletUsbService.updateChargingState(params.inputWatts);
+      this.outletCarService.updateChargingState(params.inputWatts);
       this.outletAcService.updateInputConsumption(params.inputWatts);
       this.outletUsbService.updateInputConsumption(params.inputWatts);
       this.outletCarService.updateInputConsumption(params.inputWatts);
