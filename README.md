@@ -196,8 +196,8 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 | Battery Level       | Outlet BAT | Battery Level, %         | 🔲       | Read                                                 |
 | Battery Charging    | Outlet BAT | Input Consumption, W     | 🔲       | Read                                                 |
 | Battery Discharging | Outlet BAT | Output Consumption, W    | 🔲       | Read                                                 |
-| Battery Charging    | Outlet AC  | ChargingState, Yes/No    | 🔲       | Read                                                 |
-| Battery Level       | Outlet AC  | StatusLowBattery, Yes/No | 🔲       | Read                                                 |
+| Battery Charging    | Outlet BAT | ChargingState, Yes/No    | 🔲       | Read                                                 |
+| Battery Level       | Outlet BAT | StatusLowBattery, Yes/No | 🔲       | Read                                                 |
 | Lighting brightness | Lightbulb  | On                       | ✅       | Read (> 0%: ON; 0%: OFF) / write (ON: 100%; OFF: 0%) |
 | Lighting brightness | Lightbulb  | Brightness               | ✅       | Read/write                                           |
 | Power demand        | Fan        | On                       | ✅       | Read (> 0%: ON; 0%: OFF) / write (ON: 100%; OFF: 0%) |

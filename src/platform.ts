@@ -241,17 +241,18 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
         log.warn(`"${config.model}" is not supported. Ignoring the device`);
     }
     config.simulator = EcoFlowAccessorySimulatorType;
-    return EcoFlowAccessoryType === null
-      ? null
-      : new EcoFlowAccessoryType(
-          this,
-          accessory,
-          config,
-          log,
-          this.httpApiManager,
-          this.mqttApiManager,
-          this.batteryStatusProvider
-        );
+    if (EcoFlowAccessoryType === null) {
+      return null;
+    }
+    return new EcoFlowAccessoryType(
+      this,
+      accessory,
+      config,
+      log,
+      this.httpApiManager,
+      this.mqttApiManager,
+      this.batteryStatusProvider
+    );
   }
 }
 
