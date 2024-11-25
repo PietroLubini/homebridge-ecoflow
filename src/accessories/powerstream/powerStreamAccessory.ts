@@ -45,7 +45,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
     this.inverterBrightnessService = new BrightnessService(this, 1023);
     this.inverterPowerDemandService = new PowerDemandService(
       this,
-      config.powerStream?.type ?? PowerStreamConsumptionType.W600
+      (config.powerStream?.type ?? PowerStreamConsumptionType.W600) * 10
     );
   }
 
@@ -145,7 +145,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
 
     if (params.permanentWatts !== undefined) {
       this.inverterPowerDemandService.updateState(params.permanentWatts > 0);
-      this.inverterPowerDemandService.updateRotationSpeed(params.permanentWatts * 0.1);
+      this.inverterPowerDemandService.updateRotationSpeed(params.permanentWatts);
     }
   }
 }

@@ -201,7 +201,6 @@ describe('PowerDemandService', () => {
       expect(logMock.debug.mock.calls).toEqual([['Power Demand RotationSpeed ->', 0]]);
     });
   });
-  });
 
   describe('onPowerDemandSet', () => {
     let characteristic: Characteristic;

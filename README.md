@@ -192,7 +192,7 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 | Battery Level     | Outlet CAR | Battery Level, %      | 🔲       | Read       |
 | Input             | Outlet CAR | Input Consumption, W  | 🔲       | Read       |
 | Output            | Outlet CAR | Output Consumption, W | 🔲       | Read       |
-| USB               | Outlet USB | On                    | ✅       | Read/Write |
+| USB               | Outlet USB | On                    | ✅       | Read       |
 | USB Output        | Outlet USB | OutletInUse           | ✅       | Read       |
 | Battery Level     | Outlet USB | Battery Level, %      | 🔲       | Read       |
 | Input             | Outlet USB | Input Consumption, W  | 🔲       | Read       |

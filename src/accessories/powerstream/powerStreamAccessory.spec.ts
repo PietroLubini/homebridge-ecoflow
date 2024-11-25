@@ -703,7 +703,7 @@ describe('PowerStreamAccessory', () => {
             cmdFunc: PowerStreamMqttMessageFuncType.Func20,
             cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
-              permanentWatts: 4500,
+              permanentWatts: 450,
             },
           };
 
@@ -870,7 +870,7 @@ describe('PowerStreamAccessory', () => {
         await accessory.initializeDefaultValues();
 
         expect(inverterPowerDemandServiceMock.updateState).toHaveBeenCalledWith(true);
-        expect(inverterPowerDemandServiceMock.updateRotationSpeed).toHaveBeenCalledWith(700);
+        expect(inverterPowerDemandServiceMock.updateRotationSpeed).toHaveBeenCalledWith(7000);
       });
 
       it(`should update INV power demand-related characteristics
