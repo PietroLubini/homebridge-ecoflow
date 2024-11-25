@@ -18,9 +18,9 @@ class MockFanService extends FanServiceBase {
     super(ecoFlowAccessory, 6000, 'MOCK');
   }
 
-  public override async setOn(): Promise<void> {}
+  public override async processOnSetOn(): Promise<void> {}
 
-  public override async setRotationSpeed(): Promise<void> {}
+  public override async processOnSetRotationSpeed(): Promise<void> {}
 }
 
 describe('LightBulbServiceBase', () => {
@@ -197,11 +197,11 @@ describe('LightBulbServiceBase', () => {
     it('should revert changing of rotation speed to value set from UI when sending Set command to device is failed', () => {
       service.updateRotationSpeed(6000);
       logMock.debug.mockReset();
-      const setRotationSpeedMock = jest.fn();
-      service.setRotationSpeed = setRotationSpeedMock;
+      const processOnSetRotationSpeedMock = jest.fn();
+      service.processOnSetRotationSpeed = processOnSetRotationSpeedMock;
 
       characteristic.setValue(20);
-      const revertFunc = setRotationSpeedMock.mock.calls[0][1];
+      const revertFunc = processOnSetRotationSpeedMock.mock.calls[0][1];
       revertFunc();
       const actual = characteristic.value;
 
@@ -221,11 +221,11 @@ describe('LightBulbServiceBase', () => {
     it('should revert changing of On state when it is failed', () => {
       characteristic.setValue(true);
       logMock.debug.mockReset();
-      const setOnMock = jest.fn();
-      service.setOn = setOnMock;
+      const processOnSetOnMock = jest.fn();
+      service.processOnSetOn = processOnSetOnMock;
 
       characteristic.setValue(false);
-      const revertFunc = setOnMock.mock.calls[0][1];
+      const revertFunc = processOnSetOnMock.mock.calls[0][1];
       revertFunc();
 
       const actual = characteristic.value;
@@ -246,11 +246,11 @@ describe('LightBulbServiceBase', () => {
     it('should revert changing of rotation speed when sending Set command to device is failed', () => {
       characteristic.setValue(100);
       logMock.debug.mockReset();
-      const setRotationSpeedMock = jest.fn();
-      service.setRotationSpeed = setRotationSpeedMock;
+      const processOnSetRotationSpeedMock = jest.fn();
+      service.processOnSetRotationSpeed = processOnSetRotationSpeedMock;
 
       characteristic.setValue(20);
-      const revertFunc = setRotationSpeedMock.mock.calls[0][1];
+      const revertFunc = processOnSetRotationSpeedMock.mock.calls[0][1];
       revertFunc();
 
       const actual = characteristic.value;

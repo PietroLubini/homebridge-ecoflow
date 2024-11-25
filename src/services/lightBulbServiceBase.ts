@@ -18,17 +18,17 @@ export abstract class LightBulbServiceBase extends ServiceBase {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
     onCharacteristic.onSet(value => {
       const newValue = value as boolean;
-      this.setOn(newValue, () => this.updateState(!newValue));
+      this.processOnSetOn(newValue, () => this.updateState(!newValue));
     });
 
-    const brightnessCharacteristic = this.addCharacteristic(this.platform.Characteristic.Brightness);
-    brightnessCharacteristic.onSet(percents => {
+    this.brightnessCharacteristic = this.addCharacteristic(this.platform.Characteristic.Brightness);
+    this.brightnessCharacteristic.onSet(percents => {
       const prevBrightness = this.currentBrightness;
       this.currentBrightness = this.covertPercentsToValue(percents as number, this.maxBrightness);
-      this.setBrightness(this.currentBrightness, () => this.updateBrightness(prevBrightness));
+      this.processOnSetBrightness(this.currentBrightness, () => this.updateBrightness(prevBrightness));
     });
 
-    return [onCharacteristic, brightnessCharacteristic];
+    return [onCharacteristic, this.brightnessCharacteristic];
   }
 
   public updateState(state: boolean): void {
@@ -41,7 +41,11 @@ export abstract class LightBulbServiceBase extends ServiceBase {
     this.currentBrightness = value;
   }
 
-  protected abstract setOn(value: boolean, revert: () => void): Promise<void>;
+  protected setBrightness(value: number): void {
+    this.brightnessCharacteristic?.setValue(value);
+  }
 
-  protected abstract setBrightness(value: number, revert: () => void): Promise<void>;
+  protected abstract processOnSetOn(value: boolean, revert: () => void): Promise<void>;
+
+  protected abstract processOnSetBrightness(value: number, revert: () => void): Promise<void>;
 }

@@ -9,7 +9,7 @@ export enum DeviceModel {
   Delta2Max = 'Delta 2 Max',
   Delta2 = 'Delta 2',
   // DeltaPro = 'Delta Pro',
-  DeltaProUltra = 'Delta Pro Ultra',
+  // DeltaProUltra = 'Delta Pro Ultra',
   PowerStream = 'PowerStream',
 }
 
@@ -37,6 +37,7 @@ export interface DeviceAccessConfig extends DeviceInfoConfig {
 }
 
 export interface DeviceConfig extends AccessoryConfig, DeviceAccessConfig {
+  disabled: boolean;
   battery?: BatteryDeviceConfig;
   powerStream?: PowerStreamDeviceConfig;
 }

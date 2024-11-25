@@ -149,7 +149,17 @@ describe('EcoFlowHttpApiManager', () => {
       expect(actual).toEqual(expected);
       expect(logMock.debug.mock.calls).toEqual([
         ['Get all quotas'],
-        ['Received all quotas', { inv: { cfgAcOutVol: 10.1, cfgAcXboost: true }, pd: { carWatts: 45.67 } }],
+        [
+          `Received all quotas: {
+  "inv": {
+    "cfgAcOutVol": 10.1,
+    "cfgAcXboost": true
+  },
+  "pd": {
+    "carWatts": 45.67
+  }
+}`,
+        ],
       ]);
       expect(logMock.error).not.toHaveBeenCalled();
     });

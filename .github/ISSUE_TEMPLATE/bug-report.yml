@@ -15,8 +15,6 @@ body:
         - Choose a device...
         - Delta 2
         - Delta 2 Max
-        - Delta Pro
-        - Delta Pro Ultra
         - PowerStream
         - Other
       default: 0

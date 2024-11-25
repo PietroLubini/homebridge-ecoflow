@@ -32,7 +32,7 @@
               "type": "string",
               "default": "Delta 2",
               "required": true,
-              "enum": ["Delta 2", "Delta 2 Max", "Delta Pro Ultra", "PowerStream"]
+              "enum": ["Delta 2", "Delta 2 Max", "PowerStream"]
             },
             "serialNumber": {
               "title": "Serial Number",
@@ -59,6 +59,12 @@
               "type": "string",
               "required": true,
               "description": "Secret Key from \"EcoFlow IoT Developer Platform\" (https://developer-eu.ecoflow.com)"
+            },
+            "disabled": {
+              "title": "Disabled",
+              "type": "boolean",
+              "required": false,
+              "description": "A value indicating whether device should be ignored"
             },
             "simulate": {
               "title": "Simulate",

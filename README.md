@@ -7,6 +7,7 @@
 [![downloads](https://img.shields.io/npm/dt/@pietrolubini/homebridge-ecoflow.svg)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow)
 [![build](https://github.com/pietrolubini/homebridge-ecoflow/actions/workflows/build.yml/badge.svg)](https://github.com/pietrolubini/homebridge-ecoflow/actions/workflows/build.yml)
 [![license](https://img.shields.io/npm/l/@pietrolubini/homebridge-ecoflow)](https://github.com/pietrolubini/homebridge-ecoflow/blob/main/LICENSE)
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 [![Donate](https://img.shields.io/badge/donate-Coinbase-blue)](https://commerce.coinbase.com/checkout/d56df2da-7609-41a3-af91-289cb6ec4d9b)
 
 </span>
@@ -91,6 +92,7 @@ Quota is sent every 10 seconds with random values in this mode.
     {
       "devices": [
         {
+          "disabled": false,
           "name": "Battery",
           "model": "Delta 2 Max",
           "serialNumber": "R123ABCDEGHI321",
@@ -112,27 +114,27 @@ Quota is sent every 10 seconds with random values in this mode.
 
 #### Services
 
-| Service        | Characteristic        | Standard | Permission |
-| -------------- | --------------------- | -------- | ---------- |
-| Battery        | BatteryLevel          | ✅       | Read       |
-| Battery        | ChargingState         | ✅       | Read       |
-| Battery        | StatusLowBattery      | ✅       | Read       |
-| Outlet AC      | On                    | ✅       | Read/Write |
-| Outlet AC      | OutletInUse           | ✅       | Read       |
-| Outlet AC      | Battery Level, %      | 🔲       | Read       |
-| Outlet AC      | Input Consumption, W  | 🔲       | Read       |
-| Outlet AC      | Output Consumption, W | 🔲       | Read       |
-| Outlet CAR     | On                    | ✅       | Read/Write |
-| Outlet CAR     | OutletInUse           | ✅       | Read       |
-| Outlet CAR     | Battery Level, %      | 🔲       | Read       |
-| Outlet CAR     | Input Consumption, W  | 🔲       | Read       |
-| Outlet CAR     | Output Consumption, W | 🔲       | Read       |
-| Outlet USB     | On                    | ✅       | Read/Write |
-| Outlet USB     | OutletInUse           | ✅       | Read       |
-| Outlet USB     | Battery Level, %      | 🔲       | Read       |
-| Outlet USB     | Input Consumption, W  | 🔲       | Read       |
-| Outlet USB     | Output Consumption, W | 🔲       | Read       |
-| Switch X-Boost | On                    | ✅       | Read/Write |
+| EcoFlow Parameter | Service    | Characteristic        | Standard | Permission |
+| ----------------- | ---------- | --------------------- | -------- | ---------- |
+| Battery Level     | Battery    | BatteryLevel          | ✅       | Read       |
+| Input             | Battery    | ChargingState         | ✅       | Read       |
+| Battery Level     | Battery    | StatusLowBattery      | ✅       | Read       |
+| AC                | Outlet AC  | On                    | ✅       | Read/Write |
+| AC Output         | Outlet AC  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet AC  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet AC  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet AC  | Output Consumption, W | 🔲       | Read       |
+| 12V DC            | Outlet CAR | On                    | ✅       | Read/Write |
+| 12V DC Output     | Outlet CAR | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet CAR | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet CAR | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet CAR | Output Consumption, W | 🔲       | Read       |
+| USB               | Outlet USB | On                    | ✅       | Read/Write |
+| USB Output        | Outlet USB | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet USB | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet USB | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet USB | Output Consumption, W | 🔲       | Read       |
+| Switch X-Boost    | Switch     | On                    | ✅       | Read/Write |
 
 #### Configuration
 
@@ -171,29 +173,31 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 
 ### Delta Pro
 
+> Not Activated (no testing is performed)
+
 #### Services
 
-| Service        | Characteristic        | Standard | Permission |
-| -------------- | --------------------- | -------- | ---------- |
-| Battery        | BatteryLevel          | ✅       | Read       |
-| Battery        | ChargingState         | ✅       | Read       |
-| Battery        | StatusLowBattery      | ✅       | Read       |
-| Outlet AC      | On                    | ✅       | Read/Write |
-| Outlet AC      | OutletInUse           | ✅       | Read       |
-| Outlet AC      | Battery Level, %      | 🔲       | Read       |
-| Outlet AC      | Input Consumption, W  | 🔲       | Read       |
-| Outlet AC      | Output Consumption, W | 🔲       | Read       |
-| Outlet CAR     | On                    | ✅       | Read/Write |
-| Outlet CAR     | OutletInUse           | ✅       | Read       |
-| Outlet CAR     | Battery Level, %      | 🔲       | Read       |
-| Outlet CAR     | Input Consumption, W  | 🔲       | Read       |
-| Outlet CAR     | Output Consumption, W | 🔲       | Read       |
-| Outlet USB     | On                    | ✅       | Read       |
-| Outlet USB     | OutletInUse           | ✅       | Read       |
-| Outlet USB     | Battery Level, %      | 🔲       | Read       |
-| Outlet USB     | Input Consumption, W  | 🔲       | Read       |
-| Outlet USB     | Output Consumption, W | 🔲       | Read       |
-| Switch X-Boost | On                    | ✅       | Read/Write |
+| EcoFlow Parameter | Service    | Characteristic        | Standard | Permission |
+| ----------------- | ---------- | --------------------- | -------- | ---------- |
+| Battery Level     | Battery    | BatteryLevel          | ✅       | Read       |
+| Input             | Battery    | ChargingState         | ✅       | Read       |
+| Battery Level     | Battery    | StatusLowBattery      | ✅       | Read       |
+| AC                | Outlet AC  | On                    | ✅       | Read/Write |
+| AC Output         | Outlet AC  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet AC  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet AC  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet AC  | Output Consumption, W | 🔲       | Read       |
+| 12V DC            | Outlet CAR | On                    | ✅       | Read/Write |
+| 12V DC Output     | Outlet CAR | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet CAR | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet CAR | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet CAR | Output Consumption, W | 🔲       | Read       |
+| USB               | Outlet USB | On                    | ✅       | Read/Write |
+| USB Output        | Outlet USB | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet USB | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet USB | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet USB | Output Consumption, W | 🔲       | Read       |
+| Switch X-Boost    | Switch     | On                    | ✅       | Read/Write |
 
 #### Configuration
 
@@ -224,24 +228,26 @@ The following additional characteristics is available:
 
 ### Delta Pro Ultra
 
+> Not Activated (no testing is performed)
+
 #### Services
 
-| Service        | Characteristic        | Standard | Permission |
-| -------------- | --------------------- | -------- | ---------- |
-| Battery        | BatteryLevel          | ✅       | Read       |
-| Battery        | ChargingState         | ✅       | Read       |
-| Battery        | StatusLowBattery      | ✅       | Read       |
-| Outlet AC      | On                    | ✅       | Read/Write |
-| Outlet AC      | OutletInUse           | ✅       | Read       |
-| Outlet AC      | Battery Level, %      | 🔲       | Read       |
-| Outlet AC      | Input Consumption, W  | 🔲       | Read       |
-| Outlet AC      | Output Consumption, W | 🔲       | Read       |
-| Outlet USB     | On                    | ✅       | Read       |
-| Outlet USB     | OutletInUse           | ✅       | Read       |
-| Outlet USB     | Battery Level, %      | 🔲       | Read       |
-| Outlet USB     | Input Consumption, W  | 🔲       | Read       |
-| Outlet USB     | Output Consumption, W | 🔲       | Read       |
-| Switch X-Boost | On                    | ✅       | Read/Write |
+| EcoFlow Parameter | Service    | Characteristic        | Standard | Permission |
+| ----------------- | ---------- | --------------------- | -------- | ---------- |
+| Battery Level     | Battery    | BatteryLevel          | ✅       | Read       |
+| Input             | Battery    | ChargingState         | ✅       | Read       |
+| Battery Level     | Battery    | StatusLowBattery      | ✅       | Read       |
+| AC                | Outlet AC  | On                    | ✅       | Read/Write |
+| AC Output         | Outlet AC  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet AC  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet AC  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet AC  | Output Consumption, W | 🔲       | Read       |
+| USB               | Outlet USB | On                    | ✅       | Read       |
+| USB Output        | Outlet USB | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet USB | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet USB | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet USB | Output Consumption, W | 🔲       | Read       |
+| Switch X-Boost    | Switch     | On                    | ✅       | Read/Write |
 
 #### Configuration
 
@@ -274,24 +280,24 @@ The following additional characteristics is available:
 
 #### Services
 
-| Service             | Characteristic        | Standard | Permission |
-| ------------------- | --------------------- | -------- | ---------- |
-| Outlet INV          | On                    | ✅       | Read       |
-| Outlet INV          | OutletInUse           | ✅       | Read       |
-| Outlet INV          | Input Consumption, W  | 🔲       | Read       |
-| Outlet INV          | Output Consumption, W | 🔲       | Read       |
-| Outlet PV           | On                    | ✅       | -          |
-| Outlet PV           | OutletInUse           | ✅       | Read       |
-| Outlet PV           | Output Consumption, W | 🔲       | Read       |
-| Outlet BAT          | On                    | ✅       | -          |
-| Outlet BAT          | OutletInUse           | ✅       | Read       |
-| Outlet BAT          | Battery Level, %      | 🔲       | Read       |
-| Outlet BAT          | Input Consumption, W  | 🔲       | Read       |
-| Outlet BAT          | Output Consumption, W | 🔲       | Read       |
-| Lightbulb Indicator | On                    | ✅       | Read       |
-| Lightbulb Indicator | Brightness            | ✅       | Read/write |
-| Fan Power Demand    | On                    | ✅       | Read       |
-| Fan Power Demand    | RotationSpeed         | ✅       | Read/write |
+| EcoFlow Parameter   | Service    | Characteristic        | Standard | Permission                                           |
+| ------------------- | ---------- | --------------------- | -------- | ---------------------------------------------------- |
+| Inverter            | Outlet INV | On                    | ✅       | Read (Inverter AC Output > 0: ON)                    |
+| Inverter AC Output  | Outlet INV | OutletInUse           | ✅       | Read                                                 |
+| Inverter AC Input   | Outlet INV | Input Consumption, W  | 🔲       | Read                                                 |
+| Inverter AC Output  | Outlet INV | Output Consumption, W | 🔲       | Read                                                 |
+| Solar               | Outlet PV  | On                    | ✅       | Read (Solar Generation > 0: ON)                      |
+| Solar Generation    | Outlet PV  | OutletInUse           | ✅       | Read                                                 |
+| Solar Generation    | Outlet PV  | Output Consumption, W | 🔲       | Read                                                 |
+| Battery             | Outlet BAT | On                    | ✅       | Read (Battery Discharging > 0: ON)                   |
+| Battery Discharging | Outlet BAT | OutletInUse           | ✅       | Read                                                 |
+| Battery Level       | Outlet BAT | Battery Level, %      | 🔲       | Read                                                 |
+| Battery Charging    | Outlet BAT | Input Consumption, W  | 🔲       | Read                                                 |
+| Battery Discharging | Outlet BAT | Output Consumption, W | 🔲       | Read                                                 |
+| Lighting brightness | Lightbulb  | On                    | ✅       | Read (> 0%: ON; 0%: OFF) / write (ON: 100%; OFF: 0%) |
+| Lighting brightness | Lightbulb  | Brightness            | ✅       | Read/write                                           |
+| Power demand        | Fan        | On                    | ✅       | Read (> 0%: ON; 0%: OFF) / write (ON: 100%; OFF: 0%) |
+| Power demand        | Fan        | RotationSpeed         | ✅       | Read/write                                           |
 
 #### Configuration
 

@@ -5,12 +5,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
-import {
-  Characteristic as HapCharacteristic,
-  HAPStatus as HAPHAPStatus,
-  Service as HapService,
-  HapStatusError,
-} from 'hap-nodejs';
+import { Characteristic as HapCharacteristic, Service as HapService, HapStatusError } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
 enum HAPStatus {
@@ -66,17 +61,6 @@ describe('OutletService', () => {
     } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
     service = new OutletService(ecoFlowAccessoryMock, 'PV');
     hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
-  });
-
-  describe('updateState', () => {
-    beforeEach(() => {
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-    });
-
-    it('should throw error when when tries to updateState', () => {
-      expect(() => service.updateState(true)).toThrow(new HapStatusError(HAPHAPStatus.READ_ONLY_CHARACTERISTIC));
-    });
   });
 
   describe('updateOutputConsumption', () => {

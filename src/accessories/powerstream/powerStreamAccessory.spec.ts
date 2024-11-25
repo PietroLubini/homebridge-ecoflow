@@ -10,7 +10,7 @@ import {
   PowerStreamMqttQuotaMessageWithParams,
 } from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
-import { IndicatorService } from '@ecoflow/accessories/powerstream/services/indicatorService';
+import { BrightnessService } from '@ecoflow/accessories/powerstream/services/brightnessService';
 import { OutletInvService } from '@ecoflow/accessories/powerstream/services/outletInvService';
 import { OutletService } from '@ecoflow/accessories/powerstream/services/outletService';
 import { PowerDemandService } from '@ecoflow/accessories/powerstream/services/powerDemandService';
@@ -33,7 +33,7 @@ import { Logging, PlatformAccessory } from 'homebridge';
 
 jest.mock('@ecoflow/accessories/powerstream/services/outletService');
 jest.mock('@ecoflow/accessories/powerstream/services/outletInvService');
-jest.mock('@ecoflow/accessories/powerstream/services/indicatorService');
+jest.mock('@ecoflow/accessories/powerstream/services/brightnessService');
 jest.mock('@ecoflow/accessories/powerstream/services/powerDemandService');
 jest.mock('@ecoflow/services/accessoryInformationService');
 
@@ -48,7 +48,7 @@ describe('PowerStreamAccessory', () => {
   let solarOutletServiceMock: jest.Mocked<OutletService>;
   let batteryOutletServiceMock: jest.Mocked<OutletService>;
   let inverterOutletServiceMock: jest.Mocked<OutletInvService>;
-  let inverterIndicatorServiceMock: jest.Mocked<IndicatorService>;
+  let inverterBrightnessServiceMock: jest.Mocked<BrightnessService>;
   let inverterPowerDemandServiceMock: jest.Mocked<PowerDemandService>;
   let accessoryInformationServiceMock: jest.Mocked<AccessoryInformationService>;
   const expectedServices: MockService[] = [
@@ -62,7 +62,7 @@ describe('PowerStreamAccessory', () => {
       Name: 'OutletService',
     },
     {
-      Name: 'IndicatorService',
+      Name: 'BrightnessService',
     },
     {
       Name: 'PowerDemandService',
@@ -127,8 +127,8 @@ describe('PowerStreamAccessory', () => {
     inverterOutletServiceMock = createOutletService(new OutletInvService(accessory));
     (OutletInvService as jest.Mock).mockImplementation(() => inverterOutletServiceMock);
 
-    inverterIndicatorServiceMock = createLightBulbService(new IndicatorService(accessory, 1023));
-    (IndicatorService as jest.Mock).mockImplementation(() => inverterIndicatorServiceMock);
+    inverterBrightnessServiceMock = createLightBulbService(new BrightnessService(accessory, 1023));
+    (BrightnessService as jest.Mock).mockImplementation(() => inverterBrightnessServiceMock);
 
     inverterPowerDemandServiceMock = createFanService(new PowerDemandService(accessory, 6000));
     (PowerDemandService as jest.Mock).mockImplementation(() => inverterPowerDemandServiceMock);
@@ -170,7 +170,7 @@ describe('PowerStreamAccessory', () => {
       expect(solarOutletServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(batteryOutletServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(inverterOutletServiceMock.initialize).toHaveBeenCalledTimes(1);
-      expect(inverterIndicatorServiceMock.initialize).toHaveBeenCalledTimes(1);
+      expect(inverterBrightnessServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(inverterPowerDemandServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(accessoryInformationServiceMock.initialize).toHaveBeenCalledTimes(1);
     });
@@ -314,9 +314,9 @@ describe('PowerStreamAccessory', () => {
     describe('indicatorService', () => {
       function run(deviceConfig: DeviceConfig): number | undefined {
         let actual: number | undefined;
-        (IndicatorService as jest.Mock).mockImplementation((_: EcoFlowAccessoryBase, maxBrightness: number) => {
+        (BrightnessService as jest.Mock).mockImplementation((_: EcoFlowAccessoryBase, maxBrightness: number) => {
           actual = maxBrightness;
-          return inverterIndicatorServiceMock;
+          return inverterBrightnessServiceMock;
         });
 
         new PowerStreamAccessory(
@@ -361,28 +361,28 @@ describe('PowerStreamAccessory', () => {
         it('should initialize indicator service with default max power demand when powerStream settings are not defined in config', () => {
           const actual = run({} as DeviceConfig);
 
-          expect(actual).toEqual(600);
+          expect(actual).toEqual(6000);
         });
 
         it(`should initialize indicator service with default max power demand
           when powerStream.type settings are not defined in config`, () => {
           const actual = run({ powerStream: {} } as DeviceConfig);
 
-          expect(actual).toEqual(600);
+          expect(actual).toEqual(6000);
         });
 
         it(`should initialize indicator service with 6000 max power demand
           when powerStream.type is 600W`, () => {
           const actual = run({ powerStream: { type: PowerStreamConsumptionType.W600 } } as DeviceConfig);
 
-          expect(actual).toEqual(600);
+          expect(actual).toEqual(6000);
         });
 
         it(`should initialize indicator service with 8000 max power demand
           when powerStream.type is 800W`, () => {
           const actual = run({ powerStream: { type: PowerStreamConsumptionType.W800 } } as DeviceConfig);
 
-          expect(actual).toEqual(800);
+          expect(actual).toEqual(8000);
         });
       });
     });
@@ -694,8 +694,8 @@ describe('PowerStreamAccessory', () => {
 
           processQuotaMessage(message);
 
-          expect(inverterIndicatorServiceMock.updateState).toHaveBeenCalledWith(true);
-          expect(inverterIndicatorServiceMock.updateBrightness).toHaveBeenCalledWith(23.4);
+          expect(inverterBrightnessServiceMock.updateState).toHaveBeenCalledWith(true);
+          expect(inverterBrightnessServiceMock.updateBrightness).toHaveBeenCalledWith(23.4);
         });
 
         it('should update INV power demand when Hearbeat message is received with permanentWatts', async () => {
@@ -848,8 +848,8 @@ describe('PowerStreamAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(inverterIndicatorServiceMock.updateState).toHaveBeenCalledWith(true);
-        expect(inverterIndicatorServiceMock.updateBrightness).toHaveBeenCalledWith(431);
+        expect(inverterBrightnessServiceMock.updateState).toHaveBeenCalledWith(true);
+        expect(inverterBrightnessServiceMock.updateBrightness).toHaveBeenCalledWith(431);
       });
 
       it(`should update INV brightness-related characteristics
@@ -858,8 +858,8 @@ describe('PowerStreamAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(inverterIndicatorServiceMock.updateState).not.toHaveBeenCalled();
-        expect(inverterIndicatorServiceMock.updateBrightness).not.toHaveBeenCalled();
+        expect(inverterBrightnessServiceMock.updateState).not.toHaveBeenCalled();
+        expect(inverterBrightnessServiceMock.updateBrightness).not.toHaveBeenCalled();
       });
     });
 

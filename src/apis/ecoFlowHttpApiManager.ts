@@ -33,6 +33,7 @@ export class EcoFlowHttpApiManager {
     const response = await this.execute<CmdResponseWithData<Dict>>(deviceInfo, QuotaPath, HttpMethod.Post, requestCmd);
     if (!response.failed) {
       const data = this.convertData<TData>(response.data);
+      deviceInfo.log.debug(`Received quotas: ${JSON.stringify(data, null, 2)}`);
       return data;
     }
     return null;
@@ -51,7 +52,7 @@ export class EcoFlowHttpApiManager {
     );
     if (!response.failed) {
       const data = this.convertData<TData>(response.data);
-      deviceInfo.log.debug('Received all quotas', data);
+      deviceInfo.log.debug(`Received all quotas: ${JSON.stringify(data, null, 2)}`);
       return data;
     }
     return null;

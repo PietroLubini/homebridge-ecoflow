@@ -13,10 +13,6 @@ import {
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2/delta2Accessory';
 import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2/delta2MaxAccessory';
 import { Delta2Simulator } from '@ecoflow/accessories/batteries/delta2/simulations/delta2Simulator';
-import { DeltaProAccessory } from '@ecoflow/accessories/batteries/deltapro/deltaProAccessory';
-import { DeltaProSimulator } from '@ecoflow/accessories/batteries/deltapro/simulations/deltaProSimulator';
-import { DeltaProUltraAccessory } from '@ecoflow/accessories/batteries/deltaproultra/deltaProUltraAccessory';
-import { DeltaProUltraSimulator } from '@ecoflow/accessories/batteries/deltaproultra/simulations/deltaProUltraSimulator';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { PowerStreamSimulator } from '@ecoflow/accessories/powerstream/simulations/powerStreamSimulator';
@@ -102,6 +98,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   }
 
   private validateDeviceConfig(config: DeviceConfig): string | undefined {
+    if (config.disabled === true) {
+      return 'Device is disabled';
+    }
+
     if (config.name === undefined) {
       return "Device's 'name' must be configured";
     }
@@ -214,17 +214,6 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     }
   }
 
-  private async initialize(accessories: EcoFlowAccessoryBase[], logs: Record<string, Logging>): Promise<void> {
-    for (const accessory of accessories) {
-      logs[accessory.accessory.displayName].info('Initializing accessory');
-      await accessory.initialize();
-      if (accessory.config.simulate !== true) {
-        await accessory.initializeDefaultValues();
-      }
-      await accessory.cleanupServices();
-    }
-  }
-
   private createAccessory(
     accessory: PlatformAccessory<UnknownContext>,
     config: DeviceConfig,
@@ -245,10 +234,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       //  EcoFlowAccessoryType = DeltaProAccessory;
       //  EcoFlowAccessorySimulatorType = DeltaProSimulator;
       //  break;
-      case DeviceModel.DeltaProUltra:
-        EcoFlowAccessoryType = DeltaProUltraAccessory;
-        EcoFlowAccessorySimulatorType = DeltaProUltraSimulator;
-        break;
+      // case DeviceModel.DeltaProUltra:
+      //   EcoFlowAccessoryType = DeltaProUltraAccessory;
+      //   EcoFlowAccessorySimulatorType = DeltaProUltraSimulator;
+      //   break;
       case DeviceModel.PowerStream:
         EcoFlowAccessoryType = PowerStreamAccessory;
         EcoFlowAccessorySimulatorType = PowerStreamSimulator;

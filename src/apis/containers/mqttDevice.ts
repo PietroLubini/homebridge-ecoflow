@@ -20,7 +20,7 @@ export class MqttDevice {
   ) {}
 
   public processReceivedMessage(topicType: MqttTopicType, message: MqttMessage): void {
-    this.log.debug('Received message:', message);
+    this.log.debug(`Received message: ${JSON.stringify(message, null, 2)}`);
     switch (topicType) {
       case MqttTopicType.Quota:
         this.quotaSubject.next(message as MqttQuotaMessage);

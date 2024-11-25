@@ -18,17 +18,17 @@ export abstract class FanServiceBase extends ServiceBase {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
     onCharacteristic.onSet(value => {
       const newValue = value as boolean;
-      this.setOn(newValue, () => this.updateState(!newValue));
+      this.processOnSetOn(newValue, () => this.updateState(!newValue));
     });
 
-    const rotationSpeedCharacteristic = this.addCharacteristic(this.platform.Characteristic.RotationSpeed);
-    rotationSpeedCharacteristic.onSet(percents => {
+    this.rotationSpeedCharacteristic = this.addCharacteristic(this.platform.Characteristic.RotationSpeed);
+    this.rotationSpeedCharacteristic.onSet(percents => {
       const prevRotationSpeed = this.currentRotationSpeed;
       this.currentRotationSpeed = this.covertPercentsToValue(percents as number, this.maxRotationSpeed);
-      this.setRotationSpeed(this.currentRotationSpeed, () => this.updateRotationSpeed(prevRotationSpeed));
+      this.processOnSetRotationSpeed(this.currentRotationSpeed, () => this.updateRotationSpeed(prevRotationSpeed));
     });
 
-    return [onCharacteristic, rotationSpeedCharacteristic];
+    return [onCharacteristic, this.rotationSpeedCharacteristic];
   }
 
   public updateState(state: boolean): void {
@@ -41,7 +41,11 @@ export abstract class FanServiceBase extends ServiceBase {
     this.currentRotationSpeed = value;
   }
 
-  protected abstract setOn(value: boolean, revert: () => void): Promise<void>;
+  protected setRotationSpeed(value: number): void {
+    this.rotationSpeedCharacteristic?.setValue(value);
+  }
 
-  protected abstract setRotationSpeed(value: number, revert: () => void): Promise<void>;
+  protected abstract processOnSetOn(value: boolean, revert: () => void): Promise<void>;
+
+  protected abstract processOnSetRotationSpeed(value: number, revert: () => void): Promise<void>;
 }
