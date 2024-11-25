@@ -119,7 +119,7 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
 
   private updateInvValues(params: InvStatus): void {
     if (params.inputWatts !== undefined) {
-      this.batteryService.updateChargingState(params.inputWatts);
+      this.batteryService.updateChargingState(params.inputWatts > 0);
       this.outletAcService.updateInputConsumption(params.inputWatts);
       this.outletUsbService.updateInputConsumption(params.inputWatts);
       this.outletCarService.updateInputConsumption(params.inputWatts);

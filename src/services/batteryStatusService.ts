@@ -23,8 +23,7 @@ export class BatteryStatusService extends ServiceBase {
     this.updateStatusLowBattery(batteryLevel);
   }
 
-  public updateChargingState(chargingPower: number): void {
-    const isCharging = chargingPower > 0;
+  public updateChargingState(isCharging: boolean): void {
     this.updateCharacteristic(this.platform.Characteristic.ChargingState, 'ChargingState', isCharging);
   }
 
