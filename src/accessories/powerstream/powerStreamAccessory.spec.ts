@@ -495,6 +495,7 @@ describe('PowerStreamAccessory', () => {
           processQuotaMessage(message);
 
           expect(solarOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
+          expect(solarOutletServiceMock.updateState).toHaveBeenCalledWith(true);
           expect(solarOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(4.5);
         });
 
@@ -510,6 +511,7 @@ describe('PowerStreamAccessory', () => {
           processQuotaMessage(message);
 
           expect(solarOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
+          expect(solarOutletServiceMock.updateState).toHaveBeenCalledWith(false);
           expect(solarOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
         });
 
@@ -571,6 +573,7 @@ describe('PowerStreamAccessory', () => {
           processQuotaMessage(message);
 
           expect(batteryOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
+          expect(batteryOutletServiceMock.updateState).toHaveBeenCalledWith(true);
           expect(batteryOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(12.4);
         });
 
@@ -586,6 +589,7 @@ describe('PowerStreamAccessory', () => {
           processQuotaMessage(message);
 
           expect(batteryOutletServiceMock.updateInputConsumption).toHaveBeenCalledWith(0);
+          expect(batteryOutletServiceMock.updateState).toHaveBeenCalledWith(false);
           expect(batteryOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
         });
 
@@ -707,6 +711,21 @@ describe('PowerStreamAccessory', () => {
 
           expect(inverterPowerDemandServiceMock.updateState).toHaveBeenCalledWith(true);
           expect(inverterPowerDemandServiceMock.updateRotationSpeed).toHaveBeenCalledWith(450);
+        });
+
+        it('should update INV power demand when Hearbeat message is received with permanentWatts equal to 0', async () => {
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
+            param: {
+              permanentWatts: 0,
+            },
+          };
+
+          processQuotaMessage(message);
+
+          expect(inverterPowerDemandServiceMock.updateState).toHaveBeenCalledWith(false);
+          expect(inverterPowerDemandServiceMock.updateRotationSpeed).toHaveBeenCalledWith(0);
         });
       });
     });

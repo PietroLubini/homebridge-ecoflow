@@ -4,6 +4,7 @@ import { Characteristic } from 'homebridge';
 
 export abstract class FanServiceBase extends ServiceBase {
   private currentRotationSpeed = 0;
+  private rotationSpeedCharacteristic: Characteristic | null = null;
 
   constructor(
     protected readonly ecoFlowAccessory: EcoFlowAccessoryBase,

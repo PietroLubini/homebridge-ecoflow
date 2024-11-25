@@ -54,6 +54,7 @@ Add the `EcoFlowHomebridge` platform in `config.json` in your home directory ins
     {
       "devices": [
         {
+          "disabled": false,
           "name": "Battery",
           "model": "Delta 2 Max",
           "serialNumber": "R123ABCDEGHI321",

@@ -226,6 +226,40 @@ describe('EcoFlowHomebridgePlatform', () => {
         expect(commonLogMock.warn).toHaveBeenCalledWith('Devices are not configured');
       });
 
+      it('should not register device when it is disabled', () => {
+        delta2Config.disabled = true;
+        accessory1Mock.context.deviceConfig = delta2Config;
+        config.devices = [delta2Config];
+
+        registerDevices();
+
+        expect(log1Mock.warn).toHaveBeenCalledWith('Device is disabled. Ignoring the device');
+      });
+
+      it('should not register device when name is not defined', () => {
+        config.devices = [{ accessKey: 'key1', secretKey: 'key1', serialNumber: 'sn1' } as DeviceConfig];
+
+        registerDevices();
+
+        expect(log1Mock.warn).toHaveBeenCalledWith("Device's 'name' must be configured. Ignoring the device");
+      });
+
+      it('should not register device when serialNumber is not defined', () => {
+        config.devices = [{ accessKey: 'key1', secretKey: 'key1', name: 'name1' } as DeviceConfig];
+
+        registerDevices();
+
+        expect(log1Mock.warn).toHaveBeenCalledWith("Device's 'serialNumber' must be configured. Ignoring the device");
+      });
+
+      it('should not register device when secretKey is not defined', () => {
+        config.devices = [{ accessKey: 'key1', serialNumber: 'sn1', name: 'name1' } as DeviceConfig];
+
+        registerDevices();
+
+        expect(log1Mock.warn).toHaveBeenCalledWith("Device's 'secretKey' must be configured. Ignoring the device");
+      });
+
       it('should not register device when name is not defined', () => {
         config.devices = [{ accessKey: 'key1', secretKey: 'key1', serialNumber: 'sn1' } as DeviceConfig];
 

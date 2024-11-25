@@ -4,6 +4,7 @@ import { Characteristic } from 'homebridge';
 
 export abstract class LightBulbServiceBase extends ServiceBase {
   private currentBrightness = 0;
+  private brightnessCharacteristic: Characteristic | null = null;
 
   constructor(
     protected readonly ecoFlowAccessory: EcoFlowAccessoryBase,

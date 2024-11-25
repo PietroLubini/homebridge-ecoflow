@@ -214,6 +214,17 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     }
   }
 
+  private async initialize(accessories: EcoFlowAccessoryBase[], logs: Record<string, Logging>): Promise<void> {
+    for (const accessory of accessories) {
+      logs[accessory.accessory.displayName].info('Initializing accessory');
+      await accessory.initialize();
+      if (accessory.config.simulate !== true) {
+        await accessory.initializeDefaultValues();
+      }
+      await accessory.cleanupServices();
+    }
+  }
+
   private createAccessory(
     accessory: PlatformAccessory<UnknownContext>,
     config: DeviceConfig,
@@ -230,10 +241,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
         EcoFlowAccessoryType = Delta2Accessory;
         EcoFlowAccessorySimulatorType = Delta2Simulator;
         break;
-      case DeviceModel.DeltaPro:
-        EcoFlowAccessoryType = DeltaProAccessory;
-        EcoFlowAccessorySimulatorType = DeltaProSimulator;
-        break;
+      // case DeviceModel.DeltaPro:
+      //  EcoFlowAccessoryType = DeltaProAccessory;
+      //  EcoFlowAccessorySimulatorType = DeltaProSimulator;
+      //  break;
       case DeviceModel.DeltaProUltra:
         EcoFlowAccessoryType = DeltaProUltraAccessory;
         EcoFlowAccessorySimulatorType = DeltaProUltraSimulator;
