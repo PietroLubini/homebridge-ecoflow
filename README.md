@@ -171,6 +171,8 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 
 ### Delta Pro
 
+> Not Activated (no testing is performed)
+
 #### Services
 
 | Service        | Characteristic        | Standard | Permission |
