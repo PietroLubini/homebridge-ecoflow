@@ -1,6 +1,7 @@
 import { Delta2Configuration } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2Configuration';
 import {
   Delta2AllQuotaData,
+  EmsStatus,
   InvStatus,
   MpptStatus,
   PdStatus,
@@ -20,7 +21,6 @@ import {
   AcXBoostType,
   EnableType,
 } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
-import { EmsStatus } from '@ecoflow/accessories/batteries/interfaces/httpApiBatteryContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
