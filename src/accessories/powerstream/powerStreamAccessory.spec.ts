@@ -1,13 +1,19 @@
+import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
-import {
-  Heartbeat,
-  PowerStreamAllQuotaData,
-} from '@ecoflow/accessories/powerstream/interfaces/httpApiPowerStreamContracts';
 import {
   MqttPowerStreamMessageFuncType,
   MqttPowerStreamMessageType,
   MqttPowerStreamQuotaMessageWithParams,
 } from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
+import {
+  Heartbeat,
+  PowerStreamAllQuotaData,
+} from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
+import {
+  PowerStreamMqttMessageFuncType,
+  PowerStreamMqttMessageType,
+  PowerStreamMqttQuotaMessageWithParams,
+} from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { BrightnessService } from '@ecoflow/accessories/powerstream/services/brightnessService';
 import { OutletInvService } from '@ecoflow/accessories/powerstream/services/outletInvService';
@@ -422,9 +428,9 @@ describe('PowerStreamAccessory', () => {
       });
 
       it('should update heartbeat in quota when Hearbeat message is received', async () => {
-        const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-          cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-          cmdId: MqttPowerStreamMessageType.Heartbeat,
+        const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+          cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+          cmdId: PowerStreamMqttMessageType.Heartbeat,
           param: {
             batSoc: 34.67,
           },
@@ -438,9 +444,9 @@ describe('PowerStreamAccessory', () => {
 
       describe('updateBatteryLevel', () => {
         it('should not update battery level when Hearbeat message is received with undefined status', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {},
           };
 
@@ -503,9 +509,9 @@ describe('PowerStreamAccessory', () => {
 
       describe('updateConsumption PV', () => {
         it('should not update PV Input and Output Consumption when Hearbeat message is received with undefined status', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {},
           };
 
@@ -516,9 +522,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update PV Output Consumption when Hearbeat message is received with 0 pv1InputWatts', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               pv1InputWatts: 0,
             },
@@ -531,9 +537,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update PV Output Consumption when Hearbeat message is received with pv1InputWatts', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               pv1InputWatts: 45,
             },
@@ -547,9 +553,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update PV Output Consumption when Hearbeat message is received with 0 pv2InputWatts', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               pv2InputWatts: 0,
             },
@@ -563,9 +569,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update PV Output Consumption when Hearbeat message is received with pv2InputWatts', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               pv2InputWatts: 56,
             },
@@ -578,9 +584,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update PV Output Consumption when Hearbeat message is received with all pv-related parameters', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               pv1InputWatts: 45,
               pv2InputWatts: 56,
@@ -596,9 +602,9 @@ describe('PowerStreamAccessory', () => {
 
       describe('updateConsumption BAT', () => {
         it('should not update BAT Input and Output Consumption when Hearbeat message is received with undefined status', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {},
           };
 
@@ -610,9 +616,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update BAT Output Consumption when Hearbeat message is received with positive batInputWatts', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               batInputWatts: 124,
             },
@@ -620,16 +626,16 @@ describe('PowerStreamAccessory', () => {
 
           processQuotaMessage(message);
 
-          expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(0);
+          expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(false);
           expect(batteryOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
           expect(batteryOutletServiceMock.updateState).toHaveBeenCalledWith(true);
           expect(batteryOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(12.4);
         });
 
         it('should update BAT Input and Output Consumption when Hearbeat message is received with zero batInputWatts', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               batInputWatts: 0,
             },
@@ -637,16 +643,16 @@ describe('PowerStreamAccessory', () => {
 
           processQuotaMessage(message);
 
-          expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(0);
+          expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(false);
           expect(batteryOutletServiceMock.updateInputConsumption).toHaveBeenCalledWith(0);
           expect(batteryOutletServiceMock.updateState).toHaveBeenCalledWith(false);
           expect(batteryOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
         });
 
         it('should update BAT Input Consumption when Hearbeat message is received with negative batInputWatts', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               batInputWatts: -456,
             },
@@ -654,7 +660,7 @@ describe('PowerStreamAccessory', () => {
 
           processQuotaMessage(message);
 
-          expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(45.6);
+          expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(true);
           expect(batteryOutletServiceMock.updateInputConsumption).toHaveBeenCalledWith(45.6);
           expect(batteryOutletServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
         });
@@ -662,9 +668,9 @@ describe('PowerStreamAccessory', () => {
 
       describe('updateConsumption INV', () => {
         it('should not update INV Input and Output Consumption when Hearbeat message is received with undefined status', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {},
           };
 
@@ -676,9 +682,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update INV Output Consumption when Hearbeat message is received with positive invOutputWatts', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               invOutputWatts: 124.1,
             },
@@ -691,9 +697,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update INV Input and Output Consumption when Hearbeat message is received with zero invOutputWatts', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               invOutputWatts: 0,
             },
@@ -706,9 +712,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update INV Input Consumption when Hearbeat message is received with negative invOutputWatts', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               invOutputWatts: -456.1,
             },
@@ -721,11 +727,11 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update INV State when Hearbeat message is received with invOnOff set to true', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
-              invOnOff: true,
+              invOnOff: EnableType.On,
             },
           };
 
@@ -735,9 +741,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update INV brightness when Hearbeat message is received with invBrightness', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               invBrightness: 23.4,
             },
@@ -750,9 +756,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update INV power demand when Hearbeat message is received with permanentWatts', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               permanentWatts: 450,
             },
@@ -765,9 +771,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update INV power demand when Hearbeat message is received with permanentWatts equal to 0', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               permanentWatts: 0,
             },
@@ -793,7 +799,7 @@ describe('PowerStreamAccessory', () => {
           invOutputWatts: 50,
           pv1InputWatts: 10,
           pv2InputWatts: 20,
-          invOnOff: true,
+          invOnOff: EnableType.On,
           permanentWatts: 7000,
           invBrightness: 431,
         },
@@ -856,7 +862,7 @@ describe('PowerStreamAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(12);
+        expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(true);
         expect(batteryOutletServiceMock.updateInputConsumption).toHaveBeenCalledWith(12);
         expect(batteryOutletServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
       });

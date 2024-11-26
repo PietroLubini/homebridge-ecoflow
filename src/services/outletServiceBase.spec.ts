@@ -410,7 +410,7 @@ describe('OutletServiceBase', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
-      service.updateChargingState(0);
+      service.updateChargingState(false);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.ChargingState).value;
 
@@ -425,7 +425,7 @@ describe('OutletServiceBase', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
 
-      service.updateChargingState(10.1);
+      service.updateChargingState(true);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.ChargingState).value;
 

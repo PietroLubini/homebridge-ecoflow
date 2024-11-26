@@ -24,7 +24,7 @@ import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase<BatteryAllQuotaData> {
-  private readonly batteryService: BatteryStatusService;
+  private readonly batteryStatusService: BatteryStatusService;
   private readonly outletUsbService: OutletUsbService;
   private readonly outletAcService: OutletAcService;
   private readonly outletCarService: OutletCarService;
@@ -39,14 +39,14 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
     batteryStatusProvider: BatteryStatusProvider
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
-    this.batteryService = new BatteryStatusService(this, batteryStatusProvider);
+    this.batteryStatusService = new BatteryStatusService(this, batteryStatusProvider);
     this.outletUsbService = new OutletUsbService(this, batteryStatusProvider);
     this.outletAcService = new OutletAcService(this, batteryStatusProvider);
     this.outletCarService = new OutletCarService(this, batteryStatusProvider);
   }
 
   protected override getServices(): ServiceBase[] {
-    return [this.batteryService, this.outletUsbService, this.outletAcService, this.outletCarService];
+    return [this.batteryStatusService, this.outletUsbService, this.outletAcService, this.outletCarService];
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
@@ -112,7 +112,7 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
 
   private updateEmsValues(params: EmsStatus): void {
     if (params.f32LcdShowSoc !== undefined && params.minDsgSoc !== undefined) {
-      this.batteryService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
+      this.batteryStatusService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
       this.outletAcService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
       this.outletUsbService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
       this.outletCarService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
@@ -121,10 +121,10 @@ export abstract class BatteryAccessoryBase extends EcoFlowAccessoryWithQuotaBase
 
   private updateInvValues(params: InvStatus): void {
     if (params.inputWatts !== undefined) {
-      this.batteryService.updateChargingState(params.inputWatts);
-      this.outletAcService.updateChargingState(params.inputWatts);
-      this.outletUsbService.updateChargingState(params.inputWatts);
-      this.outletCarService.updateChargingState(params.inputWatts);
+      this.batteryStatusService.updateChargingState(params.inputWatts > 0);
+      this.outletAcService.updateChargingState(params.inputWatts > 0);
+      this.outletUsbService.updateChargingState(params.inputWatts > 0);
+      this.outletCarService.updateChargingState(params.inputWatts > 0);
       this.outletAcService.updateInputConsumption(params.inputWatts);
       this.outletUsbService.updateInputConsumption(params.inputWatts);
       this.outletCarService.updateInputConsumption(params.inputWatts);

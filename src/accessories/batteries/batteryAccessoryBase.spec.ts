@@ -273,7 +273,7 @@ describe('BatteryAccessory', () => {
 
         processQuotaMessage(message);
 
-        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(12.34);
+        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
         expect(outletAcServiceMock.updateInputConsumption).toHaveBeenCalledWith(12.34);
         expect(outletUsbServiceMock.updateInputConsumption).toHaveBeenCalledWith(12.34);
         expect(outletCarServiceMock.updateInputConsumption).toHaveBeenCalledWith(12.34);
@@ -635,10 +635,10 @@ describe('BatteryAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(2.1);
-        expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(2.1);
-        expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(2.1);
-        expect(outletCarServiceMock.updateChargingState).toHaveBeenCalledWith(2.1);
+        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletCarServiceMock.updateChargingState).toHaveBeenCalledWith(true);
         expect(outletAcServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
         expect(outletAcServiceMock.updateState).toHaveBeenCalledWith(true);
         expect(outletAcServiceMock.updateOutputConsumption).toHaveBeenCalledWith(2.2);

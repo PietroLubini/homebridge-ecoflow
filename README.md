@@ -29,6 +29,8 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 
 - [Delta 2](#delta-2)
 - [Delta 2 Max](#delta-2-max)
+- [Delta Pro](#delta-pro)
+- [Delta Pro Ultra](#delta-pro-ultra)
 - [PowerStream Micro-inverter](#powerstream-micro-inverter)
 
 For a full list of devices that could be potentially added check [here](https://developer-eu.ecoflow.com/us/document/introduction)
@@ -177,6 +179,111 @@ The characteristics could be used as conditions in HomeKit Automation that uses 
 ### Delta 2 Max
 
 Supported services and configuration are the same as for [Delta 2](#delta-2)
+
+### Delta Pro
+
+> Not Activated (no testing is performed)
+
+#### Services
+
+| EcoFlow Parameter | Service    | Characteristic        | Standard | Permission |
+| ----------------- | ---------- | --------------------- | -------- | ---------- |
+| Battery Level     | Battery    | BatteryLevel          | ✅       | Read       |
+| Input             | Battery    | ChargingState         | ✅       | Read       |
+| Battery Level     | Battery    | StatusLowBattery      | ✅       | Read       |
+| AC                | Outlet AC  | On                    | ✅       | Read/Write |
+| AC Output         | Outlet AC  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet AC  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet AC  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet AC  | Output Consumption, W | 🔲       | Read       |
+| 12V DC            | Outlet CAR | On                    | ✅       | Read/Write |
+| 12V DC Output     | Outlet CAR | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet CAR | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet CAR | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet CAR | Output Consumption, W | 🔲       | Read       |
+| USB               | Outlet USB | On                    | ✅       | Read       |
+| USB Output        | Outlet USB | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet USB | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet USB | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet USB | Output Consumption, W | 🔲       | Read       |
+| Switch X-Boost    | Switch     | On                    | ✅       | Read/Write |
+
+#### Configuration
+
+The following additional characteristics is available:
+
+- Input Consumption, W
+- Output Consumption, W
+- Battery Level, %
+
+```json
+{
+  ...
+  "devices": [
+    {
+      ...
+      "model": "Delta Pro",
+      "battery": {
+        "additionalCharacteristics": [
+          "Battery Level, %",
+          "Input Consumption, W",
+          "Output Consumption, W"
+        ]
+      }
+    }
+  ],
+}
+```
+
+### Delta Pro Ultra
+
+> Not Activated (no testing is performed)
+
+#### Services
+
+| EcoFlow Parameter | Service    | Characteristic        | Standard | Permission |
+| ----------------- | ---------- | --------------------- | -------- | ---------- |
+| Battery Level     | Battery    | BatteryLevel          | ✅       | Read       |
+| Input             | Battery    | ChargingState         | ✅       | Read       |
+| Battery Level     | Battery    | StatusLowBattery      | ✅       | Read       |
+| AC                | Outlet AC  | On                    | ✅       | Read/Write |
+| AC Output         | Outlet AC  | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet AC  | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet AC  | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet AC  | Output Consumption, W | 🔲       | Read       |
+| USB               | Outlet USB | On                    | ✅       | Read       |
+| USB Output        | Outlet USB | OutletInUse           | ✅       | Read       |
+| Battery Level     | Outlet USB | Battery Level, %      | 🔲       | Read       |
+| Input             | Outlet USB | Input Consumption, W  | 🔲       | Read       |
+| Output            | Outlet USB | Output Consumption, W | 🔲       | Read       |
+| Switch X-Boost    | Switch     | On                    | ✅       | Read/Write |
+
+#### Configuration
+
+The following additional characteristics is available:
+
+- Input Consumption, W
+- Output Consumption, W
+- Battery Level, %
+
+```json
+{
+  ...
+  "devices": [
+    {
+      ...
+      "model": "Delta Pro Ultra",
+      "battery": {
+        "additionalCharacteristics": [
+          "Battery Level, %",
+          "Input Consumption, W",
+          "Output Consumption, W"
+        ]
+      }
+    }
+  ],
+}
+```
 
 ### PowerStream Micro-inverter
 

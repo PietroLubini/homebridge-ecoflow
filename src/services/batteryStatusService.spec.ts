@@ -192,21 +192,21 @@ describe('BatteryStatusService', () => {
       service.initialize();
     });
 
-    it('should set charging state to false when input power consumption is 0 Watt', () => {
-      service.updateChargingState(0);
+    it('should set charging state to false when new value is false', () => {
+      service.updateChargingState(false);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.ChargingState).value;
 
-      expect(actual).toEqual(0);
+      expect(actual).toBeFalsy();
       expect(logMock.debug).toHaveBeenCalledWith('ChargingState ->', false);
     });
 
-    it('should set charging state to true when input power consumption is more than 0 Watt', () => {
-      service.updateChargingState(10.1);
+    it('should set charging state to true when new value is true', () => {
+      service.updateChargingState(true);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.ChargingState).value;
 
-      expect(actual).toEqual(1);
+      expect(actual).toBeTruthy();
       expect(logMock.debug).toHaveBeenCalledWith('ChargingState ->', true);
     });
   });

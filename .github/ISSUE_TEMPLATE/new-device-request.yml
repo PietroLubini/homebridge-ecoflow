@@ -13,12 +13,9 @@ body:
       label: Device
       options:
         - Choose a device...
+        - Delta Pro 3
         - Smart Home Panel
-        - Smart Plug
-        - Wave Air Conditioner
-        - Glacier
         - Power Kits
-        - PowerOcean
       default: 0
     validations:
       required: true

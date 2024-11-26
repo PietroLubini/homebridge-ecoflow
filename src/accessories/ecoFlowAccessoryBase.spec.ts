@@ -284,7 +284,7 @@ describe('EcoFlowAccessoryBase', () => {
       );
     });
 
-    it("should do nothing when 'set_reply' message contains successful acknowledgement", async () => {
+    it("should do nothing when 'set_reply' message contains successful 'ack' acknowledgement", async () => {
       await accessory.sendSetCommand({} as MqttSetMessage, revertMock);
       message.data.ack = false;
 
@@ -294,9 +294,39 @@ describe('EcoFlowAccessoryBase', () => {
       expect(logMock.debug).toHaveBeenCalledWith('Setting of a value was successful for:', 500000);
     });
 
-    it("should call revert function when 'set_reply' message contains failed acknowledgement", async () => {
+    it("should call revert function when 'set_reply' message contains failed 'ack' acknowledgement", async () => {
       await accessory.sendSetCommand({} as MqttSetMessage, revertMock);
       message.data.ack = true;
+
+      processSetReplyMessage(message);
+
+      expect(revertMock).toHaveBeenCalledTimes(1);
+      expect(logMock.warn).toHaveBeenCalledWith('Failed to set a value. Reverts value back for:', 500000);
+    });
+
+    it("should do nothing when 'set_reply' message contains successful 'result' acknowledgement", async () => {
+      await accessory.sendSetCommand({} as MqttSetMessage, revertMock);
+      message.data.result = false;
+
+      processSetReplyMessage(message);
+
+      expect(revertMock).not.toHaveBeenCalled();
+      expect(logMock.debug).toHaveBeenCalledWith('Setting of a value was successful for:', 500000);
+    });
+
+    it("should call revert function when 'set_reply' message contains failed 'result' acknowledgement", async () => {
+      await accessory.sendSetCommand({} as MqttSetMessage, revertMock);
+      message.data.result = true;
+
+      processSetReplyMessage(message);
+
+      expect(revertMock).toHaveBeenCalledTimes(1);
+      expect(logMock.warn).toHaveBeenCalledWith('Failed to set a value. Reverts value back for:', 500000);
+    });
+
+    it("should call revert function when 'set_reply' message does not contain 'ack' or 'result' acknowledgement", async () => {
+      await accessory.sendSetCommand({} as MqttSetMessage, revertMock);
+      delete message.data.ack;
 
       processSetReplyMessage(message);
 
