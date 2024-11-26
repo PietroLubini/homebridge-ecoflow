@@ -1,9 +1,10 @@
 import { DeltaProOutletServiceBase } from '@ecoflow/accessories/batteries/deltapro/services/deltaProOutletServiceBase';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 
 export class OutletUsbService extends DeltaProOutletServiceBase {
-  constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
-    super(ecoFlowAccessory, 'USB', ecoFlowAccessory.config.battery?.additionalCharacteristics);
+  constructor(ecoFlowAccessory: EcoFlowAccessoryBase, batteryStatusProvider: BatteryStatusProvider) {
+    super(ecoFlowAccessory, batteryStatusProvider, 'USB', ecoFlowAccessory.config.battery?.additionalCharacteristics);
   }
 
   protected override setOn(): Promise<void> {

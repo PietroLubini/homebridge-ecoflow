@@ -14,6 +14,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
@@ -44,6 +45,7 @@ describe('DeltaProAccessoryBase', () => {
   let outletAcServiceMock: jest.Mocked<OutletAcService>;
   let outletCarServiceMock: jest.Mocked<OutletCarService>;
   let switchXboostServiceMock: jest.Mocked<SwitchXboostService>;
+  let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   let accessoryInformationServiceMock: jest.Mocked<AccessoryInformationService>;
   const expectedServices: MockService[] = [
     {
@@ -95,13 +97,25 @@ describe('DeltaProAccessoryBase', () => {
         mockOutletBase.updateState.mockReset();
       });
     }
-    batteryStatusServiceMock = initService(BatteryStatusService, new BatteryStatusService(accessory), mock => {
-      mock.updateBatteryLevel.mockReset();
-      mock.updateChargingState.mockReset();
-    });
-    outletUsbServiceMock = initOutletService(OutletUsbService, new OutletUsbService(accessory));
-    outletAcServiceMock = initOutletService(OutletAcService, new OutletAcService(accessory));
-    outletCarServiceMock = initOutletService(OutletCarService, new OutletCarService(accessory));
+
+    batteryStatusProviderMock = {} as jest.Mocked<BatteryStatusProvider>;
+    batteryStatusServiceMock = initService(
+      BatteryStatusService,
+      new BatteryStatusService(accessory, batteryStatusProviderMock),
+      mock => {
+        mock.updateBatteryLevel.mockReset();
+        mock.updateChargingState.mockReset();
+      }
+    );
+    outletUsbServiceMock = initOutletService(
+      OutletUsbService,
+      new OutletUsbService(accessory, batteryStatusProviderMock)
+    );
+    outletAcServiceMock = initOutletService(OutletAcService, new OutletAcService(accessory, batteryStatusProviderMock));
+    outletCarServiceMock = initOutletService(
+      OutletCarService,
+      new OutletCarService(accessory, batteryStatusProviderMock)
+    );
     accessoryInformationServiceMock = initService(
       AccessoryInformationService,
       new AccessoryInformationService(accessory)
@@ -125,7 +139,15 @@ describe('DeltaProAccessoryBase', () => {
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
-    accessory = new MockAccessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock);
+    accessory = new MockAccessory(
+      platformMock,
+      accessoryMock,
+      config,
+      logMock,
+      httpApiManagerMock,
+      mqttApiManagerMock,
+      batteryStatusProviderMock
+    );
   });
 
   describe('initialize', () => {
@@ -156,7 +178,7 @@ describe('DeltaProAccessoryBase', () => {
     describe('BmsMasterStatus', () => {
       let processQuotaMessage: (value: MqttQuotaMessage) => void;
       beforeEach(async () => {
-        quota.bmsMaster = {};
+        quota.ems = {};
         await accessory.initialize();
         await accessory.initializeDefaultValues(false);
         processQuotaMessage = mqttApiManagerMock.subscribeOnQuotaMessage.mock.calls[0][1]!;
@@ -165,33 +187,35 @@ describe('DeltaProAccessoryBase', () => {
       it('should update bms status in quota when BmsStatus message is received', async () => {
         const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
           data: {
-            bmsMaster: {
-              f32ShowSoc: 34.67,
+            ems: {
+              f32LcdShowSoc: 34.67,
+              minDsgSoc: 31.2,
             },
           } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
-        const actual = quota.bmsMaster;
+        const actual = quota.ems;
 
-        expect(actual).toEqual(message.data.bmsMaster);
+        expect(actual).toEqual(message.data.ems);
       });
 
       it('should update battery level when BmsStatus message is received with f32ShowSoc', async () => {
         const message: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
           data: {
-            bmsMaster: {
-              f32ShowSoc: 34.67,
+            ems: {
+              f32LcdShowSoc: 34.67,
+              minDsgSoc: 31.2,
             },
           } as DeltaProAllQuotaData,
         };
 
         processQuotaMessage(message);
 
-        expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
-        expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
-        expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
-        expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
+        expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 31.2);
+        expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 31.2);
+        expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 31.2);
+        expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 31.2);
       });
 
       it('should not update any characteristic when BmsStatus message is received with undefined status', async () => {
@@ -644,8 +668,9 @@ describe('DeltaProAccessoryBase', () => {
     let quota: DeltaProAllQuotaData;
     beforeEach(() => {
       quota = {
-        bmsMaster: {
-          f32ShowSoc: 1.1,
+        ems: {
+          f32LcdShowSoc: 1.1,
+          minDsgSoc: 1.9,
         },
         inv: {
           inputWatts: 2.1,
@@ -664,23 +689,23 @@ describe('DeltaProAccessoryBase', () => {
     });
 
     it('should initialize quota when is called before initializeDefaultValues', async () => {
-      const expected: DeltaProAllQuotaData = { bmsMaster: {}, inv: {}, pd: {} };
+      const expected: DeltaProAllQuotaData = { ems: {}, inv: {}, pd: {} };
 
       const actual = accessory.quota;
 
       expect(actual).toEqual(expected);
     });
 
-    describe('BmsStatus', () => {
+    describe('EmsStatus', () => {
       it('should update BmsStatus-related characteristics when is requested', async () => {
         httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
 
         await accessory.initializeDefaultValues();
 
-        expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
-        expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
-        expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
-        expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
+        expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 1.9);
+        expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 1.9);
+        expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 1.9);
+        expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 1.9);
       });
 
       it('should update BmsStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {

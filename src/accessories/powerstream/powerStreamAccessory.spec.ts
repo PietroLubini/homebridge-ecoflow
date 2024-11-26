@@ -1,6 +1,11 @@
 import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import {
+  MqttPowerStreamMessageFuncType,
+  MqttPowerStreamMessageType,
+  MqttPowerStreamQuotaMessageWithParams,
+} from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
+import {
   Heartbeat,
   PowerStreamAllQuotaData,
 } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
@@ -22,6 +27,7 @@ import {
   DeviceConfig,
   PowerStreamConsumptionType,
 } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
@@ -51,6 +57,7 @@ describe('PowerStreamAccessory', () => {
   let inverterBrightnessServiceMock: jest.Mocked<BrightnessService>;
   let inverterPowerDemandServiceMock: jest.Mocked<PowerDemandService>;
   let accessoryInformationServiceMock: jest.Mocked<AccessoryInformationService>;
+  let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   const expectedServices: MockService[] = [
     {
       Name: 'OutletInvService',
@@ -90,6 +97,7 @@ describe('PowerStreamAccessory', () => {
       serviceBaseMock.updateInputConsumption.mockReset();
       serviceBaseMock.updateOutputConsumption.mockReset();
       serviceBaseMock.updateState.mockReset();
+      serviceBaseMock.updateChargingState.mockReset();
       return serviceMock;
     }
 
@@ -113,18 +121,20 @@ describe('PowerStreamAccessory', () => {
       return serviceMock;
     }
 
-    solarOutletServiceMock = createOutletService(new OutletService(accessory, 'PV'));
-    batteryOutletServiceMock = createOutletService(new OutletService(accessory, 'BAT'));
-    (OutletService as jest.Mock).mockImplementation((_: PowerStreamAccessory, serviceSubType: string) => {
-      if (serviceSubType === 'PV') {
-        return solarOutletServiceMock;
-      } else if (serviceSubType === 'BAT') {
-        return batteryOutletServiceMock;
+    solarOutletServiceMock = createOutletService(new OutletService(accessory, batteryStatusProviderMock, 'PV'));
+    batteryOutletServiceMock = createOutletService(new OutletService(accessory, batteryStatusProviderMock, 'BAT'));
+    (OutletService as jest.Mock).mockImplementation(
+      (_: PowerStreamAccessory, __: BatteryStatusProvider, serviceSubType: string) => {
+        if (serviceSubType === 'PV') {
+          return solarOutletServiceMock;
+        } else if (serviceSubType === 'BAT') {
+          return batteryOutletServiceMock;
+        }
+        return undefined;
       }
-      return undefined;
-    });
+    );
 
-    inverterOutletServiceMock = createOutletService(new OutletInvService(accessory));
+    inverterOutletServiceMock = createOutletService(new OutletInvService(accessory, batteryStatusProviderMock));
     (OutletInvService as jest.Mock).mockImplementation(() => inverterOutletServiceMock);
 
     inverterBrightnessServiceMock = createLightBulbService(new BrightnessService(accessory, 1023));
@@ -150,6 +160,7 @@ describe('PowerStreamAccessory', () => {
       subscribeOnSetReplyMessage: jest.fn(),
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
+    batteryStatusProviderMock = {} as jest.Mocked<BatteryStatusProvider>;
     config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
     accessory = new PowerStreamAccessory(
       platformMock,
@@ -157,7 +168,8 @@ describe('PowerStreamAccessory', () => {
       config,
       logMock,
       httpApiManagerMock,
-      mqttApiManagerMock
+      mqttApiManagerMock,
+      batteryStatusProviderMock
     );
   });
 
@@ -183,7 +195,12 @@ describe('PowerStreamAccessory', () => {
       ): CharacteristicType[] | undefined {
         let actual: CharacteristicType[] | undefined;
         (OutletService as jest.Mock).mockImplementation(
-          (_: EcoFlowAccessoryBase, serviceSubType: string, additionalCharacteristics?: CharacteristicType[]) => {
+          (
+            _: EcoFlowAccessoryBase,
+            __: BatteryStatusProvider,
+            serviceSubType: string,
+            additionalCharacteristics?: CharacteristicType[]
+          ) => {
             if (serviceSubType === expectedServiceSubType) {
               actual = additionalCharacteristics;
               return mock;
@@ -192,7 +209,7 @@ describe('PowerStreamAccessory', () => {
           }
         );
         (OutletInvService as jest.Mock).mockImplementation(
-          (_: EcoFlowAccessoryBase, additionalCharacteristics?: CharacteristicType[]) => {
+          (_: EcoFlowAccessoryBase, __: BatteryStatusProvider, additionalCharacteristics?: CharacteristicType[]) => {
             if (expectedServiceSubType === 'INV') {
               actual = additionalCharacteristics;
               return mock;
@@ -206,7 +223,8 @@ describe('PowerStreamAccessory', () => {
           deviceConfig,
           logMock,
           httpApiManagerMock,
-          mqttApiManagerMock
+          mqttApiManagerMock,
+          batteryStatusProviderMock
         );
         return actual;
       }
@@ -325,7 +343,8 @@ describe('PowerStreamAccessory', () => {
           deviceConfig,
           logMock,
           httpApiManagerMock,
-          mqttApiManagerMock
+          mqttApiManagerMock,
+          batteryStatusProviderMock
         );
         return actual;
       }
@@ -353,7 +372,8 @@ describe('PowerStreamAccessory', () => {
           deviceConfig,
           logMock,
           httpApiManagerMock,
-          mqttApiManagerMock
+          mqttApiManagerMock,
+          batteryStatusProviderMock
         );
         return actual;
       }
@@ -437,10 +457,26 @@ describe('PowerStreamAccessory', () => {
           expect(solarOutletServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
         });
 
-        it('should update battery level when Hearbeat message is received with batSoc', async () => {
-          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
-            cmdId: PowerStreamMqttMessageType.Heartbeat,
+        it('should not update battery level when Hearbeat message is received without batSoc', async () => {
+          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
+            cmdId: MqttPowerStreamMessageType.Heartbeat,
+            param: {
+              lowerLimit: 15.4,
+            },
+          };
+
+          processQuotaMessage(message);
+
+          expect(batteryOutletServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+          expect(inverterOutletServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+          expect(solarOutletServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        });
+
+        it('should not update battery level when Hearbeat message is received without lowerLimit', async () => {
+          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
+            cmdId: MqttPowerStreamMessageType.Heartbeat,
             param: {
               batSoc: 34.67,
             },
@@ -448,7 +484,24 @@ describe('PowerStreamAccessory', () => {
 
           processQuotaMessage(message);
 
-          expect(batteryOutletServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
+          expect(batteryOutletServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+          expect(inverterOutletServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+          expect(solarOutletServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        });
+
+        it('should update battery level when Hearbeat message is received with batSoc and lowerLimit', async () => {
+          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
+            cmdId: MqttPowerStreamMessageType.Heartbeat,
+            param: {
+              batSoc: 34.67,
+              lowerLimit: 15.4,
+            },
+          };
+
+          processQuotaMessage(message);
+
+          expect(batteryOutletServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 15.4);
           expect(inverterOutletServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
           expect(solarOutletServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
         });
@@ -557,6 +610,7 @@ describe('PowerStreamAccessory', () => {
 
           processQuotaMessage(message);
 
+          expect(batteryOutletServiceMock.updateChargingState).not.toHaveBeenCalled();
           expect(batteryOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
           expect(batteryOutletServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
         });
@@ -572,6 +626,7 @@ describe('PowerStreamAccessory', () => {
 
           processQuotaMessage(message);
 
+          expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(false);
           expect(batteryOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
           expect(batteryOutletServiceMock.updateState).toHaveBeenCalledWith(true);
           expect(batteryOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(12.4);
@@ -588,6 +643,7 @@ describe('PowerStreamAccessory', () => {
 
           processQuotaMessage(message);
 
+          expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(false);
           expect(batteryOutletServiceMock.updateInputConsumption).toHaveBeenCalledWith(0);
           expect(batteryOutletServiceMock.updateState).toHaveBeenCalledWith(false);
           expect(batteryOutletServiceMock.updateOutputConsumption).toHaveBeenCalledWith(0);
@@ -604,6 +660,7 @@ describe('PowerStreamAccessory', () => {
 
           processQuotaMessage(message);
 
+          expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(true);
           expect(batteryOutletServiceMock.updateInputConsumption).toHaveBeenCalledWith(45.6);
           expect(batteryOutletServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
         });
@@ -738,6 +795,7 @@ describe('PowerStreamAccessory', () => {
         '20_1': {
           batInputWatts: -120,
           batSoc: 34.1,
+          lowerLimit: 56.4,
           invOutputWatts: 50,
           pv1InputWatts: 10,
           pv2InputWatts: 20,
@@ -762,7 +820,7 @@ describe('PowerStreamAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(batteryOutletServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.1);
+        expect(batteryOutletServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.1, 56.4);
         expect(solarOutletServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
         expect(inverterOutletServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
       });
@@ -804,6 +862,7 @@ describe('PowerStreamAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
+        expect(batteryOutletServiceMock.updateChargingState).toHaveBeenCalledWith(true);
         expect(batteryOutletServiceMock.updateInputConsumption).toHaveBeenCalledWith(12);
         expect(batteryOutletServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
       });
@@ -814,6 +873,7 @@ describe('PowerStreamAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
+        expect(batteryOutletServiceMock.updateChargingState).not.toHaveBeenCalled();
         expect(batteryOutletServiceMock.updateInputConsumption).not.toHaveBeenCalled();
         expect(batteryOutletServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
       });

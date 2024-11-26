@@ -17,8 +17,9 @@ export class DeltaProSimulator extends SimulatorTyped<DeltaProMqttSetMessageWith
   public override generateQuota(): object {
     const quota: DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData> = {
       data: {
-        bmsMaster: {
-          f32ShowSoc: this.getRandomNumber(0, 100),
+        ems: {
+          f32LcdShowSoc: this.getRandomNumber(0, 100),
+          minDsgSoc: this.getRandomNumber(0, 20),
         },
         inv: {
           cfgAcEnabled: this.getRandomBoolean() ? AcEnableType.On : AcEnableType.Off,

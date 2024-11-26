@@ -1,11 +1,13 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic, CharacteristicValue, WithUUID } from 'homebridge';
 
 export abstract class OutletServiceBase extends ServiceBase {
   constructor(
     ecoFlowAccessory: EcoFlowAccessoryBase,
+    private readonly batteryStatusProvider: BatteryStatusProvider,
     serviceSubType: string,
     private readonly additionalCharacteristics?: CharacteristicType[]
   ) {
@@ -21,7 +23,7 @@ export abstract class OutletServiceBase extends ServiceBase {
     this.updateCustomCharacteristic(
       this.platform.Characteristic.PowerConsumption.OutputConsumptionWatts,
       'Output Consumption, W',
-      watt,
+      () => watt,
       CharacteristicType.OutputConsumptionInWatts
     );
   }
@@ -30,17 +32,27 @@ export abstract class OutletServiceBase extends ServiceBase {
     this.updateCustomCharacteristic(
       this.platform.Characteristic.PowerConsumption.InputConsumptionWatts,
       'Input Consumption, W',
-      watt,
+      () => watt,
       CharacteristicType.InputConsumptionInWatts
     );
   }
 
-  public updateBatteryLevel(batteryLevel: number): void {
+  public updateBatteryLevel(batteryLevel: number, dischargeLimit: number): void {
     this.updateCustomCharacteristic(
       this.platform.Characteristic.BatteryLevel,
       'Battery Level, %',
-      batteryLevel,
+      () => batteryLevel,
       CharacteristicType.BatteryLevel
+    );
+    this.updateStatusLowBattery(batteryLevel, dischargeLimit);
+  }
+
+  public updateChargingState(isCharging: boolean): void {
+    this.updateCustomCharacteristic(
+      this.platform.Characteristic.ChargingState,
+      'ChargingState',
+      () => isCharging,
+      CharacteristicType.ChargingState
     );
   }
 
@@ -63,6 +75,11 @@ export abstract class OutletServiceBase extends ServiceBase {
         CharacteristicType.OutputConsumptionInWatts
       ),
       this.tryAddCustomCharacteristic(this.platform.Characteristic.BatteryLevel, CharacteristicType.BatteryLevel),
+      this.tryAddCustomCharacteristic(this.platform.Characteristic.ChargingState, CharacteristicType.ChargingState),
+      this.tryAddCustomCharacteristic(
+        this.platform.Characteristic.StatusLowBattery,
+        CharacteristicType.StatusLowBattery
+      ),
     ];
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.serviceName);
 
@@ -70,6 +87,15 @@ export abstract class OutletServiceBase extends ServiceBase {
   }
 
   protected abstract setOn(value: boolean, revert: () => void): Promise<void>;
+
+  private updateStatusLowBattery(batteryLevel: number, dischargeLimit: number): void {
+    this.updateCustomCharacteristic(
+      this.platform.Characteristic.StatusLowBattery,
+      'StatusLowBattery',
+      () => this.batteryStatusProvider.getStatusLowBattery(this.platform.Characteristic, batteryLevel, dischargeLimit),
+      CharacteristicType.StatusLowBattery
+    );
+  }
 
   private tryAddCustomCharacteristic(
     characteristic: WithUUID<{ new (): Characteristic }>,
@@ -84,11 +110,11 @@ export abstract class OutletServiceBase extends ServiceBase {
   private updateCustomCharacteristic(
     characteristic: WithUUID<{ new (): Characteristic }>,
     name: string,
-    value: CharacteristicValue,
+    valueFunc: () => CharacteristicValue,
     characteristicType: CharacteristicType
   ): void {
     if (this.additionalCharacteristics?.includes(characteristicType)) {
-      this.updateCharacteristic(characteristic, name, value);
+      this.updateCharacteristic(characteristic, name, valueFunc());
     }
   }
 }

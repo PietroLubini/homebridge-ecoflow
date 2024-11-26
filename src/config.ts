@@ -50,6 +50,8 @@ export enum AdditionalBatteryCharacteristicType {
   BatteryLevel = 'Battery Level, %',
   InputConsumptionInWatts = 'Input Consumption, W',
   OutputConsumptionInWatts = 'Output Consumption, W',
+  ChargingState = 'Charging State',
+  StatusLowBattery = 'Status Low Battery'
 }
 
 export enum PowerStreamConsumptionType {
