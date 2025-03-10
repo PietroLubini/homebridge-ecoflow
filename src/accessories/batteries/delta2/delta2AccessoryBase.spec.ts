@@ -103,6 +103,7 @@ describe('Delta2AccessoryBase', () => {
       return initService(Module, service, mock => {
         const mockOutletBase = mock as jest.Mocked<OutletServiceBase>;
         mockOutletBase.updateBatteryLevel.mockReset();
+        mockOutletBase.updateChargingState.mockReset();
         mockOutletBase.updateInputConsumption.mockReset();
         mockOutletBase.updateOutputConsumption.mockReset();
         mockOutletBase.updateState.mockReset();
@@ -338,6 +339,9 @@ describe('Delta2AccessoryBase', () => {
         processQuotaMessage(message);
 
         expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletCarServiceMock.updateChargingState).toHaveBeenCalledWith(true);
       });
 
       it(`should update charging state to true
@@ -353,6 +357,9 @@ describe('Delta2AccessoryBase', () => {
         processQuotaMessage(message);
 
         expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletCarServiceMock.updateChargingState).toHaveBeenCalledWith(true);
       });
 
       it(`should update charging state to false
@@ -368,6 +375,9 @@ describe('Delta2AccessoryBase', () => {
         processQuotaMessage(message);
 
         expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+        expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+        expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+        expect(outletCarServiceMock.updateChargingState).toHaveBeenCalledWith(false);
       });
 
       it(`should update charging state to false
@@ -383,6 +393,9 @@ describe('Delta2AccessoryBase', () => {
         processQuotaMessage(message);
 
         expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+        expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+        expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+        expect(outletCarServiceMock.updateChargingState).toHaveBeenCalledWith(false);
       });
 
       it('should update AC, USB, CAR input consumptions when InvStatus message is received with inputWatts', async () => {
@@ -450,10 +463,13 @@ describe('Delta2AccessoryBase', () => {
         processQuotaMessage(message);
 
         expect(batteryStatusServiceMock.updateChargingState).not.toHaveBeenCalled();
+        expect(outletAcServiceMock.updateChargingState).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateInputConsumption).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
+        expect(outletUsbServiceMock.updateChargingState).not.toHaveBeenCalled();
         expect(outletUsbServiceMock.updateInputConsumption).not.toHaveBeenCalled();
+        expect(outletCarServiceMock.updateChargingState).not.toHaveBeenCalled();
         expect(outletCarServiceMock.updateInputConsumption).not.toHaveBeenCalled();
         expect(switchXboostServiceMock.updateState).not.toHaveBeenCalled();
       });
@@ -842,10 +858,13 @@ describe('Delta2AccessoryBase', () => {
         await accessory.initializeDefaultValues();
 
         expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(true);
         expect(outletAcServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
         expect(outletAcServiceMock.updateState).toHaveBeenCalledWith(true);
         expect(outletAcServiceMock.updateOutputConsumption).toHaveBeenCalledWith(2.2);
+        expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(true);
         expect(outletUsbServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
+        expect(outletCarServiceMock.updateChargingState).toHaveBeenCalledWith(true);
         expect(outletCarServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
         expect(switchXboostServiceMock.updateState).toHaveBeenCalledWith(false);
       });
@@ -856,10 +875,13 @@ describe('Delta2AccessoryBase', () => {
         await accessory.initializeDefaultValues();
 
         expect(batteryStatusServiceMock.updateChargingState).not.toHaveBeenCalled();
+        expect(outletAcServiceMock.updateChargingState).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateInputConsumption).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
+        expect(outletUsbServiceMock.updateChargingState).not.toHaveBeenCalled();
         expect(outletUsbServiceMock.updateInputConsumption).not.toHaveBeenCalled();
+        expect(outletCarServiceMock.updateChargingState).not.toHaveBeenCalled();
         expect(outletCarServiceMock.updateInputConsumption).not.toHaveBeenCalled();
         expect(switchXboostServiceMock.updateState).not.toHaveBeenCalled();
       });

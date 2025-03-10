@@ -123,6 +123,8 @@ export class DeltaProUltraAccessory extends EcoFlowAccessoryWithQuotaBase<DeltaP
       const isCharging =
         params.wattsInSum > 0 && (params.wattsOutSum === undefined || params.wattsInSum !== params.wattsOutSum);
       this.batteryStatusService.updateChargingState(isCharging);
+      this.outletAcService.updateChargingState(isCharging);
+      this.outletUsbService.updateChargingState(isCharging);
       this.outletAcService.updateInputConsumption(params.wattsInSum);
       this.outletUsbService.updateInputConsumption(params.wattsInSum);
     }
