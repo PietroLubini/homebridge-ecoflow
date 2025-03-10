@@ -96,7 +96,7 @@ export abstract class EcoFlowAccessoryBase {
     delete this.setReplies[messageKey];
     if (
       (message.data.ack === undefined && message.data.result === undefined) ||
-      (message.data.ack !== undefined && message.data.ack !== false) ||
+      (message.data.ack !== undefined && Boolean(message.data.ack) !== false) ||
       (message.data.result !== undefined && message.data.result !== false)
     ) {
       this.log.warn('Failed to set a value. Reverts value back for:', command.requestMessage.id);

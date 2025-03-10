@@ -35,6 +35,11 @@ export class MqttClientContainer {
     if (!(config.serialNumber in this.devicesCache)) {
       this.devicesCache[config.serialNumber] = [];
     }
+    const devices = this.devicesCache[config.serialNumber];
+    if (devices.find(d => d.config.name === config.name)) {
+      // Ignore adding the same device multiple times
+      return;
+    }
     this.devicesCache[config.serialNumber].push(new MqttDevice(config, log));
   }
 
