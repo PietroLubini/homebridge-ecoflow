@@ -1,5 +1,5 @@
 import {
-  BmsStatus,
+  EmsStatus,
   InvStatus,
   MpptStatus,
   PdStatus,
@@ -22,10 +22,11 @@ export class Delta2Simulator extends SimulatorTyped<Delta2MqttSetMessage> {
   public override generateQuota(): object {
     const quotaType = this.getRandomNumber(0, 100);
     if (quotaType >= 0 && quotaType < 25) {
-      const quotaBmsStatus: Delta2MqttQuotaMessageWithParams<BmsStatus> = {
+      const quotaBmsStatus: Delta2MqttQuotaMessageWithParams<EmsStatus> = {
         typeCode: Delta2MqttMessageType.BMS,
         params: {
-          f32ShowSoc: this.getRandomNumber(0, 100),
+          f32LcdShowSoc: this.getRandomNumber(0, 100),
+          minDsgSoc: this.getRandomNumber(0, 20),
         },
       };
       return quotaBmsStatus;

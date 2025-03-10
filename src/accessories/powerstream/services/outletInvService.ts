@@ -1,10 +1,15 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 
 export class OutletInvService extends OutletServiceBase {
-  constructor(ecoFlowAccessory: EcoFlowAccessoryBase, additionalCharacteristics?: CharacteristicType[]) {
-    super(ecoFlowAccessory, 'INV', additionalCharacteristics);
+  constructor(
+    ecoFlowAccessory: EcoFlowAccessoryBase,
+    batteryStatusProvider: BatteryStatusProvider,
+    additionalCharacteristics?: CharacteristicType[]
+  ) {
+    super(ecoFlowAccessory, batteryStatusProvider, 'INV', additionalCharacteristics);
   }
 
   protected override setOn(): Promise<void> {

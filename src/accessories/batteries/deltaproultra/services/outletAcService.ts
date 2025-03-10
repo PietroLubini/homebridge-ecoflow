@@ -1,10 +1,14 @@
 import { DeltaProUltraAllQuotaData } from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraHttpApiContracts';
 import { DeltaProUltraOutletServiceBase } from '@ecoflow/accessories/batteries/deltaproultra/services/deltaProUltraOutletServiceBase';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 
 export class OutletAcService extends DeltaProUltraOutletServiceBase {
-  constructor(ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<DeltaProUltraAllQuotaData>) {
-    super(ecoFlowAccessory, 'AC', ecoFlowAccessory.config.battery?.additionalCharacteristics);
+  constructor(
+    ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<DeltaProUltraAllQuotaData>,
+    batteryStatusProvider: BatteryStatusProvider
+  ) {
+    super(ecoFlowAccessory, batteryStatusProvider, 'AC', ecoFlowAccessory.config.battery?.additionalCharacteristics);
   }
 
   protected override setOn(): Promise<void> {

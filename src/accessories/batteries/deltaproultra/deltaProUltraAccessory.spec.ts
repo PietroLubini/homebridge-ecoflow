@@ -14,6 +14,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
@@ -40,6 +41,7 @@ describe('DeltaProUltraAccessory', () => {
   let outletUsbServiceMock: jest.Mocked<OutletUsbService>;
   let outletAcServiceMock: jest.Mocked<OutletAcService>;
   let switchXboostServiceMock: jest.Mocked<SwitchXboostService>;
+  let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   let accessoryInformationServiceMock: jest.Mocked<AccessoryInformationService>;
   const expectedServices: MockService[] = [
     {
@@ -83,17 +85,26 @@ describe('DeltaProUltraAccessory', () => {
       return initService(Module, service, mock => {
         const mockOutletBase = mock as jest.Mocked<OutletServiceBase>;
         mockOutletBase.updateBatteryLevel.mockReset();
+        mockOutletBase.updateChargingState.mockReset();
         mockOutletBase.updateInputConsumption.mockReset();
         mockOutletBase.updateOutputConsumption.mockReset();
         mockOutletBase.updateState.mockReset();
       });
     }
-    batteryStatusServiceMock = initService(BatteryStatusService, new BatteryStatusService(accessory), mock => {
-      mock.updateBatteryLevel.mockReset();
-      mock.updateChargingState.mockReset();
-    });
-    outletUsbServiceMock = initOutletService(OutletUsbService, new OutletUsbService(accessory));
-    outletAcServiceMock = initOutletService(OutletAcService, new OutletAcService(accessory));
+    batteryStatusProviderMock = {} as jest.Mocked<BatteryStatusProvider>;
+    batteryStatusServiceMock = initService(
+      BatteryStatusService,
+      new BatteryStatusService(accessory, batteryStatusProviderMock),
+      mock => {
+        mock.updateBatteryLevel.mockReset();
+        mock.updateChargingState.mockReset();
+      }
+    );
+    outletUsbServiceMock = initOutletService(
+      OutletUsbService,
+      new OutletUsbService(accessory, batteryStatusProviderMock)
+    );
+    outletAcServiceMock = initOutletService(OutletAcService, new OutletAcService(accessory, batteryStatusProviderMock));
     accessoryInformationServiceMock = initService(
       AccessoryInformationService,
       new AccessoryInformationService(accessory)
@@ -123,7 +134,8 @@ describe('DeltaProUltraAccessory', () => {
       config,
       logMock,
       httpApiManagerMock,
-      mqttApiManagerMock
+      mqttApiManagerMock,
+      batteryStatusProviderMock
     );
   });
 
@@ -185,10 +197,12 @@ describe('DeltaProUltraAccessory', () => {
         expect(batteryStatusServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
         expect(batteryStatusServiceMock.updateChargingState).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        expect(outletAcServiceMock.updateChargingState).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateState).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateInputConsumption).not.toHaveBeenCalled();
         expect(outletAcServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
         expect(outletUsbServiceMock.updateBatteryLevel).not.toHaveBeenCalled();
+        expect(outletUsbServiceMock.updateChargingState).not.toHaveBeenCalled();
         expect(outletUsbServiceMock.updateState).not.toHaveBeenCalled();
         expect(outletUsbServiceMock.updateInputConsumption).not.toHaveBeenCalled();
         expect(outletUsbServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
@@ -205,9 +219,9 @@ describe('DeltaProUltraAccessory', () => {
 
           processQuotaMessage(message);
 
-          expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
-          expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
-          expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67);
+          expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 0);
+          expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 0);
+          expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 0);
         });
 
         it('should not update any characteristic when PdStatus message is received with undefined status', async () => {
@@ -237,6 +251,8 @@ describe('DeltaProUltraAccessory', () => {
           processQuotaMessage(message);
 
           expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+          expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+          expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(true);
         });
 
         it(`should update charging state to true
@@ -252,6 +268,8 @@ describe('DeltaProUltraAccessory', () => {
           processQuotaMessage(message);
 
           expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+          expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+          expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(true);
         });
 
         it(`should update charging state to false
@@ -267,6 +285,8 @@ describe('DeltaProUltraAccessory', () => {
           processQuotaMessage(message);
 
           expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+          expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+          expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(false);
         });
 
         it(`should update charging state to false
@@ -282,6 +302,8 @@ describe('DeltaProUltraAccessory', () => {
           processQuotaMessage(message);
 
           expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+          expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(false);
+          expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(false);
         });
 
         it('should update AC, USB input consumptions when PdStatus message is received with wattsInSum', async () => {
@@ -719,9 +741,9 @@ describe('DeltaProUltraAccessory', () => {
 
           await accessory.initializeDefaultValues();
 
-          expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
-          expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
-          expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1);
+          expect(batteryStatusServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 0);
+          expect(outletAcServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 0);
+          expect(outletUsbServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 0);
         });
 
         it('should update BatteryLevel-related characteristics when is requested and quotas were not initialized properly for it', async () => {
@@ -742,6 +764,8 @@ describe('DeltaProUltraAccessory', () => {
           await accessory.initializeDefaultValues();
 
           expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+          expect(outletAcServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+          expect(outletUsbServiceMock.updateChargingState).toHaveBeenCalledWith(true);
           expect(outletAcServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
           expect(outletUsbServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.1);
         });
@@ -752,6 +776,8 @@ describe('DeltaProUltraAccessory', () => {
           await accessory.initializeDefaultValues();
 
           expect(batteryStatusServiceMock.updateChargingState).not.toHaveBeenCalled();
+          expect(outletAcServiceMock.updateChargingState).not.toHaveBeenCalled();
+          expect(outletUsbServiceMock.updateChargingState).not.toHaveBeenCalled();
           expect(outletAcServiceMock.updateInputConsumption).not.toHaveBeenCalled();
           expect(outletUsbServiceMock.updateInputConsumption).not.toHaveBeenCalled();
         });

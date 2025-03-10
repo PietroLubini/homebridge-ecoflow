@@ -2,6 +2,7 @@ export interface PdSetStatus {
   acOutFreq?: AcOutFrequencyType; //Output frequency configured for the inverter (Hz) (read/write)
   // TBD: There is no in specification for all quota
   // acXboost?: AcXBoostType; //X-Boost switch: 0: off; 1: on; 0xff: ignored (read/write)
+  dsgMinSoc?: number; //Discharge limit
 }
 
 export enum AcOutFrequencyType {

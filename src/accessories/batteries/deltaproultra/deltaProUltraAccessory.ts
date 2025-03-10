@@ -20,6 +20,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
@@ -37,12 +38,13 @@ export class DeltaProUltraAccessory extends EcoFlowAccessoryWithQuotaBase<DeltaP
     config: DeviceConfig,
     log: Logging,
     httpApiManager: EcoFlowHttpApiManager,
-    mqttApiManager: EcoFlowMqttApiManager
+    mqttApiManager: EcoFlowMqttApiManager,
+    batteryStatusProvider: BatteryStatusProvider
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
-    this.batteryStatusService = new BatteryStatusService(this);
-    this.outletUsbService = new OutletUsbService(this);
-    this.outletAcService = new OutletAcService(this);
+    this.batteryStatusService = new BatteryStatusService(this, batteryStatusProvider);
+    this.outletUsbService = new OutletUsbService(this, batteryStatusProvider);
+    this.outletAcService = new OutletAcService(this, batteryStatusProvider);
     this.switchXboostService = new SwitchXboostService(this);
   }
 
@@ -110,9 +112,9 @@ export class DeltaProUltraAccessory extends EcoFlowAccessoryWithQuotaBase<DeltaP
 
   private updateBatteryLevelValues(params: PdStatusSoc): void {
     if (params.soc !== undefined) {
-      this.batteryStatusService.updateBatteryLevel(params.soc);
-      this.outletAcService.updateBatteryLevel(params.soc);
-      this.outletUsbService.updateBatteryLevel(params.soc);
+      this.batteryStatusService.updateBatteryLevel(params.soc, 0);
+      this.outletAcService.updateBatteryLevel(params.soc, 0);
+      this.outletUsbService.updateBatteryLevel(params.soc, 0);
     }
   }
 
@@ -121,6 +123,8 @@ export class DeltaProUltraAccessory extends EcoFlowAccessoryWithQuotaBase<DeltaP
       const isCharging =
         params.wattsInSum > 0 && (params.wattsOutSum === undefined || params.wattsInSum !== params.wattsOutSum);
       this.batteryStatusService.updateChargingState(isCharging);
+      this.outletAcService.updateChargingState(isCharging);
+      this.outletUsbService.updateChargingState(isCharging);
       this.outletAcService.updateInputConsumption(params.wattsInSum);
       this.outletUsbService.updateInputConsumption(params.wattsInSum);
     }

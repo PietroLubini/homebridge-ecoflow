@@ -12,6 +12,7 @@ export enum Delta2MqttMessageType {
   MPPT = 'mpptStatus',
   INV = 'invStatus',
   BMS = 'bmsStatus',
+  EMS = 'emsStatus',
 }
 
 export interface Delta2MqttQuotaMessage extends MqttQuotaMessage {

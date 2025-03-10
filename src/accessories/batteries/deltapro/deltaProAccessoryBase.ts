@@ -1,5 +1,5 @@
+import { EmsStatus } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
 import {
-  BmsMasterStatus,
   DeltaProAllQuotaData,
   InvStatus,
   PdStatus,
@@ -19,6 +19,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
@@ -37,13 +38,14 @@ export abstract class DeltaProAccessoryBase extends EcoFlowAccessoryWithQuotaBas
     config: DeviceConfig,
     log: Logging,
     httpApiManager: EcoFlowHttpApiManager,
-    mqttApiManager: EcoFlowMqttApiManager
+    mqttApiManager: EcoFlowMqttApiManager,
+    batteryStatusProvider: BatteryStatusProvider
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
-    this.batteryStatusService = new BatteryStatusService(this);
-    this.outletUsbService = new OutletUsbService(this);
-    this.outletAcService = new OutletAcService(this);
-    this.outletCarService = new OutletCarService(this);
+    this.batteryStatusService = new BatteryStatusService(this, batteryStatusProvider);
+    this.outletUsbService = new OutletUsbService(this, batteryStatusProvider);
+    this.outletAcService = new OutletAcService(this, batteryStatusProvider);
+    this.outletCarService = new OutletCarService(this, batteryStatusProvider);
     this.switchXboostService = new SwitchXboostService(this);
   }
 
@@ -59,9 +61,9 @@ export abstract class DeltaProAccessoryBase extends EcoFlowAccessoryWithQuotaBas
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
     const data = (message as DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData>).data;
-    if (data.bmsMaster !== undefined && Object.keys(data.bmsMaster).length > 0) {
-      Object.assign(this.quota.bmsMaster, data.bmsMaster);
-      this.updateBmsValues(data.bmsMaster);
+    if (data.ems !== undefined && Object.keys(data.ems).length > 0) {
+      Object.assign(this.quota.ems, data.ems);
+      this.updateEmsValues(data.ems);
     }
     if (data.inv !== undefined && Object.keys(data.inv).length > 0) {
       Object.assign(this.quota.inv, data.inv);
@@ -75,8 +77,8 @@ export abstract class DeltaProAccessoryBase extends EcoFlowAccessoryWithQuotaBas
 
   protected override initializeQuota(quota: DeltaProAllQuotaData | null): DeltaProAllQuotaData {
     const result = quota ?? ({} as DeltaProAllQuotaData);
-    if (!result.bmsMaster) {
-      result.bmsMaster = {};
+    if (!result.ems) {
+      result.ems = {};
     }
     if (!result.inv) {
       result.inv = {};
@@ -94,12 +96,12 @@ export abstract class DeltaProAccessoryBase extends EcoFlowAccessoryWithQuotaBas
     this.processQuotaMessage(message);
   }
 
-  private updateBmsValues(params: BmsMasterStatus): void {
-    if (params.f32ShowSoc !== undefined) {
-      this.batteryStatusService.updateBatteryLevel(params.f32ShowSoc);
-      this.outletAcService.updateBatteryLevel(params.f32ShowSoc);
-      this.outletUsbService.updateBatteryLevel(params.f32ShowSoc);
-      this.outletCarService.updateBatteryLevel(params.f32ShowSoc);
+  private updateEmsValues(params: EmsStatus): void {
+    if (params.f32LcdShowSoc !== undefined && params.minDsgSoc !== undefined) {
+      this.batteryStatusService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
+      this.outletAcService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
+      this.outletUsbService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
+      this.outletCarService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
     }
   }
 
@@ -108,6 +110,9 @@ export abstract class DeltaProAccessoryBase extends EcoFlowAccessoryWithQuotaBas
       const isCharging =
         params.inputWatts > 0 && (params.outputWatts === undefined || params.inputWatts !== params.outputWatts);
       this.batteryStatusService.updateChargingState(isCharging);
+      this.outletAcService.updateChargingState(isCharging);
+      this.outletUsbService.updateChargingState(isCharging);
+      this.outletCarService.updateChargingState(isCharging);
       this.outletAcService.updateInputConsumption(params.inputWatts);
       this.outletUsbService.updateInputConsumption(params.inputWatts);
       this.outletCarService.updateInputConsumption(params.inputWatts);

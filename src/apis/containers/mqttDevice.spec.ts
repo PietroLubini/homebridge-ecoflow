@@ -57,7 +57,7 @@ describe('MqttDevice', () => {
       device.processReceivedMessage(MqttTopicType.Quota, message);
 
       expect(logMock.debug).toHaveBeenCalledWith(
-        'Received message: {\n  "id": 20,\n  "version": "v1",\n  "operateType": "ot1"\n}'
+        'Received message (topic: quota): {\n  "id": 20,\n  "version": "v1",\n  "operateType": "ot1"\n}'
       );
     });
   });

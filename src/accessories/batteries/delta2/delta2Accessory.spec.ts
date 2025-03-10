@@ -5,6 +5,7 @@ import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase'
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { DeviceConfig } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Logging, PlatformAccessory } from 'homebridge';
 
@@ -21,6 +22,7 @@ describe('Delta2Accessory', () => {
   let logMock: jest.Mocked<Logging>;
   let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
   let mqttApiManagerMock: jest.Mocked<EcoFlowMqttApiManager>;
+  let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   let config: DeviceConfig;
 
   beforeEach(() => {
@@ -30,19 +32,32 @@ describe('Delta2Accessory', () => {
     logMock = {} as jest.Mocked<Logging>;
     httpApiManagerMock = {} as jest.Mocked<EcoFlowHttpApiManager>;
     mqttApiManagerMock = {} as jest.Mocked<EcoFlowMqttApiManager>;
+    batteryStatusProviderMock = {} as jest.Mocked<BatteryStatusProvider>;
   });
 
   describe('initialize', () => {
     it('should use Delta2-specific configuration when initializing accessory', () => {
       let actual: Delta2MqttSetModuleType | undefined;
       (OutletAcService as jest.Mock).mockImplementation(
-        (_accessory: EcoFlowAccessoryBase, setAcModuleType: Delta2MqttSetModuleType) => {
+        (
+          _accessory: EcoFlowAccessoryBase,
+          _batteryStatusProvider: BatteryStatusProvider,
+          setAcModuleType: Delta2MqttSetModuleType
+        ) => {
           actual = setAcModuleType;
           return undefined;
         }
       );
 
-      new Delta2Accessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock);
+      new Delta2Accessory(
+        platformMock,
+        accessoryMock,
+        config,
+        logMock,
+        httpApiManagerMock,
+        mqttApiManagerMock,
+        batteryStatusProviderMock
+      );
 
       expect(actual).toBe(Delta2MqttSetModuleType.MPPT);
     });

@@ -6,8 +6,12 @@ import {
 } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 
 // Battery management system status
-export interface BmsMasterStatus {
-  f32ShowSoc?: number; //Battery level (read)
+// export interface BmsMasterStatus {
+//   f32ShowSoc?: number; //Battery level (read)
+// }
+export interface EmsStatus {
+  f32LcdShowSoc?: number; //Battery level (read)
+  minDsgSoc?: number; //Discharge limit
 }
 
 // AC invertor status
@@ -42,7 +46,7 @@ export interface PdStatusUsb {
 export interface PdStatus extends PdStatusUsb, PdStatusCar {}
 
 export interface DeltaProAllQuotaData {
-  bmsMaster: BmsMasterStatus;
+  ems: EmsStatus;
   inv: InvStatus;
   pd: PdStatus;
 }

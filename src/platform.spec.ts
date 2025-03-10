@@ -8,6 +8,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { Logger } from '@ecoflow/helpers/logger';
 import { MachineIdProvider } from '@ecoflow/helpers/machineIdProvider';
 import { sleep } from '@ecoflow/helpers/tests/sleep';
@@ -112,6 +113,7 @@ describe('EcoFlowHomebridgePlatform', () => {
     let machineIdProviderMock: jest.Mocked<MachineIdProvider>;
     let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
     let mqttApiManagerMock: jest.Mocked<EcoFlowMqttApiManager>;
+    let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
     let delta2Config: DeviceConfig;
     let delta2MaxConfig: DeviceConfig;
 
@@ -122,7 +124,8 @@ describe('EcoFlowHomebridgePlatform', () => {
         config: DeviceConfig,
         log: Logging,
         httpApiManager: EcoFlowHttpApiManager,
-        mqttApiManager: EcoFlowMqttApiManager
+        mqttApiManager: EcoFlowMqttApiManager,
+        batteryStatusProvider: BatteryStatusProvider
       ) => TAccessory,
       deviceConfig: DeviceConfig,
       logMock: jest.Mocked<Logging>,
@@ -134,7 +137,8 @@ describe('EcoFlowHomebridgePlatform', () => {
         {} as DeviceConfig,
         logMock,
         httpApiManagerMock,
-        mqttApiManagerMock
+        mqttApiManagerMock,
+        batteryStatusProviderMock
       ) as jest.Mocked<TAccessory>;
       const accessoryBaseMock = ecoFlowAccessoryMock as jest.Mocked<EcoFlowAccessoryBase>;
       accessoryBaseMock.initialize = jest.fn().mockResolvedValue(undefined);

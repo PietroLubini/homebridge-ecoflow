@@ -1,7 +1,7 @@
 import { Delta2Configuration } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2Configuration';
 import {
-  BmsStatus,
   Delta2AllQuotaData,
+  EmsStatus,
   InvStatus,
   MpptStatus,
   PdStatus,
@@ -26,6 +26,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { DeviceConfig } from '@ecoflow/config';
+import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
@@ -45,13 +46,14 @@ export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<
     log: Logging,
     httpApiManager: EcoFlowHttpApiManager,
     mqttApiManager: EcoFlowMqttApiManager,
+    batteryStatusProvider: BatteryStatusProvider,
     configuration: Delta2Configuration
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
-    this.batteryStatusService = new BatteryStatusService(this);
-    this.outletUsbService = new OutletUsbService(this);
-    this.outletAcService = new OutletAcService(this, configuration.setAcModuleType);
-    this.outletCarService = new OutletCarService(this);
+    this.batteryStatusService = new BatteryStatusService(this, batteryStatusProvider);
+    this.outletUsbService = new OutletUsbService(this, batteryStatusProvider);
+    this.outletAcService = new OutletAcService(this, batteryStatusProvider, configuration.setAcModuleType);
+    this.outletCarService = new OutletCarService(this, batteryStatusProvider);
     this.switchXboostService = new SwitchXboostService(this, configuration.setAcModuleType);
   }
 
@@ -67,10 +69,10 @@ export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
     const batteryMessage = message as Delta2MqttQuotaMessage;
-    if (batteryMessage.typeCode === Delta2MqttMessageType.BMS) {
-      const bmsStatus = (message as MqttQuotaMessageWithParams<BmsStatus>).params;
-      Object.assign(this.quota.bms_bmsStatus, bmsStatus);
-      this.updateBmsValues(bmsStatus);
+    if (batteryMessage.typeCode === Delta2MqttMessageType.EMS) {
+      const emsStatus = (message as MqttQuotaMessageWithParams<EmsStatus>).params;
+      Object.assign(this.quota.bms_emsStatus, emsStatus);
+      this.updateEmsValues(emsStatus);
     } else if (batteryMessage.typeCode === Delta2MqttMessageType.INV) {
       const invStatus = (message as MqttQuotaMessageWithParams<InvStatus>).params;
       Object.assign(this.quota.inv, invStatus);
@@ -88,8 +90,8 @@ export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<
 
   protected override initializeQuota(quota: Delta2AllQuotaData | null): Delta2AllQuotaData {
     const result = quota ?? ({} as Delta2AllQuotaData);
-    if (!result.bms_bmsStatus) {
-      result.bms_bmsStatus = {};
+    if (!result.bms_emsStatus) {
+      result.bms_emsStatus = {};
     }
     if (!result.inv) {
       result.inv = {};
@@ -104,15 +106,15 @@ export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<
   }
 
   protected override updateInitialValues(initialData: Delta2AllQuotaData): void {
-    this.updateBmsInitialValues(initialData.bms_bmsStatus);
+    this.updateEmsInitialValues(initialData.bms_emsStatus);
     this.updateInvInitialValues(initialData.inv);
     this.updatePdInitialValues(initialData.pd);
     this.updateMpptInitialValues(initialData.mppt);
   }
 
-  private updateBmsInitialValues(params: BmsStatus): void {
-    const message: Delta2MqttQuotaMessageWithParams<BmsStatus> = {
-      typeCode: Delta2MqttMessageType.BMS,
+  private updateEmsInitialValues(params: EmsStatus): void {
+    const message: Delta2MqttQuotaMessageWithParams<EmsStatus> = {
+      typeCode: Delta2MqttMessageType.EMS,
       params,
     };
     this.processQuotaMessage(message);
@@ -142,12 +144,12 @@ export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<
     this.processQuotaMessage(message);
   }
 
-  private updateBmsValues(params: BmsStatus): void {
-    if (params.f32ShowSoc !== undefined) {
-      this.batteryStatusService.updateBatteryLevel(params.f32ShowSoc);
-      this.outletAcService.updateBatteryLevel(params.f32ShowSoc);
-      this.outletUsbService.updateBatteryLevel(params.f32ShowSoc);
-      this.outletCarService.updateBatteryLevel(params.f32ShowSoc);
+  private updateEmsValues(params: EmsStatus): void {
+    if (params.f32LcdShowSoc !== undefined && params.minDsgSoc !== undefined) {
+      this.batteryStatusService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
+      this.outletAcService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
+      this.outletUsbService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
+      this.outletCarService.updateBatteryLevel(params.f32LcdShowSoc, params.minDsgSoc);
     }
   }
 
@@ -156,6 +158,9 @@ export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<
       const isCharging =
         params.inputWatts > 0 && (params.outputWatts === undefined || params.inputWatts !== params.outputWatts);
       this.batteryStatusService.updateChargingState(isCharging);
+      this.outletAcService.updateChargingState(isCharging);
+      this.outletUsbService.updateChargingState(isCharging);
+      this.outletCarService.updateChargingState(isCharging);
       this.outletAcService.updateInputConsumption(params.inputWatts);
       this.outletUsbService.updateInputConsumption(params.inputWatts);
       this.outletCarService.updateInputConsumption(params.inputWatts);
