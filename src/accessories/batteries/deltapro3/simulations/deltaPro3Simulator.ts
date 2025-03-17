@@ -3,7 +3,6 @@ import {
   DeltaPro3AllQuotaData,
 } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3HttpApiContracts';
 import {
-  DeltaPro3MqttQuotaMessageWithParams,
   DeltaPro3MqttSetAcHvMessageParams,
   DeltaPro3MqttSetAcHvReplyMessageData,
   DeltaPro3MqttSetAcLvMessageParams,
@@ -24,25 +23,23 @@ export class DeltaPro3Simulator extends SimulatorTyped<
   DeltaPro3MqttSetMessageWithParams<DeltaPro3MqttSetMessageParams>
 > {
   public override generateQuota(): object {
-    const quota: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-      data: {
-        cmsBattSoc: this.getRandomNumber(0, 100),
-        cmsMinDsgSoc: this.getRandomNumber(0, 20),
-        flowInfo12v: this.getRandomBoolean() ? DeltaPro3AcEnableType.On : DeltaPro3AcEnableType.Off,
-        flowInfoAcHvOut: this.getRandomBoolean() ? DeltaPro3AcEnableType.On : DeltaPro3AcEnableType.Off,
-        flowInfoAcLvOut: this.getRandomBoolean() ? DeltaPro3AcEnableType.On : DeltaPro3AcEnableType.Off,
-        powGet12v: this.getRandomNumber(0, 100),
-        powGetAc: this.getRandomNumber(0, 1000),
-        powGetAcHvOut: this.getRandomNumber(0, 1000),
-        powGetAcLvOut: this.getRandomNumber(0, 1000),
-        powGetQcusb1: this.getRandomNumber(0, 100),
-        powGetQcusb2: this.getRandomNumber(0, 100),
-        powGetTypec1: this.getRandomNumber(0, 100),
-        powGetTypec2: this.getRandomNumber(0, 100),
-        powInSumW: this.getRandomNumber(0, 1000),
-        powOutSumW: this.getRandomNumber(0, 1000),
-        xboostEn: this.getRandomBoolean() ? AcXBoostType.On : AcXBoostType.Off,
-      },
+    const quota: DeltaPro3AllQuotaData = {
+      cmsBattSoc: this.getRandomNumber(0, 100),
+      cmsMinDsgSoc: this.getRandomNumber(0, 20),
+      flowInfo12v: this.getRandomBoolean() ? DeltaPro3AcEnableType.On : DeltaPro3AcEnableType.Off,
+      flowInfoAcHvOut: this.getRandomBoolean() ? DeltaPro3AcEnableType.On : DeltaPro3AcEnableType.Off,
+      flowInfoAcLvOut: this.getRandomBoolean() ? DeltaPro3AcEnableType.On : DeltaPro3AcEnableType.Off,
+      powGet12v: this.getRandomNumber(0, 100),
+      powGetAc: this.getRandomNumber(0, 1000),
+      powGetAcHvOut: this.getRandomNumber(0, 1000),
+      powGetAcLvOut: this.getRandomNumber(0, 1000),
+      powGetQcusb1: this.getRandomNumber(0, 100),
+      powGetQcusb2: this.getRandomNumber(0, 100),
+      powGetTypec1: this.getRandomNumber(0, 100),
+      powGetTypec2: this.getRandomNumber(0, 100),
+      powInSumW: this.getRandomNumber(0, 1000),
+      powOutSumW: this.getRandomNumber(0, 1000),
+      xboostEn: this.getRandomBoolean() ? AcXBoostType.On : AcXBoostType.Off,
     };
     return quota;
   }
