@@ -23,7 +23,7 @@ describe('SwitchXboostServiceBase', () => {
   const expectedMandatoryCharacteristics: MockCharacteristic[] = [
     {
       UUID: HapCharacteristic.Name.UUID,
-      value: 'accessory1 X-Boost',
+      value: 'accessory1 XBoost',
     },
     {
       UUID: HapCharacteristic.On.UUID,
@@ -73,7 +73,7 @@ describe('SwitchXboostServiceBase', () => {
       const actual = service.service;
 
       expect(actual).toEqual(expected);
-      expect(accessoryMock.addService).toHaveBeenCalledWith(HapService.Switch, 'accessory1 X-Boost', 'X-Boost');
+      expect(accessoryMock.addService).toHaveBeenCalledWith(HapService.Switch, 'accessory1 XBoost', 'XBoost');
     });
 
     it('should use existing Switch service when it is already added to accessory', () => {
@@ -84,7 +84,7 @@ describe('SwitchXboostServiceBase', () => {
       const actual = service.service;
 
       expect(actual).toEqual(expected);
-      expect(accessoryMock.getServiceById).toHaveBeenCalledWith(HapService.Switch, 'X-Boost');
+      expect(accessoryMock.getServiceById).toHaveBeenCalledWith(HapService.Switch, 'XBoost');
       expect(accessoryMock.addService).not.toHaveBeenCalled();
     });
 
@@ -131,7 +131,7 @@ describe('SwitchXboostServiceBase', () => {
       const actual = service.service.getCharacteristic(HapCharacteristic.On).value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug).toHaveBeenCalledWith('X-Boost State ->', true);
+      expect(logMock.debug).toHaveBeenCalledWith('XBoost State ->', true);
     });
 
     it('should set On state to false when it is requested', () => {
@@ -140,7 +140,7 @@ describe('SwitchXboostServiceBase', () => {
       const actual = service.service.getCharacteristic(HapCharacteristic.On).value;
 
       expect(actual).toBeFalsy();
-      expect(logMock.debug).toHaveBeenCalledWith('X-Boost State ->', false);
+      expect(logMock.debug).toHaveBeenCalledWith('XBoost State ->', false);
     });
   });
 
@@ -165,7 +165,7 @@ describe('SwitchXboostServiceBase', () => {
       const actual = characteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug.mock.calls).toEqual([['X-Boost State ->', true]]);
+      expect(logMock.debug.mock.calls).toEqual([['XBoost State ->', true]]);
     });
   });
 });
