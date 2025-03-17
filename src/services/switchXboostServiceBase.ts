@@ -4,7 +4,7 @@ import { Characteristic, CharacteristicValue } from 'homebridge';
 
 export abstract class SwitchXboostServiceBase extends ServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
-    super(ecoFlowAccessory.platform.Service.Switch, ecoFlowAccessory, 'XBoost');
+    super(ecoFlowAccessory.platform.Service.Switch, ecoFlowAccessory, 'X-Boost');
   }
 
   public updateState(state: boolean): void {

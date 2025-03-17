@@ -115,7 +115,7 @@ describe('SwitchXboostService', () => {
       const actual = onCharacteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug.mock.calls).toEqual([['XBoost State ->', true]]);
+      expect(logMock.debug.mock.calls).toEqual([['X-Boost State ->', true]]);
     });
   });
 });
