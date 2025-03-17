@@ -2,6 +2,7 @@ import {
   DeltaPro3AcEnableType,
   DeltaPro3AllQuotaData,
 } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3HttpApiContracts';
+import { DeltaPro3MqttQuotaMessage } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3MqttApiContracts';
 import { OutletAcHvService } from '@ecoflow/accessories/batteries/deltapro3/services/outletAcHvService';
 import { OutletAcLvService } from '@ecoflow/accessories/batteries/deltapro3/services/outletAcLvService';
 import { OutletDc12vService } from '@ecoflow/accessories/batteries/deltapro3/services/outletDc12vService';
@@ -53,7 +54,7 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
-    const data = message as DeltaPro3AllQuotaData;
+    const data = message as DeltaPro3MqttQuotaMessage;
     Object.assign(this.quota, data);
     this.updateSocValues(data);
     this.updateInputWattsValues(data);
@@ -70,7 +71,7 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
     this.processQuotaMessage(data);
   }
 
-  private updateSocValues(params: DeltaPro3AllQuotaData): void {
+  private updateSocValues(params: DeltaPro3MqttQuotaMessage): void {
     if (params.cmsBattSoc !== undefined && params.cmsMinDsgSoc !== undefined) {
       this.batteryStatusService.updateBatteryLevel(params.cmsBattSoc, params.cmsMinDsgSoc);
       this.outletAcHvService.updateBatteryLevel(params.cmsBattSoc, params.cmsMinDsgSoc);
@@ -79,7 +80,7 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
     }
   }
 
-  private updateInputWattsValues(params: DeltaPro3AllQuotaData): void {
+  private updateInputWattsValues(params: DeltaPro3MqttQuotaMessage): void {
     if (params.powInSumW !== undefined) {
       const isCharging =
         params.powInSumW > 0 && (params.powOutSumW === undefined || params.powInSumW !== params.powOutSumW);
@@ -93,7 +94,7 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
     }
   }
 
-  private updateOutputWattsValues(params: DeltaPro3AllQuotaData): void {
+  private updateOutputWattsValues(params: DeltaPro3MqttQuotaMessage): void {
     if (params.powGetAcHvOut !== undefined) {
       this.outletAcHvService.updateOutputConsumption(params.powGetAcHvOut);
     }
@@ -105,7 +106,7 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
     }
   }
 
-  private updateSwitchStateValues(params: DeltaPro3AllQuotaData): void {
+  private updateSwitchStateValues(params: DeltaPro3MqttQuotaMessage): void {
     if (params.flowInfoAcHvOut !== undefined && params.flowInfoAcHvOut !== DeltaPro3AcEnableType.Ignore) {
       this.outletAcHvService.updateState(params.flowInfoAcHvOut === DeltaPro3AcEnableType.On);
     }

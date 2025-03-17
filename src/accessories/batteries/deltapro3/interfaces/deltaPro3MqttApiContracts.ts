@@ -1,18 +1,16 @@
-import { DeltaPro3AcEnableType } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3HttpApiContracts';
+import {
+  DeltaPro3AcEnableType,
+  DeltaPro3AllQuotaData,
+} from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3HttpApiContracts';
 import {
   MqttQuotaMessage,
-  MqttQuotaMessageWithData,
   MqttSetMessage,
   MqttSetMessageWithParams,
   MqttSetReplyMessageData,
   MqttSetReplyMessageWithData,
 } from '@ecoflow/apis/interfaces/mqttApiContracts';
 
-export interface DeltaPro3MqttQuotaMessage extends MqttQuotaMessage {}
-
-export interface DeltaPro3MqttQuotaMessageWithParams<TParams>
-  extends MqttQuotaMessageWithData<TParams>,
-    DeltaPro3MqttQuotaMessage {}
+export interface DeltaPro3MqttQuotaMessage extends MqttQuotaMessage, DeltaPro3AllQuotaData {}
 
 export type DeltaPro3MqttSetCmdIdType = 17;
 export type DeltaPro3MqttSetDirType = 1;

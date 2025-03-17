@@ -1,4 +1,4 @@
-import { DeltaProAccessoryBase } from '@ecoflow/accessories/batteries/deltapro/deltaProAccessoryBase';
+import { DeltaProAccessory } from '@ecoflow/accessories/batteries/deltapro/deltaProAccessory';
 import { DeltaProAllQuotaData } from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProHttpApiContracts';
 import { DeltaProMqttQuotaMessageWithParams } from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProMqttApiContracts';
 import { OutletAcService } from '@ecoflow/accessories/batteries/deltapro/services/outletAcService';
@@ -30,16 +30,14 @@ jest.mock('@ecoflow/accessories/batteries/deltapro/services/outletCarService');
 jest.mock('@ecoflow/accessories/batteries/deltapro/services/switchXboostService');
 jest.mock('@ecoflow/services/accessoryInformationService');
 
-class MockAccessory extends DeltaProAccessoryBase {}
-
-describe('DeltaProAccessoryBase', () => {
+describe('DeltaProAccessory', () => {
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
   let logMock: jest.Mocked<Logging>;
   let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
   let mqttApiManagerMock: jest.Mocked<EcoFlowMqttApiManager>;
   let config: DeviceConfig;
-  let accessory: MockAccessory;
+  let accessory: DeltaProAccessory;
   let batteryStatusServiceMock: jest.Mocked<BatteryStatusService>;
   let outletUsbServiceMock: jest.Mocked<OutletUsbService>;
   let outletAcServiceMock: jest.Mocked<OutletAcService>;
@@ -140,7 +138,7 @@ describe('DeltaProAccessoryBase', () => {
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
-    accessory = new MockAccessory(
+    accessory = new DeltaProAccessory(
       platformMock,
       accessoryMock,
       config,
