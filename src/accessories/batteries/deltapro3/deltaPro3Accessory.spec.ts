@@ -3,7 +3,6 @@ import {
   DeltaPro3AcEnableType,
   DeltaPro3AllQuotaData,
 } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3HttpApiContracts';
-import { DeltaPro3MqttQuotaMessageWithParams } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3MqttApiContracts';
 import { OutletAcHvService } from '@ecoflow/accessories/batteries/deltapro3/services/outletAcHvService';
 import { OutletAcLvService } from '@ecoflow/accessories/batteries/deltapro3/services/outletAcLvService';
 import { OutletDc12vService } from '@ecoflow/accessories/batteries/deltapro3/services/outletDc12vService';
@@ -182,25 +181,21 @@ describe('DeltaPro3Accessory', () => {
 
     describe('updateSocValues', () => {
       it('should update soc values in quota when received message contains them', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            cmsBattSoc: 34.67,
-            cmsMinDsgSoc: 31.2,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          cmsBattSoc: 34.67,
+          cmsMinDsgSoc: 31.2,
         };
 
         processQuotaMessage(message);
         const actual = quota;
 
-        expect(actual).toEqual(message.data);
+        expect(actual).toEqual(message);
       });
 
       it('should update battery level when message is received with cmsBattSoc', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            cmsBattSoc: 34.67,
-            cmsMinDsgSoc: 31.2,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          cmsBattSoc: 34.67,
+          cmsMinDsgSoc: 31.2,
         };
 
         processQuotaMessage(message);
@@ -212,9 +207,7 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it('should not update any characteristic when message is received with undefined status', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {} as DeltaPro3AllQuotaData,
-        };
+        const message: DeltaPro3AllQuotaData = {};
 
         processQuotaMessage(message);
 
@@ -227,24 +220,20 @@ describe('DeltaPro3Accessory', () => {
 
     describe('updateInputWattsValues', () => {
       it('should update input watts in quota when received message contains it', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            powInSumW: 12.34,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          powInSumW: 12.34,
         };
 
         processQuotaMessage(message);
         const actual = quota;
 
-        expect(actual).toEqual(message.data);
+        expect(actual).toEqual(message);
       });
 
       it(`should update charging state to true
         when message is received with non zero powInSumW and without powOutSumW`, async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            powInSumW: 12.34,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          powInSumW: 12.34,
         };
 
         processQuotaMessage(message);
@@ -257,11 +246,9 @@ describe('DeltaPro3Accessory', () => {
 
       it(`should update charging state to true
         when message is received with non zero powInSumW and non equal to it powOutSumW`, async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            powInSumW: 12.34,
-            powOutSumW: 30.45,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          powInSumW: 12.34,
+          powOutSumW: 30.45,
         };
 
         processQuotaMessage(message);
@@ -274,11 +261,9 @@ describe('DeltaPro3Accessory', () => {
 
       it(`should update charging state to false
         when message is received with zero powInSumW and non equal to it powOutSumW`, async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            powInSumW: 0,
-            powOutSumW: 30.45,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          powInSumW: 0,
+          powOutSumW: 30.45,
         };
 
         processQuotaMessage(message);
@@ -291,11 +276,9 @@ describe('DeltaPro3Accessory', () => {
 
       it(`should update charging state to false
         when message is received with zero powInSumW and powOutSumW`, async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            powInSumW: 0,
-            powOutSumW: 0,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          powInSumW: 0,
+          powOutSumW: 0,
         };
 
         processQuotaMessage(message);
@@ -307,10 +290,8 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it('should update AC HV, AC LV, DC 12V input consumptions when message is received with powInSumW', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            powInSumW: 12.34,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          powInSumW: 12.34,
         };
 
         processQuotaMessage(message);
@@ -321,9 +302,7 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it('should not update any characteristic when message is received with undefined status', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {} as DeltaPro3AllQuotaData,
-        };
+        const message: DeltaPro3AllQuotaData = {};
 
         processQuotaMessage(message);
 
@@ -339,10 +318,8 @@ describe('DeltaPro3Accessory', () => {
 
     describe('updateOutputWattsValues', () => {
       it('should update AC HV output watts consumption when message is received with powGetAcHvOut', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            powGetAcHvOut: 45.67,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          powGetAcHvOut: 45.67,
         };
 
         processQuotaMessage(message);
@@ -351,10 +328,8 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it('should update AC LV output consumption when message is received with powGetAcLvOut', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            powGetAcLvOut: 64.89,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          powGetAcLvOut: 64.89,
         };
 
         processQuotaMessage(message);
@@ -363,10 +338,8 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it('should update DC 12V output consumption when message is received with powGet12v', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            powGet12v: 56.78,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          powGet12v: 56.78,
         };
 
         processQuotaMessage(message);
@@ -375,9 +348,7 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it('should not update any characteristic when message is received with undefined status', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {} as DeltaPro3AllQuotaData,
-        };
+        const message: DeltaPro3AllQuotaData = {};
 
         processQuotaMessage(message);
 
@@ -389,10 +360,8 @@ describe('DeltaPro3Accessory', () => {
 
     describe('updateSwitchStateValues', () => {
       it('should update AC HV state when message is received with flowInfoAcHvOut', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            flowInfoAcHvOut: DeltaPro3AcEnableType.On,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          flowInfoAcHvOut: DeltaPro3AcEnableType.On,
         };
 
         processQuotaMessage(message);
@@ -401,10 +370,8 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it('should update AC LV state when message is received with flowInfoAcLvOut', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            flowInfoAcLvOut: DeltaPro3AcEnableType.On,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          flowInfoAcLvOut: DeltaPro3AcEnableType.On,
         };
 
         processQuotaMessage(message);
@@ -413,10 +380,8 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it('should update DC 12V state when message is received with flowInfo12v', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            flowInfo12v: DeltaPro3AcEnableType.On,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          flowInfo12v: DeltaPro3AcEnableType.On,
         };
 
         processQuotaMessage(message);
@@ -425,10 +390,8 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it('should update X-Boost state when message is received with xboostEn', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {
-            xboostEn: AcXBoostType.On,
-          } as DeltaPro3AllQuotaData,
+        const message: DeltaPro3AllQuotaData = {
+          xboostEn: AcXBoostType.On,
         };
 
         processQuotaMessage(message);
@@ -437,9 +400,7 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it('should not update any characteristic when message is received with undefined status', async () => {
-        const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-          data: {} as DeltaPro3AllQuotaData,
-        };
+        const message: DeltaPro3AllQuotaData = {};
 
         processQuotaMessage(message);
 

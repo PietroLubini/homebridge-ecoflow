@@ -2,7 +2,6 @@ import {
   DeltaPro3AcEnableType,
   DeltaPro3AllQuotaData,
 } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3HttpApiContracts';
-import { DeltaPro3MqttQuotaMessageWithParams } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3MqttApiContracts';
 import { OutletAcHvService } from '@ecoflow/accessories/batteries/deltapro3/services/outletAcHvService';
 import { OutletAcLvService } from '@ecoflow/accessories/batteries/deltapro3/services/outletAcLvService';
 import { OutletDc12vService } from '@ecoflow/accessories/batteries/deltapro3/services/outletDc12vService';
@@ -54,7 +53,7 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
-    const data = (message as DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData>).data;
+    const data = message as DeltaPro3AllQuotaData;
     Object.assign(this.quota, data);
     this.updateSocValues(data);
     this.updateInputWattsValues(data);
@@ -68,10 +67,7 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
   }
 
   protected override updateInitialValues(data: DeltaPro3AllQuotaData): void {
-    const message: DeltaPro3MqttQuotaMessageWithParams<DeltaPro3AllQuotaData> = {
-      data,
-    };
-    this.processQuotaMessage(message);
+    this.processQuotaMessage(data);
   }
 
   private updateSocValues(params: DeltaPro3AllQuotaData): void {
