@@ -324,7 +324,27 @@ describe('EcoFlowAccessoryBase', () => {
       expect(logMock.warn).toHaveBeenCalledWith('Failed to set a value. Reverts value back for:', 500000);
     });
 
-    it("should call revert function when 'set_reply' message does not contain 'ack' or 'result' acknowledgement", async () => {
+    it("should do nothing when 'set_reply' message contains successful 'configOk' acknowledgement", async () => {
+      await accessory.sendSetCommand({} as MqttSetMessage, revertMock);
+      message.data.configOk = true;
+
+      processSetReplyMessage(message);
+
+      expect(revertMock).not.toHaveBeenCalled();
+      expect(logMock.debug).toHaveBeenCalledWith('Setting of a value was successful for:', 500000);
+    });
+
+    it("should call revert function when 'set_reply' message contains failed 'configOk' acknowledgement", async () => {
+      await accessory.sendSetCommand({} as MqttSetMessage, revertMock);
+      message.data.configOk = false;
+
+      processSetReplyMessage(message);
+
+      expect(revertMock).toHaveBeenCalledTimes(1);
+      expect(logMock.warn).toHaveBeenCalledWith('Failed to set a value. Reverts value back for:', 500000);
+    });
+
+    it("should call revert function when 'set_reply' message does not contain ack/result/configOk acknowledgement", async () => {
       await accessory.sendSetCommand({} as MqttSetMessage, revertMock);
       delete message.data.ack;
 

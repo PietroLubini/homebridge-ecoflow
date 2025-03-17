@@ -9,6 +9,7 @@ export enum DeviceModel {
   Delta2Max = 'Delta 2 Max',
   Delta2 = 'Delta 2',
   // DeltaPro = 'Delta Pro',
+  DeltaPro3 = 'Delta Pro 3',
   // DeltaProUltra = 'Delta Pro Ultra',
   PowerStream = 'PowerStream',
 }
@@ -51,7 +52,7 @@ export enum AdditionalBatteryCharacteristicType {
   InputConsumptionInWatts = 'Input Consumption, W',
   OutputConsumptionInWatts = 'Output Consumption, W',
   ChargingState = 'Charging State',
-  StatusLowBattery = 'Status Low Battery'
+  StatusLowBattery = 'Status Low Battery',
 }
 
 export enum PowerStreamConsumptionType {
