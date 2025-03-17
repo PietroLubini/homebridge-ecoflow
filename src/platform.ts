@@ -15,6 +15,8 @@ import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2/delta2
 import { Delta2Simulator } from '@ecoflow/accessories/batteries/delta2/simulations/delta2Simulator';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
+import { DeltaPro3Accessory } from '@ecoflow/accessories/batteries/deltapro3/deltaPro3Accessory';
+import { DeltaPro3Simulator } from '@ecoflow/accessories/batteries/deltapro3/simulations/deltaPro3Simulator';
 import { PowerStreamSimulator } from '@ecoflow/accessories/powerstream/simulations/powerStreamSimulator';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
@@ -241,6 +243,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       //   EcoFlowAccessoryType = DeltaProUltraAccessory;
       //   EcoFlowAccessorySimulatorType = DeltaProUltraSimulator;
       //   break;
+      case DeviceModel.DeltaPro3:
+        EcoFlowAccessoryType = DeltaPro3Accessory;
+        EcoFlowAccessorySimulatorType = DeltaPro3Simulator;
+        break;
       case DeviceModel.PowerStream:
         EcoFlowAccessoryType = PowerStreamAccessory;
         EcoFlowAccessorySimulatorType = PowerStreamSimulator;

@@ -1,6 +1,6 @@
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/httpApiPowerStreamContracts';
-import { MqttPowerStreamSetCmdCodeType } from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
+import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
+import { PowerStreamMqttSetCmdCodeType } from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
 import { BrightnessService } from '@ecoflow/accessories/powerstream/services/brightnessService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
@@ -164,7 +164,7 @@ describe('BrightnessService', () => {
         {
           id: 0,
           version: '',
-          cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
+          cmdCode: PowerStreamMqttSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
           params: {
             brightness: 1023,
           },
@@ -180,7 +180,7 @@ describe('BrightnessService', () => {
         {
           id: 0,
           version: '',
-          cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
+          cmdCode: PowerStreamMqttSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
           params: {
             brightness: 0,
           },
@@ -217,7 +217,7 @@ describe('BrightnessService', () => {
         {
           id: 0,
           version: '',
-          cmdCode: MqttPowerStreamSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
+          cmdCode: PowerStreamMqttSetCmdCodeType.WN511_SET_BRIGHTNESS_PACK,
           params: {
             brightness: 307,
           },

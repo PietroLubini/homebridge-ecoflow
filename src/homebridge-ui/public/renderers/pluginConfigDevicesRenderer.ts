@@ -23,6 +23,7 @@ export class PluginConfigDevicesRenderer extends PluginConfigRendererBase {
       'Delta 2': ['powerStream'],
       'Delta 2 Max': ['powerStream'],
       'Delta Pro': ['powerStream'],
+      'Delta Pro 3': ['powerStream'],
       'Delta Pro Ultra': ['powerStream'],
       PowerStream: ['battery'],
     };
