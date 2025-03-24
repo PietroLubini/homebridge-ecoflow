@@ -33,17 +33,15 @@ export abstract class OutletServiceBase extends ServiceBase {
       () => volt,
       OutletCharacteristicType.OutputVoltage
     );
-    this.updateOutputConsumptionKilowattHour();
   }
 
-  public updateOutputCurrent(miliAmpere: number): void {
+  public updateOutputCurrent(ampere: number): void {
     this.updateCustomCharacteristic(
       this.platform.Characteristic.PowerConsumption.OutputCurrent,
       'Output Current, A',
-      () => miliAmpere,
+      () => ampere,
       OutletCharacteristicType.OutputCurrent
     );
-    this.updateOutputConsumptionKilowattHour();
   }
 
   protected override addCharacteristics(): Characteristic[] {
@@ -68,11 +66,6 @@ export abstract class OutletServiceBase extends ServiceBase {
         this.platform.Characteristic.PowerConsumption.OutputConsumptionWatts,
         OutletCharacteristicType.OutputConsumptionInWatts
       ),
-      this.tryAddCustomDependentCharacteristic(
-        this.platform.Characteristic.PowerConsumption.OutputConsumptionKilowattHour,
-        OutletCharacteristicType.OutputCurrent,
-        OutletCharacteristicType.OutputVoltage
-      ),
     ];
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.serviceName);
 
@@ -80,16 +73,6 @@ export abstract class OutletServiceBase extends ServiceBase {
   }
 
   protected abstract setOn(value: boolean, revert: () => void): Promise<void>;
-
-  protected tryAddCustomDependentCharacteristic(
-    characteristic: WithUUID<{ new (): Characteristic }>,
-    ...characteristicTypes: string[]
-  ): Characteristic | null {
-    if (OutletServiceBase.intersect(this.additionalCharacteristics ?? [], characteristicTypes).length > 0) {
-      return this.addCharacteristic(characteristic);
-    }
-    return null;
-  }
 
   protected tryAddCustomCharacteristic(
     characteristic: WithUUID<{ new (): Characteristic }>,
@@ -101,17 +84,6 @@ export abstract class OutletServiceBase extends ServiceBase {
     return null;
   }
 
-  protected updateCustomDependentCharacteristic(
-    characteristic: WithUUID<{ new (): Characteristic }>,
-    name: string,
-    valueFunc: () => CharacteristicValue,
-    ...characteristicTypes: string[]
-  ): void {
-    if (OutletServiceBase.intersect(this.additionalCharacteristics ?? [], characteristicTypes).length > 0) {
-      this.updateCharacteristic(characteristic, name, valueFunc());
-    }
-  }
-
   protected updateCustomCharacteristic(
     characteristic: WithUUID<{ new (): Characteristic }>,
     name: string,
@@ -121,20 +93,5 @@ export abstract class OutletServiceBase extends ServiceBase {
     if (this.additionalCharacteristics?.includes(characteristicType)) {
       this.updateCharacteristic(characteristic, name, valueFunc());
     }
-  }
-
-  private static intersect<T>(arr1: T[], arr2: T[]): T[] {
-    const set2 = new Set(arr2);
-    return arr1.filter(item => set2.has(item));
-  }
-
-  private updateOutputConsumptionKilowattHour(): void {
-    this.updateCustomDependentCharacteristic(
-      this.platform.Characteristic.PowerConsumption.OutputConsumptionKilowattHour,
-      'Output Consumption, kW/h',
-      () => 0,
-      OutletCharacteristicType.OutputCurrent,
-      OutletCharacteristicType.OutputVoltage
-    );
   }
 }

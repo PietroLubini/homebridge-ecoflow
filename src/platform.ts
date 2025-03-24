@@ -26,7 +26,6 @@ import { Simulator } from '@ecoflow/apis/simulations/simulator';
 import {
   CustomCharacteristics,
   InputConsumptionWattFactory,
-  OutputConsumptionKilowattHourFactory,
   OutputConsumptionWattFactory,
   OutputCurrentFactory,
   OutputVoltageFactory,
@@ -96,7 +95,6 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     CustomCharacteristics.PowerConsumption.OutputConsumptionWatts = OutputConsumptionWattFactory(hap);
     CustomCharacteristics.PowerConsumption.OutputVoltage = OutputVoltageFactory(hap);
     CustomCharacteristics.PowerConsumption.OutputCurrent = OutputCurrentFactory(hap);
-    CustomCharacteristics.PowerConsumption.OutputConsumptionKilowattHour = OutputConsumptionKilowattHourFactory(hap);
   }
 
   /**

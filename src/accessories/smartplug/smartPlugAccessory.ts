@@ -88,7 +88,7 @@ export class SmartPlugAccessory extends EcoFlowAccessoryWithQuotaBase<SmartPlugA
       this.outletService.updateOutputConsumption(params.watts * 0.1);
     }
     if (params.current !== undefined) {
-      this.outletService.updateOutputCurrent(params.current);
+      this.outletService.updateOutputCurrent(params.current * 0.001);
     }
     if (params.volt !== undefined) {
       this.outletService.updateOutputVoltage(params.volt);
