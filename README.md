@@ -33,6 +33,7 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 - [Delta Pro 3](#delta-pro-3)
 - [Delta Pro Ultra](#delta-pro-ultra)
 - [PowerStream Micro-inverter](#powerstream-micro-inverter)
+- [Smart Plug](#smart-plug)
 
 For a full list of devices that could be potentially added check [here](https://developer-eu.ecoflow.com/us/document/introduction)
 
@@ -420,6 +421,48 @@ The following additional characteristics is available:
         "inverterAdditionalCharacteristics": [
           "Input Consumption, W",
           "Output Consumption, W"
+        ]
+      }
+    }
+  ],
+}
+```
+
+### Smart Plug
+
+#### Services
+
+| EcoFlow Parameter   | Service           | Characteristic        | Standard | Permission                                           |
+| ------------------- | ----------------- | --------------------- | -------- | ---------------------------------------------------- |
+| Outlet              | Outlet            | On                    | ✅       | Read/write                                           |
+| Outlet Output       | Outlet            | OutletInUse           | ✅       | Read                                                 |
+| Consumption         | Outlet            | Output Consumption, W | 🔲       | Read                                                 |
+| Voltage             | Outlet            | Output Voltage, V     | 🔲       | Read                                                 |
+| Current             | Outlet            | Output Current, V     | 🔲       | Read                                                 |
+| Lighting brightness | Lightbulb         | On                    | ✅       | Read (> 0%: ON; 0%: OFF) / write (ON: 100%; OFF: 0%) |
+| Lighting brightness | Lightbulb         | Brightness            | ✅       | Read/write                                           |
+| Temperature         | TemperatureSensor | CurrentTemperature    | ✅       | Read                                                 |
+
+#### Configuration
+
+The following additional characteristics is available:
+
+- Output Consumption, W
+- Output Voltage, V
+- Output Current, A
+
+```json
+{
+  ...
+  "devices": [
+    {
+      ...
+      "model": "SmartPlug",
+      "smartPlug": {
+        "additionalCharacteristics": [
+          "Output Consumption, W",
+          "Output Voltage, V",
+          "Output Current, A"
         ]
       }
     }

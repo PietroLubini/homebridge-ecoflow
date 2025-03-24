@@ -160,7 +160,7 @@
                   "items": {
                     "title": "Characteristic",
                     "type": "string",
-                    "enum": ["Output Voltage, V", "Output Current, A", "Output Consumption, W"]
+                    "enum": ["Output Consumption, W", "Output Voltage, V", "Output Current, A"]
                   }
                 }
               }
