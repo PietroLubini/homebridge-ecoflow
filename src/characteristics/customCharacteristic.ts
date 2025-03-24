@@ -1,10 +1,10 @@
 import { Characteristic, HAP, WithUUID } from 'homebridge';
 
 export const OutputVoltageFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
-  return class InputConsumptionWatt extends hap.Characteristic {
+  return class OutputVoltage extends hap.Characteristic {
     public static readonly UUID: string = '564C6469-F3A7-48D8-A1EB-608238475444';
     constructor() {
-      super('Output Voltage', InputConsumptionWatt.UUID, {
+      super('Output Voltage', OutputVoltage.UUID, {
         description: 'Output Voltage, V',
         format: hap.Formats.FLOAT,
         perms: [hap.Perms.NOTIFY, hap.Perms.PAIRED_READ],
@@ -18,10 +18,10 @@ export const OutputVoltageFactory = (hap: HAP): WithUUID<{ new (): Characteristi
 };
 
 export const OutputCurrentFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
-  return class InputConsumptionWatt extends hap.Characteristic {
+  return class OutputCurrent extends hap.Characteristic {
     public static readonly UUID: string = 'BA7CC214-A7DA-40DF-8655-C06ED9513D09';
     constructor() {
-      super('Output Current', InputConsumptionWatt.UUID, {
+      super('Output Current', OutputCurrent.UUID, {
         description: 'Output Current, A',
         format: hap.Formats.FLOAT,
         perms: [hap.Perms.NOTIFY, hap.Perms.PAIRED_READ],
@@ -70,7 +70,7 @@ export const OutputConsumptionWattFactory = (hap: HAP): WithUUID<{ new (): Chara
 };
 
 // https://gist.github.com/simont77/3f4d4330fa55b83f8ca96388d9004e7d
-// export const OutputVoltageFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
+// export const PowerConsumptionVoltFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
 //   return class PowerConsumptionVolt extends hap.Characteristic {
 //     public static readonly UUID: string = 'E863F10A-079E-48FF-8F27-9C2605A29F52';
 //     constructor() {
@@ -86,7 +86,7 @@ export const OutputConsumptionWattFactory = (hap: HAP): WithUUID<{ new (): Chara
 //   };
 // };
 
-// export const OutputCurrentFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
+// export const PowerConsumptionAmpereFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
 //   return class PowerConsumptionAmpere extends hap.Characteristic {
 //     public static readonly UUID: string = 'E863F126-079E-48FF-8F27-9C2605A29F52';
 //     constructor() {
@@ -102,7 +102,7 @@ export const OutputConsumptionWattFactory = (hap: HAP): WithUUID<{ new (): Chara
 //   };
 // };
 
-// export const OutputConsumptionKilowattHourFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
+// export const PowerConsumptionKilowattHourFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
 //   return class PowerConsumptionKilowattHour extends hap.Characteristic {
 //     public static readonly UUID: string = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
 //     constructor() {
