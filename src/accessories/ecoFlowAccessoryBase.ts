@@ -94,10 +94,12 @@ export abstract class EcoFlowAccessoryBase {
     }
     this.log.debug('Received "SetReply" response:', message);
     delete this.setReplies[messageKey];
+    // Detect whether response is successfull for different contracts (e.g. data.ack, data.result, data.configOk)
     if (
-      (message.data.ack === undefined && message.data.result === undefined) ||
+      (message.data.ack === undefined && message.data.result === undefined && message.data.configOk === undefined) ||
       (message.data.ack !== undefined && Boolean(message.data.ack) !== false) ||
-      (message.data.result !== undefined && message.data.result !== false)
+      (message.data.result !== undefined && message.data.result !== false) ||
+      (message.data.configOk !== undefined && message.data.configOk === false)
     ) {
       this.log.warn('Failed to set a value. Reverts value back for:', command.requestMessage.id);
       command.revert();

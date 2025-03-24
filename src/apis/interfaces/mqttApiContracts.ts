@@ -31,7 +31,14 @@ export interface MqttResultSetReplyMessageData {
   result?: boolean;
 }
 
-export interface MqttSetReplyMessageData extends MqttAckSetReplyMessageData, MqttResultSetReplyMessageData {}
+export interface MqttConfigOkSetReplyMessageData {
+  configOk?: boolean;
+}
+
+export interface MqttSetReplyMessageData
+  extends MqttAckSetReplyMessageData,
+    MqttResultSetReplyMessageData,
+    MqttConfigOkSetReplyMessageData {}
 
 export interface MqttSetReplyMessage extends MqttSetReplyMessageWithData<MqttSetReplyMessageData> {}
 

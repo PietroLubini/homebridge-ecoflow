@@ -30,6 +30,7 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 - [Delta 2](#delta-2)
 - [Delta 2 Max](#delta-2-max)
 - [Delta Pro](#delta-pro)
+- [Delta Pro 3](#delta-pro-3)
 - [Delta Pro Ultra](#delta-pro-ultra)
 - [PowerStream Micro-inverter](#powerstream-micro-inverter)
 
@@ -230,6 +231,65 @@ The following additional characteristics is available:
     {
       ...
       "model": "Delta Pro",
+      "battery": {
+        "additionalCharacteristics": [
+          "Battery Level, %",
+          "Input Consumption, W",
+          "Output Consumption, W"
+        ]
+      }
+    }
+  ],
+}
+```
+
+### Delta Pro 3
+
+#### Services
+
+| EcoFlow Parameter | Service       | Characteristic           | Standard | Permission |
+| ----------------- | ------------- | ------------------------ | -------- | ---------- |
+| Battery Level     | Battery       | BatteryLevel             | ✅       | Read       |
+| Charging State    | Battery       | ChargingState            | ✅       | Read       |
+| Battery Level     | Battery       | StatusLowBattery         | ✅       | Read       |
+| AC HV             | Outlet AC HV  | On                       | ✅       | Read/Write |
+| AC HV Output      | Outlet AC HV  | OutletInUse              | ✅       | Read       |
+| Battery Level     | Outlet AC HV  | Battery Level, %         | 🔲       | Read       |
+| Input             | Outlet AC HV  | Input Consumption, W     | 🔲       | Read       |
+| Output            | Outlet AC HV  | Output Consumption, W    | 🔲       | Read       |
+| Charging State    | Outlet AC HV  | ChargingState, Yes/No    | 🔲       | Read       |
+| Battery Level     | Outlet AC HV  | StatusLowBattery, Yes/No | 🔲       | Read       |
+| AC LV             | Outlet AC LV  | On                       | ✅       | Read/Write |
+| AC LV Output      | Outlet AC LV  | OutletInUse              | ✅       | Read       |
+| Battery Level     | Outlet AC LV  | Battery Level, %         | 🔲       | Read       |
+| Input             | Outlet AC LV  | Input Consumption, W     | 🔲       | Read       |
+| Output            | Outlet AC LV  | Output Consumption, W    | 🔲       | Read       |
+| Charging State    | Outlet AC LV  | ChargingState, Yes/No    | 🔲       | Read       |
+| Battery Level     | Outlet AC LV  | StatusLowBattery, Yes/No | 🔲       | Read       |
+| DC 12V            | Outlet DC 12V | On                       | ✅       | Read/Write |
+| DC 12V Output     | Outlet DC 12V | OutletInUse              | ✅       | Read       |
+| Battery Level     | Outlet DC 12V | Battery Level, %         | 🔲       | Read       |
+| Input             | Outlet DC 12V | Input Consumption, W     | 🔲       | Read       |
+| Output            | Outlet DC 12V | Output Consumption, W    | 🔲       | Read       |
+| Charging State    | Outlet DC 12V | ChargingState, Yes/No    | 🔲       | Read       |
+| Battery Level     | Outlet DC 12V | StatusLowBattery, Yes/No | 🔲       | Read       |
+| Switch X-Boost    | Switch        | On                       | ✅       | Read/Write |
+
+#### Configuration
+
+The following additional characteristics is available:
+
+- Input Consumption, W
+- Output Consumption, W
+- Battery Level, %
+
+```json
+{
+  ...
+  "devices": [
+    {
+      ...
+      "model": "Delta Pro 3",
       "battery": {
         "additionalCharacteristics": [
           "Battery Level, %",
