@@ -61,9 +61,9 @@ export const OutputCurrentFactory = (hap: HAP): WithUUID<{ new (): Characteristi
         format: hap.Formats.FLOAT,
         perms: [hap.Perms.NOTIFY, hap.Perms.PAIRED_READ],
         minValue: 0,
-        maxValue: 100,
+        maxValue: 10000,
       });
-      this.value = this.getDefaultValue();
+      this.value = this.getDefaultValue(); // value should be set in mA
     }
   };
 };

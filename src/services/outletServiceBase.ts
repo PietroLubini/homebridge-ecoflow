@@ -35,11 +35,11 @@ export abstract class OutletServiceBase extends ServiceBase {
     );
   }
 
-  public updateOutputCurrent(ampere: number): void {
+  public updateOutputCurrent(miliAmpere: number): void {
     this.updateCustomCharacteristic(
       this.platform.Characteristic.PowerConsumption.OutputCurrent,
       'Output Current, A',
-      () => ampere,
+      () => miliAmpere,
       OutletCharacteristicType.OutputCurrent
     );
   }

@@ -361,7 +361,7 @@ describe('PowerStreamAccessory', () => {
             cmdFunc: SmartPlugMqttMessageFuncType.Func2,
             cmdId: SmartPlugMqttMessageType.Heartbeat,
             param: {
-              current: 2500,
+              current: 2.5,
             },
           };
 
@@ -469,7 +469,7 @@ describe('PowerStreamAccessory', () => {
         '2_1': {
           switchSta: true,
           watts: 21,
-          current: 1500,
+          current: 1.5,
           volt: 200.4,
           brightness: 789.3,
           temp: 36.6,
