@@ -25,11 +25,9 @@ export interface PowerStreamMqttQuotaMessageWithParams<TParams>
     PowerStreamMqttQuotaMessage {}
 
 export enum PowerStreamMqttSetCmdCodeType {
-  WN511_SET_SUPPLY_PRIORITY_PACK = 'WN511_SET_SUPPLY_PRIORITY_PACK',
-  WN511_SET_PERMANENT_WATTS_PACK = 'WN511_SET_PERMANENT_WATTS_PACK',
-  WN511_SET_BAT_LOWER_PACK = 'WN511_SET_BAT_LOWER_PACK',
-  WN511_SET_BAT_UPPER_PACK = 'WN511_SET_BAT_UPPER_PACK',
-  WN511_SET_BRIGHTNESS_PACK = 'WN511_SET_BRIGHTNESS_PACK',
+  SupplyPriority = 'WN511_SET_SUPPLY_PRIORITY_PACK',
+  PowerDemand = 'WN511_SET_PERMANENT_WATTS_PACK',
+  Brightness = 'WN511_SET_BRIGHTNESS_PACK',
 }
 
 export interface PowerStreamMqttSetMessage extends MqttSetMessage {

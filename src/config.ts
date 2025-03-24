@@ -11,6 +11,7 @@ export enum DeviceModel {
   // DeltaPro = 'Delta Pro',
   // DeltaProUltra = 'Delta Pro Ultra',
   PowerStream = 'PowerStream',
+  SmartPlug = 'Smart Plug',
 }
 
 export enum LocationType {
@@ -40,18 +41,28 @@ export interface DeviceConfig extends AccessoryConfig, DeviceAccessConfig {
   disabled: boolean;
   battery?: BatteryDeviceConfig;
   powerStream?: PowerStreamDeviceConfig;
+  outlet?: OutletDeviceConfig;
 }
 
 export interface BatteryDeviceConfig {
   additionalCharacteristics: AdditionalBatteryCharacteristicType[];
 }
 
-export enum AdditionalBatteryCharacteristicType {
+export type AdditionalBatteryCharacteristicType =
+  | AdditionalOutletCharacteristicType
+  | AdditionalBatteryOutletCharacteristicType;
+
+export enum AdditionalBatteryOutletCharacteristicType {
   BatteryLevel = 'Battery Level, %',
   InputConsumptionInWatts = 'Input Consumption, W',
-  OutputConsumptionInWatts = 'Output Consumption, W',
   ChargingState = 'Charging State',
-  StatusLowBattery = 'Status Low Battery'
+  StatusLowBattery = 'Status Low Battery',
+}
+
+export enum AdditionalOutletCharacteristicType {
+  OutputVoltage = 'Output Voltage, V',
+  OutputCurrent = 'Output Current, A',
+  OutputConsumptionInWatts = 'Output Consumption, W',
 }
 
 export enum PowerStreamConsumptionType {
@@ -64,4 +75,8 @@ export interface PowerStreamDeviceConfig {
   batteryAdditionalCharacteristics?: AdditionalBatteryCharacteristicType[];
   pvAdditionalCharacteristics?: AdditionalBatteryCharacteristicType[];
   inverterAdditionalCharacteristics?: AdditionalBatteryCharacteristicType[];
+}
+
+export interface OutletDeviceConfig {
+  additionalCharacteristics?: AdditionalOutletCharacteristicType[];
 }

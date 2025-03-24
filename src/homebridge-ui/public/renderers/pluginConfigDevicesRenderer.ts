@@ -20,11 +20,12 @@ export class PluginConfigDevicesRenderer extends PluginConfigRendererBase {
     this.$tabs = $('#devicesTabs');
     this.$tabPanels = $('#devicesPanels');
     this._hideDeviceSettingsPerModel = {
-      'Delta 2': ['powerStream'],
-      'Delta 2 Max': ['powerStream'],
-      'Delta Pro': ['powerStream'],
-      'Delta Pro Ultra': ['powerStream'],
-      PowerStream: ['battery'],
+      'Delta 2': ['powerStream', 'outlet'],
+      'Delta 2 Max': ['powerStream', 'outlet'],
+      'Delta Pro': ['powerStream', 'outlet'],
+      'Delta Pro Ultra': ['powerStream', 'outlet'],
+      PowerStream: ['battery', 'outlet'],
+      'Smart Plug': ['battery', 'powerStream'],
     };
   }
 

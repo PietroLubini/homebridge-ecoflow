@@ -7,7 +7,10 @@ import { OutletAcService } from '@ecoflow/accessories/batteries/delta2/services/
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
-import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
+import {
+  AdditionalBatteryOutletCharacteristicType as BatteryOutletCharacteristicType,
+  AdditionalOutletCharacteristicType as OutletCharacteristicType,
+} from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
@@ -63,7 +66,7 @@ describe('OutletAcService', () => {
   describe('updateOutputConsumption', () => {
     it('should set OutputConsumption when it is enabled in configuration', () => {
       ecoFlowAccessoryMock.config.battery = {
-        additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
+        additionalCharacteristics: [OutletCharacteristicType.OutputConsumptionInWatts],
       };
       service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock, Delta2MqttSetModuleType.MPPT);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
@@ -100,7 +103,7 @@ describe('OutletAcService', () => {
   describe('updateInputConsumption', () => {
     it('should set InputConsumption when it is enabled in configuration', () => {
       ecoFlowAccessoryMock.config.battery = {
-        additionalCharacteristics: [CharacteristicType.InputConsumptionInWatts],
+        additionalCharacteristics: [BatteryOutletCharacteristicType.InputConsumptionInWatts],
       };
       service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock, Delta2MqttSetModuleType.MPPT);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
@@ -134,7 +137,7 @@ describe('OutletAcService', () => {
   describe('updateStatusLowBattery', () => {
     it('should set low battery level when it is less than 20', () => {
       ecoFlowAccessoryMock.config.battery = {
-        additionalCharacteristics: [CharacteristicType.StatusLowBattery],
+        additionalCharacteristics: [BatteryOutletCharacteristicType.StatusLowBattery],
       };
       service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock, Delta2MqttSetModuleType.MPPT);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
@@ -152,7 +155,7 @@ describe('OutletAcService', () => {
 
     it('should set normal battery level when it is more than or equal to 20', () => {
       ecoFlowAccessoryMock.config.battery = {
-        additionalCharacteristics: [CharacteristicType.StatusLowBattery],
+        additionalCharacteristics: [BatteryOutletCharacteristicType.StatusLowBattery],
       };
       service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock, Delta2MqttSetModuleType.MPPT);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
@@ -172,7 +175,7 @@ describe('OutletAcService', () => {
   describe('updateBatteryLevel', () => {
     it('should set BatteryLevel when it is enabled in configuration', () => {
       ecoFlowAccessoryMock.config.battery = {
-        additionalCharacteristics: [CharacteristicType.BatteryLevel],
+        additionalCharacteristics: [BatteryOutletCharacteristicType.BatteryLevel],
       };
       service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock, Delta2MqttSetModuleType.MPPT);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);

@@ -3,7 +3,10 @@ import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interf
 import { OutletService } from '@ecoflow/accessories/powerstream/services/outletService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
-import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
+import {
+  AdditionalBatteryOutletCharacteristicType as BatteryOutletCharacteristicType,
+  AdditionalOutletCharacteristicType as OutletCharacteristicType,
+} from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService, HapStatusError } from 'hap-nodejs';
@@ -69,7 +72,7 @@ describe('OutletService', () => {
   describe('updateOutputConsumption', () => {
     it('should set OutputConsumption when it is enabled in configuration', () => {
       service = new OutletService(ecoFlowAccessoryMock, batteryStatusProviderMock, 'INV', [
-        CharacteristicType.OutputConsumptionInWatts,
+        OutletCharacteristicType.OutputConsumptionInWatts,
       ]);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
@@ -107,7 +110,7 @@ describe('OutletService', () => {
     it('should set InputConsumption when it is enabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service = new OutletService(ecoFlowAccessoryMock, batteryStatusProviderMock, 'BAT', [
-        CharacteristicType.InputConsumptionInWatts,
+        BatteryOutletCharacteristicType.InputConsumptionInWatts,
       ]);
       service.initialize();
 
@@ -141,7 +144,7 @@ describe('OutletService', () => {
     it('should set low battery level when it is less than 20', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service = new OutletService(ecoFlowAccessoryMock, batteryStatusProviderMock, 'BAT', [
-        CharacteristicType.StatusLowBattery,
+        BatteryOutletCharacteristicType.StatusLowBattery,
       ]);
       service.initialize();
       batteryStatusProviderMock.getStatusLowBattery.mockReturnValue(
@@ -158,7 +161,7 @@ describe('OutletService', () => {
     it('should set normal battery level when it is more than or equal to 20', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service = new OutletService(ecoFlowAccessoryMock, batteryStatusProviderMock, 'BAT', [
-        CharacteristicType.StatusLowBattery,
+        BatteryOutletCharacteristicType.StatusLowBattery,
       ]);
       service.initialize();
       batteryStatusProviderMock.getStatusLowBattery.mockReturnValue(
@@ -190,7 +193,7 @@ describe('OutletService', () => {
     it('should set BatteryLevel when it is enabled in configuration', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service = new OutletService(ecoFlowAccessoryMock, batteryStatusProviderMock, 'BAT', [
-        CharacteristicType.BatteryLevel,
+        BatteryOutletCharacteristicType.BatteryLevel,
       ]);
       service.initialize();
 

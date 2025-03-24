@@ -1,7 +1,7 @@
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
-import { PowerStreamMqttSetCmdCodeType } from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
-import { BrightnessService } from '@ecoflow/accessories/powerstream/services/brightnessService';
+import { SmartPlugAllQuotaData } from '@ecoflow/accessories/smartplug/interfaces/smartPlugHttpApiContracts';
+import { SmartPlugMqttSetCmdCodeType } from '@ecoflow/accessories/smartplug/interfaces/smartPlugMqttApiContracts';
+import { BrightnessService } from '@ecoflow/accessories/smartplug/services/brightnessService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
@@ -14,7 +14,7 @@ enum HAPStatus {
 
 describe('BrightnessService', () => {
   let service: BrightnessService;
-  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
+  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<SmartPlugAllQuotaData>>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
@@ -58,7 +58,7 @@ describe('BrightnessService', () => {
       httpApiManager: httpApiManagerMock,
       quota: {},
       sendSetCommand: jest.fn(),
-    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
+    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<SmartPlugAllQuotaData>>;
     service = new BrightnessService(ecoFlowAccessoryMock, 1023);
     hapService = new HapService('Accessory Bulb Name', HapService.Lightbulb.UUID);
   });
@@ -164,7 +164,7 @@ describe('BrightnessService', () => {
         {
           id: 0,
           version: '',
-          cmdCode: PowerStreamMqttSetCmdCodeType.Brightness,
+          cmdCode: SmartPlugMqttSetCmdCodeType.Brightness,
           params: {
             brightness: 1023,
           },
@@ -180,7 +180,7 @@ describe('BrightnessService', () => {
         {
           id: 0,
           version: '',
-          cmdCode: PowerStreamMqttSetCmdCodeType.Brightness,
+          cmdCode: SmartPlugMqttSetCmdCodeType.Brightness,
           params: {
             brightness: 0,
           },
@@ -217,7 +217,7 @@ describe('BrightnessService', () => {
         {
           id: 0,
           version: '',
-          cmdCode: PowerStreamMqttSetCmdCodeType.Brightness,
+          cmdCode: SmartPlugMqttSetCmdCodeType.Brightness,
           params: {
             brightness: 307,
           },

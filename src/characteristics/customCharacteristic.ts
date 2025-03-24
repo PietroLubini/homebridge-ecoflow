@@ -36,37 +36,37 @@ export const OutputConsumptionWattFactory = (hap: HAP): WithUUID<{ new (): Chara
 };
 
 // https://gist.github.com/simont77/3f4d4330fa55b83f8ca96388d9004e7d
-// export const PowerConsumptionVoltFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
-//   return class PowerConsumptionVolt extends hap.Characteristic {
-//     public static readonly UUID: string = 'E863F10A-079E-48FF-8F27-9C2605A29F52';
-//     constructor() {
-//       super('Voltage', PowerConsumptionVolt.UUID, {
-//         description: '"Voltage, V" in Eve App',
-//         format: Formats.FLOAT,
-//         perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-//         minValue: 0,
-//         maxValue: 300,
-//       });
-//       this.value = this.getDefaultValue();
-//     }
-//   };
-// };
+export const OutputVoltageFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
+  return class PowerConsumptionVolt extends hap.Characteristic {
+    public static readonly UUID: string = 'E863F10A-079E-48FF-8F27-9C2605A29F52';
+    constructor() {
+      super('Voltage', PowerConsumptionVolt.UUID, {
+        description: '"Voltage, V" in Eve App',
+        format: hap.Formats.FLOAT,
+        perms: [hap.Perms.NOTIFY, hap.Perms.PAIRED_READ],
+        minValue: 0,
+        maxValue: 300,
+      });
+      this.value = this.getDefaultValue();
+    }
+  };
+};
 
-// export const PowerConsumptionAmpereFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
-//   return class PowerConsumptionAmpere extends hap.Characteristic {
-//     public static readonly UUID: string = 'E863F126-079E-48FF-8F27-9C2605A29F52';
-//     constructor() {
-//       super('Current', PowerConsumptionAmpere.UUID, {
-//         description: '"Current, A" in Eve App',
-//         format: Formats.FLOAT,
-//         perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-//         minValue: 0,
-//         maxValue: 100,
-//       });
-//       this.value = this.getDefaultValue();
-//     }
-//   };
-// };
+export const OutputCurrentFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
+  return class PowerConsumptionAmpere extends hap.Characteristic {
+    public static readonly UUID: string = 'E863F126-079E-48FF-8F27-9C2605A29F52';
+    constructor() {
+      super('Current', PowerConsumptionAmpere.UUID, {
+        description: '"Current, A" in Eve App',
+        format: hap.Formats.FLOAT,
+        perms: [hap.Perms.NOTIFY, hap.Perms.PAIRED_READ],
+        minValue: 0,
+        maxValue: 100,
+      });
+      this.value = this.getDefaultValue();
+    }
+  };
+};
 
 // export const PowerConsumptionKilowattHourFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
 //   return class PowerConsumptionKilowattHour extends hap.Characteristic {
@@ -87,6 +87,8 @@ export const OutputConsumptionWattFactory = (hap: HAP): WithUUID<{ new (): Chara
 export class PowerConsumption {
   public static InputConsumptionWatts: WithUUID<{ new (): Characteristic }>;
   public static OutputConsumptionWatts: WithUUID<{ new (): Characteristic }>;
+  public static OutputVoltage: WithUUID<{ new (): Characteristic }>;
+  public static OutputCurrent: WithUUID<{ new (): Characteristic }>;
 }
 
 export class CustomCharacteristics {

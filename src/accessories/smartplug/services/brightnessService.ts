@@ -1,9 +1,9 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import {
-  PowerStreamMqttSetBrightnessMessageParams,
-  PowerStreamMqttSetCmdCodeType,
-  PowerStreamMqttSetMessageWithParams,
-} from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
+  SmartPlugMqttSetBrightnessMessageParams,
+  SmartPlugMqttSetCmdCodeType,
+  SmartPlugMqttSetMessageWithParams,
+} from '@ecoflow/accessories/smartplug/interfaces/smartPlugMqttApiContracts';
 import { LightBulbServiceBase } from '@ecoflow/services/lightBulbServiceBase';
 
 export class BrightnessService extends LightBulbServiceBase {
@@ -17,10 +17,10 @@ export class BrightnessService extends LightBulbServiceBase {
   }
 
   protected override processOnSetBrightness(value: number, revert: () => void): Promise<void> {
-    const message: PowerStreamMqttSetMessageWithParams<PowerStreamMqttSetBrightnessMessageParams> = {
+    const message: SmartPlugMqttSetMessageWithParams<SmartPlugMqttSetBrightnessMessageParams> = {
       id: 0,
       version: '',
-      cmdCode: PowerStreamMqttSetCmdCodeType.Brightness,
+      cmdCode: SmartPlugMqttSetCmdCodeType.Brightness,
       params: {
         brightness: Math.round(value),
       },
