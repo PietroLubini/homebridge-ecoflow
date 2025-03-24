@@ -137,6 +137,10 @@ describe('OutletServiceBase', () => {
           UUID: CustomCharacteristics.PowerConsumption.OutputVoltage.UUID,
           value: 0,
         },
+        {
+          UUID: CustomCharacteristics.PowerConsumption.OutputConsumptionKilowattHour.UUID,
+          value: 0,
+        },
       ];
       accessoryMock.getServiceById.mockReturnValueOnce(undefined);
       accessoryMock.addService.mockReturnValueOnce(hapService);
@@ -153,6 +157,10 @@ describe('OutletServiceBase', () => {
         ...expectedMandatoryCharacteristics,
         {
           UUID: CustomCharacteristics.PowerConsumption.OutputCurrent.UUID,
+          value: 0,
+        },
+        {
+          UUID: CustomCharacteristics.PowerConsumption.OutputConsumptionKilowattHour.UUID,
           value: 0,
         },
       ];
@@ -281,7 +289,10 @@ describe('OutletServiceBase', () => {
       const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.OutputVoltage).value;
 
       expect(actual).toEqual(41.1);
-      expect(logMock.debug.mock.calls).toEqual([['MOCK Output Voltage, V ->', 41.1]]);
+      expect(logMock.debug.mock.calls).toEqual([
+        ['MOCK Output Voltage, V ->', 41.1],
+        ['MOCK Output Consumption, kW/h ->', 0],
+      ]);
     });
 
     it('should not set OutputVoltage when it is disabled in configuration', () => {
@@ -308,7 +319,10 @@ describe('OutletServiceBase', () => {
       const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.OutputCurrent).value;
 
       expect(actual).toEqual(24.5);
-      expect(logMock.debug.mock.calls).toEqual([['MOCK Output Current, A ->', 24.5]]);
+      expect(logMock.debug.mock.calls).toEqual([
+        ['MOCK Output Current, A ->', 24.5],
+        ['MOCK Output Consumption, kW/h ->', 0],
+      ]);
     });
 
     it('should not set OutputCurrent when it is disabled in configuration', () => {

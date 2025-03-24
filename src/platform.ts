@@ -13,10 +13,10 @@ import {
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2/delta2Accessory';
 import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2/delta2MaxAccessory';
 import { Delta2Simulator } from '@ecoflow/accessories/batteries/delta2/simulations/delta2Simulator';
-import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
-import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { DeltaPro3Accessory } from '@ecoflow/accessories/batteries/deltapro3/deltaPro3Accessory';
 import { DeltaPro3Simulator } from '@ecoflow/accessories/batteries/deltapro3/simulations/deltaPro3Simulator';
+import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
+import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { PowerStreamSimulator } from '@ecoflow/accessories/powerstream/simulations/powerStreamSimulator';
 import { SmartPlugSimulator } from '@ecoflow/accessories/smartplug/simulations/smartPlugSimulator';
 import { SmartPlugAccessory } from '@ecoflow/accessories/smartplug/smartPlugAccessory';
@@ -26,6 +26,7 @@ import { Simulator } from '@ecoflow/apis/simulations/simulator';
 import {
   CustomCharacteristics,
   InputConsumptionWattFactory,
+  OutputConsumptionKilowattHourFactory,
   OutputConsumptionWattFactory,
   OutputCurrentFactory,
   OutputVoltageFactory,
@@ -95,6 +96,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     CustomCharacteristics.PowerConsumption.OutputConsumptionWatts = OutputConsumptionWattFactory(hap);
     CustomCharacteristics.PowerConsumption.OutputVoltage = OutputVoltageFactory(hap);
     CustomCharacteristics.PowerConsumption.OutputCurrent = OutputCurrentFactory(hap);
+    CustomCharacteristics.PowerConsumption.OutputConsumptionKilowattHour = OutputConsumptionKilowattHourFactory(hap);
   }
 
   /**

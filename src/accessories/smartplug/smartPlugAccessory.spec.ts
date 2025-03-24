@@ -100,7 +100,7 @@ describe('PowerStreamAccessory', () => {
     }
 
     outletServiceMock = createOutletService(new OutletService(accessory));
-    (OutletService as jest.Mock).mockImplementation(() => outletServiceMock);
+    (OutletService as unknown as jest.Mock).mockImplementation(() => outletServiceMock);
 
     brightnessServiceMock = createLightBulbService(new BrightnessService(accessory, 1023));
     (BrightnessService as jest.Mock).mockImplementation(() => brightnessServiceMock);
@@ -154,7 +154,7 @@ describe('PowerStreamAccessory', () => {
         deviceConfig: DeviceConfig
       ): CharacteristicType[] | undefined {
         let actual: CharacteristicType[] | undefined;
-        (OutletService as jest.Mock).mockImplementation(
+        (OutletService as unknown as jest.Mock).mockImplementation(
           (_: EcoFlowAccessoryBase, additionalCharacteristics?: CharacteristicType[]) => {
             actual = additionalCharacteristics;
             return mock;

@@ -68,27 +68,28 @@ export const OutputCurrentFactory = (hap: HAP): WithUUID<{ new (): Characteristi
   };
 };
 
-// export const PowerConsumptionKilowattHourFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
-//   return class PowerConsumptionKilowattHour extends hap.Characteristic {
-//     public static readonly UUID: string = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
-//     constructor() {
-//       super('Total Consumption', PowerConsumptionKilowattHour.UUID, {
-//         description: '"Total Consumption, kW/h" in Eve App',
-//         format: Formats.FLOAT,
-//         perms: [Perms.NOTIFY, Perms.PAIRED_READ],
-//         minValue: 0,
-//         maxValue: 50,
-//       });
-//       this.value = this.getDefaultValue();
-//     }
-//   };
-// };
+export const OutputConsumptionKilowattHourFactory = (hap: HAP): WithUUID<{ new (): Characteristic }> => {
+  return class PowerConsumptionKilowattHour extends hap.Characteristic {
+    public static readonly UUID: string = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
+    constructor() {
+      super('Total Consumption', PowerConsumptionKilowattHour.UUID, {
+        description: '"Total Consumption, kW/h" in Eve App',
+        format: hap.Formats.FLOAT,
+        perms: [hap.Perms.NOTIFY, hap.Perms.PAIRED_READ],
+        minValue: 0,
+        maxValue: 50,
+      });
+      this.value = this.getDefaultValue();
+    }
+  };
+};
 
 export class PowerConsumption {
   public static InputConsumptionWatts: WithUUID<{ new (): Characteristic }>;
   public static OutputConsumptionWatts: WithUUID<{ new (): Characteristic }>;
   public static OutputVoltage: WithUUID<{ new (): Characteristic }>;
   public static OutputCurrent: WithUUID<{ new (): Characteristic }>;
+  public static OutputConsumptionKilowattHour: WithUUID<{ new (): Characteristic }>;
 }
 
 export class CustomCharacteristics {

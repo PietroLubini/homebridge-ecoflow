@@ -185,7 +185,7 @@ describe('Delta2AccessoryBase', () => {
 
     it('should create OutletAcService with MPPT setModuleType when initializing accessory MPPT setModuleType', async () => {
       let actual: Delta2MqttSetModuleType | undefined;
-      (OutletAcService as jest.Mock).mockImplementation(
+      (OutletAcService as unknown as jest.Mock).mockImplementation(
         (
           _ecoFlowAccessory: EcoFlowAccessoryBase,
           _batteryStatusProvider: BatteryStatusProvider,

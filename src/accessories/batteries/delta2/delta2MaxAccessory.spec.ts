@@ -38,7 +38,7 @@ describe('Delta2MaxAccessory', () => {
   describe('initialize', () => {
     it('should use Delta2Max-specific configuration when initializing accessory', () => {
       let actual: Delta2MqttSetModuleType | undefined;
-      (OutletAcService as jest.Mock).mockImplementation(
+      (OutletAcService as unknown as jest.Mock).mockImplementation(
         (
           _accessory: EcoFlowAccessoryBase,
           _batteryStatusProvider: BatteryStatusProvider,
