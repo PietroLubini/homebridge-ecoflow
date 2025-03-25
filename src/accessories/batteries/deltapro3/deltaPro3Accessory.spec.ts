@@ -221,7 +221,7 @@ describe('DeltaPro3Accessory', () => {
     describe('updateInputWattsValues', () => {
       it('should update input watts in quota when received message contains it', async () => {
         const message: DeltaPro3AllQuotaData = {
-          powInSumW: 12.34,
+          inputWatts: 12.34,
         };
 
         processQuotaMessage(message);
@@ -231,9 +231,9 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it(`should update charging state to true
-        when message is received with non zero powInSumW and without powOutSumW`, async () => {
+        when message is received with non zero inputWatts and without outputWatts`, async () => {
         const message: DeltaPro3AllQuotaData = {
-          powInSumW: 12.34,
+          inputWatts: 12.34,
         };
 
         processQuotaMessage(message);
@@ -245,10 +245,10 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it(`should update charging state to true
-        when message is received with non zero powInSumW and non equal to it powOutSumW`, async () => {
+        when message is received with non zero inputWatts and non equal to it outputWatts`, async () => {
         const message: DeltaPro3AllQuotaData = {
-          powInSumW: 12.34,
-          powOutSumW: 30.45,
+          inputWatts: 12.34,
+          outputWatts: 30.45,
         };
 
         processQuotaMessage(message);
@@ -260,10 +260,10 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it(`should update charging state to false
-        when message is received with zero powInSumW and non equal to it powOutSumW`, async () => {
+        when message is received with zero inputWatts and non equal to it outputWatts`, async () => {
         const message: DeltaPro3AllQuotaData = {
-          powInSumW: 0,
-          powOutSumW: 30.45,
+          inputWatts: 0,
+          outputWatts: 30.45,
         };
 
         processQuotaMessage(message);
@@ -275,10 +275,10 @@ describe('DeltaPro3Accessory', () => {
       });
 
       it(`should update charging state to false
-        when message is received with zero powInSumW and powOutSumW`, async () => {
+        when message is received with zero inputWatts and outputWatts`, async () => {
         const message: DeltaPro3AllQuotaData = {
-          powInSumW: 0,
-          powOutSumW: 0,
+          inputWatts: 0,
+          outputWatts: 0,
         };
 
         processQuotaMessage(message);
@@ -289,9 +289,9 @@ describe('DeltaPro3Accessory', () => {
         expect(outletDc12vServiceMock.updateChargingState).toHaveBeenCalledWith(false);
       });
 
-      it('should update AC HV, AC LV, DC 12V input consumptions when message is received with powInSumW', async () => {
+      it('should update AC HV, AC LV, DC 12V input consumptions when message is received with inputWatts', async () => {
         const message: DeltaPro3AllQuotaData = {
-          powInSumW: 12.34,
+          inputWatts: 12.34,
         };
 
         processQuotaMessage(message);
@@ -319,7 +319,7 @@ describe('DeltaPro3Accessory', () => {
     describe('updateOutputWattsValues', () => {
       it('should update AC HV output watts consumption when message is received with powGetAcHvOut', async () => {
         const message: DeltaPro3AllQuotaData = {
-          powGetAcHvOut: 45.67,
+          powGetAcHvOut: -45.67,
         };
 
         processQuotaMessage(message);
@@ -329,7 +329,7 @@ describe('DeltaPro3Accessory', () => {
 
       it('should update AC LV output consumption when message is received with powGetAcLvOut', async () => {
         const message: DeltaPro3AllQuotaData = {
-          powGetAcLvOut: 64.89,
+          powGetAcLvOut: -64.89,
         };
 
         processQuotaMessage(message);
@@ -339,7 +339,7 @@ describe('DeltaPro3Accessory', () => {
 
       it('should update DC 12V output consumption when message is received with powGet12v', async () => {
         const message: DeltaPro3AllQuotaData = {
-          powGet12v: 56.78,
+          powGet12v: -56.78,
         };
 
         processQuotaMessage(message);
@@ -421,11 +421,11 @@ describe('DeltaPro3Accessory', () => {
         flowInfo12v: DeltaPro3AcEnableType.Off,
         flowInfoAcHvOut: DeltaPro3AcEnableType.On,
         flowInfoAcLvOut: DeltaPro3AcEnableType.Off,
-        powGet12v: 2.1,
-        powGetAcHvOut: 2.2,
-        powGetAcLvOut: 2.3,
-        powInSumW: 3.1,
-        powOutSumW: 3.2,
+        powGet12v: -2.1,
+        powGetAcHvOut: -2.2,
+        powGetAcLvOut: -2.3,
+        inputWatts: 3.1,
+        outputWatts: 3.2,
         xboostEn: AcXBoostType.Off,
       };
     });
