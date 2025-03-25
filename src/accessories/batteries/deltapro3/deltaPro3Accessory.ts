@@ -81,28 +81,28 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
   }
 
   private updateInputWattsValues(params: DeltaPro3MqttQuotaMessage): void {
-    if (params.powInSumW !== undefined) {
+    if (params.inputWatts !== undefined) {
       const isCharging =
-        params.powInSumW > 0 && (params.powOutSumW === undefined || params.powInSumW !== params.powOutSumW);
+        params.inputWatts > 0 && (params.outputWatts === undefined || params.inputWatts !== params.outputWatts);
       this.batteryStatusService.updateChargingState(isCharging);
       this.outletAcHvService.updateChargingState(isCharging);
       this.outletAcLvService.updateChargingState(isCharging);
       this.outletDc12vService.updateChargingState(isCharging);
-      this.outletAcHvService.updateInputConsumption(params.powInSumW);
-      this.outletAcLvService.updateInputConsumption(params.powInSumW);
-      this.outletDc12vService.updateInputConsumption(params.powInSumW);
+      this.outletAcHvService.updateInputConsumption(params.inputWatts);
+      this.outletAcLvService.updateInputConsumption(params.inputWatts);
+      this.outletDc12vService.updateInputConsumption(params.inputWatts);
     }
   }
 
   private updateOutputWattsValues(params: DeltaPro3MqttQuotaMessage): void {
     if (params.powGetAcHvOut !== undefined) {
-      this.outletAcHvService.updateOutputConsumption(params.powGetAcHvOut);
+      this.outletAcHvService.updateOutputConsumption(Math.abs(params.powGetAcHvOut));
     }
     if (params.powGetAcLvOut !== undefined) {
-      this.outletAcLvService.updateOutputConsumption(params.powGetAcLvOut);
+      this.outletAcLvService.updateOutputConsumption(Math.abs(params.powGetAcLvOut));
     }
     if (params.powGet12v !== undefined) {
-      this.outletDc12vService.updateOutputConsumption(params.powGet12v);
+      this.outletDc12vService.updateOutputConsumption(Math.abs(params.powGet12v));
     }
   }
 
