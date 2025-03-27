@@ -16,6 +16,8 @@ import { Delta2Simulator } from '@ecoflow/accessories/batteries/delta2/simulatio
 import { DeltaPro3Accessory } from '@ecoflow/accessories/batteries/deltapro3/deltaPro3Accessory';
 import { DeltaPro3Simulator } from '@ecoflow/accessories/batteries/deltapro3/simulations/deltaPro3Simulator';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
+import { GlacierAccessory } from '@ecoflow/accessories/glacier/glacierAccessory';
+import { GlacierSimulator } from '@ecoflow/accessories/glacier/simulations/glacierSimulator';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { PowerStreamSimulator } from '@ecoflow/accessories/powerstream/simulations/powerStreamSimulator';
 import { SmartPlugSimulator } from '@ecoflow/accessories/smartplug/simulations/smartPlugSimulator';
@@ -260,6 +262,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       case DeviceModel.SmartPlug:
         EcoFlowAccessoryType = SmartPlugAccessory;
         EcoFlowAccessorySimulatorType = SmartPlugSimulator;
+        break;
+      case DeviceModel.Glacier:
+        EcoFlowAccessoryType = GlacierAccessory;
+        EcoFlowAccessorySimulatorType = GlacierSimulator;
         break;
       default:
         log.warn(`"${config.model}" is not supported. Ignoring the device`);

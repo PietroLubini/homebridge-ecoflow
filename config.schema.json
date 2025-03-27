@@ -32,7 +32,7 @@
               "type": "string",
               "default": "Delta 2",
               "required": true,
-              "enum": ["Delta 2", "Delta 2 Max", "Delta Pro 3", "PowerStream", "Smart Plug"]
+              "enum": ["Delta 2", "Delta 2 Max", "Delta Pro 3", "PowerStream", "Smart Plug", "Glacier"]
             },
             "serialNumber": {
               "title": "Serial Number",

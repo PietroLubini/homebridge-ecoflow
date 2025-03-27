@@ -38,7 +38,7 @@ export interface SmartPlugMqttSetMessageWithParams<TParams extends SmartPlugMqtt
   extends MqttSetMessageWithParams<TParams>,
     SmartPlugMqttSetMessage {}
 
-export interface SmartPlugSwitchMqttSetMessageParams extends SmartPlugMqttSetMessageParams {
+export interface SmartPlugMqttSetSwitchMessageParams extends SmartPlugMqttSetMessageParams {
   plugSwitch: EnableType;
 }
 

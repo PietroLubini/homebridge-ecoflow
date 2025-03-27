@@ -13,6 +13,7 @@ export enum DeviceModel {
   // DeltaProUltra = 'Delta Pro Ultra',
   PowerStream = 'PowerStream',
   SmartPlug = 'Smart Plug',
+  Glacier = 'Glacier',
 }
 
 export enum LocationType {
