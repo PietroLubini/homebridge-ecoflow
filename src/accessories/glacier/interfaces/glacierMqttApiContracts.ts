@@ -46,9 +46,9 @@ export interface GlacierMqttSetMessageWithParams<TParams extends GlacierMqttSetM
     GlacierMqttSetMessage {}
 
 export interface GlacierMqttSetTemperatureMessageParams extends GlacierMqttSetMessageParams {
-  tmpR: number;
-  tmpL: number;
-  tmpM: number;
+  tmpR?: number; // TODO: should be verified that could be set separately
+  tmpL?: number;
+  tmpM?: number;
 }
 
 export interface GlacierMqttSetTemperatureUnitMessageParams extends GlacierMqttSetMessageParams {

@@ -18,8 +18,8 @@ import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
-import { BatteryOutletServiceBase } from '@ecoflow/services/batteryOutletServiceBase';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
+import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
@@ -83,12 +83,12 @@ describe('DeltaProAccessory', () => {
       return serviceMock;
     }
 
-    function initOutletService<TService extends BatteryOutletServiceBase>(
+    function initOutletService<TService extends OutletBatteryServiceBase>(
       Module: object,
       service: TService
     ): jest.Mocked<TService> {
       return initService(Module, service, mock => {
-        const mockOutletBase = mock as jest.Mocked<BatteryOutletServiceBase>;
+        const mockOutletBase = mock as jest.Mocked<OutletBatteryServiceBase>;
         mockOutletBase.updateBatteryLevel.mockReset();
         mockOutletBase.updateChargingState.mockReset();
         mockOutletBase.updateInputConsumption.mockReset();

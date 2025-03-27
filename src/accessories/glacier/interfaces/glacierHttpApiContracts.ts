@@ -40,16 +40,19 @@ export interface BmsStatus {
   amp?: number; // Current (mA) (read)
 }
 
-export interface PdStatusTemperature {
+export interface PdStatusFridgeZones {
+  pwrState?: EnableType; //Device state (0: Powered off; 1: Powered on) (read)
   coolZoneDoubleCount?: CoolingZoneType; //Count of dual temperature zones (read)
   tmpUnit?: TemperatureType; // Temperature type 0: Celsius; 1: Fahrenheit (read)
   tmpR?: number; // Real-time temperature of the right temperature zone, amplified 10 times (read)
   tmpL?: number; // Real-time temperature of the left temperature zone, amplified 10 times (read)
   tmpAver?: number; // Real-time temperature of single temperature zone, amplified 10 times (read)
+  tmpRSet?: number; // Set temperature of the right temperature zone (valid when partition is inserted) (read)
+  tmpLSet?: number; // Set temperature of the left temperature zone (valid when partition is inserted) (read)
+  tmpMSet?: number; // Set temperature of the combined temperature zone (valid when the partition is removed) (read)
 }
 
 export interface PdStatusState {
-  pwrState?: EnableType; //Device state (0: Powered off; 1: Powered on) (read/write)
   coolMode?: CoolModeType; //Cool mode (0: Normal; 1: Eco) (read/write)
   doorStat?: ContactSensorType; //Door status detection (1: Open; 0: Closed) (read)
 }
@@ -64,7 +67,7 @@ export interface PdStatusIceMaking {
   iceMkMode?: IceCubeStatusType;
 }
 
-export interface PdStatus extends PdStatusTemperature, PdStatusState, PdStatusIceMaking {}
+export interface PdStatus extends PdStatusFridgeZones, PdStatusState, PdStatusIceMaking {}
 
 export interface GlacierAllQuotaData {
   bms_emsStatus: EmsStatus;

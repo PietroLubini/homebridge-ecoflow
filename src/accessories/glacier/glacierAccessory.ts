@@ -1,16 +1,27 @@
+import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import {
   BmsStatus,
+  ContactSensorType,
+  CoolingZoneType,
+  CoolModeType,
   EmsStatus,
   GlacierAllQuotaData,
   PdStatus,
+  PdStatusFridgeZones,
+  PdStatusIceMaking,
+  PdStatusState,
 } from '@ecoflow/accessories/glacier/interfaces/glacierHttpApiContracts';
 import {
   GlacierMqttMessageType,
   GlacierMqttQuotaMessage,
   GlacierMqttQuotaMessageWithParams,
 } from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
-import { ThermostatService } from '@ecoflow/accessories/glacier/services/thermostatService';
+import { OutletBatteryService } from '@ecoflow/accessories/glacier/services/outletBatteryService';
+import { SwitchEcoModeService } from '@ecoflow/accessories/glacier/services/switchEcoModeService';
+import { ThermostatFridgeDualLeftZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeDualLeftZoneService';
+import { ThermostatFridgeDualRightZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeDualRightZoneService';
+import { ThermostatFridgeSingleZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeSingleZoneService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/interfaces/mqttApiContracts';
@@ -18,13 +29,19 @@ import { DeviceConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
+import { ContactSensorService } from '@ecoflow/services/contactSensorService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
+import { CoolerStateType } from '@ecoflow/services/thermostatFridgeServiceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQuotaData> {
   private readonly batteryStatusService: BatteryStatusService;
-  private readonly thermostatService: ThermostatService;
-  // private readonly switchXboostService: SwitchXboostService;
+  private readonly fridgeDualLeftZoneService: ThermostatFridgeDualLeftZoneService;
+  private readonly fridgeDualRightZoneService: ThermostatFridgeDualRightZoneService;
+  private readonly fridgeSingleZoneService: ThermostatFridgeSingleZoneService;
+  private readonly switchEcoModeService: SwitchEcoModeService;
+  private readonly contactSensorDoorService: ContactSensorService;
+  private readonly outletBatteryService: OutletBatteryService;
 
   constructor(
     platform: EcoFlowHomebridgePlatform,
@@ -37,15 +54,23 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
     this.batteryStatusService = new BatteryStatusService(this, batteryStatusProvider);
-    this.thermostatService = new ThermostatService(this);
-    // this.switchXboostService = new SwitchXboostService(this, configuration.setAcModuleType);
+    this.fridgeDualLeftZoneService = new ThermostatFridgeDualLeftZoneService(this);
+    this.fridgeDualRightZoneService = new ThermostatFridgeDualRightZoneService(this);
+    this.fridgeSingleZoneService = new ThermostatFridgeSingleZoneService(this);
+    this.switchEcoModeService = new SwitchEcoModeService(this);
+    this.contactSensorDoorService = new ContactSensorService(this, 'Door');
+    this.outletBatteryService = new OutletBatteryService(this, batteryStatusProvider);
   }
 
   protected override getServices(): ServiceBase[] {
     return [
       this.batteryStatusService,
-      this.thermostatService,
-      // this.switchXboostService,
+      this.fridgeDualLeftZoneService,
+      this.fridgeDualRightZoneService,
+      this.fridgeSingleZoneService,
+      this.switchEcoModeService,
+      this.contactSensorDoorService,
+      this.outletBatteryService,
     ];
   }
 
@@ -113,6 +138,7 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
   private updateEmsValues(params: EmsStatus): void {
     if (params.lcdSoc !== undefined && params.minDsgSoc !== undefined) {
       this.batteryStatusService.updateBatteryLevel(params.lcdSoc, params.minDsgSoc);
+      this.outletBatteryService.updateBatteryLevel(params.lcdSoc, params.minDsgSoc);
     }
   }
 
@@ -120,13 +146,74 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
     if (params.inWatts !== undefined) {
       const isCharging = params.inWatts > 0 && (params.outWatts === undefined || params.inWatts !== params.outWatts);
       this.batteryStatusService.updateChargingState(isCharging);
-      // this.outletAcService.updateChargingState(isCharging);
-      // this.outletAcService.updateInputConsumption(params.inputWatts);
+      this.outletBatteryService.updateChargingState(isCharging);
+      this.outletBatteryService.updateInputConsumption(params.inWatts);
     }
     if (params.outWatts !== undefined) {
-      // this.outletAcService.updateOutputConsumption(params.outWatts);
+      this.outletBatteryService.updateOutputConsumption(params.outWatts);
     }
   }
 
-  private updatePdValues(params: PdStatus): void {}
+  private updatePdValues(params: PdStatus): void {
+    this.updateFridgeZonesValues(params);
+    this.updateStateValues(params);
+    this.updateIceMakingValues(params);
+  }
+
+  private updateFridgeZonesValues(params: PdStatusFridgeZones): void {
+    if (params.pwrState !== undefined) {
+      const coolerState = params.pwrState === EnableType.On ? CoolerStateType.Cool : CoolerStateType.Off;
+      this.fridgeSingleZoneService.updateTargetState(coolerState);
+      this.fridgeDualLeftZoneService.updateTargetState(coolerState);
+      this.fridgeDualRightZoneService.updateTargetState(coolerState);
+      this.outletBatteryService.updateState(params.pwrState === EnableType.On);
+    }
+    if (params.coolZoneDoubleCount !== undefined && params.coolZoneDoubleCount === CoolingZoneType.Dual) {
+      this.changeEnabledServiceState(this.fridgeSingleZoneService, false);
+      this.changeEnabledServiceState(this.fridgeDualLeftZoneService, true);
+      this.changeEnabledServiceState(this.fridgeDualRightZoneService, true);
+    }
+    if (params.coolZoneDoubleCount !== undefined && params.coolZoneDoubleCount === CoolingZoneType.Single) {
+      this.changeEnabledServiceState(this.fridgeSingleZoneService, true);
+      this.changeEnabledServiceState(this.fridgeDualLeftZoneService, false);
+      this.changeEnabledServiceState(this.fridgeDualRightZoneService, false);
+    }
+    if (params.tmpL !== undefined) {
+      this.fridgeDualLeftZoneService.updateCurrentTemperature(params.tmpL);
+    }
+    if (params.tmpR !== undefined) {
+      this.fridgeDualRightZoneService.updateCurrentTemperature(params.tmpR);
+    }
+    if (params.tmpAver !== undefined) {
+      this.fridgeSingleZoneService.updateCurrentTemperature(params.tmpAver);
+    }
+    if (params.tmpLSet !== undefined) {
+      this.fridgeDualLeftZoneService.updateTargetTemperature(params.tmpLSet);
+    }
+    if (params.tmpRSet !== undefined) {
+      this.fridgeDualRightZoneService.updateTargetTemperature(params.tmpRSet);
+    }
+    if (params.tmpMSet !== undefined) {
+      this.fridgeSingleZoneService.updateTargetTemperature(params.tmpMSet);
+    }
+  }
+
+  private updateStateValues(params: PdStatusState): void {
+    if (params.coolMode !== undefined) {
+      this.switchEcoModeService.updateState(params.coolMode === CoolModeType.Eco);
+    }
+    if (params.doorStat !== undefined) {
+      this.contactSensorDoorService.updateState(params.doorStat === ContactSensorType.Closed);
+    }
+  }
+
+  private updateIceMakingValues(params: PdStatusIceMaking): void {
+    // TODO
+  }
+
+  private changeEnabledServiceState(service: ServiceBase, enable: boolean): void {
+    service.service
+      .getCharacteristic(this.platform.Characteristic.Active)
+      .updateValue(enable ? this.platform.Characteristic.Active.ACTIVE : this.platform.Characteristic.Active.INACTIVE);
+  }
 }

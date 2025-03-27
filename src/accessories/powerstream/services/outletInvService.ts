@@ -1,9 +1,9 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
-import { BatteryOutletServiceBase } from '@ecoflow/services/batteryOutletServiceBase';
+import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
 
-export class OutletInvService extends BatteryOutletServiceBase {
+export class OutletInvService extends OutletBatteryServiceBase {
   constructor(
     ecoFlowAccessory: EcoFlowAccessoryBase,
     batteryStatusProvider: BatteryStatusProvider,

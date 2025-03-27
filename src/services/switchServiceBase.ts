@@ -2,9 +2,9 @@ import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase'
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic, CharacteristicValue } from 'homebridge';
 
-export abstract class SwitchXboostServiceBase extends ServiceBase {
-  constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
-    super(ecoFlowAccessory.platform.Service.Switch, ecoFlowAccessory, 'X-Boost');
+export abstract class SwitchServiceBase extends ServiceBase {
+  constructor(ecoFlowAccessory: EcoFlowAccessoryBase, serviceSubType: string) {
+    super(ecoFlowAccessory.platform.Service.Switch, ecoFlowAccessory, serviceSubType);
   }
 
   public updateState(state: boolean): void {

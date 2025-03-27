@@ -4,9 +4,9 @@ import {
   Delta2MqttSetModuleType,
   Delta2MqttSetOperationType,
 } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
-import { BatteryOutletServiceBase } from '@ecoflow/services/batteryOutletServiceBase';
+import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
 
-export abstract class Delta2OutletServiceBase extends BatteryOutletServiceBase {
+export abstract class Delta2OutletServiceBase extends OutletBatteryServiceBase {
   protected sendOn<TParams extends Delta2MqttSetMessageParams>(
     moduleType: Delta2MqttSetModuleType,
     operateType: Delta2MqttSetOperationType,

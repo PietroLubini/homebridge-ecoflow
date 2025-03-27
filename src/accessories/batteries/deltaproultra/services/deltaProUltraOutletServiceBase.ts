@@ -3,9 +3,9 @@ import {
   DeltaProUltraMqttSetMessageParams,
   DeltaProUltraMqttSetMessageWithParams,
 } from '@ecoflow/accessories/batteries/deltaproultra/interfaces/deltaProUltraMqttApiContracts';
-import { BatteryOutletServiceBase } from '@ecoflow/services/batteryOutletServiceBase';
+import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
 
-export abstract class DeltaProUltraOutletServiceBase extends BatteryOutletServiceBase {
+export abstract class DeltaProUltraOutletServiceBase extends OutletBatteryServiceBase {
   protected sendOn<TParams extends DeltaProUltraMqttSetMessageParams>(
     cmdCode: DeltaProUltraMqttSetCmdCodeType,
     params: TParams,
