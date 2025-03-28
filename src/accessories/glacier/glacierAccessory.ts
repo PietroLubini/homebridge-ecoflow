@@ -121,9 +121,11 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
   protected override updateInitialValues(initialData: GlacierAllQuotaData): void {
     this.log.debug('Inactivating fridgeDualLeftZoneService');
     this.changeEnabledServiceState(this.fridgeDualLeftZoneService, false);
-    this.updateEmsInitialValues(initialData.bms_emsStatus);
-    this.updateBmsInitialValues(initialData.bms_bmsStatus);
-    this.updatePdInitialValues(initialData.pd);
+    this.log.debug('Inactivating switchMakeIceSmallService');
+    this.changeEnabledServiceState(this.switchMakeIceSmallService, false);
+    // this.updateEmsInitialValues(initialData.bms_emsStatus);
+    // this.updateBmsInitialValues(initialData.bms_bmsStatus);
+    // this.updatePdInitialValues(initialData.pd);
   }
 
   private updateEmsInitialValues(params: EmsStatus): void {

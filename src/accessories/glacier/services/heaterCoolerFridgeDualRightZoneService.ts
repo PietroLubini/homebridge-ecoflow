@@ -8,7 +8,7 @@ import { GlacierHeaterCoolerFridgeServiceBase } from '@ecoflow/accessories/glaci
 
 export class HeaterCoolerFridgeDualRightZoneService extends GlacierHeaterCoolerFridgeServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<GlacierAllQuotaData>) {
-    super(ecoFlowAccessory, 'Dual Right Zone');
+    super(ecoFlowAccessory, 'Dual Right Zone HC');
   }
 
   protected override processOnSetTargetTemperature(value: number, revert: () => void): Promise<void> {
