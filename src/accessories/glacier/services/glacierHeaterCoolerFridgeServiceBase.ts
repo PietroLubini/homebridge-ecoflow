@@ -8,16 +8,16 @@ import {
   GlacierMqttSetTemperatureUnitMessageParams,
 } from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
 import { TemperatureDisplayUnitsType } from '@ecoflow/characteristics/characteristicContracts';
-import { ThermostatFridgeServiceBase } from '@ecoflow/services/thermostatFridgeServiceBase';
+import { HeaterCoolerFridgeServiceBase } from '@ecoflow/services/heaterCoolerFridgeServiceBase';
 
-export abstract class GlacierThermostatFridgeServiceBase extends ThermostatFridgeServiceBase {
+export abstract class GlacierHeaterCoolerFridgeServiceBase extends HeaterCoolerFridgeServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<GlacierAllQuotaData>, serviceSubType: string) {
     super(ecoFlowAccessory, -25, 10, serviceSubType);
   }
 
-  protected override processOnSetTargetState(): Promise<void> {
-    throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.READ_ONLY_CHARACTERISTIC);
-  }
+  // protected override processOnSetTargetState(): Promise<void> {
+  //   throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.READ_ONLY_CHARACTERISTIC);
+  // }
 
   protected override processOnSetTemperatureDisplayUnits(
     value: TemperatureDisplayUnitsType,

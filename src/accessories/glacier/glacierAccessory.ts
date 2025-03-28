@@ -17,31 +17,33 @@ import {
   GlacierMqttQuotaMessage,
   GlacierMqttQuotaMessageWithParams,
 } from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
+import { HeaterCoolerFridgeDualLeftZoneService } from '@ecoflow/accessories/glacier/services/heaterCoolerFridgeDualLeftZoneService';
 import { OutletBatteryService } from '@ecoflow/accessories/glacier/services/outletBatteryService';
 import { SwitchEcoModeService } from '@ecoflow/accessories/glacier/services/switchEcoModeService';
-import { ThermostatFridgeDualLeftZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeDualLeftZoneService';
 import { ThermostatFridgeDualRightZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeDualRightZoneService';
 import { ThermostatFridgeSingleZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeSingleZoneService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { FridgeStateType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
 import { ContactSensorService } from '@ecoflow/services/contactSensorService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
-import { CoolerStateType } from '@ecoflow/services/thermostatFridgeServiceBase';
+import { StatefulProgSwitchService } from '@ecoflow/services/statefullProgSwitchServiceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQuotaData> {
   private readonly batteryStatusService: BatteryStatusService;
-  private readonly fridgeDualLeftZoneService: ThermostatFridgeDualLeftZoneService;
+  private readonly fridgeDualLeftZoneService: HeaterCoolerFridgeDualLeftZoneService;
   private readonly fridgeDualRightZoneService: ThermostatFridgeDualRightZoneService;
   private readonly fridgeSingleZoneService: ThermostatFridgeSingleZoneService;
   private readonly switchEcoModeService: SwitchEcoModeService;
   private readonly contactSensorDoorService: ContactSensorService;
   private readonly outletBatteryService: OutletBatteryService;
+  private readonly statefulProgSwitchService: StatefulProgSwitchService;
 
   constructor(
     platform: EcoFlowHomebridgePlatform,
@@ -54,12 +56,13 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
     this.batteryStatusService = new BatteryStatusService(this, batteryStatusProvider);
-    this.fridgeDualLeftZoneService = new ThermostatFridgeDualLeftZoneService(this);
+    this.fridgeDualLeftZoneService = new HeaterCoolerFridgeDualLeftZoneService(this);
     this.fridgeDualRightZoneService = new ThermostatFridgeDualRightZoneService(this);
     this.fridgeSingleZoneService = new ThermostatFridgeSingleZoneService(this);
     this.switchEcoModeService = new SwitchEcoModeService(this);
     this.contactSensorDoorService = new ContactSensorService(this, 'Door');
     this.outletBatteryService = new OutletBatteryService(this, batteryStatusProvider);
+    this.statefulProgSwitchService = new StatefulProgSwitchService(this, 'Make Ice');
   }
 
   protected override getServices(): ServiceBase[] {
@@ -71,6 +74,7 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
       this.switchEcoModeService,
       this.contactSensorDoorService,
       this.outletBatteryService,
+      this.statefulProgSwitchService,
     ];
   }
 
@@ -162,7 +166,7 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
 
   private updateFridgeZonesValues(params: PdStatusFridgeZones): void {
     if (params.pwrState !== undefined) {
-      const coolerState = params.pwrState === EnableType.On ? CoolerStateType.Cool : CoolerStateType.Off;
+      const coolerState = params.pwrState === EnableType.On ? FridgeStateType.On : FridgeStateType.Off;
       this.fridgeSingleZoneService.updateTargetState(coolerState);
       this.fridgeDualLeftZoneService.updateTargetState(coolerState);
       this.fridgeDualRightZoneService.updateTargetState(coolerState);

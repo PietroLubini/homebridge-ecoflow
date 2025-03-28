@@ -2,14 +2,16 @@ import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase'
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { GlacierAllQuotaData } from '@ecoflow/accessories/glacier/interfaces/glacierHttpApiContracts';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
+import {
+  CurrentHeatingCoolingStateType,
+  FridgeStateType,
+  TargetHeatingCoolingStateType,
+  TemperatureDisplayUnitsType,
+} from '@ecoflow/characteristics/characteristicContracts';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
-import {
-  CoolerStateType,
-  TemperatureDisplayUnitsType,
-  ThermostatFridgeServiceBase,
-} from '@ecoflow/services/thermostatFridgeServiceBase';
+import { ThermostatFridgeServiceBase } from '@ecoflow/services/thermostatFridgeServiceBase';
 import { Characteristic as HapCharacteristic, Service as HapService, HapStatusError } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
@@ -68,11 +70,11 @@ describe('ThermostatFridgeServiceBase', () => {
     },
     {
       UUID: HapCharacteristic.CurrentHeatingCoolingState.UUID,
-      value: CoolerStateType.Off,
+      value: CurrentHeatingCoolingStateType.Off,
     },
     {
       UUID: HapCharacteristic.TargetHeatingCoolingState.UUID,
-      value: CoolerStateType.Off,
+      value: TargetHeatingCoolingStateType.Off,
     },
     {
       UUID: HapCharacteristic.TemperatureDisplayUnits.UUID,
@@ -226,7 +228,7 @@ describe('ThermostatFridgeServiceBase', () => {
     });
 
     it('should set current state to Cool when it is requested', () => {
-      service.updateCurrentState(CoolerStateType.Cool);
+      service.updateCurrentState(FridgeStateType.On);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.CurrentHeatingCoolingState).value;
 
@@ -235,8 +237,8 @@ describe('ThermostatFridgeServiceBase', () => {
     });
 
     it('should set current state to Off when it is requested', () => {
-      service.updateCurrentState(CoolerStateType.Cool);
-      service.updateCurrentState(CoolerStateType.Off);
+      service.updateCurrentState(FridgeStateType.On);
+      service.updateCurrentState(FridgeStateType.Off);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.CurrentHeatingCoolingState).value;
 
@@ -248,12 +250,12 @@ describe('ThermostatFridgeServiceBase', () => {
     });
 
     it('should set current state to Off when update requested for unsupported value', () => {
-      service.updateCurrentState(1 as CoolerStateType);
+      service.updateCurrentState(100 as FridgeStateType);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.CurrentHeatingCoolingState).value;
 
       expect(actual).toEqual(0);
-      expect(logMock.debug).toHaveBeenCalledWith('MOCK Current State ->', 1);
+      expect(logMock.debug).toHaveBeenCalledWith('MOCK Current State ->', 0);
     });
   });
 
@@ -264,7 +266,7 @@ describe('ThermostatFridgeServiceBase', () => {
     });
 
     it('should set target state to Cool when it is requested', () => {
-      service.updateTargetState(CoolerStateType.Cool);
+      service.updateTargetState(FridgeStateType.On);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.TargetHeatingCoolingState).value;
 
@@ -273,8 +275,8 @@ describe('ThermostatFridgeServiceBase', () => {
     });
 
     it('should set target state to Off when it is requested', () => {
-      service.updateTargetState(CoolerStateType.Cool);
-      service.updateTargetState(CoolerStateType.Off);
+      service.updateTargetState(FridgeStateType.On);
+      service.updateTargetState(FridgeStateType.Off);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.TargetHeatingCoolingState).value;
 
@@ -286,12 +288,12 @@ describe('ThermostatFridgeServiceBase', () => {
     });
 
     it('should set target state to Off when update requested for unsupported value', () => {
-      service.updateTargetState(1 as CoolerStateType);
+      service.updateTargetState(100 as FridgeStateType);
 
       const actual = service.service.getCharacteristic(HapCharacteristic.TargetHeatingCoolingState).value;
 
       expect(actual).toEqual(0);
-      expect(logMock.debug).toHaveBeenCalledWith('MOCK Target State ->', 1);
+      expect(logMock.debug).toHaveBeenCalledWith('MOCK Target State ->', 0);
     });
   });
 
@@ -358,12 +360,12 @@ describe('ThermostatFridgeServiceBase', () => {
     });
 
     it('should revert changing of Target State when it is failed', () => {
-      characteristic.setValue(CoolerStateType.Cool);
+      characteristic.setValue(TargetHeatingCoolingStateType.Cool);
       logMock.debug.mockReset();
       const processOnSetTargetStateMock = jest.fn();
       service.processOnSetTargetState = processOnSetTargetStateMock;
 
-      characteristic.setValue(CoolerStateType.Off);
+      characteristic.setValue(TargetHeatingCoolingStateType.Off);
       const revertFunc = processOnSetTargetStateMock.mock.calls[0][1];
       revertFunc();
 

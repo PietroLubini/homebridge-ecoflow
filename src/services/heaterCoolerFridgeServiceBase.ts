@@ -1,16 +1,16 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import {
-  CurrentHeatingCoolingStateType,
+  CurrenttHeaterCoolerStateType,
   FridgeStateType,
-  TargetHeatingCoolingStateType,
+  TargetHeaterCoolerStateType,
   TemperatureDisplayUnitsType,
 } from '@ecoflow/characteristics/characteristicContracts';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic, CharacteristicValue } from 'homebridge';
 
-export abstract class ThermostatFridgeServiceBase extends ServiceBase {
+export abstract class HeaterCoolerFridgeServiceBase extends ServiceBase {
   private currentTargetTemperature: number = 0;
-  private currentTargetFridgeState: FridgeStateType = FridgeStateType.Off;
+  // private currentTargetFridgeState: FridgeStateType = FridgeStateType.Off;
   private currentTemperatureDisplayUnits: number = 0;
 
   constructor(
@@ -19,7 +19,7 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
     private readonly maxTemperature: number,
     serviceSubType: string
   ) {
-    super(ecoFlowAccessory.platform.Service.Thermostat, ecoFlowAccessory, serviceSubType);
+    super(ecoFlowAccessory.platform.Service.HeaterCooler, ecoFlowAccessory, serviceSubType);
   }
 
   public updateCurrentTemperature(value: number): void {
@@ -32,17 +32,17 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
 
   public updateCurrentState(value: FridgeStateType): void {
     this.updateCharacteristic(
-      this.platform.Characteristic.CurrentHeatingCoolingState,
+      this.platform.Characteristic.CurrentHeaterCoolerState,
       'Current State',
-      value === FridgeStateType.On ? CurrentHeatingCoolingStateType.Cool : CurrentHeatingCoolingStateType.Off
+      value === FridgeStateType.On ? CurrenttHeaterCoolerStateType.Cooling : CurrenttHeaterCoolerStateType.Inactive
     );
   }
 
   public updateTargetState(value: FridgeStateType): void {
     this.updateCharacteristic(
-      this.platform.Characteristic.TargetHeatingCoolingState,
+      this.platform.Characteristic.TargetHeaterCoolerState,
       'Target State',
-      value === FridgeStateType.On ? TargetHeatingCoolingStateType.Cool : TargetHeatingCoolingStateType.Off
+      value === FridgeStateType.On ? TargetHeaterCoolerStateType.Cool : TargetHeaterCoolerStateType.Auto
     );
   }
 
@@ -54,8 +54,8 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
     const characteristics = [
       this.addCurrentTemperatureCharacteristic(),
       this.addTargetTemperatureCharacteristic(),
-      this.addCurrentHeatingCoolingStateCharacteristic(),
-      this.addTargetHeatingCoolingStateCharacteristic(),
+      this.addCurrentHeaterCoolerStateCharacteristic(),
+      this.addTargetHeaterCoolerStateCharacteristic(),
       this.addTemperatureDisplayUnitsCharacteristic(),
     ];
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.serviceName);
@@ -65,7 +65,7 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
 
   protected abstract processOnSetTargetTemperature(value: number, revert: () => void): Promise<void>;
 
-  protected abstract processOnSetTargetState(value: FridgeStateType, revert: () => void): Promise<void>;
+  // protected abstract processOnSetTargetState(value: FridgeStateType, revert: () => void): Promise<void>;
 
   protected abstract processOnSetTemperatureDisplayUnits(
     value: TemperatureDisplayUnitsType,
@@ -97,25 +97,22 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
     return characteristic;
   }
 
-  private addCurrentHeatingCoolingStateCharacteristic(): Characteristic {
+  private addCurrentHeaterCoolerStateCharacteristic(): Characteristic {
     const characteristic = this.addCharacteristic(this.platform.Characteristic.CurrentHeatingCoolingState).setProps({
-      validValues: [TargetHeatingCoolingStateType.Off, TargetHeatingCoolingStateType.Cool],
+      validValues: [CurrenttHeaterCoolerStateType.Inactive, CurrenttHeaterCoolerStateType.Cooling],
     });
     return characteristic;
   }
 
-  private addTargetHeatingCoolingStateCharacteristic(): Characteristic {
+  private addTargetHeaterCoolerStateCharacteristic(): Characteristic {
     const characteristic = this.addCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState).setProps({
-      validValues: [TargetHeatingCoolingStateType.Off, TargetHeatingCoolingStateType.Cool],
+      validValues: [TargetHeaterCoolerStateType.Cool],
     });
-    characteristic.onSet((value: CharacteristicValue) => {
-      const prevTargetFridgeState = this.currentTargetFridgeState;
-      this.currentTargetFridgeState =
-        (value as TargetHeatingCoolingStateType) === TargetHeatingCoolingStateType.Cool
-          ? FridgeStateType.On
-          : FridgeStateType.Off;
-      this.processOnSetTargetState(this.currentTargetFridgeState, () => this.updateTargetState(prevTargetFridgeState));
-    });
+    // characteristic.onSet((value: CharacteristicValue) => {
+    //   const prevTargetState = this.currentTargetState;
+    //   this.currentTargetState = value as CoolerStateType;
+    //   this.processOnSetTargetState(this.currentTargetState, () => this.updateTargetState(prevTargetState));
+    // });
     return characteristic;
   }
 
