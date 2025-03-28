@@ -98,14 +98,14 @@ export abstract class HeaterCoolerFridgeServiceBase extends ServiceBase {
   }
 
   private addCurrentHeaterCoolerStateCharacteristic(): Characteristic {
-    const characteristic = this.addCharacteristic(this.platform.Characteristic.CurrentHeatingCoolingState).setProps({
+    const characteristic = this.addCharacteristic(this.platform.Characteristic.CurrentHeaterCoolerState).setProps({
       // validValues: [CurrenttHeaterCoolerStateType.Inactive, CurrenttHeaterCoolerStateType.Cooling],
     });
     return characteristic;
   }
 
   private addTargetHeaterCoolerStateCharacteristic(): Characteristic {
-    const characteristic = this.addCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState).setProps({
+    const characteristic = this.addCharacteristic(this.platform.Characteristic.TargetHeaterCoolerState).setProps({
       // validValues: [TargetHeaterCoolerStateType.Cool],
     });
     // characteristic.onSet((value: CharacteristicValue) => {

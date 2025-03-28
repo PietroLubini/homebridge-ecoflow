@@ -56,7 +56,7 @@ export class MockMqttClient extends MqttClient {
       this.subscriptionTopics
         .filter(topic => topic.endsWith('quota'))
         .forEach(topic => {
-          // this.emitMessage(topic, this.simulator!.generateQuota());
+          this.emitMessage(topic, this.simulator!.generateQuota());
         });
     }
   }
