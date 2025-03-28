@@ -1,10 +1,10 @@
-import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import {
   SmartPlugMqttSetCmdCodeType,
   SmartPlugMqttSetMessageWithParams,
   SmartPlugMqttSetSwitchMessageParams,
 } from '@ecoflow/accessories/smartplug/interfaces/smartPlugMqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { AdditionalOutletCharacteristicType as OutletCharacteristicType } from '@ecoflow/config';
 import { OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 

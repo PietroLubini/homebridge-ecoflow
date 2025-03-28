@@ -5,14 +5,11 @@ import { OutletAcService } from '@ecoflow/accessories/batteries/deltapro/service
 import { OutletCarService } from '@ecoflow/accessories/batteries/deltapro/services/outletCarService';
 import { OutletUsbService } from '@ecoflow/accessories/batteries/deltapro/services/outletUsbService';
 import { SwitchXboostService } from '@ecoflow/accessories/batteries/deltapro/services/switchXboostService';
-import {
-  AcEnableType,
-  AcXBoostType,
-  EnableType,
-} from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
+import { AcEnableType, AcXBoostType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';

@@ -1,4 +1,3 @@
-import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { CoolModeType, TemperatureType } from '@ecoflow/accessories/glacier/interfaces/glacierHttpApiContracts';
 import {
   MqttQuotaMessage,
@@ -7,6 +6,7 @@ import {
   MqttSetMessageWithParams,
   MqttSetReplyMessage,
 } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 
 export enum GlacierMqttSetModuleType {
   Default = 1,

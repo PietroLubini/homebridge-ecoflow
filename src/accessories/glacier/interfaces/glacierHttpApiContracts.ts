@@ -1,4 +1,4 @@
-import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 
 export enum CoolingZoneType {
   Single = 1,
@@ -15,11 +15,16 @@ export enum CoolModeType {
   Eco = 1,
 }
 
-export enum IceCubeStatusType {
+export enum MakeIceStatusType {
   SmallInPreparation = 0,
   LargeInPreparation = 1,
   SmallInProgress = 2,
   LargeInProgress = 3,
+}
+
+export enum DetachIceStatusType {
+  InProgress = 4,
+  Completed = 5,
 }
 
 export enum ContactSensorType {
@@ -42,7 +47,7 @@ export interface BmsStatus {
 
 export interface PdStatusFridgeZones {
   pwrState?: EnableType; //Device state (0: Powered off; 1: Powered on) (read)
-  coolZoneDoubleCount?: CoolingZoneType; //Count of dual temperature zones (read)
+  flagTwoZone?: CoolingZoneType; //Count of dual temperature zones (read)
   tmpUnit?: TemperatureType; // Temperature type 0: Celsius; 1: Fahrenheit (read)
   tmpR?: number; // Real-time temperature of the right temperature zone, amplified 10 times (read)
   tmpL?: number; // Real-time temperature of the left temperature zone, amplified 10 times (read)
@@ -64,7 +69,8 @@ export interface PdStatusIceMaking {
   // 1: Large ice cube (in preparation);
   // 2: Small ice cube (ice making in progress; cannot be changed);
   // 3: Large ice cube (ice making in progress)
-  iceMkMode?: IceCubeStatusType;
+  iceMkMode?: MakeIceStatusType;
+  fsmState?: DetachIceStatusType; //4: Detaching ice, 5: Detaching completed (read)
 }
 
 export interface PdStatus extends PdStatusFridgeZones, PdStatusState, PdStatusIceMaking {}

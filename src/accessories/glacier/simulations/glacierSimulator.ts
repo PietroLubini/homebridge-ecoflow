@@ -1,11 +1,11 @@
-import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import {
   BmsStatus,
   ContactSensorType,
   CoolingZoneType,
   CoolModeType,
+  DetachIceStatusType,
   EmsStatus,
-  IceCubeStatusType,
+  MakeIceStatusType,
   PdStatus,
   TemperatureType,
 } from '@ecoflow/accessories/glacier/interfaces/glacierHttpApiContracts';
@@ -16,6 +16,7 @@ import {
   GlacierMqttSetReplyMessage,
 } from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
 import { SimulatorTyped } from '@ecoflow/apis/simulations/simulator';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 
 export class GlacierSimulator extends SimulatorTyped<GlacierMqttSetMessage> {
   public override generateQuota(): object {
@@ -45,9 +46,10 @@ export class GlacierSimulator extends SimulatorTyped<GlacierMqttSetMessage> {
         typeCode: GlacierMqttMessageType.PD,
         params: {
           coolMode: this.getRandomBoolean() ? CoolModeType.Normal : CoolModeType.Eco,
-          coolZoneDoubleCount: this.getRandomBoolean() ? CoolingZoneType.Single : CoolingZoneType.Dual,
           doorStat: this.getRandomBoolean() ? ContactSensorType.Closed : ContactSensorType.Opened,
-          iceMkMode: this.getRandomBoolean() ? IceCubeStatusType.SmallInProgress : IceCubeStatusType.LargeInProgress,
+          flagTwoZone: this.getRandomBoolean() ? CoolingZoneType.Single : CoolingZoneType.Dual,
+          fsmState: this.getRandomNumber(2, 5) as DetachIceStatusType,
+          iceMkMode: this.getRandomBoolean() ? MakeIceStatusType.SmallInProgress : MakeIceStatusType.LargeInProgress,
           icePercent: this.getRandomNumber(0, 100),
           pwrState: this.getRandomBoolean() ? EnableType.Off : EnableType.On,
           tmpAver: this.getRandomNumber(-25, 10),

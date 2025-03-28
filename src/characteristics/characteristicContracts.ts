@@ -1,3 +1,8 @@
+export enum EnableType {
+  Off = 0,
+  On = 1,
+}
+
 // Service: HeaterCooler
 export enum CurrenttHeaterCoolerStateType {
   Inactive = 0,

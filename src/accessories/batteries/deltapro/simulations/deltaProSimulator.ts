@@ -9,9 +9,9 @@ import {
   AcEnableType,
   AcOutFrequencyType,
   AcXBoostType,
-  EnableType,
 } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { SimulatorTyped } from '@ecoflow/apis/simulations/simulator';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 
 export class DeltaProSimulator extends SimulatorTyped<DeltaProMqttSetMessageWithParams<DeltaProMqttSetMessageParams>> {
   public override generateQuota(): object {

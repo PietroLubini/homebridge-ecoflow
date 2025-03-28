@@ -1,8 +1,3 @@
-export enum EnableType {
-  Off = 0,
-  On = 1,
-}
-
 export enum AcEnableType {
   Off = 0,
   On = 1,

@@ -1,4 +1,3 @@
-import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import {
   Heartbeat,
@@ -17,6 +16,7 @@ import { PowerDemandService } from '@ecoflow/accessories/powerstream/services/po
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import {
   AdditionalBatteryOutletCharacteristicType as BatteryOutletCharacteristicType,
   AdditionalBatteryCharacteristicType as CharacteristicType,

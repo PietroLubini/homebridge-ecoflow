@@ -1,4 +1,3 @@
-import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { Heartbeat } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
 import {
   PowerStreamMqttMessageFuncType,
@@ -8,6 +7,7 @@ import {
 } from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
 import { MqttSetReplyMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { SimulatorTyped } from '@ecoflow/apis/simulations/simulator';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 
 export class PowerStreamSimulator extends SimulatorTyped<PowerStreamMqttSetMessage> {
   public override generateQuota(): object {
