@@ -15,7 +15,6 @@ import {
 } from '@ecoflow/accessories/glacier/interfaces/glacierHttpApiContracts';
 import {
   GlacierMqttMessageType,
-  GlacierMqttQuotaMessage,
   GlacierMqttQuotaMessageWithParams,
   IceCubeShapeType,
 } from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
@@ -28,7 +27,7 @@ import { SwitchMakeIceService } from '@ecoflow/accessories/glacier/services/swit
 import { ThermostatFridgeSingleZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeSingleZoneService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
-import { MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { EnableType, FridgeStateType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
@@ -93,20 +92,20 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
     this.log.debug('Inactivating switchMakeIceSmallService');
     this.changeEnabledServiceState(this.switchMakeIceSmallService, false);
 
-    const glacierMessage = message as GlacierMqttQuotaMessage;
-    if (glacierMessage.typeCode === GlacierMqttMessageType.EMS) {
-      const emsStatus = (message as MqttQuotaMessageWithParams<EmsStatus>).params;
-      Object.assign(this.quota.bms_emsStatus, emsStatus);
-      this.updateEmsValues(emsStatus);
-    } else if (glacierMessage.typeCode === GlacierMqttMessageType.BMS) {
-      const bmsStatus = (message as MqttQuotaMessageWithParams<BmsStatus>).params;
-      Object.assign(this.quota.bms_bmsStatus, bmsStatus);
-      this.updateBmsValues(bmsStatus);
-    } else if (glacierMessage.typeCode === GlacierMqttMessageType.PD) {
-      const pdStatus = (message as MqttQuotaMessageWithParams<PdStatus>).params;
-      Object.assign(this.quota.pd, pdStatus);
-      this.updatePdValues(pdStatus);
-    }
+    // const glacierMessage = message as GlacierMqttQuotaMessage;
+    // if (glacierMessage.typeCode === GlacierMqttMessageType.EMS) {
+    //   const emsStatus = (message as MqttQuotaMessageWithParams<EmsStatus>).params;
+    //   Object.assign(this.quota.bms_emsStatus, emsStatus);
+    //   this.updateEmsValues(emsStatus);
+    // } else if (glacierMessage.typeCode === GlacierMqttMessageType.BMS) {
+    //   const bmsStatus = (message as MqttQuotaMessageWithParams<BmsStatus>).params;
+    //   Object.assign(this.quota.bms_bmsStatus, bmsStatus);
+    //   this.updateBmsValues(bmsStatus);
+    // } else if (glacierMessage.typeCode === GlacierMqttMessageType.PD) {
+    //   const pdStatus = (message as MqttQuotaMessageWithParams<PdStatus>).params;
+    //   Object.assign(this.quota.pd, pdStatus);
+    //   this.updatePdValues(pdStatus);
+    // }
   }
 
   protected override initializeQuota(quota: GlacierAllQuotaData | null): GlacierAllQuotaData {
@@ -255,7 +254,14 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
 
   private changeEnabledServiceState(service: ServiceBase, enable: boolean): void {
     service.service
-      .getCharacteristic(this.platform.Characteristic.Active)
-      .updateValue(enable ? this.platform.Characteristic.Active.ACTIVE : this.platform.Characteristic.Active.INACTIVE);
+      .getCharacteristic(this.platform.Characteristic.StatusFault)
+      .updateValue(
+        enable
+          ? this.platform.Characteristic.StatusFault.NO_FAULT
+          : this.platform.Characteristic.StatusFault.GENERAL_FAULT
+      );
+    // service.service
+    //   .getCharacteristic(this.platform.Characteristic.Active)
+    //   .updateValue(enable ? this.platform.Characteristic.Active.ACTIVE : this.platform.Characteristic.Active.INACTIVE);
   }
 }
