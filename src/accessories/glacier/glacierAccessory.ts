@@ -88,6 +88,11 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
+    this.log.debug('Inactivating fridgeDualLeftZoneService');
+    this.changeEnabledServiceState(this.fridgeDualLeftZoneService, false);
+    this.log.debug('Inactivating switchMakeIceSmallService');
+    this.changeEnabledServiceState(this.switchMakeIceSmallService, false);
+
     const glacierMessage = message as GlacierMqttQuotaMessage;
     if (glacierMessage.typeCode === GlacierMqttMessageType.EMS) {
       const emsStatus = (message as MqttQuotaMessageWithParams<EmsStatus>).params;
@@ -119,13 +124,9 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
   }
 
   protected override updateInitialValues(initialData: GlacierAllQuotaData): void {
-    this.log.debug('Inactivating fridgeDualLeftZoneService');
-    this.changeEnabledServiceState(this.fridgeDualLeftZoneService, false);
-    this.log.debug('Inactivating switchMakeIceSmallService');
-    this.changeEnabledServiceState(this.switchMakeIceSmallService, false);
-    // this.updateEmsInitialValues(initialData.bms_emsStatus);
-    // this.updateBmsInitialValues(initialData.bms_bmsStatus);
-    // this.updatePdInitialValues(initialData.pd);
+    this.updateEmsInitialValues(initialData.bms_emsStatus);
+    this.updateBmsInitialValues(initialData.bms_bmsStatus);
+    this.updatePdInitialValues(initialData.pd);
   }
 
   private updateEmsInitialValues(params: EmsStatus): void {
