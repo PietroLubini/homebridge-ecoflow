@@ -87,7 +87,7 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
       maxValue: this.maxTemperature,
       minStep: 0.1,
     });
-    characteristic.onSet((value: CharacteristicValue) => {
+    this.addCharacteristicSet(characteristic, 'TargetTemperature', (value: CharacteristicValue) => {
       const prevTargetTemperature = this.currentTargetTemperature;
       this.currentTargetTemperature = value as number;
       this.processOnSetTargetTemperature(this.currentTargetTemperature, () =>
@@ -108,7 +108,7 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
     const characteristic = this.addCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState).setProps({
       validValues: [TargetHeatingCoolingStateType.Off, TargetHeatingCoolingStateType.Cool],
     });
-    characteristic.onSet((value: CharacteristicValue) => {
+    this.addCharacteristicSet(characteristic, 'TargetHeatingCoolingState', (value: CharacteristicValue) => {
       const prevTargetFridgeState = this.currentTargetFridgeState;
       this.currentTargetFridgeState =
         (value as TargetHeatingCoolingStateType) === TargetHeatingCoolingStateType.Cool
@@ -121,7 +121,7 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
 
   private addTemperatureDisplayUnitsCharacteristic(): Characteristic {
     const characteristic = this.addCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits);
-    characteristic.onSet((value: CharacteristicValue) => {
+    this.addCharacteristicSet(characteristic, 'TemperatureDisplayUnits', (value: CharacteristicValue) => {
       const prevTemperatureDisplayUnits = this.currentTemperatureDisplayUnits;
       this.currentTemperatureDisplayUnits = value as TemperatureDisplayUnitsType;
       this.processOnSetTemperatureDisplayUnits(this.currentTemperatureDisplayUnits, () =>

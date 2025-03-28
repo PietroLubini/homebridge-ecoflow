@@ -15,19 +15,20 @@ import {
 } from '@ecoflow/accessories/glacier/interfaces/glacierHttpApiContracts';
 import {
   GlacierMqttMessageType,
+  GlacierMqttQuotaMessage,
   GlacierMqttQuotaMessageWithParams,
   IceCubeShapeType,
 } from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
-import { HeaterCoolerFridgeDualLeftZoneService } from '@ecoflow/accessories/glacier/services/heaterCoolerFridgeDualLeftZoneService';
-import { HeaterCoolerFridgeDualRightZoneService } from '@ecoflow/accessories/glacier/services/heaterCoolerFridgeDualRightZoneService';
 import { OutletBatteryService } from '@ecoflow/accessories/glacier/services/outletBatteryService';
 import { SwitchDetachIceService } from '@ecoflow/accessories/glacier/services/switchDetachIceService';
 import { SwitchEcoModeService } from '@ecoflow/accessories/glacier/services/switchEcoModeService';
 import { SwitchMakeIceService } from '@ecoflow/accessories/glacier/services/switchMakeIceService';
+import { ThermostatFridgeDualLeftZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeDualLeftZoneService';
+import { ThermostatFridgeDualRightZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeDualRightZoneService';
 import { ThermostatFridgeSingleZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeSingleZoneService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
-import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { EnableType, FridgeStateType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
@@ -39,8 +40,8 @@ import { Logging, PlatformAccessory } from 'homebridge';
 
 export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQuotaData> {
   private readonly batteryStatusService: BatteryStatusService;
-  private readonly fridgeDualLeftZoneService: HeaterCoolerFridgeDualLeftZoneService;
-  private readonly fridgeDualRightZoneService: HeaterCoolerFridgeDualRightZoneService;
+  private readonly fridgeDualLeftZoneService: ThermostatFridgeDualLeftZoneService;
+  private readonly fridgeDualRightZoneService: ThermostatFridgeDualRightZoneService;
   private readonly fridgeSingleZoneService: ThermostatFridgeSingleZoneService;
   private readonly switchEcoModeService: SwitchEcoModeService;
   private readonly contactSensorDoorService: ContactSensorService;
@@ -60,8 +61,8 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
     this.batteryStatusService = new BatteryStatusService(this, batteryStatusProvider);
-    this.fridgeDualLeftZoneService = new HeaterCoolerFridgeDualLeftZoneService(this);
-    this.fridgeDualRightZoneService = new HeaterCoolerFridgeDualRightZoneService(this);
+    this.fridgeDualLeftZoneService = new ThermostatFridgeDualLeftZoneService(this);
+    this.fridgeDualRightZoneService = new ThermostatFridgeDualRightZoneService(this);
     this.fridgeSingleZoneService = new ThermostatFridgeSingleZoneService(this);
     this.switchEcoModeService = new SwitchEcoModeService(this);
     this.contactSensorDoorService = new ContactSensorService(this, 'Door');
@@ -87,25 +88,20 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
-    this.log.debug('Inactivating fridgeDualLeftZoneService');
-    this.changeEnabledServiceState(this.fridgeDualLeftZoneService, false);
-    this.log.debug('Inactivating switchMakeIceSmallService');
-    this.changeEnabledServiceState(this.switchMakeIceSmallService, false);
-
-    // const glacierMessage = message as GlacierMqttQuotaMessage;
-    // if (glacierMessage.typeCode === GlacierMqttMessageType.EMS) {
-    //   const emsStatus = (message as MqttQuotaMessageWithParams<EmsStatus>).params;
-    //   Object.assign(this.quota.bms_emsStatus, emsStatus);
-    //   this.updateEmsValues(emsStatus);
-    // } else if (glacierMessage.typeCode === GlacierMqttMessageType.BMS) {
-    //   const bmsStatus = (message as MqttQuotaMessageWithParams<BmsStatus>).params;
-    //   Object.assign(this.quota.bms_bmsStatus, bmsStatus);
-    //   this.updateBmsValues(bmsStatus);
-    // } else if (glacierMessage.typeCode === GlacierMqttMessageType.PD) {
-    //   const pdStatus = (message as MqttQuotaMessageWithParams<PdStatus>).params;
-    //   Object.assign(this.quota.pd, pdStatus);
-    //   this.updatePdValues(pdStatus);
-    // }
+    const glacierMessage = message as GlacierMqttQuotaMessage;
+    if (glacierMessage.typeCode === GlacierMqttMessageType.EMS) {
+      const emsStatus = (message as MqttQuotaMessageWithParams<EmsStatus>).params;
+      Object.assign(this.quota.bms_emsStatus, emsStatus);
+      this.updateEmsValues(emsStatus);
+    } else if (glacierMessage.typeCode === GlacierMqttMessageType.BMS) {
+      const bmsStatus = (message as MqttQuotaMessageWithParams<BmsStatus>).params;
+      Object.assign(this.quota.bms_bmsStatus, bmsStatus);
+      this.updateBmsValues(bmsStatus);
+    } else if (glacierMessage.typeCode === GlacierMqttMessageType.PD) {
+      const pdStatus = (message as MqttQuotaMessageWithParams<PdStatus>).params;
+      Object.assign(this.quota.pd, pdStatus);
+      this.updatePdValues(pdStatus);
+    }
   }
 
   protected override initializeQuota(quota: GlacierAllQuotaData | null): GlacierAllQuotaData {
@@ -186,14 +182,14 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
       this.outletBatteryService.updateState(params.pwrState === EnableType.On);
     }
     if (params.flagTwoZone !== undefined && params.flagTwoZone === CoolingZoneType.Dual) {
-      this.changeEnabledServiceState(this.fridgeSingleZoneService, false);
-      this.changeEnabledServiceState(this.fridgeDualLeftZoneService, true);
-      this.changeEnabledServiceState(this.fridgeDualRightZoneService, true);
+      this.fridgeSingleZoneService.updateEnabled(false);
+      this.fridgeDualLeftZoneService.updateEnabled(true);
+      this.fridgeDualRightZoneService.updateEnabled(true);
     }
     if (params.flagTwoZone !== undefined && params.flagTwoZone === CoolingZoneType.Single) {
-      this.changeEnabledServiceState(this.fridgeSingleZoneService, true);
-      this.changeEnabledServiceState(this.fridgeDualLeftZoneService, false);
-      this.changeEnabledServiceState(this.fridgeDualRightZoneService, false);
+      this.fridgeSingleZoneService.updateEnabled(true);
+      this.fridgeDualLeftZoneService.updateEnabled(false);
+      this.fridgeDualRightZoneService.updateEnabled(false);
     }
     if (params.tmpL !== undefined) {
       this.fridgeDualLeftZoneService.updateCurrentTemperature(params.tmpL);
@@ -229,39 +225,30 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
       const iceSmallMaking =
         params.iceMkMode === MakeIceStatusType.SmallInPreparation ||
         params.iceMkMode === MakeIceStatusType.SmallInProgress;
-      const icelargeMaking =
+      const iceLargeMaking =
         params.iceMkMode === MakeIceStatusType.LargeInPreparation ||
         params.iceMkMode === MakeIceStatusType.LargeInProgress;
 
-      this.changeEnabledServiceState(this.switchMakeIceSmallService, true);
-      this.changeEnabledServiceState(this.switchMakeIceLargeService, true);
-      this.changeEnabledServiceState(this.switchDetachIceService, false);
+      this.switchMakeIceSmallService.updateEnabled(iceSmallMaking);
+      this.switchMakeIceLargeService.updateEnabled(iceLargeMaking);
+      this.switchDetachIceService.updateEnabled(false);
 
       this.switchMakeIceSmallService.updateState(iceSmallMaking);
-      this.switchMakeIceLargeService.updateState(icelargeMaking);
+      this.switchMakeIceLargeService.updateState(iceLargeMaking);
       this.switchDetachIceService.updateState(false);
     }
+    if (params.icePercent !== undefined && params.icePercent === 100) {
+      this.switchMakeIceSmallService.updateEnabled(true);
+      this.switchMakeIceLargeService.updateEnabled(true);
+    }
     if (params.fsmState !== undefined) {
-      this.changeEnabledServiceState(this.switchMakeIceSmallService, false);
-      this.changeEnabledServiceState(this.switchMakeIceLargeService, false);
-      this.changeEnabledServiceState(this.switchDetachIceService, true);
+      this.switchMakeIceSmallService.updateEnabled(false);
+      this.switchMakeIceLargeService.updateEnabled(false);
+      this.switchDetachIceService.updateEnabled(true);
 
       this.switchMakeIceSmallService.updateState(false);
       this.switchMakeIceLargeService.updateState(false);
       this.switchDetachIceService.updateState(params.fsmState === DetachIceStatusType.InProgress);
     }
-  }
-
-  private changeEnabledServiceState(service: ServiceBase, enable: boolean): void {
-    service.service
-      .getCharacteristic(this.platform.Characteristic.StatusFault)
-      .updateValue(
-        enable
-          ? this.platform.Characteristic.StatusFault.NO_FAULT
-          : this.platform.Characteristic.StatusFault.GENERAL_FAULT
-      );
-    // service.service
-    //   .getCharacteristic(this.platform.Characteristic.Active)
-    //   .updateValue(enable ? this.platform.Characteristic.Active.ACTIVE : this.platform.Characteristic.Active.INACTIVE);
   }
 }

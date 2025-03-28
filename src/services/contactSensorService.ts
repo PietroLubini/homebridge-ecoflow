@@ -18,7 +18,7 @@ export class ContactSensorService extends ServiceBase {
     this.updateCharacteristic(
       this.platform.Characteristic.ContactSensorState,
       `${this.serviceSubType ?? 'Contact'} State`,
-      closed ? 1 : 0
+      closed ? 0 : 1
     );
   }
 }

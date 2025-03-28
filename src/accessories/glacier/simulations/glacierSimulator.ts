@@ -21,7 +21,7 @@ import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 export class GlacierSimulator extends SimulatorTyped<GlacierMqttSetMessage> {
   public override generateQuota(): object {
     const quotaType = this.getRandomNumber(0, 100);
-    if (quotaType >= 0 && quotaType < 33) {
+    if (quotaType >= 0 && quotaType < 25) {
       const quotaEmsStatus: GlacierMqttQuotaMessageWithParams<EmsStatus> = {
         typeCode: GlacierMqttMessageType.EMS,
         params: {
@@ -30,7 +30,7 @@ export class GlacierSimulator extends SimulatorTyped<GlacierMqttSetMessage> {
         },
       };
       return quotaEmsStatus;
-    } else if (quotaType >= 33 && quotaType < 66) {
+    } else if (quotaType >= 25 && quotaType < 50) {
       const quotaBmsStatus: GlacierMqttQuotaMessageWithParams<BmsStatus> = {
         typeCode: GlacierMqttMessageType.BMS,
         params: {
@@ -48,9 +48,6 @@ export class GlacierSimulator extends SimulatorTyped<GlacierMqttSetMessage> {
           coolMode: this.getRandomBoolean() ? CoolModeType.Normal : CoolModeType.Eco,
           doorStat: this.getRandomBoolean() ? ContactSensorType.Closed : ContactSensorType.Opened,
           flagTwoZone: this.getRandomBoolean() ? CoolingZoneType.Single : CoolingZoneType.Dual,
-          fsmState: this.getRandomNumber(2, 5) as DetachIceStatusType,
-          iceMkMode: this.getRandomBoolean() ? MakeIceStatusType.SmallInProgress : MakeIceStatusType.LargeInProgress,
-          icePercent: this.getRandomNumber(0, 100),
           pwrState: this.getRandomBoolean() ? EnableType.Off : EnableType.On,
           tmpAver: this.getRandomNumber(-25, 10),
           tmpL: this.getRandomNumber(-25, 10),
@@ -61,6 +58,14 @@ export class GlacierSimulator extends SimulatorTyped<GlacierMqttSetMessage> {
           tmpUnit: this.getRandomBoolean() ? TemperatureType.Celsius : TemperatureType.Fahrenheit,
         },
       };
+      if (this.getRandomBoolean()) {
+        quotaPdStatus.params.icePercent = this.getRandomNumber(0, 100);
+        quotaPdStatus.params.iceMkMode = this.getRandomBoolean()
+          ? MakeIceStatusType.SmallInProgress
+          : MakeIceStatusType.LargeInProgress;
+      } else {
+        quotaPdStatus.params.fsmState = this.getRandomInt(2, 5) as DetachIceStatusType;
+      }
       return quotaPdStatus;
     }
   }
