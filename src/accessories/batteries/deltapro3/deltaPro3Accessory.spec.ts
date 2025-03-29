@@ -18,7 +18,6 @@ import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
 import { BatteryOutletServiceBase } from '@ecoflow/services/batteryOutletServiceBase';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
-import { OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
