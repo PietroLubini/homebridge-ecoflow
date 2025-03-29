@@ -5,11 +5,11 @@ import {
   DeltaPro3MqttSetXBoostMessageParams,
 } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3MqttApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { SwitchXboostServiceBase } from '@ecoflow/services/switchXboostServiceBase';
+import { SwitchServiceBase } from '@ecoflow/services/switchServiceBase';
 
-export class SwitchXboostService extends SwitchXboostServiceBase {
+export class SwitchXboostService extends SwitchServiceBase {
   constructor(protected readonly ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<DeltaPro3AllQuotaData>) {
-    super(ecoFlowAccessory);
+    super(ecoFlowAccessory, 'X-Boost');
   }
 
   protected override setOn(value: boolean, revert: () => void): Promise<void> {

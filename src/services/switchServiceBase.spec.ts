@@ -3,15 +3,15 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
-import { SwitchXboostServiceBase } from '@ecoflow/services/switchXboostServiceBase';
+import { SwitchServiceBase } from '@ecoflow/services/switchServiceBase';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
-class MockSwitchXboostService extends SwitchXboostServiceBase {
+class MockSwitchXboostService extends SwitchServiceBase {
   public override async setOn(): Promise<void> {}
 }
 
-describe('SwitchXboostServiceBase', () => {
+describe('SwitchServiceBase', () => {
   let service: MockSwitchXboostService;
   let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryBase>;
   let logMock: jest.Mocked<Logging>;
@@ -59,7 +59,7 @@ describe('SwitchXboostServiceBase', () => {
       quota: {},
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessoryBase>;
-    service = new MockSwitchXboostService(ecoFlowAccessoryMock);
+    service = new MockSwitchXboostService(ecoFlowAccessoryMock, 'X-Boost');
     hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
   });
 

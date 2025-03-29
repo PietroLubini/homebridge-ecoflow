@@ -1,4 +1,4 @@
-import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 
 export enum SupplyPriorityType {
   Supply = 0,

@@ -1,7 +1,7 @@
 import { DeltaProMqttSetOnMessageParams } from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProMqttApiContracts';
 import { DeltaProOutletServiceBase } from '@ecoflow/accessories/batteries/deltapro/services/deltaProOutletServiceBase';
-import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 
 export class OutletCarService extends DeltaProOutletServiceBase {

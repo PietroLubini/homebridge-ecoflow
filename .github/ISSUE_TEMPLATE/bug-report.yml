@@ -15,8 +15,10 @@ body:
         - Choose a device...
         - Delta 2
         - Delta 2 Max
+        - Delta Pro 3
         - PowerStream
         - Smart Plug
+        - Glacier
         - Other
       default: 0
     validations:
