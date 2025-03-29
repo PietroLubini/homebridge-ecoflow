@@ -32,7 +32,7 @@
               "type": "string",
               "default": "Delta 2",
               "required": true,
-              "enum": ["Delta 2", "Delta 2 Max", "Delta Pro 3", "PowerStream"]
+              "enum": ["Delta 2", "Delta 2 Max", "Delta Pro 3", "PowerStream", "Smart Plug"]
             },
             "serialNumber": {
               "title": "Serial Number",
@@ -144,6 +144,23 @@
                     "title": "Characteristic",
                     "type": "string",
                     "enum": ["Input Consumption, W", "Output Consumption, W"]
+                  }
+                }
+              }
+            },
+            "outlet": {
+              "title": "Outlet Settings",
+              "type": "object",
+              "properties": {
+                "additionalCharacteristics": {
+                  "title": "Outlet Additional Characteristics",
+                  "description": "List of additional characteristics for Outlet",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "title": "Characteristic",
+                    "type": "string",
+                    "enum": ["Output Consumption, W", "Output Voltage, V", "Output Current, A"]
                   }
                 }
               }

@@ -3,7 +3,10 @@ import { OutletAcHvService } from '@ecoflow/accessories/batteries/deltapro3/serv
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
-import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
+import {
+  AdditionalBatteryOutletCharacteristicType as BatteryOutletCharacteristicType,
+  AdditionalOutletCharacteristicType as OutletCharacteristicType,
+} from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
@@ -60,7 +63,7 @@ describe('OutletAcHvService', () => {
   describe('updateOutputConsumption', () => {
     it('should set OutputConsumption when it is enabled in configuration', () => {
       ecoFlowAccessoryMock.config.battery = {
-        additionalCharacteristics: [CharacteristicType.OutputConsumptionInWatts],
+        additionalCharacteristics: [OutletCharacteristicType.OutputConsumptionInWatts],
       };
       service = new OutletAcHvService(ecoFlowAccessoryMock, batteryStatusProviderMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
@@ -97,7 +100,7 @@ describe('OutletAcHvService', () => {
   describe('updateInputConsumption', () => {
     it('should set InputConsumption when it is enabled in configuration', () => {
       ecoFlowAccessoryMock.config.battery = {
-        additionalCharacteristics: [CharacteristicType.InputConsumptionInWatts],
+        additionalCharacteristics: [BatteryOutletCharacteristicType.InputConsumptionInWatts],
       };
       service = new OutletAcHvService(ecoFlowAccessoryMock, batteryStatusProviderMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
@@ -131,7 +134,7 @@ describe('OutletAcHvService', () => {
   describe('updateBatteryLevel', () => {
     it('should set BatteryLevel when it is enabled in configuration', () => {
       ecoFlowAccessoryMock.config.battery = {
-        additionalCharacteristics: [CharacteristicType.BatteryLevel],
+        additionalCharacteristics: [BatteryOutletCharacteristicType.BatteryLevel],
       };
       service = new OutletAcHvService(ecoFlowAccessoryMock, batteryStatusProviderMock);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);

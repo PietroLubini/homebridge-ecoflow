@@ -91,6 +91,17 @@ describe('PluginConfigDevicesRenderer', () => {
         },
       },
     } as unknown as PluginConfigSchemaObject;
+    const outletPlugSchema = {
+      properties: {
+        additionalCharacteristics: {
+          items: {
+            title: 'Characteristic',
+            type: 'string',
+            enum: ['Output Voltage, V', 'Output Current, A', 'Output Consumption, W'],
+          },
+        },
+      },
+    } as unknown as PluginConfigSchemaObject;
     configSchema = {
       schema: {
         properties: {
@@ -112,6 +123,7 @@ describe('PluginConfigDevicesRenderer', () => {
                 },
                 battery: batterySchema,
                 powerStream: powerStreamSchema,
+                outlet: outletPlugSchema,
               },
             },
           },
@@ -136,15 +148,22 @@ describe('PluginConfigDevicesRenderer', () => {
     return JSON.parse(JSON.stringify(obj));
   }
 
+  function cleanupAdditionalProperties(expectedSchema: PluginConfigSchemaDevices, ...names: string[]): void {
+    names.forEach(name => {
+      delete expectedSchema.items.properties[name];
+    });
+  }
+
   describe('hideDeviceSettingsPerModel', () => {
     it('should contain proper hideDeviceSettingsPerModel configuration', () => {
       const expected = {
-        'Delta 2': ['powerStream'],
-        'Delta 2 Max': ['powerStream'],
-        'Delta Pro': ['powerStream'],
-        'Delta Pro 3': ['powerStream'],
-        'Delta Pro Ultra': ['powerStream'],
-        PowerStream: ['battery'],
+        'Delta 2': ['powerStream', 'outlet'],
+        'Delta 2 Max': ['powerStream', 'outlet'],
+        'Delta Pro': ['powerStream', 'outlet'],
+        'Delta Pro 3': ['powerStream', 'outlet'],
+        'Delta Pro Ultra': ['powerStream', 'outlet'],
+        PowerStream: ['battery', 'outlet'],
+        'Smart Plug': ['battery', 'powerStream'],
       };
 
       const actual = renderer.hideDeviceSettingsPerModel;
@@ -184,11 +203,11 @@ describe('PluginConfigDevicesRenderer', () => {
 
       beforeEach(() => {
         expectedSchema = clone(configSchema.schema.properties.devices);
-        delete expectedSchema.items.properties.model;
+        cleanupAdditionalProperties(expectedSchema, 'model');
       });
 
       it('should render form for first device in configuration by default', () => {
-        delete expectedSchema.items.properties['powerStream'];
+        cleanupAdditionalProperties(expectedSchema, 'powerStream', 'outlet');
         const expectedConfiguration = clone(configuration).devices[0];
 
         renderer.render(context);
@@ -201,7 +220,7 @@ describe('PluginConfigDevicesRenderer', () => {
       });
 
       it('should render form for second device when second tab is clicked', () => {
-        delete expectedSchema.items.properties['battery'];
+        cleanupAdditionalProperties(expectedSchema, 'battery', 'outlet');
         const expectedConfiguration = clone(configuration).devices[1];
 
         renderer.render(context);
@@ -237,8 +256,7 @@ describe('PluginConfigDevicesRenderer', () => {
 
       beforeEach(() => {
         expectedSchema = clone(configSchema.schema.properties.devices);
-        delete expectedSchema.items.properties.model;
-        delete expectedSchema.items.properties['powerStream'];
+        cleanupAdditionalProperties(expectedSchema, 'model', 'powerStream', 'outlet');
         renderer.render(context);
         homebridgeProviderMock.createForm.mockClear();
       });
@@ -336,7 +354,7 @@ describe('PluginConfigDevicesRenderer', () => {
 
       beforeEach(() => {
         expectedSchema = clone(configSchema.schema.properties.devices);
-        delete expectedSchema.items.properties.model;
+        cleanupAdditionalProperties(expectedSchema, 'model');
 
         renderer.render(context);
         homebridgeProviderMock.createForm.mockClear();
@@ -347,7 +365,7 @@ describe('PluginConfigDevicesRenderer', () => {
         modelElement.val('PowerStream');
         modelElement.trigger('change');
 
-        delete expectedSchema.items.properties['battery'];
+        cleanupAdditionalProperties(expectedSchema, 'battery', 'outlet');
         const expectedConfiguration = clone(configuration).devices[0];
 
         expect(homebridgeProviderMock.createForm).toHaveBeenCalledTimes(1);

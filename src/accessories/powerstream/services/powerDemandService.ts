@@ -20,7 +20,7 @@ export class PowerDemandService extends FanServiceBase {
     const message: PowerStreamMqttSetMessageWithParams<PowerStreamMqttSetPermanentWattsMessageParams> = {
       id: 0,
       version: '',
-      cmdCode: PowerStreamMqttSetCmdCodeType.WN511_SET_PERMANENT_WATTS_PACK,
+      cmdCode: PowerStreamMqttSetCmdCodeType.PowerDemand,
       params: {
         permanentWatts: value,
       },

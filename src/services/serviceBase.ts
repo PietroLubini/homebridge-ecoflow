@@ -42,7 +42,7 @@ export abstract class ServiceBase {
   }
 
   protected get serviceName(): string {
-    return `${this.ecoFlowAccessory.config.name} ${this.serviceSubType}`;
+    return this.ecoFlowAccessory.config.name + (this.serviceSubType ? ` ${this.serviceSubType}` : '');
   }
 
   protected createService(): Service {

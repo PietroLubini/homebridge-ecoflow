@@ -18,6 +18,8 @@ import { DeltaPro3Simulator } from '@ecoflow/accessories/batteries/deltapro3/sim
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { PowerStreamSimulator } from '@ecoflow/accessories/powerstream/simulations/powerStreamSimulator';
+import { SmartPlugSimulator } from '@ecoflow/accessories/smartplug/simulations/smartPlugSimulator';
+import { SmartPlugAccessory } from '@ecoflow/accessories/smartplug/smartPlugAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { Simulator } from '@ecoflow/apis/simulations/simulator';
@@ -25,6 +27,8 @@ import {
   CustomCharacteristics,
   InputConsumptionWattFactory,
   OutputConsumptionWattFactory,
+  OutputCurrentFactory,
+  OutputVoltageFactory,
 } from '@ecoflow/characteristics/customCharacteristic';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
@@ -89,6 +93,8 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   public static InitCustomCharacteristics(hap: HAP): void {
     CustomCharacteristics.PowerConsumption.InputConsumptionWatts = InputConsumptionWattFactory(hap);
     CustomCharacteristics.PowerConsumption.OutputConsumptionWatts = OutputConsumptionWattFactory(hap);
+    CustomCharacteristics.PowerConsumption.OutputVoltage = OutputVoltageFactory(hap);
+    CustomCharacteristics.PowerConsumption.OutputCurrent = OutputCurrentFactory(hap);
   }
 
   /**
@@ -250,6 +256,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       case DeviceModel.PowerStream:
         EcoFlowAccessoryType = PowerStreamAccessory;
         EcoFlowAccessorySimulatorType = PowerStreamSimulator;
+        break;
+      case DeviceModel.SmartPlug:
+        EcoFlowAccessoryType = SmartPlugAccessory;
+        EcoFlowAccessorySimulatorType = SmartPlugSimulator;
         break;
       default:
         log.warn(`"${config.model}" is not supported. Ignoring the device`);

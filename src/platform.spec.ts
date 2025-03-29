@@ -5,6 +5,7 @@ import { DeltaPro3Accessory } from '@ecoflow/accessories/batteries/deltapro3/del
 import { DeltaProUltraAccessory } from '@ecoflow/accessories/batteries/deltaproultra/deltaProUltraAccessory';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
+import { SmartPlugAccessory } from '@ecoflow/accessories/smartplug/smartPlugAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
@@ -23,6 +24,7 @@ jest.mock('@ecoflow/accessories/batteries/deltapro/deltaProAccessory');
 jest.mock('@ecoflow/accessories/batteries/deltapro3/deltaPro3Accessory');
 jest.mock('@ecoflow/accessories/batteries/deltaproultra/deltaProUltraAccessory');
 jest.mock('@ecoflow/accessories/powerstream/powerStreamAccessory');
+jest.mock('@ecoflow/accessories/smartplug/smartPlugAccessory');
 jest.mock('@ecoflow/apis/ecoFlowHttpApiManager');
 jest.mock('@ecoflow/apis/ecoFlowMqttApiManager');
 jest.mock('@ecoflow/helpers/machineIdProvider');
@@ -192,6 +194,7 @@ describe('EcoFlowHomebridgePlatform', () => {
         httpApiManagerMock,
         machineIdProviderMock
       ) as jest.Mocked<EcoFlowMqttApiManager>;
+      batteryStatusProviderMock = new BatteryStatusProvider() as jest.Mocked<BatteryStatusProvider>;
       delta2AccessoryMock = createAccessory(Delta2Accessory, delta2Config, log1Mock, accessory1Mock);
       delta2MaxAccessoryMock = createAccessory(Delta2MaxAccessory, delta2MaxConfig, log2Mock, accessory2Mock);
       platform = new EcoFlowHomebridgePlatform(commonLogMock, config, apiMock);
@@ -444,6 +447,23 @@ describe('EcoFlowHomebridgePlatform', () => {
         registerDevices();
 
         expect(powerStreamAccessoryMock.initialize).toHaveBeenCalled();
+      });
+
+      it('should register SmartPlug accessory when model is SmartPlug in config', () => {
+        config.devices = [
+          {
+            name: 'device4',
+            model: DeviceModel.SmartPlug,
+            serialNumber: 'sn2',
+            accessKey: 'key1',
+            secretKey: 'key1',
+          } as DeviceConfig,
+        ];
+        const smartPlugAccessoryMock = createAccessory(SmartPlugAccessory, config.devices[0], log2Mock, accessory2Mock);
+
+        registerDevices();
+
+        expect(smartPlugAccessoryMock.initialize).toHaveBeenCalled();
       });
     });
 

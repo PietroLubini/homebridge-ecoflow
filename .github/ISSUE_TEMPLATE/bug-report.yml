@@ -17,6 +17,7 @@ body:
         - Delta 2 Max
         - Delta Pro 3
         - PowerStream
+        - Smart Plug
         - Other
       default: 0
     validations:
