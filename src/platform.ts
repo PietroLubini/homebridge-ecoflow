@@ -253,10 +253,6 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       //   EcoFlowAccessoryType = DeltaProUltraAccessory;
       //   EcoFlowAccessorySimulatorType = DeltaProUltraSimulator;
       //   break;
-      case DeviceModel.DeltaPro3:
-        EcoFlowAccessoryType = DeltaPro3Accessory;
-        EcoFlowAccessorySimulatorType = DeltaPro3Simulator;
-        break;
       case DeviceModel.PowerStream:
         EcoFlowAccessoryType = PowerStreamAccessory;
         EcoFlowAccessorySimulatorType = PowerStreamSimulator;
