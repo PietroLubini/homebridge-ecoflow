@@ -1,11 +1,6 @@
 import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import {
-  MqttPowerStreamMessageFuncType,
-  MqttPowerStreamMessageType,
-  MqttPowerStreamQuotaMessageWithParams,
-} from '@ecoflow/accessories/powerstream/interfaces/mqttApiPowerStreamContracts';
-import {
   Heartbeat,
   PowerStreamAllQuotaData,
 } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
@@ -458,9 +453,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should not update battery level when Hearbeat message is received without batSoc', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               lowerLimit: 15.4,
             },
@@ -474,9 +469,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should not update battery level when Hearbeat message is received without lowerLimit', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               batSoc: 34.67,
             },
@@ -490,9 +485,9 @@ describe('PowerStreamAccessory', () => {
         });
 
         it('should update battery level when Hearbeat message is received with batSoc and lowerLimit', async () => {
-          const message: MqttPowerStreamQuotaMessageWithParams<Heartbeat> = {
-            cmdFunc: MqttPowerStreamMessageFuncType.Func20,
-            cmdId: MqttPowerStreamMessageType.Heartbeat,
+          const message: PowerStreamMqttQuotaMessageWithParams<Heartbeat> = {
+            cmdFunc: PowerStreamMqttMessageFuncType.Func20,
+            cmdId: PowerStreamMqttMessageType.Heartbeat,
             param: {
               batSoc: 34.67,
               lowerLimit: 15.4,
