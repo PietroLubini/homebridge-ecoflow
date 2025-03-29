@@ -273,7 +273,6 @@ The following additional characteristics is available:
 | Output            | Outlet DC 12V | Output Consumption, W    | 🔲       | Read       |
 | Charging State    | Outlet DC 12V | ChargingState, Yes/No    | 🔲       | Read       |
 | Battery Level     | Outlet DC 12V | StatusLowBattery, Yes/No | 🔲       | Read       |
-| Switch X-Boost    | Switch        | On                       | ✅       | Read/Write |
 
 #### Configuration
 

@@ -56,9 +56,9 @@ describe('DeltaPro3Accessory', () => {
     {
       Name: 'OutletDc12vService',
     },
-    {
-      Name: 'SwitchXboostService',
-    },
+    // {
+    //   Name: 'SwitchXboostService',
+    // },
     {
       Name: 'AccessoryInformationService',
     },
@@ -160,7 +160,7 @@ describe('DeltaPro3Accessory', () => {
       expect(outletAcHvServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(outletAcLvServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(outletDc12vServiceMock.initialize).toHaveBeenCalledTimes(1);
-      expect(switchXboostServiceMock.initialize).toHaveBeenCalledTimes(1);
+      // expect(switchXboostServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(accessoryInformationServiceMock.initialize).toHaveBeenCalledTimes(1);
     });
   });
