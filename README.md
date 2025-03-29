@@ -245,6 +245,8 @@ The following additional characteristics is available:
 
 ### Delta Pro 3
 
+> US version with Dual AC (HV and LV) is tested. Volunteers that own EU version with Single AC are wanted for testing.
+
 #### Services
 
 | EcoFlow Parameter | Service       | Characteristic           | Standard | Permission |
