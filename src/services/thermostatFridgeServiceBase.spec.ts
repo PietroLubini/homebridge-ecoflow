@@ -349,6 +349,21 @@ describe('ThermostatFridgeServiceBase', () => {
       expect(actual).toEqual(-3);
       expect(logMock.debug.mock.calls).toEqual([['MOCK Target Temperature ->', -3]]);
     });
+
+    it('should disallow changing of Current Temperature when service is disabled', () => {
+      characteristic.updateValue(-3);
+      logMock.debug.mockReset();
+
+      service.updateEnabled(false);
+      characteristic.setValue(1);
+      const actual = characteristic.value;
+
+      expect(actual).toEqual(-3);
+      expect(logMock.debug).not.toHaveBeenCalled();
+      expect(logMock.warn.mock.calls).toEqual([
+        ['[accessory1 MOCK] Service is disabled. Setting of "TargetTemperature" is disallowed'],
+      ]);
+    });
   });
 
   describe('onTargetStateSet', () => {
@@ -374,6 +389,21 @@ describe('ThermostatFridgeServiceBase', () => {
       expect(actual).toEqual(2);
       expect(logMock.debug.mock.calls).toEqual([['MOCK Target State ->', 2]]);
     });
+
+    it('should disallow changing of Target State when service is disabled', () => {
+      characteristic.updateValue(TargetHeatingCoolingStateType.Cool);
+      logMock.debug.mockReset();
+
+      service.updateEnabled(false);
+      characteristic.setValue(TargetHeatingCoolingStateType.Off);
+      const actual = characteristic.value;
+
+      expect(actual).toEqual(2);
+      expect(logMock.debug).not.toHaveBeenCalled();
+      expect(logMock.warn.mock.calls).toEqual([
+        ['[accessory1 MOCK] Service is disabled. Setting of "TargetHeatingCoolingState" is disallowed'],
+      ]);
+    });
   });
 
   describe('onTemperatureDisplayUnitsSet', () => {
@@ -398,6 +428,21 @@ describe('ThermostatFridgeServiceBase', () => {
 
       expect(actual).toEqual(1);
       expect(logMock.debug.mock.calls).toEqual([['MOCK Temperature Display Units ->', 1]]);
+    });
+
+    it('should disallow changing of Temperature Display Units when service is disabled', () => {
+      characteristic.updateValue(TemperatureDisplayUnitsType.Fahrenheit);
+      logMock.debug.mockReset();
+
+      service.updateEnabled(false);
+      characteristic.setValue(TemperatureDisplayUnitsType.Celsius);
+      const actual = characteristic.value;
+
+      expect(actual).toEqual(1);
+      expect(logMock.debug).not.toHaveBeenCalled();
+      expect(logMock.warn.mock.calls).toEqual([
+        ['[accessory1 MOCK] Service is disabled. Setting of "TemperatureDisplayUnits" is disallowed'],
+      ]);
     });
   });
 });
