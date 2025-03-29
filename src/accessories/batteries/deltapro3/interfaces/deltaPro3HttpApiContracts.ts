@@ -10,8 +10,6 @@ export interface DeltaPro3AllQuotaData {
   cmsBattSoc?: number; //Battery level (read)
   cmsMinDsgSoc?: number; //Discharge limit (read)
   xboostEn?: AcXBoostType; //X-Boost switch: 0: off; 1: on; 0xff: ignored (read/write -> cfgXboostEn)
-  // powInSumW?: number; //Total input power (W). (read)
-  // powOutSumW?: number; //Total output power (W) (read)
   inputWatts?: number; //Charging power (W) (read)
   outputWatts?: number; //Discharging power (W) (read)
 

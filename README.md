@@ -246,6 +246,8 @@ The following additional characteristics is available:
 
 ### Delta Pro 3
 
+> US version with Dual AC (HV and LV) is tested. Volunteers that own EU version with Single AC are wanted for testing.
+
 #### Services
 
 | EcoFlow Parameter | Service       | Characteristic           | Standard | Permission |
@@ -274,7 +276,6 @@ The following additional characteristics is available:
 | Output            | Outlet DC 12V | Output Consumption, W    | 🔲       | Read       |
 | Charging State    | Outlet DC 12V | ChargingState, Yes/No    | 🔲       | Read       |
 | Battery Level     | Outlet DC 12V | StatusLowBattery, Yes/No | 🔲       | Read       |
-| Switch X-Boost    | Switch        | On                       | ✅       | Read/Write |
 
 #### Configuration
 

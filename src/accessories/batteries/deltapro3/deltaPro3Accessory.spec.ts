@@ -18,6 +18,7 @@ import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
 import { BatteryOutletServiceBase } from '@ecoflow/services/batteryOutletServiceBase';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
+import { OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
@@ -56,9 +57,9 @@ describe('DeltaPro3Accessory', () => {
     {
       Name: 'OutletDc12vService',
     },
-    {
-      Name: 'SwitchXboostService',
-    },
+    // {
+    //   Name: 'SwitchXboostService',
+    // },
     {
       Name: 'AccessoryInformationService',
     },
@@ -160,7 +161,7 @@ describe('DeltaPro3Accessory', () => {
       expect(outletAcHvServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(outletAcLvServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(outletDc12vServiceMock.initialize).toHaveBeenCalledTimes(1);
-      expect(switchXboostServiceMock.initialize).toHaveBeenCalledTimes(1);
+      // expect(switchXboostServiceMock.initialize).toHaveBeenCalledTimes(1);
       expect(accessoryInformationServiceMock.initialize).toHaveBeenCalledTimes(1);
     });
   });
