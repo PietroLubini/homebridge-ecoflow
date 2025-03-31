@@ -49,7 +49,11 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
       this.outletAcHvService,
       this.outletAcLvService,
       this.outletDc12vService,
-      this.switchXboostService,
+      // X-boost status:
+      //   - Set ON/OFF - WORKS
+      //   - Read initial value - WORKS
+      //   - Receive updates about changes inside Ecoflow App - DOES NOT WORK (no mqtt quota messages about X-Boost changes)
+      // this.switchXboostService,
     ];
   }
 
