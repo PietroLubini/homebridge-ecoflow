@@ -9,10 +9,10 @@ import {
 } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
-import { Characteristic as HapCharacteristic, Service as HapService, HapStatusError } from 'hap-nodejs';
+import { Characteristic as HapCharacteristic, Service as HapService, HAPStatus, HapStatusError } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-enum HAPStatus {
+enum HAPStatusMock {
   READ_ONLY_CHARACTERISTIC = -70404,
 }
 
@@ -29,7 +29,7 @@ describe('OutletService', () => {
   const hapMock = {
     Characteristic: HapCharacteristic,
     HapStatusError: HapStatusError,
-    HAPStatus: HAPStatus,
+    HAPStatus: HAPStatusMock,
   } as unknown as HAP;
   EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
 
@@ -220,20 +220,17 @@ describe('OutletService', () => {
   });
 
   describe('onOnSet', () => {
-    let onCharacteristic: Characteristic;
+    let characteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
-      onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
+      characteristic = service.service.getCharacteristic(HapCharacteristic.On);
     });
 
     it('should not allow to set ON value', () => {
-      onCharacteristic.value = 1;
+      const actual = characteristic.setValue(true);
 
-      onCharacteristic.setValue(true);
-      const actual = onCharacteristic.value;
-
-      expect(actual).toEqual(1);
+      expect(actual.statusCode).toBe(HAPStatus.READ_ONLY_CHARACTERISTIC);
     });
   });
 });
