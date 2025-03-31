@@ -389,15 +389,15 @@ describe('DeltaPro3Accessory', () => {
         expect(outletDc12vServiceMock.updateState).toHaveBeenCalledWith(true);
       });
 
-      it('should update X-Boost state when message is received with xboostEn', async () => {
-        const message: DeltaPro3AllQuotaData = {
-          xboostEn: AcXBoostType.On,
-        };
+      // it('should update X-Boost state when message is received with xboostEn', async () => {
+      //   const message: DeltaPro3AllQuotaData = {
+      //     xboostEn: AcXBoostType.On,
+      //   };
 
-        processQuotaMessage(message);
+      //   processQuotaMessage(message);
 
-        expect(switchXboostServiceMock.updateState).toHaveBeenCalledWith(true);
-      });
+      //   expect(switchXboostServiceMock.updateState).toHaveBeenCalledWith(true);
+      // });
 
       it('should not update any characteristic when message is received with undefined status', async () => {
         const message: DeltaPro3AllQuotaData = {};
@@ -523,7 +523,7 @@ describe('DeltaPro3Accessory', () => {
         expect(outletAcHvServiceMock.updateState).toHaveBeenCalledWith(true);
         expect(outletAcLvServiceMock.updateState).toHaveBeenCalledWith(false);
         expect(outletDc12vServiceMock.updateState).toHaveBeenCalledWith(false);
-        expect(switchXboostServiceMock.updateState).toHaveBeenCalledWith(false);
+        // expect(switchXboostServiceMock.updateState).toHaveBeenCalledWith(false);
       });
 
       it('should update switch-related characteristics when is requested and quotas were not initialized properly for it', async () => {

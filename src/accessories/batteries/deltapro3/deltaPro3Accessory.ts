@@ -6,8 +6,6 @@ import { DeltaPro3MqttQuotaMessage } from '@ecoflow/accessories/batteries/deltap
 import { OutletAcHvService } from '@ecoflow/accessories/batteries/deltapro3/services/outletAcHvService';
 import { OutletAcLvService } from '@ecoflow/accessories/batteries/deltapro3/services/outletAcLvService';
 import { OutletDc12vService } from '@ecoflow/accessories/batteries/deltapro3/services/outletDc12vService';
-import { SwitchXboostService } from '@ecoflow/accessories/batteries/deltapro3/services/switchXboostService';
-import { AcXBoostType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
@@ -24,7 +22,7 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
   private readonly outletAcHvService: OutletAcHvService;
   private readonly outletAcLvService: OutletAcLvService;
   private readonly outletDc12vService: OutletDc12vService;
-  private readonly switchXboostService: SwitchXboostService;
+  // private readonly switchXboostService: SwitchXboostService;
 
   constructor(
     platform: EcoFlowHomebridgePlatform,
@@ -40,7 +38,7 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
     this.outletAcHvService = new OutletAcHvService(this, batteryStatusProvider);
     this.outletAcLvService = new OutletAcLvService(this, batteryStatusProvider);
     this.outletDc12vService = new OutletDc12vService(this, batteryStatusProvider);
-    this.switchXboostService = new SwitchXboostService(this);
+    // this.switchXboostService = new SwitchXboostService(this);
   }
 
   protected override getServices(): ServiceBase[] {
@@ -120,8 +118,8 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
     if (params.flowInfo12v !== undefined && params.flowInfo12v !== DeltaPro3AcEnableType.Ignore) {
       this.outletDc12vService.updateState(params.flowInfo12v === DeltaPro3AcEnableType.On);
     }
-    if (params.xboostEn !== undefined && params.xboostEn !== AcXBoostType.Ignore) {
-      this.switchXboostService.updateState(params.xboostEn === AcXBoostType.On);
-    }
+    // if (params.xboostEn !== undefined && params.xboostEn !== AcXBoostType.Ignore) {
+    //   this.switchXboostService.updateState(params.xboostEn === AcXBoostType.On);
+    // }
   }
 }
