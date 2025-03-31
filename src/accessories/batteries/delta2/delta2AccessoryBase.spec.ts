@@ -254,7 +254,7 @@ describe('Delta2AccessoryBase', () => {
         processQuotaMessage = mqttApiManagerMock.subscribeOnQuotaMessage.mock.calls[0][1]!;
       });
 
-      it('should update bms status in quota when BmsStatus message is received', async () => {
+      it('should update ems status in quota when EmsStatus message is received', async () => {
         const message: Delta2MqttQuotaMessageWithParams<EmsStatus> = {
           typeCode: Delta2MqttMessageType.EMS,
           params: {
@@ -269,7 +269,7 @@ describe('Delta2AccessoryBase', () => {
         expect(actual).toEqual(message.params);
       });
 
-      it('should update battery level when BmsStatus message is received with f32ShowSoc', async () => {
+      it('should update battery level when EmsStatus message is received with f32ShowSoc', async () => {
         const message: Delta2MqttQuotaMessageWithParams<EmsStatus> = {
           typeCode: Delta2MqttMessageType.EMS,
           params: {
@@ -286,9 +286,9 @@ describe('Delta2AccessoryBase', () => {
         expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 32.1);
       });
 
-      it('should not update any characteristic when BmsStatus message is received with undefined status', async () => {
+      it('should not update any characteristic when EmsStatus message is received with undefined status', async () => {
         const message: Delta2MqttQuotaMessageWithParams<EmsStatus> = {
-          typeCode: Delta2MqttMessageType.BMS,
+          typeCode: Delta2MqttMessageType.EMS,
           params: {},
         };
 
@@ -836,7 +836,7 @@ describe('Delta2AccessoryBase', () => {
         expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 0.5);
       });
 
-      it('should update BmsStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
+      it('should not update BmsStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
         httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as Delta2AllQuotaData);
 
         await accessory.initializeDefaultValues();

@@ -242,8 +242,8 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
       this.switchMakeIceLargeService.updateEnabled(true);
     }
     if (params.fsmState !== undefined) {
-      this.switchMakeIceSmallService.updateEnabled(false);
-      this.switchMakeIceLargeService.updateEnabled(false);
+      this.switchMakeIceSmallService.updateEnabled(params.fsmState === DetachIceStatusType.Completed);
+      this.switchMakeIceLargeService.updateEnabled(params.fsmState === DetachIceStatusType.Completed);
       this.switchDetachIceService.updateEnabled(true);
 
       this.switchMakeIceSmallService.updateState(false);
