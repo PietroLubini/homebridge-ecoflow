@@ -52,7 +52,7 @@ describe('SwitchEcoModeService', () => {
     hapService = new HapService('Accessory ECO mode Name', HapService.Switch.UUID);
   });
 
-  describe('onOnSet', () => {
+  describe('processOnSetOn', () => {
     let onCharacteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);

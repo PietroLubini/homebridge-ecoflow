@@ -48,7 +48,7 @@ describe('SwitchXboostService', () => {
     hapService = new HapService('Accessory Switch Name', HapService.Switch.UUID);
   });
 
-  describe('onOnSet', () => {
+  describe('processOnSetOn', () => {
     let onCharacteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);

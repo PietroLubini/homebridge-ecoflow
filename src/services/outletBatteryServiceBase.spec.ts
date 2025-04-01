@@ -21,7 +21,7 @@ class MockOutletService extends OutletBatteryServiceBase {
     super(ecoFlowAccessory, batteryStatusProvider, 'MOCK', additionalCharacteristics);
   }
 
-  public override async setOn(): Promise<void> {}
+  public override async processOnSetOn(): Promise<void> {}
 }
 
 describe('OutletBatteryServiceBase', () => {

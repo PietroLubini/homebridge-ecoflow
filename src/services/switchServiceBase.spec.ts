@@ -144,7 +144,7 @@ describe('SwitchServiceBase', () => {
     });
   });
 
-  describe('onOnSet', () => {
+  describe('processOnSetOn', () => {
     let characteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);

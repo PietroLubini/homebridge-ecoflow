@@ -13,7 +13,7 @@ class MockOutletService extends OutletServiceBase {
     super(ecoFlowAccessory, additionalCharacteristics, 'MOCK');
   }
 
-  public override async setOn(): Promise<void> {}
+  public override async processOnSetOn(): Promise<void> {}
 }
 
 describe('OutletServiceBase', () => {
@@ -324,7 +324,7 @@ describe('OutletServiceBase', () => {
     });
   });
 
-  describe('onOnSet', () => {
+  describe('processOnSetOn', () => {
     let characteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
@@ -336,7 +336,7 @@ describe('OutletServiceBase', () => {
       characteristic.setValue(true);
       logMock.debug.mockReset();
       const setOnMock = jest.fn();
-      service.setOn = setOnMock;
+      service.processOnSetOn = setOnMock;
 
       characteristic.setValue(false);
       const revertFunc = setOnMock.mock.calls[0][1];

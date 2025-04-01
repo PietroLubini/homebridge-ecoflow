@@ -13,7 +13,7 @@ export class OutletService extends OutletServiceBase {
     super(ecoFlowAccessory, additionalCharacteristics);
   }
 
-  protected override setOn(value: boolean, revert: () => void): Promise<void> {
+  protected override processOnSetOn(value: boolean, revert: () => void): Promise<void> {
     const message: SmartPlugMqttSetMessageWithParams<SmartPlugMqttSetSwitchMessageParams> = {
       id: 0,
       version: '',

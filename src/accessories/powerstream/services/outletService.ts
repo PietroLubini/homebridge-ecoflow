@@ -14,7 +14,7 @@ export class OutletService extends OutletBatteryServiceBase {
     super(ecoFlowAccessory, batteryStatusProvider, serviceSubType, additionalCharacteristics);
   }
 
-  protected override setOn(): Promise<void> {
+  protected override processOnSetOn(): Promise<void> {
     throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.READ_ONLY_CHARACTERISTIC);
   }
 }

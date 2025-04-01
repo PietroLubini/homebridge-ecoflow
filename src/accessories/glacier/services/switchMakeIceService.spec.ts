@@ -58,7 +58,7 @@ describe('SwitchMakeIceService', () => {
       service = new SwitchMakeIceService(ecoFlowAccessoryMock, IceCubeShapeType.Small);
     });
 
-    describe('onOnSet', () => {
+    describe('processOnSetOn', () => {
       let onCharacteristic: Characteristic;
       beforeEach(() => {
         accessoryMock.getServiceById.mockReturnValueOnce(hapService);
@@ -127,7 +127,7 @@ describe('SwitchMakeIceService', () => {
       service = new SwitchMakeIceService(ecoFlowAccessoryMock, IceCubeShapeType.Large);
     });
 
-    describe('onOnSet', () => {
+    describe('processOnSetOn', () => {
       let onCharacteristic: Characteristic;
       beforeEach(() => {
         accessoryMock.getServiceById.mockReturnValueOnce(hapService);
