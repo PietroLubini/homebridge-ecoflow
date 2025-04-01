@@ -13,17 +13,17 @@ import {
   AcXBoostType,
 } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { SwitchXboostServiceBase } from '@ecoflow/services/switchXboostServiceBase';
+import { SwitchServiceBase } from '@ecoflow/services/switchServiceBase';
 
-export class SwitchXboostService extends SwitchXboostServiceBase {
+export class SwitchXboostService extends SwitchServiceBase {
   constructor(
     ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<Delta2AllQuotaData>,
     private readonly setAcModuleType: Delta2MqttSetModuleType
   ) {
-    super(ecoFlowAccessory);
+    super(ecoFlowAccessory, 'X-Boost');
   }
 
-  protected setOn(value: boolean, revert: () => void): Promise<void> {
+  protected processOnSetOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<Delta2MqttSetAcOnMessageParams>(
       this.setAcModuleType,
       Delta2MqttSetOperationType.AcOutCfg,

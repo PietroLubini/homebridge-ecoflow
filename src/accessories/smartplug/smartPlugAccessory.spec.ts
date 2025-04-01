@@ -30,7 +30,7 @@ jest.mock('@ecoflow/accessories/smartplug/services/brightnessService');
 jest.mock('@ecoflow/services/temperatureSensorService');
 jest.mock('@ecoflow/services/accessoryInformationService');
 
-describe('PowerStreamAccessory', () => {
+describe('SmartPlugAccessory', () => {
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
   let logMock: jest.Mocked<Logging>;

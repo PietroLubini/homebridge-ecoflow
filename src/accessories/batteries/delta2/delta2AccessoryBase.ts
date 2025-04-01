@@ -16,15 +16,12 @@ import { OutletAcService } from '@ecoflow/accessories/batteries/delta2/services/
 import { OutletCarService } from '@ecoflow/accessories/batteries/delta2/services/outletCarService';
 import { OutletUsbService } from '@ecoflow/accessories/batteries/delta2/services/outletUsbService';
 import { SwitchXboostService } from '@ecoflow/accessories/batteries/delta2/services/switchXboostService';
-import {
-  AcEnableType,
-  AcXBoostType,
-  EnableType,
-} from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
+import { AcEnableType, AcXBoostType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage, MqttQuotaMessageWithParams } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';

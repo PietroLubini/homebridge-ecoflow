@@ -8,11 +8,11 @@ import {
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
-import { BatteryOutletServiceBase } from '@ecoflow/services/batteryOutletServiceBase';
+import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { HAP, Logging, PlatformAccessory } from 'homebridge';
 
-class MockOutletService extends BatteryOutletServiceBase {
+class MockOutletService extends OutletBatteryServiceBase {
   constructor(
     ecoFlowAccessory: EcoFlowAccessoryBase,
     batteryStatusProvider: BatteryStatusProvider,
@@ -21,10 +21,10 @@ class MockOutletService extends BatteryOutletServiceBase {
     super(ecoFlowAccessory, batteryStatusProvider, 'MOCK', additionalCharacteristics);
   }
 
-  public override async setOn(): Promise<void> {}
+  public override async processOnSetOn(): Promise<void> {}
 }
 
-describe('BatteryOutletServiceBase', () => {
+describe('OutletBatteryServiceBase', () => {
   let service: MockOutletService;
   let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryBase>;
   let logMock: jest.Mocked<Logging>;

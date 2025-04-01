@@ -2,9 +2,9 @@ import {
   DeltaPro3MqttSetMessageParams,
   DeltaPro3MqttSetMessageWithParams,
 } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3MqttApiContracts';
-import { BatteryOutletServiceBase } from '@ecoflow/services/batteryOutletServiceBase';
+import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
 
-export abstract class DeltaPro3OutletServiceBase extends BatteryOutletServiceBase {
+export abstract class DeltaPro3OutletServiceBase extends OutletBatteryServiceBase {
   protected sendOn<TParams extends DeltaPro3MqttSetMessageParams>(params: TParams, revert: () => void): Promise<void> {
     const message: DeltaPro3MqttSetMessageWithParams<TParams> = {
       id: 0,

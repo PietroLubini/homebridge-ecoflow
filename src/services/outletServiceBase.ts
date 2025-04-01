@@ -48,7 +48,7 @@ export abstract class OutletServiceBase extends ServiceBase {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
     onCharacteristic.onSet((value: CharacteristicValue) => {
       const newValue = value as boolean;
-      this.setOn(newValue, () => this.updateState(!newValue));
+      this.processOnSetOn(newValue, () => this.updateState(!newValue));
     });
 
     const characteristics = [
@@ -72,7 +72,7 @@ export abstract class OutletServiceBase extends ServiceBase {
     return characteristics.filter(characteristic => characteristic !== null);
   }
 
-  protected abstract setOn(value: boolean, revert: () => void): Promise<void>;
+  protected abstract processOnSetOn(value: boolean, revert: () => void): Promise<void>;
 
   protected tryAddCustomCharacteristic(
     characteristic: WithUUID<{ new (): Characteristic }>,
