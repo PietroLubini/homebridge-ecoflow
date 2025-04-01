@@ -19,7 +19,7 @@ export abstract class SwitchServiceBase extends ServiceBase {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
     this.addCharacteristicSet(onCharacteristic, 'On', (value: CharacteristicValue) => {
       const newValue = value as boolean;
-      this.setOn(newValue, () => this.updateState(!newValue));
+      this.processOnSetOn(newValue, () => this.updateState(!newValue));
     });
 
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.serviceName);
@@ -27,5 +27,5 @@ export abstract class SwitchServiceBase extends ServiceBase {
     return [onCharacteristic];
   }
 
-  protected abstract setOn(value: boolean, revert: () => void): Promise<void>;
+  protected abstract processOnSetOn(value: boolean, revert: () => void): Promise<void>;
 }

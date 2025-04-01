@@ -128,16 +128,16 @@ describe('SwitchMakeIceService', () => {
     });
 
     describe('processOnSetOn', () => {
-      let onCharacteristic: Characteristic;
+      let characteristic: Characteristic;
       beforeEach(() => {
         accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       });
 
       it('should send Set command to device when Make Ice Cubes value was changed to true', () => {
         service.initialize();
-        onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
+        characteristic = service.service.getCharacteristic(HapCharacteristic.On);
 
-        onCharacteristic.setValue(true);
+        characteristic.setValue(true);
 
         expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
           {
@@ -156,9 +156,9 @@ describe('SwitchMakeIceService', () => {
 
       it('should send Set command to device when Make Ice Cubes value was changed to false', () => {
         service.initialize();
-        onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
+        characteristic = service.service.getCharacteristic(HapCharacteristic.On);
 
-        onCharacteristic.setValue(false);
+        characteristic.setValue(false);
 
         expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
           {
@@ -177,13 +177,13 @@ describe('SwitchMakeIceService', () => {
 
       it('should revert changing of Make Ice Cubes state when sending Set command to device is failed', () => {
         service.initialize();
-        onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
-        onCharacteristic.updateValue(true);
+        characteristic = service.service.getCharacteristic(HapCharacteristic.On);
+        characteristic.updateValue(true);
 
-        onCharacteristic.setValue(false);
+        characteristic.setValue(false);
         const revertFunc = ecoFlowAccessoryMock.sendSetCommand.mock.calls[0][1];
         revertFunc();
-        const actual = onCharacteristic.value;
+        const actual = characteristic.value;
 
         expect(actual).toBeTruthy();
         expect(logMock.debug.mock.calls).toEqual([['Make Ice Large Cubes State ->', true]]);

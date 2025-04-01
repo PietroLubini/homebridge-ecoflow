@@ -355,10 +355,10 @@ describe('ThermostatFridgeServiceBase', () => {
       logMock.debug.mockReset();
 
       service.updateEnabled(false);
-      characteristic.setValue(1);
-      const actual = characteristic.value;
+      const actual = characteristic.setValue(1);
 
-      expect(actual).toEqual(-3);
+      expect(actual.value).toEqual(-3);
+      expect(actual.statusCode).toEqual(HAPStatus.READ_ONLY_CHARACTERISTIC);
       expect(logMock.debug).not.toHaveBeenCalled();
       expect(logMock.warn.mock.calls).toEqual([
         ['[accessory1 MOCK] Service is disabled. Setting of "TargetTemperature" is disallowed'],
@@ -395,10 +395,10 @@ describe('ThermostatFridgeServiceBase', () => {
       logMock.debug.mockReset();
 
       service.updateEnabled(false);
-      characteristic.setValue(TargetHeatingCoolingStateType.Off);
-      const actual = characteristic.value;
+      const actual = characteristic.setValue(TargetHeatingCoolingStateType.Off);
 
-      expect(actual).toEqual(2);
+      expect(actual.value).toEqual(2);
+      expect(actual.statusCode).toEqual(HAPStatus.READ_ONLY_CHARACTERISTIC);
       expect(logMock.debug).not.toHaveBeenCalled();
       expect(logMock.warn.mock.calls).toEqual([
         ['[accessory1 MOCK] Service is disabled. Setting of "TargetHeatingCoolingState" is disallowed'],
@@ -435,10 +435,10 @@ describe('ThermostatFridgeServiceBase', () => {
       logMock.debug.mockReset();
 
       service.updateEnabled(false);
-      characteristic.setValue(TemperatureDisplayUnitsType.Celsius);
-      const actual = characteristic.value;
+      const actual = characteristic.setValue(TemperatureDisplayUnitsType.Celsius);
 
-      expect(actual).toEqual(1);
+      expect(actual.value).toEqual(1);
+      expect(actual.statusCode).toEqual(HAPStatus.READ_ONLY_CHARACTERISTIC);
       expect(logMock.debug).not.toHaveBeenCalled();
       expect(logMock.warn.mock.calls).toEqual([
         ['[accessory1 MOCK] Service is disabled. Setting of "TemperatureDisplayUnits" is disallowed'],

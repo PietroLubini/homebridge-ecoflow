@@ -15,7 +15,7 @@ export class SwitchDetachIceService extends SwitchServiceBase {
     super(ecoFlowAccessory, 'Detach Ice');
   }
 
-  protected override setOn(value: boolean, revert: () => void): Promise<void> {
+  protected override processOnSetOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<GlacierMqttSetDetachIceMessageParams>(
       {
         enable: value ? EnableType.On : EnableType.Off,

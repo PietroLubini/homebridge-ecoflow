@@ -12,7 +12,7 @@ export class SwitchXboostService extends SwitchServiceBase {
     super(ecoFlowAccessory, 'X-Boost');
   }
 
-  protected override setOn(value: boolean, revert: () => void): Promise<void> {
+  protected override processOnSetOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<DeltaPro3MqttSetXBoostMessageParams>(
       {
         cfgXboostEn: value,

@@ -14,7 +14,7 @@ export class SwitchEcoModeService extends SwitchServiceBase {
     super(ecoFlowAccessory, 'ECO mode');
   }
 
-  protected override setOn(value: boolean, revert: () => void): Promise<void> {
+  protected override processOnSetOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<GlacierMqttSetEcoModeMessageParams>(
       {
         mode: value ? CoolModeType.Eco : CoolModeType.Normal,

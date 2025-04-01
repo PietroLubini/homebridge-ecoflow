@@ -1,18 +1,19 @@
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { CoolModeType, GlacierAllQuotaData } from '@ecoflow/accessories/glacier/interfaces/glacierHttpApiContracts';
+import { GlacierAllQuotaData } from '@ecoflow/accessories/glacier/interfaces/glacierHttpApiContracts';
 import {
   GlacierMqttSetModuleType,
   GlacierMqttSetOperateType,
 } from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
-import { SwitchEcoModeService } from '@ecoflow/accessories/glacier/services/switchEcoModeService';
+import { SwitchDetachIceService } from '@ecoflow/accessories/glacier/services/switchDetachIceService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
-describe('SwitchEcoModeService', () => {
-  let service: SwitchEcoModeService;
+describe('SwitchDetachIceService', () => {
+  let service: SwitchDetachIceService;
   let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<GlacierAllQuotaData>>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
@@ -48,8 +49,8 @@ describe('SwitchEcoModeService', () => {
       httpApiManager: httpApiManagerMock,
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<GlacierAllQuotaData>>;
-    service = new SwitchEcoModeService(ecoFlowAccessoryMock);
-    hapService = new HapService('Accessory ECO mode Name', HapService.Switch.UUID);
+    service = new SwitchDetachIceService(ecoFlowAccessoryMock);
+    hapService = new HapService('Accessory Detach Ice Name', HapService.Switch.UUID);
   });
 
   describe('processOnSetOn', () => {
@@ -58,7 +59,7 @@ describe('SwitchEcoModeService', () => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
     });
 
-    it('should send Set command to device when ECO mode value was changed to Eco', () => {
+    it('should send Set command to device when Detach Ice value was changed to On', () => {
       service.initialize();
       characteristic = service.service.getCharacteristic(HapCharacteristic.On);
 
@@ -69,16 +70,16 @@ describe('SwitchEcoModeService', () => {
           id: 0,
           version: '',
           moduleType: GlacierMqttSetModuleType.Default,
-          operateType: GlacierMqttSetOperateType.EcoMode,
+          operateType: GlacierMqttSetOperateType.DetachIce,
           params: {
-            mode: CoolModeType.Eco,
+            enable: EnableType.On,
           },
         },
         expect.any(Function)
       );
     });
 
-    it('should send Set command to device when ECO mode value was changed to Normal', () => {
+    it('should send Set command to device when Detach Ice value was changed to Off', () => {
       service.initialize();
       characteristic = service.service.getCharacteristic(HapCharacteristic.On);
 
@@ -89,16 +90,16 @@ describe('SwitchEcoModeService', () => {
           id: 0,
           version: '',
           moduleType: GlacierMqttSetModuleType.Default,
-          operateType: GlacierMqttSetOperateType.EcoMode,
+          operateType: GlacierMqttSetOperateType.DetachIce,
           params: {
-            mode: CoolModeType.Normal,
+            enable: EnableType.Off,
           },
         },
         expect.any(Function)
       );
     });
 
-    it('should revert changing of ECO mode state when sending Set command to device is failed', () => {
+    it('should revert changing of Detach Ice state when sending Set command to device is failed', () => {
       service.initialize();
       characteristic = service.service.getCharacteristic(HapCharacteristic.On);
       characteristic.updateValue(true);
@@ -109,7 +110,7 @@ describe('SwitchEcoModeService', () => {
       const actual = characteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug.mock.calls).toEqual([['ECO mode State ->', true]]);
+      expect(logMock.debug.mock.calls).toEqual([['Detach Ice State ->', true]]);
     });
   });
 });

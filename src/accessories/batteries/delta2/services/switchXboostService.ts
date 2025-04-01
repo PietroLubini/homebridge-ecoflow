@@ -23,7 +23,7 @@ export class SwitchXboostService extends SwitchServiceBase {
     super(ecoFlowAccessory, 'X-Boost');
   }
 
-  protected setOn(value: boolean, revert: () => void): Promise<void> {
+  protected processOnSetOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<Delta2MqttSetAcOnMessageParams>(
       this.setAcModuleType,
       Delta2MqttSetOperationType.AcOutCfg,

@@ -8,7 +8,7 @@ import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-
 import { Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
 class MockSwitchXboostService extends SwitchServiceBase {
-  public override async setOn(): Promise<void> {}
+  public override async processOnSetOn(): Promise<void> {}
 }
 
 describe('SwitchServiceBase', () => {
@@ -144,6 +144,23 @@ describe('SwitchServiceBase', () => {
     });
   });
 
+  describe('updateEnabled', () => {
+    beforeEach(() => {
+      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+      service.initialize();
+    });
+
+    it('should set On state to false when service is disabled', () => {
+      service.updateState(true);
+
+      service.updateEnabled(false);
+
+      const actual = service.service.getCharacteristic(HapCharacteristic.On).value;
+
+      expect(actual).toBeFalsy();
+    });
+  });
+
   describe('processOnSetOn', () => {
     let characteristic: Characteristic;
     beforeEach(() => {
@@ -156,7 +173,7 @@ describe('SwitchServiceBase', () => {
       characteristic.setValue(true);
       logMock.debug.mockReset();
       const setOnMock = jest.fn();
-      service.setOn = setOnMock;
+      service.processOnSetOn = setOnMock;
 
       characteristic.setValue(false);
       const revertFunc = setOnMock.mock.calls[0][1];

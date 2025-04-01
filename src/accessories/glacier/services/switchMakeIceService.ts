@@ -19,7 +19,7 @@ export class SwitchMakeIceService extends SwitchServiceBase {
     super(ecoFlowAccessory, `Make Ice ${iceCubeShapeType === IceCubeShapeType.Small ? 'Small' : 'Large'} Cubes`);
   }
 
-  protected override setOn(value: boolean, revert: () => void): Promise<void> {
+  protected override processOnSetOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<GlacierMqttSetMakeIceMessageParams>(
       {
         enable: value ? EnableType.On : EnableType.Off,
