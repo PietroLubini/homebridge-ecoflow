@@ -5,3 +5,4 @@
 *.jpeg binary -crlf
 *.gif binary -crlf
 *.pdf binary -crlf
+*.wasm binary -crlf
