@@ -25,6 +25,10 @@ export abstract class SimulatorTyped<TSetMessage extends MqttSetMessage> extends
     return Math.random() * (max - min) + min;
   }
 
+  protected getRandomInt(min: number, max: number): number {
+    return Math.round(this.getRandomNumber(min, max));
+  }
+
   protected getRandomBoolean(): boolean {
     return Math.random() < 0.5;
   }

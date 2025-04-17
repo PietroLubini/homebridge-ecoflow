@@ -52,7 +52,7 @@ describe('OutletService', () => {
     hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
   });
 
-  describe('onOnSet', () => {
+  describe('processOnSetOn', () => {
     let onCharacteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getService.mockReturnValueOnce(hapService);

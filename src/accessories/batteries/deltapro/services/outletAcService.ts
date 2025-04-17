@@ -13,7 +13,7 @@ export class OutletAcService extends DeltaProOutletServiceBase {
     super(ecoFlowAccessory, batteryStatusProvider, 'AC', ecoFlowAccessory.config.battery?.additionalCharacteristics);
   }
 
-  protected override setOn(value: boolean, revert: () => void): Promise<void> {
+  protected override processOnSetOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<DeltaProMqttSetAcOnMessageParams>(
       {
         cmdSet: 32,

@@ -2,9 +2,9 @@ import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAcces
 import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
-import { BatteryOutletServiceBase } from '@ecoflow/services/batteryOutletServiceBase';
+import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
 
-export class OutletService extends BatteryOutletServiceBase {
+export class OutletService extends OutletBatteryServiceBase {
   constructor(
     ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>,
     batteryStatusProvider: BatteryStatusProvider,
@@ -14,7 +14,7 @@ export class OutletService extends BatteryOutletServiceBase {
     super(ecoFlowAccessory, batteryStatusProvider, serviceSubType, additionalCharacteristics);
   }
 
-  protected override setOn(): Promise<void> {
+  protected override processOnSetOn(): Promise<void> {
     throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.READ_ONLY_CHARACTERISTIC);
   }
 }

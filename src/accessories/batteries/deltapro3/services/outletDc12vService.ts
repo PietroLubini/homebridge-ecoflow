@@ -9,10 +9,15 @@ export class OutletDc12vService extends DeltaPro3OutletServiceBase {
     ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<DeltaPro3AllQuotaData>,
     batteryStatusProvider: BatteryStatusProvider
   ) {
-    super(ecoFlowAccessory, batteryStatusProvider, 'DC 12V', ecoFlowAccessory.config.battery?.additionalCharacteristics);
+    super(
+      ecoFlowAccessory,
+      batteryStatusProvider,
+      'DC 12V',
+      ecoFlowAccessory.config.battery?.additionalCharacteristics
+    );
   }
 
-  protected override setOn(value: boolean, revert: () => void): Promise<void> {
+  protected override processOnSetOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<DeltaPro3MqttSetDc12vMessageParams>(
       {
         cfgDc12vOutOpen: value,
@@ -21,4 +26,3 @@ export class OutletDc12vService extends DeltaPro3OutletServiceBase {
     );
   }
 }
-

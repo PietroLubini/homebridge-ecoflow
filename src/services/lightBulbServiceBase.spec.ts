@@ -125,23 +125,6 @@ describe('LightBulbServiceBase', () => {
     });
   });
 
-  describe('setOn', () => {
-    beforeEach(() => {
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-    });
-
-    it('should not allow to set value when it is updated from UI', () => {
-      const onCharacteristic = service.service.getCharacteristic(HapCharacteristic.On);
-      onCharacteristic.value = false;
-
-      onCharacteristic.setValue(true);
-      const actual = onCharacteristic.value;
-
-      expect(actual).toBeFalsy();
-    });
-  });
-
   describe('updateState', () => {
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
@@ -210,7 +193,7 @@ describe('LightBulbServiceBase', () => {
     });
   });
 
-  describe('onOnSet', () => {
+  describe('processOnSetOn', () => {
     let characteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);

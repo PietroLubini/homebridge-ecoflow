@@ -3,15 +3,15 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
-import { SwitchXboostServiceBase } from '@ecoflow/services/switchXboostServiceBase';
+import { SwitchServiceBase } from '@ecoflow/services/switchServiceBase';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
-class MockSwitchXboostService extends SwitchXboostServiceBase {
-  public override async setOn(): Promise<void> {}
+class MockSwitchXboostService extends SwitchServiceBase {
+  public override async processOnSetOn(): Promise<void> {}
 }
 
-describe('SwitchXboostServiceBase', () => {
+describe('SwitchServiceBase', () => {
   let service: MockSwitchXboostService;
   let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryBase>;
   let logMock: jest.Mocked<Logging>;
@@ -59,7 +59,7 @@ describe('SwitchXboostServiceBase', () => {
       quota: {},
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowAccessoryBase>;
-    service = new MockSwitchXboostService(ecoFlowAccessoryMock);
+    service = new MockSwitchXboostService(ecoFlowAccessoryMock, 'X-Boost');
     hapService = new HapService('Accessory Outlet Name', HapService.Outlet.UUID);
   });
 
@@ -144,7 +144,24 @@ describe('SwitchXboostServiceBase', () => {
     });
   });
 
-  describe('onOnSet', () => {
+  describe('updateEnabled', () => {
+    beforeEach(() => {
+      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+      service.initialize();
+    });
+
+    it('should set On state to false when service is disabled', () => {
+      service.updateState(true);
+
+      service.updateEnabled(false);
+
+      const actual = service.service.getCharacteristic(HapCharacteristic.On).value;
+
+      expect(actual).toBeFalsy();
+    });
+  });
+
+  describe('processOnSetOn', () => {
     let characteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
@@ -156,7 +173,7 @@ describe('SwitchXboostServiceBase', () => {
       characteristic.setValue(true);
       logMock.debug.mockReset();
       const setOnMock = jest.fn();
-      service.setOn = setOnMock;
+      service.processOnSetOn = setOnMock;
 
       characteristic.setValue(false);
       const revertFunc = setOnMock.mock.calls[0][1];
