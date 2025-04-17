@@ -130,8 +130,8 @@ Quota is sent every 10 seconds with random values in this mode.
 | Output            | Outlet AC  | Output Consumption, W    | 🔲       | Read       |
 | Charging State    | Outlet AC  | ChargingState, Yes/No    | 🔲       | Read       |
 | Battery Level     | Outlet AC  | StatusLowBattery, Yes/No | 🔲       | Read       |
-| 12V DC            | Outlet CAR | On                       | ✅       | Read/Write |
-| 12V DC Output     | Outlet CAR | OutletInUse              | ✅       | Read       |
+| DC 12V            | Outlet CAR | On                       | ✅       | Read/Write |
+| DC 12V Output     | Outlet CAR | OutletInUse              | ✅       | Read       |
 | Battery Level     | Outlet CAR | Battery Level, %         | 🔲       | Read       |
 | Input             | Outlet CAR | Input Consumption, W     | 🔲       | Read       |
 | Output            | Outlet CAR | Output Consumption, W    | 🔲       | Read       |
@@ -203,8 +203,8 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 | Output            | Outlet AC  | Output Consumption, W    | 🔲       | Read       |
 | Charging State    | Outlet AC  | ChargingState, Yes/No    | 🔲       | Read       |
 | Battery Level     | Outlet AC  | StatusLowBattery, Yes/No | 🔲       | Read       |
-| 12V DC            | Outlet CAR | On                       | ✅       | Read/Write |
-| 12V DC Output     | Outlet CAR | OutletInUse              | ✅       | Read       |
+| DC 12V            | Outlet CAR | On                       | ✅       | Read/Write |
+| DC 12V Output     | Outlet CAR | OutletInUse              | ✅       | Read       |
 | Battery Level     | Outlet CAR | Battery Level, %         | 🔲       | Read       |
 | Input             | Outlet CAR | Input Consumption, W     | 🔲       | Read       |
 | Output            | Outlet CAR | Output Consumption, W    | 🔲       | Read       |
