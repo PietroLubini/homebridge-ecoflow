@@ -10,8 +10,6 @@ import {
   PowerStreamMqttQuotaMessageWithParams,
 } from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
 import { BrightnessService } from '@ecoflow/accessories/powerstream/services/brightnessService';
-import { OutletInvService } from '@ecoflow/accessories/powerstream/services/outletInvService';
-import { OutletService } from '@ecoflow/accessories/powerstream/services/outletService';
 import { PowerDemandService } from '@ecoflow/accessories/powerstream/services/powerDemandService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
@@ -20,13 +18,14 @@ import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig, PowerStreamConsumptionType } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
+import { OutletReadOnlyService } from '@ecoflow/services/outletReadOnlyService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData> {
-  private readonly inverterOutletService: OutletInvService;
-  private readonly solarOutletService: OutletService;
-  private readonly batteryOutletService: OutletService;
+  private readonly inverterOutletService: OutletReadOnlyService;
+  private readonly solarOutletService: OutletReadOnlyService;
+  private readonly batteryOutletService: OutletReadOnlyService;
   private readonly inverterBrightnessService: BrightnessService;
   private readonly inverterPowerDemandService: PowerDemandService;
 
@@ -41,18 +40,19 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
 
-    this.inverterOutletService = new OutletInvService(
+    this.inverterOutletService = new OutletReadOnlyService(
       this,
       batteryStatusProvider,
+      'INV',
       config.powerStream?.inverterAdditionalCharacteristics
     );
-    this.solarOutletService = new OutletService(
+    this.solarOutletService = new OutletReadOnlyService(
       this,
       batteryStatusProvider,
       'PV',
       config.powerStream?.pvAdditionalCharacteristics
     );
-    this.batteryOutletService = new OutletService(
+    this.batteryOutletService = new OutletReadOnlyService(
       this,
       batteryStatusProvider,
       'BAT',

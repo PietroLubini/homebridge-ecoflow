@@ -12,6 +12,7 @@ export enum DeviceModel {
   DeltaPro3 = 'Delta Pro 3',
   // DeltaProUltra = 'Delta Pro Ultra',
   PowerStream = 'PowerStream',
+  PowerOcean = 'PowerOcean',
   SmartPlug = 'Smart Plug',
   // Glacier = 'Glacier',
 }
@@ -43,6 +44,7 @@ export interface DeviceConfig extends AccessoryConfig, DeviceAccessConfig {
   disabled: boolean;
   battery?: BatteryDeviceConfig;
   powerStream?: PowerStreamDeviceConfig;
+  powerOcean?: PowerOceanDeviceConfig;
   outlet?: OutletDeviceConfig;
 }
 
@@ -72,8 +74,11 @@ export enum PowerStreamConsumptionType {
   W800 = 800,
 }
 
-export interface PowerStreamDeviceConfig {
+export interface PowerStreamDeviceConfig extends PowerOceanDeviceConfig {
   type: PowerStreamConsumptionType;
+}
+
+export interface PowerOceanDeviceConfig {
   batteryAdditionalCharacteristics?: AdditionalBatteryCharacteristicType[];
   pvAdditionalCharacteristics?: AdditionalBatteryCharacteristicType[];
   inverterAdditionalCharacteristics?: AdditionalBatteryCharacteristicType[];

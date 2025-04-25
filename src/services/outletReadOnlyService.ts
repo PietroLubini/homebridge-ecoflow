@@ -3,13 +3,14 @@ import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecof
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
 
-export class OutletInvService extends OutletBatteryServiceBase {
+export class OutletReadOnlyService extends OutletBatteryServiceBase {
   constructor(
     ecoFlowAccessory: EcoFlowAccessoryBase,
     batteryStatusProvider: BatteryStatusProvider,
+    serviceSubType: string,
     additionalCharacteristics?: CharacteristicType[]
   ) {
-    super(ecoFlowAccessory, batteryStatusProvider, 'INV', additionalCharacteristics);
+    super(ecoFlowAccessory, batteryStatusProvider, serviceSubType, additionalCharacteristics);
   }
 
   protected override processOnSetOn(): Promise<void> {
