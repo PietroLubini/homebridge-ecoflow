@@ -473,6 +473,8 @@ The following additional characteristics is available:
 
 ### Glacier
 
+> Not Activated (no testing is performed)
+
 #### Services
 
 | EcoFlow Parameter                   | Service               | Characteristic             | Standard | Permission                                                                                               |
