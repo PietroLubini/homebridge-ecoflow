@@ -4,8 +4,8 @@ import {
   Delta2MqttSetOperationType,
 } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
 import { Delta2OutletServiceBase } from '@ecoflow/accessories/batteries/delta2/services/delta2OutletServiceBase';
-import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 
 export class OutletCarService extends Delta2OutletServiceBase {
@@ -13,7 +13,7 @@ export class OutletCarService extends Delta2OutletServiceBase {
     super(ecoFlowAccessory, batteryStatusProvider, 'CAR', ecoFlowAccessory.config.battery?.additionalCharacteristics);
   }
 
-  protected override setOn(value: boolean, revert: () => void): Promise<void> {
+  protected override processOnSetOn(value: boolean, revert: () => void): Promise<void> {
     return this.sendOn<Delta2MqttSetOnMessageParams>(
       Delta2MqttSetModuleType.MPPT,
       Delta2MqttSetOperationType.MpptCar,

@@ -7,7 +7,7 @@ import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 import { Characteristic } from 'homebridge';
 
-export abstract class BatteryOutletServiceBase extends OutletServiceBase {
+export abstract class OutletBatteryServiceBase extends OutletServiceBase {
   constructor(
     ecoFlowAccessory: EcoFlowAccessoryBase,
     private readonly batteryStatusProvider: BatteryStatusProvider,

@@ -4,6 +4,7 @@
 
 [![latest](https://img.shields.io/npm/v/@pietrolubini/homebridge-ecoflow.svg?label=stable)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow/v/latest)
 [![beta](https://img.shields.io/npm/v/@pietrolubini/homebridge-ecoflow/beta.svg?label=beta)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow/v/beta)
+[![alpha](https://img.shields.io/npm/v/@pietrolubini/homebridge-ecoflow/alpha.svg?label=alpha)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow/v/alpha)
 [![downloads](https://img.shields.io/npm/dt/@pietrolubini/homebridge-ecoflow.svg)](https://www.npmjs.com/package/@pietrolubini/homebridge-ecoflow)
 [![build](https://github.com/pietrolubini/homebridge-ecoflow/actions/workflows/build.yml/badge.svg)](https://github.com/pietrolubini/homebridge-ecoflow/actions/workflows/build.yml)
 [![license](https://img.shields.io/npm/l/@pietrolubini/homebridge-ecoflow)](https://github.com/pietrolubini/homebridge-ecoflow/blob/main/LICENSE)
@@ -34,6 +35,7 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 - [Delta Pro Ultra](#delta-pro-ultra)
 - [PowerStream Micro-inverter](#powerstream-micro-inverter)
 - [Smart Plug](#smart-plug)
+- [Glacier](#glacier)
 
 For a full list of devices that could be potentially added check [here](https://developer-eu.ecoflow.com/us/document/introduction)
 
@@ -128,8 +130,8 @@ Quota is sent every 10 seconds with random values in this mode.
 | Output            | Outlet AC  | Output Consumption, W    | 🔲       | Read       |
 | Charging State    | Outlet AC  | ChargingState, Yes/No    | 🔲       | Read       |
 | Battery Level     | Outlet AC  | StatusLowBattery, Yes/No | 🔲       | Read       |
-| 12V DC            | Outlet CAR | On                       | ✅       | Read/Write |
-| 12V DC Output     | Outlet CAR | OutletInUse              | ✅       | Read       |
+| DC 12V            | Outlet CAR | On                       | ✅       | Read/Write |
+| DC 12V Output     | Outlet CAR | OutletInUse              | ✅       | Read       |
 | Battery Level     | Outlet CAR | Battery Level, %         | 🔲       | Read       |
 | Input             | Outlet CAR | Input Consumption, W     | 🔲       | Read       |
 | Output            | Outlet CAR | Output Consumption, W    | 🔲       | Read       |
@@ -148,9 +150,9 @@ Quota is sent every 10 seconds with random values in this mode.
 
 The following additional characteristics is available:
 
+- Battery Level, %
 - Input Consumption, W
 - Output Consumption, W
-- Battery Level, %
 - Charging State
 - Status Low Battery
 
@@ -201,8 +203,8 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 | Output            | Outlet AC  | Output Consumption, W    | 🔲       | Read       |
 | Charging State    | Outlet AC  | ChargingState, Yes/No    | 🔲       | Read       |
 | Battery Level     | Outlet AC  | StatusLowBattery, Yes/No | 🔲       | Read       |
-| 12V DC            | Outlet CAR | On                       | ✅       | Read/Write |
-| 12V DC Output     | Outlet CAR | OutletInUse              | ✅       | Read       |
+| DC 12V            | Outlet CAR | On                       | ✅       | Read/Write |
+| DC 12V Output     | Outlet CAR | OutletInUse              | ✅       | Read       |
 | Battery Level     | Outlet CAR | Battery Level, %         | 🔲       | Read       |
 | Input             | Outlet CAR | Input Consumption, W     | 🔲       | Read       |
 | Output            | Outlet CAR | Output Consumption, W    | 🔲       | Read       |
@@ -221,9 +223,9 @@ Supported services and configuration are the same as for [Delta 2](#delta-2)
 
 The following additional characteristics is available:
 
+- Battery Level, %
 - Input Consumption, W
 - Output Consumption, W
-- Battery Level, %
 
 ```json
 {
@@ -245,8 +247,6 @@ The following additional characteristics is available:
 ```
 
 ### Delta Pro 3
-
-> US version with Dual AC (HV and LV) is tested. Volunteers that own EU version with Single AC are wanted for testing.
 
 #### Services
 
@@ -281,9 +281,9 @@ The following additional characteristics is available:
 
 The following additional characteristics is available:
 
+- Battery Level, %
 - Input Consumption, W
 - Output Consumption, W
-- Battery Level, %
 
 ```json
 {
@@ -335,9 +335,9 @@ The following additional characteristics is available:
 
 The following additional characteristics is available:
 
+- Battery Level, %
 - Input Consumption, W
 - Output Consumption, W
-- Battery Level, %
 
 ```json
 {
@@ -389,9 +389,9 @@ The following additional characteristics is available:
 
 - type (600, 800)
 - battery:
+  - Battery Level, %
   - Input Consumption, W
   - Output Consumption, W
-  - Battery Level, %
   - Charging State
   - Status Low Battery
 - pv:
@@ -464,6 +464,66 @@ The following additional characteristics is available:
           "Output Consumption, W",
           "Output Voltage, V",
           "Output Current, A"
+        ]
+      }
+    }
+  ],
+}
+```
+
+### Glacier
+
+> Not Activated (no testing is performed)
+
+#### Services
+
+| EcoFlow Parameter                   | Service               | Characteristic             | Standard | Permission                                                                                               |
+| ----------------------------------- | --------------------- | -------------------------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| Battery                             | Outlet                | On                         | ✅       | Read (Battery Discharging > 0: ON)                                                                       |
+| Battery Discharging                 | Outlet                | OutletInUse                | ✅       | Read                                                                                                     |
+| Battery Level                       | Outlet                | Battery Level, %           | 🔲       | Read                                                                                                     |
+| Battery Charging                    | Outlet                | Input Consumption, W       | 🔲       | Read                                                                                                     |
+| Battery Discharging                 | Outlet                | Output Consumption, W      | 🔲       | Read                                                                                                     |
+| Battery Charging State              | Outlet                | ChargingState, Yes/No      | 🔲       | Read                                                                                                     |
+| Battery Level                       | Outlet                | StatusLowBattery, Yes/No   | 🔲       | Read                                                                                                     |
+| ECO mode                            | Switch                | On                         | ✅       | Read/Write                                                                                               |
+| Door Opened                         | ContactSensor         | ContactSensorState         | ✅       | Read                                                                                                     |
+| Make ice (small cubes)              | Switch                | On                         | ✅       | Read/Write (allowed when `Detach Ice` or `Make ice (large cubes)` options are not activated)             |
+| Make ice (large cubes)              | Switch                | On                         | ✅       | Read/Write (allowed when `Detach Ice` or `Make ice (small cubes)` options are not activated)             |
+| Detach ice                          | Switch                | On                         | ✅       | Read/Write (allowed when `Make ice (small cubes)` or `Make ice (large cubes)` options are not activated) |
+| Dual Left Zone Current Temperature  | Thermostat Dual Left  | CurrentTemperature         | ✅       | Read                                                                                                     |
+| Dual Left Zone Target Temperature   | Thermostat Dual Left  | TargetTemperature          | ✅       | Read/write (allowed when zone partition is installed)                                                    |
+| Device is ON/OFF                    | Thermostat Dual Left  | CurrentHeatingCoolingState | ✅       | Read                                                                                                     |
+| Device is ON/OFF                    | Thermostat Dual Left  | TargetHeatingCoolingState  | ✅       | Read                                                                                                     |
+| Dual Right Zone Current Temperature | Thermostat Dual Right | CurrentTemperature         | ✅       | Read                                                                                                     |
+| Dual Right Zone Target Temperature  | Thermostat Dual Right | TargetTemperature          | ✅       | Read/write (allowed when zone partition is installed)                                                    |
+| Device is ON/OFF                    | Thermostat Dual Right | CurrentHeatingCoolingState | ✅       | Read                                                                                                     |
+| Device is ON/OFF                    | Thermostat Dual Right | TargetHeatingCoolingState  | ✅       | Read                                                                                                     |
+| Single Zone Current Temperature     | Thermostat Single     | CurrentTemperature         | ✅       | Read                                                                                                     |
+| Single Zone Target Temperature      | Thermostat Single     | TargetTemperature          | ✅       | Read/write (allowed when zone partition is removed)                                                      |
+| Device is ON/OFF                    | Thermostat Single     | CurrentHeatingCoolingState | ✅       | Read                                                                                                     |
+| Device is ON/OFF                    | Thermostat Single     | TargetHeatingCoolingState  | ✅       | Read                                                                                                     |
+
+#### Configuration
+
+The following additional characteristics is available:
+
+- Battery Level, %
+- Input Consumption, W
+- Output Consumption, W
+
+```json
+{
+  ...
+  "devices": [
+    {
+      ...
+      "model": "Glacier",
+      "battery": {
+        "additionalCharacteristics": [
+          "Battery Level, %",
+          "Input Consumption, W",
+          "Output Consumption, W"
         ]
       }
     }

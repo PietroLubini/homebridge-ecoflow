@@ -128,3 +128,6 @@ dist
 
 # Tests
 junit.xml
+
+# MacOS files
+.DS_Store

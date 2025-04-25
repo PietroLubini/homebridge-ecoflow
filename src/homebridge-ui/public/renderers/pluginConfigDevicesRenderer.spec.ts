@@ -164,6 +164,7 @@ describe('PluginConfigDevicesRenderer', () => {
         'Delta Pro Ultra': ['powerStream', 'outlet'],
         PowerStream: ['battery', 'outlet'],
         'Smart Plug': ['battery', 'powerStream'],
+        Glacier: ['powerStream', 'outlet'],
       };
 
       const actual = renderer.hideDeviceSettingsPerModel;

@@ -166,7 +166,7 @@ describe('OutletUsbService', () => {
     });
   });
 
-  describe('onOnSet', () => {
+  describe('processOnSetOn', () => {
     let onCharacteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);

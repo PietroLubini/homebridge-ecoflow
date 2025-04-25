@@ -1,10 +1,10 @@
-import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import {
   MqttQuotaMessage,
   MqttQuotaMessageWithParam,
   MqttSetMessage,
   MqttSetMessageWithParams,
 } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 
 export enum SmartPlugMqttMessageType {
   Heartbeat = 1,
@@ -38,7 +38,7 @@ export interface SmartPlugMqttSetMessageWithParams<TParams extends SmartPlugMqtt
   extends MqttSetMessageWithParams<TParams>,
     SmartPlugMqttSetMessage {}
 
-export interface SmartPlugSwitchMqttSetMessageParams extends SmartPlugMqttSetMessageParams {
+export interface SmartPlugMqttSetSwitchMessageParams extends SmartPlugMqttSetMessageParams {
   plugSwitch: EnableType;
 }
 

@@ -261,6 +261,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
         EcoFlowAccessoryType = SmartPlugAccessory;
         EcoFlowAccessorySimulatorType = SmartPlugSimulator;
         break;
+      // case DeviceModel.Glacier:
+      //   EcoFlowAccessoryType = GlacierAccessory;
+      //   EcoFlowAccessorySimulatorType = GlacierSimulator;
+      //   break;
       default:
         log.warn(`"${config.model}" is not supported. Ignoring the device`);
     }

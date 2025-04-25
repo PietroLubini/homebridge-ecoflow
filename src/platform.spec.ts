@@ -4,6 +4,7 @@ import { DeltaProAccessory } from '@ecoflow/accessories/batteries/deltapro/delta
 import { DeltaPro3Accessory } from '@ecoflow/accessories/batteries/deltapro3/deltaPro3Accessory';
 import { DeltaProUltraAccessory } from '@ecoflow/accessories/batteries/deltaproultra/deltaProUltraAccessory';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
+import { GlacierAccessory } from '@ecoflow/accessories/glacier/glacierAccessory';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { SmartPlugAccessory } from '@ecoflow/accessories/smartplug/smartPlugAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
@@ -25,6 +26,7 @@ jest.mock('@ecoflow/accessories/batteries/deltapro3/deltaPro3Accessory');
 jest.mock('@ecoflow/accessories/batteries/deltaproultra/deltaProUltraAccessory');
 jest.mock('@ecoflow/accessories/powerstream/powerStreamAccessory');
 jest.mock('@ecoflow/accessories/smartplug/smartPlugAccessory');
+jest.mock('@ecoflow/accessories/glacier/glacierAccessory');
 jest.mock('@ecoflow/apis/ecoFlowHttpApiManager');
 jest.mock('@ecoflow/apis/ecoFlowMqttApiManager');
 jest.mock('@ecoflow/helpers/machineIdProvider');
@@ -460,6 +462,23 @@ describe('EcoFlowHomebridgePlatform', () => {
           } as DeviceConfig,
         ];
         const smartPlugAccessoryMock = createAccessory(SmartPlugAccessory, config.devices[0], log2Mock, accessory2Mock);
+
+        registerDevices();
+
+        expect(smartPlugAccessoryMock.initialize).toHaveBeenCalled();
+      });
+
+      it.skip('should register Glacier accessory when model is Glacier in config', () => {
+        config.devices = [
+          {
+            name: 'device4',
+            // model: DeviceModel.Glacier,
+            serialNumber: 'sn2',
+            accessKey: 'key1',
+            secretKey: 'key1',
+          } as DeviceConfig,
+        ];
+        const smartPlugAccessoryMock = createAccessory(GlacierAccessory, config.devices[0], log2Mock, accessory2Mock);
 
         registerDevices();
 

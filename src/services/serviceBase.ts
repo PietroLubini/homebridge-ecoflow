@@ -7,6 +7,7 @@ export abstract class ServiceBase {
   protected readonly platform: EcoFlowHomebridgePlatform;
   protected characteristics: Characteristic[] = [];
   private _service: Service | null = null;
+  private enabled: boolean = true;
 
   constructor(
     private readonly serviceType: WithUUID<typeof Service>,
@@ -39,6 +40,13 @@ export abstract class ServiceBase {
       throw new Error(`Service is not initialized: ${this.constructor.name}`);
     }
     return this._service;
+  }
+
+  public updateEnabled(enabled: boolean): void {
+    this.enabled = enabled;
+    if (!enabled) {
+      this.onDisabled();
+    }
   }
 
   protected get serviceName(): string {
@@ -94,5 +102,22 @@ export abstract class ServiceBase {
 
   protected covertValueToPercents(value: number, maxValue: number): number {
     return (value * 100) / maxValue;
+  }
+
+  protected onDisabled(): void {}
+
+  protected addCharacteristicSet(
+    characteristic: Characteristic,
+    name: string,
+    process: (value: CharacteristicValue) => void
+  ): void {
+    characteristic.onSet((value: CharacteristicValue) => {
+      if (!this.enabled) {
+        this.log.warn(`[${this.serviceName}] Service is disabled. Setting of "${name}" is disallowed`);
+        throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.READ_ONLY_CHARACTERISTIC);
+      } else {
+        process(value);
+      }
+    });
   }
 }

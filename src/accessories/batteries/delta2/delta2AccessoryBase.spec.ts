@@ -15,22 +15,19 @@ import { OutletAcService } from '@ecoflow/accessories/batteries/delta2/services/
 import { OutletCarService } from '@ecoflow/accessories/batteries/delta2/services/outletCarService';
 import { OutletUsbService } from '@ecoflow/accessories/batteries/delta2/services/outletUsbService';
 import { SwitchXboostService } from '@ecoflow/accessories/batteries/delta2/services/switchXboostService';
-import {
-  AcEnableType,
-  AcXBoostType,
-  EnableType,
-} from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
+import { AcEnableType, AcXBoostType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
-import { BatteryOutletServiceBase } from '@ecoflow/services/batteryOutletServiceBase';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
+import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
@@ -96,12 +93,12 @@ describe('Delta2AccessoryBase', () => {
       return serviceMock;
     }
 
-    function initOutletService<TService extends BatteryOutletServiceBase>(
+    function initOutletService<TService extends OutletBatteryServiceBase>(
       Module: object,
       service: TService
     ): jest.Mocked<TService> {
       return initService(Module, service, mock => {
-        const mockOutletBase = mock as jest.Mocked<BatteryOutletServiceBase>;
+        const mockOutletBase = mock as jest.Mocked<OutletBatteryServiceBase>;
         mockOutletBase.updateBatteryLevel.mockReset();
         mockOutletBase.updateChargingState.mockReset();
         mockOutletBase.updateInputConsumption.mockReset();
@@ -257,7 +254,7 @@ describe('Delta2AccessoryBase', () => {
         processQuotaMessage = mqttApiManagerMock.subscribeOnQuotaMessage.mock.calls[0][1]!;
       });
 
-      it('should update bms status in quota when BmsStatus message is received', async () => {
+      it('should update ems status in quota when EmsStatus message is received', async () => {
         const message: Delta2MqttQuotaMessageWithParams<EmsStatus> = {
           typeCode: Delta2MqttMessageType.EMS,
           params: {
@@ -272,7 +269,7 @@ describe('Delta2AccessoryBase', () => {
         expect(actual).toEqual(message.params);
       });
 
-      it('should update battery level when BmsStatus message is received with f32ShowSoc', async () => {
+      it('should update battery level when EmsStatus message is received with f32ShowSoc', async () => {
         const message: Delta2MqttQuotaMessageWithParams<EmsStatus> = {
           typeCode: Delta2MqttMessageType.EMS,
           params: {
@@ -289,9 +286,9 @@ describe('Delta2AccessoryBase', () => {
         expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(34.67, 32.1);
       });
 
-      it('should not update any characteristic when BmsStatus message is received with undefined status', async () => {
+      it('should not update any characteristic when EmsStatus message is received with undefined status', async () => {
         const message: Delta2MqttQuotaMessageWithParams<EmsStatus> = {
-          typeCode: Delta2MqttMessageType.BMS,
+          typeCode: Delta2MqttMessageType.EMS,
           params: {},
         };
 
@@ -839,7 +836,7 @@ describe('Delta2AccessoryBase', () => {
         expect(outletCarServiceMock.updateBatteryLevel).toHaveBeenCalledWith(1.1, 0.5);
       });
 
-      it('should update BmsStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
+      it('should not update BmsStatus-related characteristics when is requested and quotas were not initialized properly for it', async () => {
         httpApiManagerMock.getAllQuotas.mockResolvedValueOnce({} as Delta2AllQuotaData);
 
         await accessory.initializeDefaultValues();

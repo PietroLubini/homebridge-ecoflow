@@ -2,8 +2,8 @@ import {
   AcEnableType,
   AcOutFrequencyType,
   AcXBoostType,
-  EnableType,
 } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 
 // Battery management system status
 export interface EmsStatus {

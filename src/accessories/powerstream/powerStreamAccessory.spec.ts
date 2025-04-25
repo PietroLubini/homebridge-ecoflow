@@ -1,4 +1,3 @@
-import { EnableType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import {
   Heartbeat,
@@ -17,6 +16,7 @@ import { PowerDemandService } from '@ecoflow/accessories/powerstream/services/po
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import {
   AdditionalBatteryOutletCharacteristicType as BatteryOutletCharacteristicType,
   AdditionalBatteryCharacteristicType as CharacteristicType,
@@ -28,9 +28,9 @@ import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
-import { BatteryOutletServiceBase } from '@ecoflow/services/batteryOutletServiceBase';
 import { FanServiceBase } from '@ecoflow/services/fanServiceBase';
 import { LightBulbServiceBase } from '@ecoflow/services/lightBulbServiceBase';
+import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
@@ -85,9 +85,9 @@ describe('PowerStreamAccessory', () => {
       return serviceMock;
     }
 
-    function createOutletService<TService extends BatteryOutletServiceBase>(service: TService): jest.Mocked<TService> {
+    function createOutletService<TService extends OutletBatteryServiceBase>(service: TService): jest.Mocked<TService> {
       const serviceMock = service as jest.Mocked<TService>;
-      const serviceBaseMock = serviceMock as jest.Mocked<BatteryOutletServiceBase>;
+      const serviceBaseMock = serviceMock as jest.Mocked<OutletBatteryServiceBase>;
       serviceBaseMock.initialize.mockReset();
       serviceBaseMock.cleanupCharacteristics.mockReset();
       serviceBaseMock.updateBatteryLevel.mockReset();
@@ -275,7 +275,7 @@ describe('PowerStreamAccessory', () => {
         it('should initialize BAT outlet service with additional characteristics when battery settings are not defined in config', () => {
           const actual = run(
             'BAT',
-            batteryOutletServiceMock as unknown as jest.Mocked<BatteryOutletServiceBase>,
+            batteryOutletServiceMock as unknown as jest.Mocked<OutletBatteryServiceBase>,
             {
               powerStream: {},
             } as DeviceConfig
