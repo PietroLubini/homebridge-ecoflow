@@ -412,16 +412,16 @@ describe('EcoFlowAccessoryBase', () => {
       const message = { params: { status: EnableType.On } } as MqttStatusMessage;
       processStatusMessage(message);
 
-      expect(batteryStatusServiceMock.updateStatus).toHaveBeenCalledWith(true);
-      expect(accessoryInformationServiceMock.updateStatus).toHaveBeenCalledWith(true);
+      expect(batteryStatusServiceMock.updateReachability).toHaveBeenCalledWith(true);
+      expect(accessoryInformationServiceMock.updateReachability).toHaveBeenCalledWith(true);
     });
 
     it('should update status of all services when status message is received with value Offline (0)', async () => {
       const message = { params: { status: EnableType.Off } } as MqttStatusMessage;
       processStatusMessage(message);
 
-      expect(batteryStatusServiceMock.updateStatus).toHaveBeenCalledWith(false);
-      expect(accessoryInformationServiceMock.updateStatus).toHaveBeenCalledWith(false);
+      expect(batteryStatusServiceMock.updateReachability).toHaveBeenCalledWith(false);
+      expect(accessoryInformationServiceMock.updateReachability).toHaveBeenCalledWith(false);
     });
   });
 

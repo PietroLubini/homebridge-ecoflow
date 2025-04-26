@@ -7,6 +7,7 @@ export abstract class ServiceBase {
   protected readonly platform: EcoFlowHomebridgePlatform;
   protected characteristics: Characteristic[] = [];
   private _service: Service | null = null;
+  private _isReachable: boolean = true;
   private enabled: boolean = true;
 
   constructor(
@@ -49,9 +50,15 @@ export abstract class ServiceBase {
     }
   }
 
-  public updateStatus(online: boolean): void {
-    this.log.debug(`[${this.serviceName}] Device is ${online ? 'online' : 'offline'}`);
-    this.service.updateCharacteristic(this.platform.Characteristic.StatusActive, online);
+  public updateReachability(online: boolean): void {
+    this.log.warn(`[${this.serviceName}] Device is ${online ? 'online' : 'offline'}`);
+    this._isReachable = online;
+  }
+
+  public checkReachability(): void {
+    if (!this._isReachable) {
+      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    }
   }
 
   protected get serviceName(): string {

@@ -11,6 +11,7 @@ import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
 enum HAPStatus {
   READ_ONLY_CHARACTERISTIC = -70404,
+  SERVICE_COMMUNICATION_FAILURE = -70402,
 }
 
 class MockLightBulbService extends LightBulbServiceBase {
@@ -215,6 +216,22 @@ describe('LightBulbServiceBase', () => {
 
       expect(actual).toBeTruthy();
       expect(logMock.debug.mock.calls).toEqual([['MOCK State ->', true]]);
+    });
+
+    it('should not allow to set ON value when device is offline', () => {
+      service.updateReachability(false);
+
+      const actual = characteristic.setValue(true);
+
+      expect(actual.statusCode).toBe(HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    });
+
+    it('should allow to set ON value when device is online', () => {
+      service.updateReachability(true);
+
+      const actual = characteristic.setValue(true);
+
+      expect(actual).toBeTruthy();
     });
   });
 

@@ -47,6 +47,7 @@ export abstract class OutletServiceBase extends ServiceBase {
   protected override addCharacteristics(): Characteristic[] {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
     onCharacteristic.onSet((value: CharacteristicValue) => {
+      this.checkReachability();
       const newValue = value as boolean;
       this.processOnSetOn(newValue, () => this.updateState(!newValue));
     });

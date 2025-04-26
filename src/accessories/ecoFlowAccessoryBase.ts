@@ -94,7 +94,7 @@ export abstract class EcoFlowAccessoryBase {
 
   protected processStatusMessage(message: MqttStatusMessage): void {
     const status = message.params.status;
-    this.services.forEach(service => service.updateStatus(status === EnableType.On));
+    this.services.forEach(service => service.updateReachability(status === EnableType.On));
   }
 
   protected processSetReplyMessage(message: MqttSetReplyMessage): void {

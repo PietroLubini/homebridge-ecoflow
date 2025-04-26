@@ -8,6 +8,10 @@ import { OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
+enum HAPStatus {
+  SERVICE_COMMUNICATION_FAILURE = -70402,
+}
+
 class MockOutletService extends OutletServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryBase, additionalCharacteristics?: CharacteristicType[]) {
     super(ecoFlowAccessory, additionalCharacteristics, 'MOCK');
@@ -346,6 +350,22 @@ describe('OutletServiceBase', () => {
 
       expect(actual).toBeTruthy();
       expect(logMock.debug.mock.calls).toEqual([['MOCK State ->', true]]);
+    });
+
+    it('should not allow to set ON value when device is offline', () => {
+      service.updateReachability(false);
+
+      const actual = characteristic.setValue(true);
+
+      expect(actual.statusCode).toBe(HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    });
+
+    it('should allow to set ON value when device is online', () => {
+      service.updateReachability(true);
+
+      const actual = characteristic.setValue(true);
+
+      expect(actual).toBeTruthy();
     });
   });
 });
