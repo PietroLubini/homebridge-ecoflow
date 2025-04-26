@@ -49,6 +49,11 @@ export abstract class ServiceBase {
     }
   }
 
+  public updateStatus(online: boolean): void {
+    this.log.debug(`[${this.serviceName}] Device is ${online ? 'online' : 'offline'}`);
+    this.service.updateCharacteristic(this.platform.Characteristic.StatusActive, online);
+  }
+
   protected get serviceName(): string {
     return this.ecoFlowAccessory.config.name + (this.serviceSubType ? ` ${this.serviceSubType}` : '');
   }

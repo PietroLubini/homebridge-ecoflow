@@ -1,7 +1,13 @@
 import { DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
-import { MqttQuotaMessage, MqttSetMessage, MqttSetReplyMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import {
+  MqttQuotaMessage,
+  MqttSetMessage,
+  MqttSetReplyMessage,
+  MqttStatusMessage,
+} from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
@@ -79,11 +85,17 @@ export abstract class EcoFlowAccessoryBase {
     const subscriptions = [
       this.mqttApiManager.subscribeOnQuotaMessage(this.deviceInfo, this.processQuotaMessage.bind(this)),
       this.mqttApiManager.subscribeOnSetReplyMessage(this.deviceInfo, this.processSetReplyMessage.bind(this)),
+      this.mqttApiManager.subscribeOnStatusMessage(this.deviceInfo, this.processStatusMessage.bind(this)),
     ];
     return subscriptions.filter(subscription => !!subscription);
   }
 
   protected abstract processQuotaMessage(message: MqttQuotaMessage): void;
+
+  protected processStatusMessage(message: MqttStatusMessage): void {
+    const status = message.params.status;
+    this.services.forEach(service => service.updateStatus(status === EnableType.On));
+  }
 
   protected processSetReplyMessage(message: MqttSetReplyMessage): void {
     const messageKey = this.getMqttSetMessageKey(message);
@@ -131,7 +143,8 @@ export abstract class EcoFlowAccessoryBase {
   private async initMqtt(): Promise<void> {
     this.isMqttConnected =
       (await this.mqttApiManager.subscribeOnQuotaTopic(this.deviceInfo)) &&
-      (await this.mqttApiManager.subscribeOnSetReplyTopic(this.deviceInfo));
+      (await this.mqttApiManager.subscribeOnSetReplyTopic(this.deviceInfo)) &&
+      (await this.mqttApiManager.subscribeOnStatusTopic(this.deviceInfo));
 
     if (this.isMqttConnected) {
       this.subscriptions = this.subscribeOnParameterUpdates();

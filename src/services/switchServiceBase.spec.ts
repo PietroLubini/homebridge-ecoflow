@@ -161,6 +161,31 @@ describe('SwitchServiceBase', () => {
     });
   });
 
+  describe('updateStatus', () => {
+    beforeEach(() => {
+      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+      service.initialize();
+    });
+
+    it('should set StatusActive to false when device is offline', () => {
+      service.updateStatus(false);
+
+      const actual = service.service.getCharacteristic(HapCharacteristic.StatusActive).value;
+
+      expect(actual).toBeFalsy();
+      expect(logMock.debug.mock.calls).toEqual([['[accessory1 X-Boost] Device is offline']]);
+    });
+
+    it('should set StatusActive to true when device is online', () => {
+      service.updateStatus(true);
+
+      const actual = service.service.getCharacteristic(HapCharacteristic.StatusActive).value;
+
+      expect(actual).toBeTruthy();
+      expect(logMock.debug.mock.calls).toEqual([['[accessory1 X-Boost] Device is online']]);
+    });
+  });
+
   describe('processOnSetOn', () => {
     let characteristic: Characteristic;
     beforeEach(() => {

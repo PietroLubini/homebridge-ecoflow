@@ -426,6 +426,41 @@ describe('EcoFlowMqttApiManager', () => {
         expect(log1Mock.debug).toHaveBeenCalledWith('Subscribed to topic:', '/open/account1/sn1/set_reply');
       });
     });
+
+    describe('subscribeOnStatusTopic', () => {
+      it('should not subscribe to status topic when it is impossible to establish connection to mqtt server', async () => {
+        httpApiManagerMock.acquireCertificate.mockReset();
+        httpApiManagerMock.acquireCertificate.mockResolvedValueOnce(null);
+
+        const actual = await manager.subscribeOnStatusTopic(deviceInfo1);
+
+        expect(actual).toBeFalsy();
+        expect(client1Mock.subscribeAsync).not.toHaveBeenCalled();
+      });
+
+      it('should handle error when subscribing is failed', async () => {
+        const error = new Error('Access denied');
+        client1Mock.subscribeAsync.mockImplementationOnce(() => {
+          throw error;
+        });
+
+        const actual = await manager.subscribeOnStatusTopic(deviceInfo1);
+
+        expect(actual).toBeFalsy();
+        expect(log1Mock.error).toHaveBeenCalledWith(
+          "Subscribing to topic '/open/account1/sn1/status' was failed:",
+          error
+        );
+      });
+
+      it('should subscribe to status topic when it is requested', async () => {
+        const actual = await manager.subscribeOnStatusTopic(deviceInfo1);
+
+        expect(actual).toBeTruthy();
+        expect(client1Mock.subscribeAsync).toHaveBeenCalledWith('/open/account1/sn1/status');
+        expect(log1Mock.debug).toHaveBeenCalledWith('Subscribed to topic:', '/open/account1/sn1/status');
+      });
+    });
   });
 
   describe('subscribeOnMessage', () => {
@@ -512,6 +547,45 @@ describe('EcoFlowMqttApiManager', () => {
         expect(mqttDevice3Mock.subscribeOnMessage).not.toHaveBeenCalled();
       });
     });
+
+    describe('subscribeOnStatusMessage', () => {
+      async function connect(...deviceInfos: DeviceInfo[]): Promise<void> {
+        for (const deviceInfo of deviceInfos) {
+          await manager.subscribeOnStatusTopic(deviceInfo);
+        }
+      }
+
+      it('should not subscribe to status message when connection to mqtt server is not established', async () => {
+        const actual = await manager.subscribeOnStatusMessage(deviceInfo1, callbackMock);
+
+        expect(actual).toBeUndefined();
+        expect(mqttDevice1Mock.subscribeOnMessage).not.toHaveBeenCalled();
+        expect(mqttDevice2Mock.subscribeOnMessage).not.toHaveBeenCalled();
+        expect(mqttDevice3Mock.subscribeOnMessage).not.toHaveBeenCalled();
+      });
+
+      it('should not subscribe to status message when device is not registered for client connection', async () => {
+        await connect(deviceInfo1);
+
+        const actual = await manager.subscribeOnStatusMessage(deviceInfo2, callbackMock);
+
+        expect(actual).toBeUndefined();
+        expect(mqttDevice1Mock.subscribeOnMessage).not.toHaveBeenCalled();
+        expect(mqttDevice2Mock.subscribeOnMessage).not.toHaveBeenCalled();
+        expect(mqttDevice3Mock.subscribeOnMessage).not.toHaveBeenCalled();
+      });
+
+      it('should subscribe to status message when it is requested', async () => {
+        await connect(deviceInfo1, deviceInfo2, deviceInfo3);
+
+        const actual = await manager.subscribeOnStatusMessage(deviceInfo1, callbackMock);
+
+        expect(actual).toBe(subscription1);
+        expect(mqttDevice1Mock.subscribeOnMessage).toHaveBeenCalledWith(MqttTopicType.Status, callbackMock);
+        expect(mqttDevice2Mock.subscribeOnMessage).not.toHaveBeenCalled();
+        expect(mqttDevice3Mock.subscribeOnMessage).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('destroy', () => {
@@ -529,6 +603,7 @@ describe('EcoFlowMqttApiManager', () => {
       when destroying an EcoFlow MQTT API object`, async () => {
       await manager.subscribeOnSetReplyTopic(deviceInfo1);
       await manager.subscribeOnQuotaTopic(deviceInfo2);
+      await manager.subscribeOnStatusTopic(deviceInfo2);
 
       await manager.destroy();
 
@@ -541,6 +616,7 @@ describe('EcoFlowMqttApiManager', () => {
       ]);
       expect(log2Mock.debug.mock.calls).toEqual([
         ['Subscribed to topic:', '/open/account1/sn2/quota'],
+        ['Subscribed to topic:', '/open/account1/sn2/status'],
         ['Unsubscribed from all topics'],
         ['Disconnected from EcoFlow MQTT Service'],
       ]);
@@ -552,6 +628,7 @@ describe('EcoFlowMqttApiManager', () => {
     it(`should unsubscribe from all topics for devices that has own mqtt client
       when destroying an EcoFlow MQTT API object`, async () => {
       await manager.subscribeOnSetReplyTopic(deviceInfo1);
+      await manager.subscribeOnStatusTopic(deviceInfo1);
       await manager.subscribeOnQuotaTopic(deviceInfo3);
 
       await manager.destroy();
@@ -560,6 +637,7 @@ describe('EcoFlowMqttApiManager', () => {
       expect(client1Mock.endAsync).toHaveBeenCalledTimes(1);
       expect(log1Mock.debug.mock.calls).toEqual([
         ['Subscribed to topic:', '/open/account1/sn1/set_reply'],
+        ['Subscribed to topic:', '/open/account1/sn1/status'],
         ['Unsubscribed from all topics'],
         ['Disconnected from EcoFlow MQTT Service'],
       ]);
