@@ -3,7 +3,7 @@ import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic } from 'homebridge';
 
 export class TemperatureSensorService extends ServiceBase {
-  private temperatureCharacteristic: Characteristic | null = null;
+  private currentTemperature: number = 0;
 
   constructor(
     protected readonly ecoFlowAccessory: EcoFlowAccessoryBase,
@@ -13,11 +13,13 @@ export class TemperatureSensorService extends ServiceBase {
   }
 
   protected override addCharacteristics(): Characteristic[] {
-    this.temperatureCharacteristic = this.addCharacteristic(this.platform.Characteristic.CurrentTemperature);
-    return [this.temperatureCharacteristic];
+    const temperatureCharacteristic = this.addCharacteristic(this.platform.Characteristic.CurrentTemperature);
+    temperatureCharacteristic.onGet(() => this.processOnGet(this.currentTemperature));
+    return [temperatureCharacteristic];
   }
 
   public updateCurrentTemperature(value: number): void {
+    this.currentTemperature = value;
     this.updateCharacteristic(this.platform.Characteristic.CurrentTemperature, 'Current Temperature', value);
   }
 }

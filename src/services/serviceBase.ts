@@ -51,14 +51,7 @@ export abstract class ServiceBase {
   }
 
   public updateReachability(online: boolean): void {
-    this.log.warn(`[${this.serviceName}] Device is ${online ? 'online' : 'offline'}`);
     this._isReachable = online;
-  }
-
-  public checkReachability(): void {
-    if (!this._isReachable) {
-      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
-    }
   }
 
   protected get serviceName(): string {
@@ -131,5 +124,21 @@ export abstract class ServiceBase {
         process(value);
       }
     });
+  }
+
+  protected processOnGet<TValue>(value: TValue): TValue {
+    this.checkReachability();
+    return value;
+  }
+
+  protected processOnSet(func: () => void): void {
+    this.checkReachability();
+    func();
+  }
+
+  private checkReachability(): void {
+    if (!this._isReachable) {
+      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    }
   }
 }

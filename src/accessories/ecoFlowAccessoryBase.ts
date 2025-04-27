@@ -94,7 +94,9 @@ export abstract class EcoFlowAccessoryBase {
 
   protected processStatusMessage(message: MqttStatusMessage): void {
     const status = message.params.status;
-    this.services.forEach(service => service.updateReachability(status === EnableType.On));
+    const online = status === EnableType.On;
+    this.log.warn(`Device is ${online ? 'online' : 'offline'}`);
+    this.services.forEach(service => service.updateReachability(online));
   }
 
   protected processSetReplyMessage(message: MqttSetReplyMessage): void {

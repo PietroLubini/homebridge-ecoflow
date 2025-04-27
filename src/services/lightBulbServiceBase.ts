@@ -3,7 +3,9 @@ import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic } from 'homebridge';
 
 export abstract class LightBulbServiceBase extends ServiceBase {
-  private currentBrightness = 0;
+  private state: boolean = false;
+  private brightnessPercents: number = 0;
+  private brightness: number = 0;
   private brightnessCharacteristic: Characteristic | null = null;
 
   constructor(
@@ -16,30 +18,38 @@ export abstract class LightBulbServiceBase extends ServiceBase {
 
   protected override addCharacteristics(): Characteristic[] {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
-    onCharacteristic.onSet(value => {
-      this.checkReachability();
-      const newValue = value as boolean;
-      this.processOnSetOn(newValue, () => this.updateState(!newValue));
-    });
+    onCharacteristic
+      .onGet(() => this.processOnGet(this.state))
+      .onSet(value =>
+        this.processOnSet(() => {
+          const newValue = value as boolean;
+          this.processOnSetOn(newValue, () => this.updateState(!newValue));
+        })
+      );
 
     this.brightnessCharacteristic = this.addCharacteristic(this.platform.Characteristic.Brightness);
-    this.brightnessCharacteristic.onSet(percents => {
-      const prevBrightness = this.currentBrightness;
-      this.currentBrightness = this.covertPercentsToValue(percents as number, this.maxBrightness);
-      this.processOnSetBrightness(this.currentBrightness, () => this.updateBrightness(prevBrightness));
-    });
+    this.brightnessCharacteristic
+      .onGet(() => this.processOnGet(this.brightnessPercents))
+      .onSet(percents =>
+        this.processOnSet(() => {
+          const prevBrightness = this.brightness;
+          this.brightness = this.covertPercentsToValue(percents as number, this.maxBrightness);
+          this.processOnSetBrightness(this.brightness, () => this.updateBrightness(prevBrightness));
+        })
+      );
 
     return [onCharacteristic, this.brightnessCharacteristic];
   }
 
   public updateState(state: boolean): void {
+    this.state = state;
     this.updateCharacteristic(this.platform.Characteristic.On, 'State', state);
   }
 
   public updateBrightness(value: number): void {
-    const percents = this.covertValueToPercents(value, this.maxBrightness);
-    this.updateCharacteristic(this.platform.Characteristic.Brightness, 'Brightness', percents);
-    this.currentBrightness = value;
+    this.brightnessPercents = this.covertValueToPercents(value, this.maxBrightness);
+    this.updateCharacteristic(this.platform.Characteristic.Brightness, 'Brightness', this.brightnessPercents);
+    this.brightness = value;
   }
 
   protected setBrightness(value: number): void {
