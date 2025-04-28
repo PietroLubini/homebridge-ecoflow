@@ -3,6 +3,8 @@ import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic } from 'homebridge';
 
 export class ContactSensorService extends ServiceBase {
+  private contactState: number = this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED;
+
   constructor(
     protected readonly ecoFlowAccessory: EcoFlowAccessoryBase,
     serviceSubType?: string
@@ -11,16 +13,17 @@ export class ContactSensorService extends ServiceBase {
   }
 
   protected override addCharacteristics(): Characteristic[] {
-    return [this.addCharacteristic(this.platform.Characteristic.ContactSensorState)];
+    const contactSensorStateCharacteristic = this.addCharacteristic(
+      this.platform.Characteristic.ContactSensorState
+    ).onGet(() => this.processOnGet(this.contactState));
+    return [contactSensorStateCharacteristic];
   }
 
   public updateState(closed: boolean): void {
-    this.updateCharacteristic(
-      this.platform.Characteristic.ContactSensorState,
-      'State',
-      closed
-        ? this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED
-        : this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
-    );
+    this.contactState = closed
+      ? this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED
+      : this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED;
+
+    this.updateCharacteristic(this.platform.Characteristic.ContactSensorState, 'State', this.contactState);
   }
 }

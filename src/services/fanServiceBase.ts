@@ -3,7 +3,9 @@ import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic } from 'homebridge';
 
 export abstract class FanServiceBase extends ServiceBase {
-  private currentRotationSpeed = 0;
+  private state: boolean = false;
+  private rotationSpeedPercents: number = 0;
+  private rotationSpeed = 0;
   private rotationSpeedCharacteristic: Characteristic | null = null;
 
   constructor(
@@ -15,30 +17,38 @@ export abstract class FanServiceBase extends ServiceBase {
   }
 
   protected override addCharacteristics(): Characteristic[] {
-    const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
-    onCharacteristic.onSet(value => {
-      const newValue = value as boolean;
-      this.processOnSetOn(newValue, () => this.updateState(!newValue));
-    });
+    const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On)
+      .onGet(() => this.processOnGet(this.state))
+      .onSet(value =>
+        this.processOnSet(this.platform.Characteristic.On.name, () => {
+          this.state = value as boolean;
+          this.processOnSetOn(this.state, () => this.updateState(!this.state));
+        })
+      );
 
-    this.rotationSpeedCharacteristic = this.addCharacteristic(this.platform.Characteristic.RotationSpeed);
-    this.rotationSpeedCharacteristic.onSet(percents => {
-      const prevRotationSpeed = this.currentRotationSpeed;
-      this.currentRotationSpeed = this.covertPercentsToValue(percents as number, this.maxRotationSpeed);
-      this.processOnSetRotationSpeed(this.currentRotationSpeed, () => this.updateRotationSpeed(prevRotationSpeed));
-    });
+    this.rotationSpeedCharacteristic = this.addCharacteristic(this.platform.Characteristic.RotationSpeed)
+      .onGet(() => this.processOnGet(this.rotationSpeedPercents))
+      .onSet(percents =>
+        this.processOnSet(this.platform.Characteristic.RotationSpeed.name, () => {
+          this.rotationSpeedPercents = percents as number;
+          const prevRotationSpeed = this.rotationSpeed;
+          this.rotationSpeed = this.covertPercentsToValue(this.rotationSpeedPercents, this.maxRotationSpeed);
+          this.processOnSetRotationSpeed(this.rotationSpeed, () => this.updateRotationSpeed(prevRotationSpeed));
+        })
+      );
 
     return [onCharacteristic, this.rotationSpeedCharacteristic];
   }
 
   public updateState(state: boolean): void {
+    this.state = state;
     this.updateCharacteristic(this.platform.Characteristic.On, 'State', state);
   }
 
   public updateRotationSpeed(value: number): void {
-    const percents = this.covertValueToPercents(value, this.maxRotationSpeed);
-    this.updateCharacteristic(this.platform.Characteristic.RotationSpeed, 'RotationSpeed', percents);
-    this.currentRotationSpeed = value;
+    this.rotationSpeedPercents = this.covertValueToPercents(value, this.maxRotationSpeed);
+    this.updateCharacteristic(this.platform.Characteristic.RotationSpeed, 'RotationSpeed', this.rotationSpeedPercents);
+    this.rotationSpeed = value;
   }
 
   protected setRotationSpeed(value: number): void {

@@ -48,11 +48,10 @@ export abstract class OutletServiceBase extends ServiceBase {
   }
 
   protected override addCharacteristics(): Characteristic[] {
-    const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
-    onCharacteristic
+    const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On)
       .onGet(() => this.processOnGet(this.state))
       .onSet((value: CharacteristicValue) =>
-        this.processOnSet(() => {
+        this.processOnSet(this.platform.Characteristic.On.name, () => {
           this.state = value as boolean;
           this.processOnSetOn(this.state, () => this.updateState(!this.state));
         })

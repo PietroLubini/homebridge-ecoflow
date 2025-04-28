@@ -139,43 +139,58 @@ describe('TemperatureSensorService', () => {
   });
 
   describe('characteristics', () => {
-    const characteristicCurrentTemperatureMock: jest.Mocked<Characteristic> = {
-      onGet: jest.fn(),
-      onSet: jest.fn(),
-      updateValue: jest.fn(),
-    } as unknown as jest.Mocked<Characteristic>;
+    function createCharacteristicMock(): jest.Mocked<Characteristic> {
+      return {
+        setProps: jest.fn(),
+        onGet: jest.fn(),
+        onSet: jest.fn(),
+        updateValue: jest.fn(),
+      } as unknown as jest.Mocked<Characteristic>;
+    }
+
+    function setupCharacteristicMock(characteristicMock: jest.Mocked<Characteristic>): void {
+      characteristicMock.setProps.mockReset();
+      characteristicMock.onGet.mockReset();
+      characteristicMock.onSet.mockReset();
+      characteristicMock.setProps.mockReturnValueOnce(characteristicMock);
+      characteristicMock.onGet.mockReturnValueOnce(characteristicMock);
+      characteristicMock.onSet.mockReturnValueOnce(characteristicMock);
+    }
+
+    const characteristicCurrentTemperatureMock: jest.Mocked<Characteristic> = createCharacteristicMock();
     const hapServiceMock: jest.Mocked<HapService> = {
       getCharacteristic: jest.fn(constructor => {
-        if (constructor.name === 'CurrentTemperature') {
-          return characteristicCurrentTemperatureMock;
+        switch (constructor.name) {
+          case HapCharacteristic.CurrentTemperature.name:
+            return characteristicCurrentTemperatureMock;
+          default:
+            return undefined;
         }
-        return undefined;
       }),
     } as unknown as jest.Mocked<HapService>;
 
     beforeEach(() => {
       accessoryMock.getService.mockReturnValueOnce(hapServiceMock);
-      characteristicCurrentTemperatureMock.onGet.mockReset();
-      characteristicCurrentTemperatureMock.onGet.mockReturnValueOnce(characteristicCurrentTemperatureMock);
+      setupCharacteristicMock(characteristicCurrentTemperatureMock);
       service.initialize();
     });
 
-    describe('currentTemperature', () => {
+    describe('CurrentTemperature', () => {
       describe('onGet', () => {
         let handler: CharacteristicGetHandler;
 
         beforeEach(() => {
           handler = characteristicCurrentTemperatureMock.onGet.mock.calls[0][0];
         });
-        it('should get current temperature when device is online', () => {
+        it('should get CurrentTemperature when device is online', () => {
           service.updateCurrentTemperature(1.5);
 
           const actual = handler(undefined);
 
-          expect(actual).toEqual(1.5);
+          expect(actual).toBe(1.5);
         });
 
-        it('should throw an error when getting current temperature but device is offline', () => {
+        it('should throw an error when getting CurrentTemperature but device is offline', () => {
           service.updateReachability(false);
 
           expect(() => handler(undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));

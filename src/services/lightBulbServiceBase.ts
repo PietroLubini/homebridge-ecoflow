@@ -17,21 +17,19 @@ export abstract class LightBulbServiceBase extends ServiceBase {
   }
 
   protected override addCharacteristics(): Characteristic[] {
-    const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
-    onCharacteristic
+    const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On)
       .onGet(() => this.processOnGet(this.state))
       .onSet(value =>
-        this.processOnSet(() => {
+        this.processOnSet(this.platform.Characteristic.On.name, () => {
           this.state = value as boolean;
           this.processOnSetOn(this.state, () => this.updateState(!this.state));
         })
       );
 
-    this.brightnessCharacteristic = this.addCharacteristic(this.platform.Characteristic.Brightness);
-    this.brightnessCharacteristic
+    this.brightnessCharacteristic = this.addCharacteristic(this.platform.Characteristic.Brightness)
       .onGet(() => this.processOnGet(this.brightnessPercents))
       .onSet(percents =>
-        this.processOnSet(() => {
+        this.processOnSet(this.platform.Characteristic.Brightness.name, () => {
           this.brightnessPercents = percents as number;
           const prevBrightness = this.brightness;
           this.brightness = this.covertPercentsToValue(this.brightnessPercents, this.maxBrightness);

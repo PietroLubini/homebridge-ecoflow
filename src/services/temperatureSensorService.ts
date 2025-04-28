@@ -13,8 +13,9 @@ export class TemperatureSensorService extends ServiceBase {
   }
 
   protected override addCharacteristics(): Characteristic[] {
-    const temperatureCharacteristic = this.addCharacteristic(this.platform.Characteristic.CurrentTemperature);
-    temperatureCharacteristic.onGet(() => this.processOnGet(this.currentTemperature));
+    const temperatureCharacteristic = this.addCharacteristic(this.platform.Characteristic.CurrentTemperature).onGet(
+      () => this.processOnGet(this.currentTemperature)
+    );
     return [temperatureCharacteristic];
   }
 

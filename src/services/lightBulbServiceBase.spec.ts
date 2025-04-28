@@ -201,39 +201,47 @@ describe('LightBulbServiceBase', () => {
   });
 
   describe('characteristics', () => {
-    const characteristicOnMock: jest.Mocked<Characteristic> = {
-      onGet: jest.fn(),
-      onSet: jest.fn(),
-      updateValue: jest.fn(),
-    } as unknown as jest.Mocked<Characteristic>;
-    const characteristicBrightnessMock: jest.Mocked<Characteristic> = {
-      onGet: jest.fn(),
-      onSet: jest.fn(),
-      updateValue: jest.fn(),
-    } as unknown as jest.Mocked<Characteristic>;
+    function createCharacteristicMock(): jest.Mocked<Characteristic> {
+      return {
+        setProps: jest.fn(),
+        onGet: jest.fn(),
+        onSet: jest.fn(),
+        updateValue: jest.fn(),
+      } as unknown as jest.Mocked<Characteristic>;
+    }
+
+    function setupCharacteristicMock(characteristicMock: jest.Mocked<Characteristic>): void {
+      characteristicMock.setProps.mockReset();
+      characteristicMock.onGet.mockReset();
+      characteristicMock.onSet.mockReset();
+      characteristicMock.setProps.mockReturnValueOnce(characteristicMock);
+      characteristicMock.onGet.mockReturnValueOnce(characteristicMock);
+      characteristicMock.onSet.mockReturnValueOnce(characteristicMock);
+    }
+
+    const characteristicOnMock: jest.Mocked<Characteristic> = createCharacteristicMock();
+    const characteristicBrightnessMock: jest.Mocked<Characteristic> = createCharacteristicMock();
     const hapServiceMock: jest.Mocked<HapService> = {
       getCharacteristic: jest.fn(constructor => {
-        if (constructor.name === 'On') {
-          return characteristicOnMock;
-        } else if (constructor.name === 'Brightness') {
-          return characteristicBrightnessMock;
+        switch (constructor.name) {
+          case HapCharacteristic.On.name:
+            return characteristicOnMock;
+          case HapCharacteristic.Brightness.name:
+            return characteristicBrightnessMock;
+          default:
+            return undefined;
         }
-        return undefined;
       }),
     } as unknown as jest.Mocked<HapService>;
 
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapServiceMock);
-      characteristicOnMock.onGet.mockReset();
-      characteristicOnMock.onSet.mockReset();
-      characteristicOnMock.onGet.mockReturnValueOnce(characteristicOnMock);
-      characteristicBrightnessMock.onGet.mockReset();
-      characteristicBrightnessMock.onSet.mockReset();
-      characteristicBrightnessMock.onGet.mockReturnValueOnce(characteristicBrightnessMock);
+      setupCharacteristicMock(characteristicOnMock);
+      setupCharacteristicMock(characteristicBrightnessMock);
       service.initialize();
     });
 
-    describe('on', () => {
+    describe('On', () => {
       describe('onGet', () => {
         let handler: CharacteristicGetHandler;
 
@@ -273,12 +281,21 @@ describe('LightBulbServiceBase', () => {
           expect(actual).toBeTruthy();
         });
 
-        it('should throw an error when setting on value but device is offline', () => {
+        it('should throw an error when setting On value but device is offline', () => {
           service.updateReachability(false);
 
           expect(() => handlerOnSet(true, undefined)).toThrow(
             new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE)
           );
+        });
+
+        it('should throw an error when setting On value but service is disabled', () => {
+          service.updateEnabled(false);
+
+          expect(() => handlerOnSet(true, undefined)).toThrow(new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC));
+          expect(logMock.warn.mock.calls).toEqual([
+            ['[accessory1 MOCK] Service is disabled. Setting of "On" is disallowed'],
+          ]);
         });
 
         it('should revert changing of On state when it is failed', () => {
@@ -287,11 +304,11 @@ describe('LightBulbServiceBase', () => {
           const characteristic = service.service.getCharacteristic(HapCharacteristic.On);
           characteristic.setValue(true);
           logMock.debug.mockReset();
-          const processOnSetOnMock = jest.fn();
-          service.processOnSetOn = processOnSetOnMock;
+          const processOnSetMock = jest.fn();
+          service.processOnSetOn = processOnSetMock;
 
           characteristic.setValue(false);
-          const revertFunc = processOnSetOnMock.mock.calls[0][1];
+          const revertFunc = processOnSetMock.mock.calls[0][1];
           revertFunc();
 
           const actual = characteristic.value;
@@ -302,7 +319,7 @@ describe('LightBulbServiceBase', () => {
       });
     });
 
-    describe('brightness', () => {
+    describe('Brightness', () => {
       describe('onGet', () => {
         let handler: CharacteristicGetHandler;
 
@@ -310,7 +327,7 @@ describe('LightBulbServiceBase', () => {
           handler = characteristicBrightnessMock.onGet.mock.calls[0][0];
         });
 
-        it('should get brightness value when device is online', () => {
+        it('should get Brightness value when device is online', () => {
           service.updateBrightness(1023);
 
           const actual = handler(undefined);
@@ -318,7 +335,7 @@ describe('LightBulbServiceBase', () => {
           expect(actual).toBe(100);
         });
 
-        it('should throw an error when getting brightness value but device is offline', () => {
+        it('should throw an error when getting Brightness value but device is offline', () => {
           service.updateReachability(false);
 
           expect(() => handler(undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
@@ -334,7 +351,7 @@ describe('LightBulbServiceBase', () => {
           handlerOnSet = characteristicBrightnessMock.onSet.mock.calls[0][0];
         });
 
-        it('should set brightness value when device is online', () => {
+        it('should set Brightness value when device is online', () => {
           handlerOnSet(55, undefined);
 
           const actual = handlerOnGet(undefined);
@@ -342,26 +359,35 @@ describe('LightBulbServiceBase', () => {
           expect(actual).toBe(55);
         });
 
-        it('should throw an error when setting brightness value but device is offline', () => {
+        it('should throw an error when setting Brightness value but device is offline', () => {
           service.updateReachability(false);
 
-          expect(() => handlerOnSet(1023, undefined)).toThrow(
+          expect(() => handlerOnSet(23, undefined)).toThrow(
             new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE)
           );
         });
 
-        it('should revert changing of brightness when sending Set command to device is failed', () => {
+        it('should throw an error when setting on value but service is disabled', () => {
+          service.updateEnabled(false);
+
+          expect(() => handlerOnSet(23, undefined)).toThrow(new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC));
+          expect(logMock.warn.mock.calls).toEqual([
+            ['[accessory1 MOCK] Service is disabled. Setting of "Brightness" is disallowed'],
+          ]);
+        });
+
+        it('should revert changing of Brightness when sending Set command to device is failed', () => {
           accessoryMock.getServiceById.mockReturnValueOnce(hapService);
           service.initialize();
           const characteristic = service.service.getCharacteristic(HapCharacteristic.Brightness);
 
           characteristic.setValue(100);
           logMock.debug.mockReset();
-          const processOnSetBrightnessMock = jest.fn();
-          service.processOnSetBrightness = processOnSetBrightnessMock;
+          const processOnSetMock = jest.fn();
+          service.processOnSetBrightness = processOnSetMock;
 
           characteristic.setValue(20);
-          const revertFunc = processOnSetBrightnessMock.mock.calls[0][1];
+          const revertFunc = processOnSetMock.mock.calls[0][1];
           revertFunc();
 
           const actual = characteristic.value;
