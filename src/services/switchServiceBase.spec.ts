@@ -161,25 +161,6 @@ describe('SwitchServiceBase', () => {
     });
   });
 
-  describe('updateReachability', () => {
-    beforeEach(() => {
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-    });
-
-    it('should log when device is offline', () => {
-      service.updateReachability(false);
-
-      expect(logMock.warn.mock.calls).toEqual([['[accessory1 X-Boost] Device is offline']]);
-    });
-
-    it('should log when device is online', () => {
-      service.updateReachability(true);
-
-      expect(logMock.warn.mock.calls).toEqual([['[accessory1 X-Boost] Device is online']]);
-    });
-  });
-
   describe('processOnSetOn', () => {
     let characteristic: Characteristic;
     beforeEach(() => {

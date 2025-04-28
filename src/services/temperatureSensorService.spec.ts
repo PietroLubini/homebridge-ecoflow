@@ -5,10 +5,15 @@ import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteri
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { TemperatureSensorService } from '@ecoflow/services/temperatureSensorService';
-import { Characteristic as HapCharacteristic, Service as HapService, HapStatusError } from 'hap-nodejs';
-import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
+import {
+  CharacteristicGetHandler,
+  Characteristic as HapCharacteristic,
+  Service as HapService,
+  HapStatusError,
+} from 'hap-nodejs';
+import { Characteristic, HAP, HAPStatus, Logging, PlatformAccessory } from 'homebridge';
 
-enum HAPStatus {
+enum HAPStatusMock {
   READ_ONLY_CHARACTERISTIC = -70404,
 }
 
@@ -24,7 +29,7 @@ describe('TemperatureSensorService', () => {
   const hapMock = {
     Characteristic: HapCharacteristic,
     HapStatusError: HapStatusError,
-    HAPStatus: HAPStatus,
+    HAPStatus: HAPStatusMock,
   } as unknown as HAP;
   EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
 
@@ -130,6 +135,52 @@ describe('TemperatureSensorService', () => {
 
       expect(actual).toEqual(1.5);
       expect(logMock.debug).toHaveBeenCalledWith('Current Temperature ->', 1.5);
+    });
+  });
+
+  describe('characteristics', () => {
+    const characteristicCurrentTemperatureMock: jest.Mocked<Characteristic> = {
+      onGet: jest.fn(),
+      onSet: jest.fn(),
+      updateValue: jest.fn(),
+    } as unknown as jest.Mocked<Characteristic>;
+    const hapServiceMock: jest.Mocked<HapService> = {
+      getCharacteristic: jest.fn(constructor => {
+        if (constructor.name === 'CurrentTemperature') {
+          return characteristicCurrentTemperatureMock;
+        }
+        return undefined;
+      }),
+    } as unknown as jest.Mocked<HapService>;
+
+    beforeEach(() => {
+      accessoryMock.getService.mockReturnValueOnce(hapServiceMock);
+      characteristicCurrentTemperatureMock.onGet.mockReset();
+      characteristicCurrentTemperatureMock.onGet.mockReturnValueOnce(characteristicCurrentTemperatureMock);
+      service.initialize();
+    });
+
+    describe('currentTemperature', () => {
+      describe('onGet', () => {
+        let handler: CharacteristicGetHandler;
+
+        beforeEach(() => {
+          handler = characteristicCurrentTemperatureMock.onGet.mock.calls[0][0];
+        });
+        it('should get current temperature when device is online', () => {
+          service.updateCurrentTemperature(1.5);
+
+          const actual = handler(undefined);
+
+          expect(actual).toEqual(1.5);
+        });
+
+        it('should throw an error when getting current temperature but device is offline', () => {
+          service.updateReachability(false);
+
+          expect(() => handler(undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+        });
+      });
     });
   });
 });

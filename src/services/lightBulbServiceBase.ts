@@ -22,8 +22,8 @@ export abstract class LightBulbServiceBase extends ServiceBase {
       .onGet(() => this.processOnGet(this.state))
       .onSet(value =>
         this.processOnSet(() => {
-          const newValue = value as boolean;
-          this.processOnSetOn(newValue, () => this.updateState(!newValue));
+          this.state = value as boolean;
+          this.processOnSetOn(this.state, () => this.updateState(!this.state));
         })
       );
 
@@ -32,8 +32,9 @@ export abstract class LightBulbServiceBase extends ServiceBase {
       .onGet(() => this.processOnGet(this.brightnessPercents))
       .onSet(percents =>
         this.processOnSet(() => {
+          this.brightnessPercents = percents as number;
           const prevBrightness = this.brightness;
-          this.brightness = this.covertPercentsToValue(percents as number, this.maxBrightness);
+          this.brightness = this.covertPercentsToValue(this.brightnessPercents, this.maxBrightness);
           this.processOnSetBrightness(this.brightness, () => this.updateBrightness(prevBrightness));
         })
       );
