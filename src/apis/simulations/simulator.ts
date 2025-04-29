@@ -1,8 +1,21 @@
-import { MqttSetMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { MqttSetMessage, MqttStatusMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 
 export abstract class Simulator {
   public abstract generateQuota(): object;
   public abstract generateSetReply(message: string): object;
+
+  public generateStatus(): MqttStatusMessage {
+    const status: MqttStatusMessage = {
+      id: `${Math.floor(Math.random() * 1000000)}`,
+      version: '1.0',
+      timestamp: Date.now(),
+      params: {
+        status: this.getRandomBoolean() ? EnableType.On : EnableType.Off,
+      },
+    };
+    return status;
+  }
 
   protected getRandomNumber(min: number, max: number): number {
     return Math.random() * (max - min) + min;

@@ -37,6 +37,10 @@ export class EcoFlowMqttApiManager {
     return this.subscribeOnTopic(deviceInfo, MqttTopicType.SetReply);
   }
 
+  public subscribeOnStatusTopic(deviceInfo: DeviceInfo): Promise<boolean> {
+    return this.subscribeOnTopic(deviceInfo, MqttTopicType.Status);
+  }
+
   public subscribeOnQuotaMessage<TMessage>(
     deviceInfo: DeviceInfo,
     callback: (message: TMessage) => void
@@ -49,6 +53,13 @@ export class EcoFlowMqttApiManager {
     callback: (message: TMessage) => void
   ): Subscription | undefined {
     return this.subscribeOnMessage(deviceInfo, MqttTopicType.SetReply, callback);
+  }
+
+  public subscribeOnStatusMessage<TMessage>(
+    deviceInfo: DeviceInfo,
+    callback: (message: TMessage) => void
+  ): Subscription | undefined {
+    return this.subscribeOnMessage(deviceInfo, MqttTopicType.Status, callback);
   }
 
   public async sendSetCommand(deviceInfo: DeviceInfo, message: MqttSetMessage): Promise<void> {

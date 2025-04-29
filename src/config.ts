@@ -37,6 +37,7 @@ export interface DeviceAccessConfig extends DeviceInfoConfig {
   simulate?: boolean;
   simulator?: new () => Simulator;
   simulateQuotaTimeoutMs?: number;
+  simulateStatusTimeoutMs?: number;
 }
 
 export interface DeviceConfig extends AccessoryConfig, DeviceAccessConfig {
@@ -44,6 +45,7 @@ export interface DeviceConfig extends AccessoryConfig, DeviceAccessConfig {
   battery?: BatteryDeviceConfig;
   powerStream?: PowerStreamDeviceConfig;
   outlet?: OutletDeviceConfig;
+  setReplyWaitResponseTimeoutMs?: number;
 }
 
 export interface BatteryDeviceConfig {

@@ -2,8 +2,15 @@ import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase'
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { ContactSensorService } from '@ecoflow/services/contactSensorService';
-import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
-import { Logging, PlatformAccessory } from 'homebridge';
+import {
+  Characteristic,
+  CharacteristicGetHandler,
+  Characteristic as HapCharacteristic,
+  Service as HapService,
+  HAPStatus,
+  HapStatusError,
+} from 'hap-nodejs';
+import { HAP, Logging, PlatformAccessory } from 'homebridge';
 
 describe('ContactSensorService', () => {
   let service: ContactSensorService;
@@ -12,6 +19,11 @@ describe('ContactSensorService', () => {
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
   let hapService: HapService;
+
+  const hapMock = {
+    Characteristic: HapCharacteristic,
+    HapStatusError: HapStatusError,
+  } as unknown as HAP;
 
   const expectedCharacteristics: MockCharacteristic[] = [
     {
@@ -32,6 +44,9 @@ describe('ContactSensorService', () => {
     platformMock = {
       Service: HapService,
       Characteristic: HapCharacteristic,
+      api: {
+        hap: hapMock,
+      },
     } as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
     accessoryMock = {
       getServiceById: jest.fn(),
@@ -79,6 +94,67 @@ describe('ContactSensorService', () => {
 
       expect(actual).toEqual(HapCharacteristic.ContactSensorState.CONTACT_NOT_DETECTED);
       expect(logMock.debug).toHaveBeenCalledWith('Door State ->', 1);
+    });
+  });
+
+  describe('characteristics', () => {
+    function createCharacteristicMock(): jest.Mocked<Characteristic> {
+      return {
+        setProps: jest.fn(),
+        onGet: jest.fn(),
+        onSet: jest.fn(),
+        updateValue: jest.fn(),
+      } as unknown as jest.Mocked<Characteristic>;
+    }
+
+    function setupCharacteristicMock(characteristicMock: jest.Mocked<Characteristic>): void {
+      characteristicMock.setProps.mockReset();
+      characteristicMock.onGet.mockReset();
+      characteristicMock.onSet.mockReset();
+      characteristicMock.setProps.mockReturnValueOnce(characteristicMock);
+      characteristicMock.onGet.mockReturnValueOnce(characteristicMock);
+      characteristicMock.onSet.mockReturnValueOnce(characteristicMock);
+    }
+
+    const characteristicContactSensorStateMock: jest.Mocked<Characteristic> = createCharacteristicMock();
+    const hapServiceMock: jest.Mocked<HapService> = {
+      getCharacteristic: jest.fn(constructor => {
+        switch (constructor.name) {
+          case HapCharacteristic.ContactSensorState.name:
+            return characteristicContactSensorStateMock;
+          default:
+            return undefined;
+        }
+      }),
+    } as unknown as jest.Mocked<HapService>;
+
+    beforeEach(() => {
+      accessoryMock.getServiceById.mockReturnValueOnce(hapServiceMock);
+      setupCharacteristicMock(characteristicContactSensorStateMock);
+      service.initialize();
+    });
+
+    describe('ContactSensorState', () => {
+      describe('onGet', () => {
+        let handler: CharacteristicGetHandler;
+
+        beforeEach(() => {
+          handler = characteristicContactSensorStateMock.onGet.mock.calls[0][0];
+        });
+        it('should get ContactSensorState when device is online', () => {
+          service.updateState(false);
+
+          const actual = handler(undefined);
+
+          expect(actual).toEqual(HapCharacteristic.ContactSensorState.CONTACT_NOT_DETECTED);
+        });
+
+        it('should throw an error when getting ContactSensorState but device is offline', () => {
+          service.updateReachability(false);
+
+          expect(() => handler(undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+        });
+      });
     });
   });
 });

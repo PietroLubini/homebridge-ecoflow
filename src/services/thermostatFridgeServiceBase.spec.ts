@@ -12,10 +12,17 @@ import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteri
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { ThermostatFridgeServiceBase } from '@ecoflow/services/thermostatFridgeServiceBase';
-import { Characteristic as HapCharacteristic, Service as HapService, HapStatusError } from 'hap-nodejs';
+import {
+  CharacteristicGetHandler,
+  CharacteristicSetHandler,
+  Characteristic as HapCharacteristic,
+  Service as HapService,
+  HAPStatus,
+  HapStatusError,
+} from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-enum HAPStatus {
+enum HAPStatusMock {
   READ_ONLY_CHARACTERISTIC = -70404,
 }
 
@@ -51,7 +58,7 @@ describe('ThermostatFridgeServiceBase', () => {
   const hapMock = {
     Characteristic: HapCharacteristic,
     HapStatusError: HapStatusError,
-    HAPStatus: HAPStatus,
+    HAPStatus: HAPStatusMock,
   } as unknown as HAP;
   EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
 
@@ -326,123 +333,347 @@ describe('ThermostatFridgeServiceBase', () => {
     });
   });
 
-  describe('onTargetTemperatureSet', () => {
-    let characteristic: Characteristic;
+  describe('characteristics', () => {
+    function createCharacteristicMock(): jest.Mocked<Characteristic> {
+      return {
+        setProps: jest.fn(),
+        onGet: jest.fn(),
+        onSet: jest.fn(),
+        updateValue: jest.fn(),
+      } as unknown as jest.Mocked<Characteristic>;
+    }
+
+    function setupCharacteristicMock(characteristicMock: jest.Mocked<Characteristic>): void {
+      characteristicMock.setProps.mockReset();
+      characteristicMock.onGet.mockReset();
+      characteristicMock.onSet.mockReset();
+      characteristicMock.setProps.mockReturnValueOnce(characteristicMock);
+      characteristicMock.onGet.mockReturnValueOnce(characteristicMock);
+      characteristicMock.onSet.mockReturnValueOnce(characteristicMock);
+    }
+
+    const characteristicCurrentTemperatureMock: jest.Mocked<Characteristic> = createCharacteristicMock();
+    const characteristicTargetTemperatureMock: jest.Mocked<Characteristic> = createCharacteristicMock();
+    const characteristicCurrentHeatingCoolingStateMock: jest.Mocked<Characteristic> = createCharacteristicMock();
+    const characteristicTargetHeatingCoolingStateMock: jest.Mocked<Characteristic> = createCharacteristicMock();
+    const characteristicTemperatureDisplayUnitsMock: jest.Mocked<Characteristic> = createCharacteristicMock();
+    const hapServiceMock: jest.Mocked<HapService> = {
+      getCharacteristic: jest.fn(constructor => {
+        switch (constructor.name) {
+          case HapCharacteristic.CurrentTemperature.name:
+            return characteristicCurrentTemperatureMock;
+          case HapCharacteristic.TargetTemperature.name:
+            return characteristicTargetTemperatureMock;
+          case HapCharacteristic.CurrentHeatingCoolingState.name:
+            return characteristicCurrentHeatingCoolingStateMock;
+          case HapCharacteristic.TargetHeatingCoolingState.name:
+            return characteristicTargetHeatingCoolingStateMock;
+          case HapCharacteristic.TemperatureDisplayUnits.name:
+            return characteristicTemperatureDisplayUnitsMock;
+          default:
+            return undefined;
+        }
+      }),
+      setCharacteristic: jest.fn(),
+    } as unknown as jest.Mocked<HapService>;
+
     beforeEach(() => {
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+      accessoryMock.getServiceById.mockReturnValueOnce(hapServiceMock);
+      setupCharacteristicMock(characteristicCurrentTemperatureMock);
+      setupCharacteristicMock(characteristicTargetTemperatureMock);
+      setupCharacteristicMock(characteristicCurrentHeatingCoolingStateMock);
+      setupCharacteristicMock(characteristicTargetHeatingCoolingStateMock);
+      setupCharacteristicMock(characteristicTemperatureDisplayUnitsMock);
       service.initialize();
-      characteristic = service.service.getCharacteristic(HapCharacteristic.TargetTemperature);
     });
 
-    it('should revert changing of Current Temperature when it is failed', () => {
-      characteristic.setValue(-3);
-      logMock.debug.mockReset();
-      const processOnSetTargetTemperatureMock = jest.fn();
-      service.processOnSetTargetTemperature = processOnSetTargetTemperatureMock;
+    describe('CurrentTemperature', () => {
+      describe('onGet', () => {
+        let handler: CharacteristicGetHandler;
 
-      characteristic.setValue(1);
-      const revertFunc = processOnSetTargetTemperatureMock.mock.calls[0][1];
-      revertFunc();
+        beforeEach(() => {
+          handler = characteristicCurrentTemperatureMock.onGet.mock.calls[0][0];
+        });
 
-      const actual = characteristic.value;
+        it('should get CurrentTemperature value when device is online', () => {
+          service.updateCurrentTemperature(4.3);
 
-      expect(actual).toEqual(-3);
-      expect(logMock.debug.mock.calls).toEqual([['MOCK Target Temperature ->', -3]]);
+          const actual = handler(undefined);
+
+          expect(actual).toBe(4.3);
+        });
+
+        it('should throw an error when getting CurrentTemperature value but device is offline', () => {
+          service.updateReachability(false);
+
+          expect(() => handler(undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+        });
+      });
     });
 
-    it('should disallow changing of Current Temperature when service is disabled', () => {
-      characteristic.updateValue(-3);
-      logMock.debug.mockReset();
+    describe('TargetTemperature', () => {
+      describe('onGet', () => {
+        let handler: CharacteristicGetHandler;
 
-      service.updateEnabled(false);
-      const actual = characteristic.setValue(1);
+        beforeEach(() => {
+          handler = characteristicTargetTemperatureMock.onGet.mock.calls[0][0];
+        });
 
-      expect(actual.value).toEqual(-3);
-      expect(actual.statusCode).toEqual(HAPStatus.READ_ONLY_CHARACTERISTIC);
-      expect(logMock.debug).not.toHaveBeenCalled();
-      expect(logMock.warn.mock.calls).toEqual([
-        ['[accessory1 MOCK] Service is disabled. Setting of "TargetTemperature" is disallowed'],
-      ]);
-    });
-  });
+        it('should get TargetTemperature value when device is online', () => {
+          service.updateTargetTemperature(3);
 
-  describe('onTargetStateSet', () => {
-    let characteristic: Characteristic;
-    beforeEach(() => {
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-      characteristic = service.service.getCharacteristic(HapCharacteristic.TargetHeatingCoolingState);
-    });
+          const actual = handler(undefined);
 
-    it('should revert changing of Target State when it is failed', () => {
-      characteristic.setValue(TargetHeatingCoolingStateType.Cool);
-      logMock.debug.mockReset();
-      const processOnSetTargetStateMock = jest.fn();
-      service.processOnSetTargetState = processOnSetTargetStateMock;
+          expect(actual).toBe(3);
+        });
 
-      characteristic.setValue(TargetHeatingCoolingStateType.Off);
-      const revertFunc = processOnSetTargetStateMock.mock.calls[0][1];
-      revertFunc();
+        it('should throw an error when getting TargetTemperature value but device is offline', () => {
+          service.updateReachability(false);
 
-      const actual = characteristic.value;
+          expect(() => handler(undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+        });
+      });
 
-      expect(actual).toEqual(2);
-      expect(logMock.debug.mock.calls).toEqual([['MOCK Target State ->', 2]]);
-    });
+      describe('onSet', () => {
+        let handlerOnGet: CharacteristicGetHandler;
+        let handlerOnSet: CharacteristicSetHandler;
 
-    it('should disallow changing of Target State when service is disabled', () => {
-      characteristic.updateValue(TargetHeatingCoolingStateType.Cool);
-      logMock.debug.mockReset();
+        beforeEach(() => {
+          handlerOnGet = characteristicTargetTemperatureMock.onGet.mock.calls[0][0];
+          handlerOnSet = characteristicTargetTemperatureMock.onSet.mock.calls[0][0];
+        });
 
-      service.updateEnabled(false);
-      const actual = characteristic.setValue(TargetHeatingCoolingStateType.Off);
+        it('should set TargetTemperature value when device is online', () => {
+          handlerOnSet(4, undefined);
 
-      expect(actual.value).toEqual(2);
-      expect(actual.statusCode).toEqual(HAPStatus.READ_ONLY_CHARACTERISTIC);
-      expect(logMock.debug).not.toHaveBeenCalled();
-      expect(logMock.warn.mock.calls).toEqual([
-        ['[accessory1 MOCK] Service is disabled. Setting of "TargetHeatingCoolingState" is disallowed'],
-      ]);
-    });
-  });
+          const actual = handlerOnGet(undefined);
 
-  describe('onTemperatureDisplayUnitsSet', () => {
-    let characteristic: Characteristic;
-    beforeEach(() => {
-      accessoryMock.getServiceById.mockReturnValueOnce(hapService);
-      service.initialize();
-      characteristic = service.service.getCharacteristic(HapCharacteristic.TemperatureDisplayUnits);
-    });
+          expect(actual).toBe(4);
+        });
 
-    it('should revert changing of Current Temperature when it is failed', () => {
-      characteristic.setValue(TemperatureDisplayUnitsType.Fahrenheit);
-      logMock.debug.mockReset();
-      const processOnSetTemperatureDisplayUnitsMock = jest.fn();
-      service.processOnSetTemperatureDisplayUnits = processOnSetTemperatureDisplayUnitsMock;
+        it('should throw an error when setting TargetTemperature value but device is offline', () => {
+          service.updateReachability(false);
 
-      characteristic.setValue(TemperatureDisplayUnitsType.Celsius);
-      const revertFunc = processOnSetTemperatureDisplayUnitsMock.mock.calls[0][1];
-      revertFunc();
+          expect(() => handlerOnSet(1, undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+        });
 
-      const actual = characteristic.value;
+        it('should throw an error when setting on value but service is disabled', () => {
+          service.updateEnabled(false);
 
-      expect(actual).toEqual(1);
-      expect(logMock.debug.mock.calls).toEqual([['MOCK Temperature Display Units ->', 1]]);
+          expect(() => handlerOnSet(1, undefined)).toThrow(new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC));
+          expect(logMock.warn.mock.calls).toEqual([
+            ['[accessory1 MOCK] Service is disabled. Setting of "TargetTemperature" is disallowed'],
+          ]);
+        });
+
+        it('should revert changing of TargetTemperature when sending Set command to device is failed', () => {
+          accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+          service.initialize();
+          const characteristic = service.service.getCharacteristic(HapCharacteristic.TargetTemperature);
+
+          characteristic.setValue(-3);
+          logMock.debug.mockReset();
+          const processOnSetMock = jest.fn();
+          service.processOnSetTargetTemperature = processOnSetMock;
+
+          characteristic.setValue(1);
+          const revertFunc = processOnSetMock.mock.calls[0][1];
+          revertFunc();
+
+          const actual = characteristic.value;
+
+          expect(actual).toBe(-3);
+          expect(logMock.debug.mock.calls).toEqual([['MOCK Target Temperature ->', -3]]);
+        });
+      });
     });
 
-    it('should disallow changing of Temperature Display Units when service is disabled', () => {
-      characteristic.updateValue(TemperatureDisplayUnitsType.Fahrenheit);
-      logMock.debug.mockReset();
+    describe('CurrentHeatingCoolingState', () => {
+      describe('onGet', () => {
+        let handler: CharacteristicGetHandler;
 
-      service.updateEnabled(false);
-      const actual = characteristic.setValue(TemperatureDisplayUnitsType.Celsius);
+        beforeEach(() => {
+          handler = characteristicCurrentHeatingCoolingStateMock.onGet.mock.calls[0][0];
+        });
 
-      expect(actual.value).toEqual(1);
-      expect(actual.statusCode).toEqual(HAPStatus.READ_ONLY_CHARACTERISTIC);
-      expect(logMock.debug).not.toHaveBeenCalled();
-      expect(logMock.warn.mock.calls).toEqual([
-        ['[accessory1 MOCK] Service is disabled. Setting of "TemperatureDisplayUnits" is disallowed'],
-      ]);
+        it('should get CurrentHeatingCoolingState value when device is online', () => {
+          service.updateCurrentState(FridgeStateType.On);
+
+          const actual = handler(undefined);
+
+          expect(actual).toBe(CurrentHeatingCoolingStateType.Cool);
+        });
+
+        it('should throw an error when getting CurrentHeatingCoolingState value but device is offline', () => {
+          service.updateReachability(false);
+
+          expect(() => handler(undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+        });
+      });
+    });
+
+    describe('TargetHeatingCoolingState', () => {
+      describe('onGet', () => {
+        let handler: CharacteristicGetHandler;
+
+        beforeEach(() => {
+          handler = characteristicTargetHeatingCoolingStateMock.onGet.mock.calls[0][0];
+        });
+
+        it('should get TargetHeatingCoolingState value when device is online', () => {
+          service.updateTargetState(FridgeStateType.On);
+
+          const actual = handler(undefined);
+
+          expect(actual).toBe(TargetHeatingCoolingStateType.Cool);
+        });
+
+        it('should throw an error when getting TargetHeatingCoolingState value but device is offline', () => {
+          service.updateReachability(false);
+
+          expect(() => handler(undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+        });
+      });
+
+      describe('onSet', () => {
+        let handlerOnGet: CharacteristicGetHandler;
+        let handlerOnSet: CharacteristicSetHandler;
+
+        beforeEach(() => {
+          handlerOnGet = characteristicTargetHeatingCoolingStateMock.onGet.mock.calls[0][0];
+          handlerOnSet = characteristicTargetHeatingCoolingStateMock.onSet.mock.calls[0][0];
+        });
+
+        it('should set TargetHeatingCoolingState value when device is online', () => {
+          handlerOnSet(TargetHeatingCoolingStateType.Cool, undefined);
+
+          const actual = handlerOnGet(undefined);
+
+          expect(actual).toBe(TargetHeatingCoolingStateType.Cool);
+        });
+
+        it('should throw an error when setting TargetHeatingCoolingState value but device is offline', () => {
+          service.updateReachability(false);
+
+          expect(() => handlerOnSet(TargetHeatingCoolingStateType.Cool, undefined)).toThrow(
+            new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE)
+          );
+        });
+
+        it('should throw an error when setting on value but service is disabled', () => {
+          service.updateEnabled(false);
+
+          expect(() => handlerOnSet(TargetHeatingCoolingStateType.Cool, undefined)).toThrow(
+            new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC)
+          );
+          expect(logMock.warn.mock.calls).toEqual([
+            ['[accessory1 MOCK] Service is disabled. Setting of "TargetHeatingCoolingState" is disallowed'],
+          ]);
+        });
+
+        it('should revert changing of TargetHeatingCoolingState when sending Set command to device is failed', () => {
+          accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+          service.initialize();
+          const characteristic = service.service.getCharacteristic(HapCharacteristic.TargetHeatingCoolingState);
+
+          characteristic.setValue(TargetHeatingCoolingStateType.Cool);
+          logMock.debug.mockReset();
+          const processOnSetMock = jest.fn();
+          service.processOnSetTargetState = processOnSetMock;
+
+          characteristic.setValue(TargetHeatingCoolingStateType.Off);
+          const revertFunc = processOnSetMock.mock.calls[0][1];
+          revertFunc();
+
+          const actual = characteristic.value;
+
+          expect(actual).toBe(TargetHeatingCoolingStateType.Cool);
+          expect(logMock.debug.mock.calls).toEqual([['MOCK Target State ->', TargetHeatingCoolingStateType.Cool]]);
+        });
+      });
+    });
+
+    describe('TemperatureDisplayUnits', () => {
+      describe('onGet', () => {
+        let handler: CharacteristicGetHandler;
+
+        beforeEach(() => {
+          handler = characteristicTemperatureDisplayUnitsMock.onGet.mock.calls[0][0];
+        });
+
+        it('should get TemperatureDisplayUnits value when device is online', () => {
+          service.updateTemperatureDisplayUnits(TemperatureDisplayUnitsType.Fahrenheit);
+
+          const actual = handler(undefined);
+
+          expect(actual).toBe(TemperatureDisplayUnitsType.Fahrenheit);
+        });
+
+        it('should throw an error when getting TemperatureDisplayUnits value but device is offline', () => {
+          service.updateReachability(false);
+
+          expect(() => handler(undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
+        });
+      });
+
+      describe('onSet', () => {
+        let handlerOnGet: CharacteristicGetHandler;
+        let handlerOnSet: CharacteristicSetHandler;
+
+        beforeEach(() => {
+          handlerOnGet = characteristicTemperatureDisplayUnitsMock.onGet.mock.calls[0][0];
+          handlerOnSet = characteristicTemperatureDisplayUnitsMock.onSet.mock.calls[0][0];
+        });
+
+        it('should set TemperatureDisplayUnits value when device is online', () => {
+          handlerOnSet(TemperatureDisplayUnitsType.Fahrenheit, undefined);
+
+          const actual = handlerOnGet(undefined);
+
+          expect(actual).toBe(TemperatureDisplayUnitsType.Fahrenheit);
+        });
+
+        it('should throw an error when setting TemperatureDisplayUnits value but device is offline', () => {
+          service.updateReachability(false);
+
+          expect(() => handlerOnSet(TemperatureDisplayUnitsType.Fahrenheit, undefined)).toThrow(
+            new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE)
+          );
+        });
+
+        it('should throw an error when setting on value but service is disabled', () => {
+          service.updateEnabled(false);
+
+          expect(() => handlerOnSet(TemperatureDisplayUnitsType.Fahrenheit, undefined)).toThrow(
+            new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC)
+          );
+          expect(logMock.warn.mock.calls).toEqual([
+            ['[accessory1 MOCK] Service is disabled. Setting of "TemperatureDisplayUnits" is disallowed'],
+          ]);
+        });
+
+        it('should revert changing of TemperatureDisplayUnits when sending Set command to device is failed', () => {
+          accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+          service.initialize();
+          const characteristic = service.service.getCharacteristic(HapCharacteristic.TemperatureDisplayUnits);
+
+          characteristic.setValue(TemperatureDisplayUnitsType.Fahrenheit);
+          logMock.debug.mockReset();
+          const processOnSetMock = jest.fn();
+          service.processOnSetTemperatureDisplayUnits = processOnSetMock;
+
+          characteristic.setValue(TemperatureDisplayUnitsType.Celsius);
+          const revertFunc = processOnSetMock.mock.calls[0][1];
+          revertFunc();
+
+          const actual = characteristic.value;
+
+          expect(actual).toBe(TemperatureDisplayUnitsType.Fahrenheit);
+          expect(logMock.debug.mock.calls).toEqual([
+            ['MOCK Temperature Display Units ->', TemperatureDisplayUnitsType.Fahrenheit],
+          ]);
+        });
+      });
     });
   });
 });

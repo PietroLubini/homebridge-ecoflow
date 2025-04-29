@@ -1,7 +1,13 @@
 import { DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
-import { MqttQuotaMessage, MqttSetMessage, MqttSetReplyMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import {
+  MqttQuotaMessage,
+  MqttSetMessage,
+  MqttSetReplyMessage,
+  MqttStatusMessage,
+} from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
@@ -15,7 +21,10 @@ export abstract class EcoFlowAccessoryBase {
   private isMqttConnected: boolean = false;
   private subscriptions: Subscription[] = [];
   protected readonly deviceInfo: DeviceInfo;
-  public readonly setReplies: Record<string, { requestMessage: MqttSetMessage; revert: () => void }> = {};
+  public readonly setReplies: Record<
+    string,
+    { requestMessage: MqttSetMessage; revert: () => void; timeoutId: NodeJS.Timeout }
+  > = {};
 
   constructor(
     public readonly platform: EcoFlowHomebridgePlatform,
@@ -69,7 +78,19 @@ export abstract class EcoFlowAccessoryBase {
   public async sendSetCommand(message: MqttSetMessage, revert: () => void): Promise<void> {
     message.id = Math.floor(Math.random() * 1000000);
     message.version = '1.0';
-    this.setReplies[this.getMqttSetMessageKey(message)] = { requestMessage: message, revert };
+    const messageKey = this.getMqttSetMessageKey(message);
+    const timeoutId = setTimeout(() => {
+      const command = this.setReplies[messageKey];
+      if (!command) {
+        this.log.debug('Timed out message is already processed. Ignore it:', message.id);
+      } else {
+        this.log.warn('Sending of command is timed out. Reverts value back for:', message.id);
+        revert();
+        this.setStatus(false);
+        delete this.setReplies[messageKey];
+      }
+    }, this.config.setReplyWaitResponseTimeoutMs ?? 3000);
+    this.setReplies[messageKey] = { requestMessage: message, revert, timeoutId };
     await this.mqttApiManager.sendSetCommand(this.deviceInfo, message);
   }
 
@@ -79,11 +100,17 @@ export abstract class EcoFlowAccessoryBase {
     const subscriptions = [
       this.mqttApiManager.subscribeOnQuotaMessage(this.deviceInfo, this.processQuotaMessage.bind(this)),
       this.mqttApiManager.subscribeOnSetReplyMessage(this.deviceInfo, this.processSetReplyMessage.bind(this)),
+      this.mqttApiManager.subscribeOnStatusMessage(this.deviceInfo, this.processStatusMessage.bind(this)),
     ];
     return subscriptions.filter(subscription => !!subscription);
   }
 
   protected abstract processQuotaMessage(message: MqttQuotaMessage): void;
+
+  protected processStatusMessage(message: MqttStatusMessage): void {
+    const online = message.params.status === EnableType.On;
+    this.setStatus(online);
+  }
 
   protected processSetReplyMessage(message: MqttSetReplyMessage): void {
     const messageKey = this.getMqttSetMessageKey(message);
@@ -92,6 +119,7 @@ export abstract class EcoFlowAccessoryBase {
       this.log.debug('Received "SetReply" response was not sent by accessory. Ignore it:', message);
       return;
     }
+    clearTimeout(command.timeoutId);
     this.log.debug('Received "SetReply" response:', message);
     delete this.setReplies[messageKey];
     // Detect whether response is successfull for different contracts (e.g. data.ack, data.result, data.configOk)
@@ -131,10 +159,16 @@ export abstract class EcoFlowAccessoryBase {
   private async initMqtt(): Promise<void> {
     this.isMqttConnected =
       (await this.mqttApiManager.subscribeOnQuotaTopic(this.deviceInfo)) &&
-      (await this.mqttApiManager.subscribeOnSetReplyTopic(this.deviceInfo));
+      (await this.mqttApiManager.subscribeOnSetReplyTopic(this.deviceInfo)) &&
+      (await this.mqttApiManager.subscribeOnStatusTopic(this.deviceInfo));
 
     if (this.isMqttConnected) {
       this.subscriptions = this.subscribeOnParameterUpdates();
     }
+  }
+
+  private setStatus(online: boolean): void {
+    this.log.warn(`Device is ${online ? 'online' : 'offline'}`);
+    this.services.forEach(service => service.updateReachability(online));
   }
 }
