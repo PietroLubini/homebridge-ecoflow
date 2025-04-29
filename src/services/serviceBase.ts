@@ -7,6 +7,7 @@ export abstract class ServiceBase {
   protected readonly platform: EcoFlowHomebridgePlatform;
   protected characteristics: Characteristic[] = [];
   private _service: Service | null = null;
+  private isReachable: boolean = true;
   private enabled: boolean = true;
 
   constructor(
@@ -47,6 +48,10 @@ export abstract class ServiceBase {
     if (!enabled) {
       this.onDisabled();
     }
+  }
+
+  public updateReachability(value: boolean): void {
+    this.isReachable = value;
   }
 
   protected get serviceName(): string {
@@ -106,18 +111,27 @@ export abstract class ServiceBase {
 
   protected onDisabled(): void {}
 
-  protected addCharacteristicSet(
-    characteristic: Characteristic,
-    name: string,
-    process: (value: CharacteristicValue) => void
-  ): void {
-    characteristic.onSet((value: CharacteristicValue) => {
-      if (!this.enabled) {
-        this.log.warn(`[${this.serviceName}] Service is disabled. Setting of "${name}" is disallowed`);
-        throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.READ_ONLY_CHARACTERISTIC);
-      } else {
-        process(value);
-      }
-    });
+  protected processOnGet<TValue>(value: TValue): TValue {
+    this.checkIsReachable();
+    return value;
+  }
+
+  protected processOnSet(name: string, func: () => void): void {
+    this.checkIsReachable();
+    this.checkIsEnabled(name);
+    func();
+  }
+
+  private checkIsReachable(): void {
+    if (!this.isReachable) {
+      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE);
+    }
+  }
+
+  private checkIsEnabled(name: string): void {
+    if (!this.enabled) {
+      this.log.warn(`[${this.serviceName}] Service is disabled. Setting of "${name}" is disallowed`);
+      throw new this.platform.api.hap.HapStatusError(this.platform.api.hap.HAPStatus.READ_ONLY_CHARACTERISTIC);
+    }
   }
 }

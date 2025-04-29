@@ -25,6 +25,7 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 - Integrates EcoFlow devices into HomeKit
 - Fully customizable HomeKit accessories
 - HomeKit automations for your EcoFlow devices
+- Detection of whether EcoFlow accessory is online/offline
 
 ## Supported Device Types
 

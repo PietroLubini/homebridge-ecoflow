@@ -148,8 +148,10 @@ describe('Delta2AccessoryBase', () => {
       destroy: jest.fn(),
       subscribeOnQuotaTopic: jest.fn(),
       subscribeOnSetReplyTopic: jest.fn(),
+      subscribeOnStatusTopic: jest.fn(),
       subscribeOnQuotaMessage: jest.fn(),
       subscribeOnSetReplyMessage: jest.fn(),
+      subscribeOnStatusMessage: jest.fn(),
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
@@ -243,6 +245,7 @@ describe('Delta2AccessoryBase', () => {
       httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
       mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnStatusTopic.mockResolvedValue(true);
     });
 
     describe('EmsStatus', () => {

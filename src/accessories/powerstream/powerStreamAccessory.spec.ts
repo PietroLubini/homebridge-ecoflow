@@ -155,8 +155,10 @@ describe('PowerStreamAccessory', () => {
       destroy: jest.fn(),
       subscribeOnQuotaTopic: jest.fn(),
       subscribeOnSetReplyTopic: jest.fn(),
+      subscribeOnStatusTopic: jest.fn(),
       subscribeOnQuotaMessage: jest.fn(),
       subscribeOnSetReplyMessage: jest.fn(),
+      subscribeOnStatusMessage: jest.fn(),
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     batteryStatusProviderMock = {} as jest.Mocked<BatteryStatusProvider>;
@@ -406,6 +408,7 @@ describe('PowerStreamAccessory', () => {
       httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
       mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnStatusTopic.mockResolvedValue(true);
     });
 
     describe('Hearbeat', () => {

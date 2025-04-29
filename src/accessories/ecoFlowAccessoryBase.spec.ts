@@ -2,7 +2,13 @@ import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase'
 import { DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
-import { MqttQuotaMessage, MqttSetMessage, MqttSetReplyMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import {
+  MqttQuotaMessage,
+  MqttSetMessage,
+  MqttSetReplyMessage,
+  MqttStatusMessage,
+} from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { getActualServices, MockService } from '@ecoflow/helpers/tests/accessoryTestHelper';
@@ -19,7 +25,7 @@ jest.mock('@ecoflow/services/batteryStatusService');
 jest.mock('@ecoflow/services/accessoryInformationService');
 
 class MockEcoFlowAccessory extends EcoFlowAccessoryBase {
-  private readonly batteryService: BatteryStatusService;
+  private readonly _batteryService: BatteryStatusService;
 
   constructor(
     platform: EcoFlowHomebridgePlatform,
@@ -31,15 +37,19 @@ class MockEcoFlowAccessory extends EcoFlowAccessoryBase {
     batteryStatusProvider: BatteryStatusProvider
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
-    this.batteryService = new BatteryStatusService(this, batteryStatusProvider);
+    this._batteryService = new BatteryStatusService(this, batteryStatusProvider);
   }
 
   public override async initializeDefaultValues(): Promise<void> {}
 
   public override processQuotaMessage(): void {}
 
+  public get batteryService(): BatteryStatusService {
+    return this._batteryService;
+  }
+
   protected override getServices(): ServiceBase[] {
-    return [this.batteryService];
+    return [this._batteryService];
   }
 }
 
@@ -65,7 +75,11 @@ describe('EcoFlowAccessoryBase', () => {
   ];
 
   function waitMqttReconnection(attempts: number): Promise<void> {
-    return sleep(config.reconnectMqttTimeoutMs! * (1 / 2 + attempts));
+    return sleep(config.reconnectMqttTimeoutMs! * (0.5 + attempts));
+  }
+
+  function waitSetReplyTimeout(): Promise<void> {
+    return sleep(config.setReplyWaitResponseTimeoutMs! * 1.5);
   }
 
   beforeEach(() => {
@@ -100,12 +114,19 @@ describe('EcoFlowAccessoryBase', () => {
       destroy: jest.fn(),
       subscribeOnQuotaTopic: jest.fn(),
       subscribeOnSetReplyTopic: jest.fn(),
+      subscribeOnStatusTopic: jest.fn(),
       subscribeOnQuotaMessage: jest.fn(),
       subscribeOnSetReplyMessage: jest.fn(),
+      subscribeOnStatusMessage: jest.fn(),
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     batteryStatusProviderMock = {} as jest.Mocked<BatteryStatusProvider>;
-    config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
+    config = {
+      secretKey: 'secretKey1',
+      accessKey: 'accessKey1',
+      serialNumber: 'sn1',
+      setReplyWaitResponseTimeoutMs: 100,
+    } as unknown as DeviceConfig;
     accessory = new MockEcoFlowAccessory(
       platformMock,
       accessoryMock,
@@ -137,6 +158,7 @@ describe('EcoFlowAccessoryBase', () => {
     it('should connect to mqtt server during initialization when subscription to quota and set_reply topic is successful', async () => {
       mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnStatusTopic.mockResolvedValue(true);
 
       await accessory.initialize();
       await waitMqttReconnection(1);
@@ -145,6 +167,8 @@ describe('EcoFlowAccessoryBase', () => {
       expect(mqttApiManagerMock.subscribeOnQuotaTopic).toHaveBeenCalledWith(deviceInfo);
       expect(mqttApiManagerMock.subscribeOnSetReplyTopic).toHaveBeenCalledTimes(1);
       expect(mqttApiManagerMock.subscribeOnSetReplyTopic).toHaveBeenCalledWith(deviceInfo);
+      expect(mqttApiManagerMock.subscribeOnStatusTopic).toHaveBeenCalledTimes(1);
+      expect(mqttApiManagerMock.subscribeOnStatusTopic).toHaveBeenCalledWith(deviceInfo);
     });
 
     it('should re-connect to mqtt server when subscription to quota was failed during initialization', async () => {
@@ -152,17 +176,35 @@ describe('EcoFlowAccessoryBase', () => {
         .mockImplementationOnce(() => Promise.resolve(false))
         .mockImplementationOnce(() => Promise.resolve(true));
       mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnStatusTopic.mockResolvedValue(true);
 
       await accessory.initialize();
       await waitMqttReconnection(1);
 
       expect(mqttApiManagerMock.subscribeOnQuotaTopic).toHaveBeenCalledTimes(2);
       expect(mqttApiManagerMock.subscribeOnSetReplyTopic).toHaveBeenCalledTimes(1);
+      expect(mqttApiManagerMock.subscribeOnStatusTopic).toHaveBeenCalledTimes(1);
     });
 
     it('should re-connect to mqtt server when subscription to set_reply was failed during initialization', async () => {
       mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnSetReplyTopic
+        .mockImplementationOnce(() => Promise.resolve(false))
+        .mockImplementationOnce(() => Promise.resolve(true));
+      mqttApiManagerMock.subscribeOnStatusTopic.mockResolvedValue(true);
+
+      await accessory.initialize();
+      await waitMqttReconnection(1);
+
+      expect(mqttApiManagerMock.subscribeOnQuotaTopic).toHaveBeenCalledTimes(2);
+      expect(mqttApiManagerMock.subscribeOnSetReplyTopic).toHaveBeenCalledTimes(2);
+      expect(mqttApiManagerMock.subscribeOnStatusTopic).toHaveBeenCalledTimes(1);
+    });
+
+    it('should re-connect to mqtt server when subscription to status was failed during initialization', async () => {
+      mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnStatusTopic
         .mockImplementationOnce(() => Promise.resolve(false))
         .mockImplementationOnce(() => Promise.resolve(true));
 
@@ -171,19 +213,22 @@ describe('EcoFlowAccessoryBase', () => {
 
       expect(mqttApiManagerMock.subscribeOnQuotaTopic).toHaveBeenCalledTimes(2);
       expect(mqttApiManagerMock.subscribeOnSetReplyTopic).toHaveBeenCalledTimes(2);
+      expect(mqttApiManagerMock.subscribeOnStatusTopic).toHaveBeenCalledTimes(2);
     });
   });
 
   describe('subscribeOnParameterUpdates', () => {
     let quotaSubscriptionMock: jest.Mocked<Subscription>;
     let setReplySubscriptionMock: jest.Mocked<Subscription>;
+    let statusSubscriptionMock: jest.Mocked<Subscription>;
 
     beforeEach(() => {
       quotaSubscriptionMock = jest.fn() as unknown as jest.Mocked<Subscription>;
       setReplySubscriptionMock = jest.fn() as unknown as jest.Mocked<Subscription>;
+      statusSubscriptionMock = jest.fn() as unknown as jest.Mocked<Subscription>;
     });
 
-    it('should not subscribe on parameters updates for quota and set_reply messages when mqtt is failed to connect', async () => {
+    it('should not subscribe on parameters updates for quota, set_reply and status messages when mqtt is failed to connect', async () => {
       mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(false);
 
       await accessory.initialize();
@@ -192,27 +237,33 @@ describe('EcoFlowAccessoryBase', () => {
       expect(actual).toEqual([]);
       expect(mqttApiManagerMock.subscribeOnQuotaMessage).not.toHaveBeenCalled();
       expect(mqttApiManagerMock.subscribeOnSetReplyMessage).not.toHaveBeenCalled();
+      expect(mqttApiManagerMock.subscribeOnStatusMessage).not.toHaveBeenCalled();
     });
 
-    it('should subscribe on parameters updates for quota and set_reply messages when mqtt is connected successfully', async () => {
+    it('should subscribe on parameters updates for quota, set_reply and status messages when mqtt is connected successfully', async () => {
       mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnStatusTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnQuotaMessage.mockReturnValueOnce(quotaSubscriptionMock);
       mqttApiManagerMock.subscribeOnSetReplyMessage.mockReturnValueOnce(setReplySubscriptionMock);
+      mqttApiManagerMock.subscribeOnStatusMessage.mockReturnValueOnce(statusSubscriptionMock);
 
       await accessory.initialize();
       const actual = Reflect.get(accessory, 'subscriptions');
 
-      expect(actual).toEqual([quotaSubscriptionMock, setReplySubscriptionMock]);
+      expect(actual).toEqual([quotaSubscriptionMock, setReplySubscriptionMock, statusSubscriptionMock]);
       expect(mqttApiManagerMock.subscribeOnQuotaMessage).toHaveBeenCalledWith(deviceInfo, expect.any(Function));
       expect(mqttApiManagerMock.subscribeOnSetReplyMessage).toHaveBeenCalledWith(deviceInfo, expect.any(Function));
+      expect(mqttApiManagerMock.subscribeOnStatusMessage).toHaveBeenCalledWith(deviceInfo, expect.any(Function));
     });
 
     it('should filter failed subscription on parameters updates when mqtt is connected successfully', async () => {
       mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnStatusTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnQuotaMessage.mockReturnValueOnce(undefined);
       mqttApiManagerMock.subscribeOnSetReplyMessage.mockReturnValueOnce(setReplySubscriptionMock);
+      mqttApiManagerMock.subscribeOnStatusMessage.mockReturnValueOnce(undefined);
 
       await accessory.initialize();
       const actual = Reflect.get(accessory, 'subscriptions');
@@ -220,6 +271,7 @@ describe('EcoFlowAccessoryBase', () => {
       expect(actual).toEqual([setReplySubscriptionMock]);
       expect(mqttApiManagerMock.subscribeOnQuotaMessage).toHaveBeenCalledWith(deviceInfo, expect.any(Function));
       expect(mqttApiManagerMock.subscribeOnSetReplyMessage).toHaveBeenCalledWith(deviceInfo, expect.any(Function));
+      expect(mqttApiManagerMock.subscribeOnStatusMessage).toHaveBeenCalledWith(deviceInfo, expect.any(Function));
     });
   });
 
@@ -232,6 +284,7 @@ describe('EcoFlowAccessoryBase', () => {
       accessory.processQuotaMessage = processQuotaMessageMock;
       mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnStatusTopic.mockResolvedValue(true);
 
       await accessory.initialize();
       processQuotaMessage = mqttApiManagerMock.subscribeOnQuotaMessage.mock.calls[0][1]!;
@@ -259,6 +312,7 @@ describe('EcoFlowAccessoryBase', () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.5);
       mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnStatusTopic.mockResolvedValue(true);
       await accessory.initialize();
       processSetReplyMessage = mqttApiManagerMock.subscribeOnSetReplyMessage.mock.calls[0][1]!;
     });
@@ -282,6 +336,16 @@ describe('EcoFlowAccessoryBase', () => {
         'Received "SetReply" response was not sent by accessory. Ignore it:',
         message
       );
+    });
+
+    it('should clear timeout for message when it is already processed', async () => {
+      await accessory.sendSetCommand({} as MqttSetMessage, revertMock);
+      message.data.ack = false;
+
+      processSetReplyMessage(message);
+      await waitSetReplyTimeout();
+
+      expect(logMock.debug).not.toHaveBeenCalledWith('Timed out message is already processed. Ignore it:', 500000);
     });
 
     it("should do nothing when 'set_reply' message contains successful 'ack' acknowledgement", async () => {
@@ -355,15 +419,47 @@ describe('EcoFlowAccessoryBase', () => {
     });
   });
 
+  describe('processStatusMessage', () => {
+    let processStatusMessage: (value: MqttStatusMessage) => void;
+
+    beforeEach(async () => {
+      mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnStatusTopic.mockResolvedValue(true);
+
+      await accessory.initialize();
+      processStatusMessage = mqttApiManagerMock.subscribeOnStatusMessage.mock.calls[0][1]!;
+    });
+
+    it('should update status of all services when status message is received with value Online (1)', async () => {
+      const message = { params: { status: EnableType.On } } as MqttStatusMessage;
+      processStatusMessage(message);
+
+      expect(batteryStatusServiceMock.updateReachability).toHaveBeenCalledWith(true);
+      expect(accessoryInformationServiceMock.updateReachability).toHaveBeenCalledWith(true);
+    });
+
+    it('should update status of all services when status message is received with value Offline (0)', async () => {
+      const message = { params: { status: EnableType.Off } } as MqttStatusMessage;
+      processStatusMessage(message);
+
+      expect(batteryStatusServiceMock.updateReachability).toHaveBeenCalledWith(false);
+      expect(accessoryInformationServiceMock.updateReachability).toHaveBeenCalledWith(false);
+    });
+  });
+
   describe('destroy', () => {
     let quotaSubscriptionMock: jest.Mocked<Subscription>;
     let setReplySubscriptionMock: jest.Mocked<Subscription>;
+    let statusSubscriptionMock: jest.Mocked<Subscription>;
 
     beforeEach(() => {
       quotaSubscriptionMock = { unsubscribe: jest.fn() } as unknown as jest.Mocked<Subscription>;
       setReplySubscriptionMock = { unsubscribe: jest.fn() } as unknown as jest.Mocked<Subscription>;
+      statusSubscriptionMock = { unsubscribe: jest.fn() } as unknown as jest.Mocked<Subscription>;
       mqttApiManagerMock.subscribeOnQuotaMessage.mockReturnValueOnce(quotaSubscriptionMock);
       mqttApiManagerMock.subscribeOnSetReplyMessage.mockReturnValueOnce(setReplySubscriptionMock);
+      mqttApiManagerMock.subscribeOnStatusMessage.mockReturnValueOnce(statusSubscriptionMock);
 
       config.reconnectMqttTimeoutMs = 100;
     });
@@ -382,12 +478,14 @@ describe('EcoFlowAccessoryBase', () => {
     it('should unsubscribe from parameters updates when destroying accessory', async () => {
       mqttApiManagerMock.subscribeOnQuotaTopic.mockResolvedValue(true);
       mqttApiManagerMock.subscribeOnSetReplyTopic.mockResolvedValue(true);
+      mqttApiManagerMock.subscribeOnStatusTopic.mockResolvedValue(true);
       await accessory.initialize();
 
       await accessory.destroy();
 
       expect(quotaSubscriptionMock.unsubscribe).toHaveBeenCalledTimes(1);
       expect(setReplySubscriptionMock.unsubscribe).toHaveBeenCalledTimes(1);
+      expect(statusSubscriptionMock.unsubscribe).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -444,18 +542,103 @@ describe('EcoFlowAccessoryBase', () => {
 
   describe('sendSetCommand', () => {
     let revertMock: jest.Mock;
-    beforeEach(() => {
-      revertMock = jest.fn();
+    let updateReachabilityMock: jest.Mock;
+    beforeEach(async () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.6);
+      revertMock = jest.fn();
+      updateReachabilityMock = jest.fn();
+      accessory.batteryService.updateReachability = updateReachabilityMock;
+
+      await accessory.initialize();
     });
 
-    it('should stop mqtt reconnection when destroying accessory', async () => {
+    it('should send mqtt "set" message when sending of command is requested', async () => {
       const expectedMessage: MqttSetMessage = {
         id: 600000,
         version: '1.0',
       };
       await accessory.sendSetCommand(expectedMessage, revertMock);
+
       expect(mqttApiManagerMock.sendSetCommand).toHaveBeenCalledWith(deviceInfo, expectedMessage);
+      expect(revertMock).not.toHaveBeenCalled();
+    });
+
+    it('should revert sent command when its sending is timed out', async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      await waitSetReplyTimeout();
+
+      expect(revertMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("should log timed out warning when command's sending is timed out", async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      await waitSetReplyTimeout();
+
+      expect(logMock.warn.mock.calls).toEqual([
+        ['Sending of command is timed out. Reverts value back for:', 600000],
+        ['Device is offline'],
+      ]);
+      expect(updateReachabilityMock).toHaveBeenCalledWith(false);
+    });
+
+    it("should mark all accessory's services as unreachable when command's sending is timed out", async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      await waitSetReplyTimeout();
+
+      expect(updateReachabilityMock).toHaveBeenCalledWith(false);
+    });
+
+    it("should remove message from setReply dictionary when command's sending is timed out", async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      await waitSetReplyTimeout();
+
+      expect(Object.keys(accessory.setReplies).length).toBe(0);
+    });
+
+    it('should ignore timed out message when it is already processed', async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      delete accessory.setReplies['600000'];
+      await waitSetReplyTimeout();
+
+      expect(logMock.debug).toHaveBeenCalledWith('Timed out message is already processed. Ignore it:', 600000);
+    });
+
+    it('should use default value of setReplyWaitResponseTimeoutMs when it is not set in config', async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+      config.setReplyWaitResponseTimeoutMs = undefined;
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      await sleep(3100);
+
+      expect(Object.keys(accessory.setReplies).length).toBe(0);
     });
   });
 });

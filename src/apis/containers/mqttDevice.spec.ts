@@ -1,5 +1,11 @@
 import { MqttDevice } from '@ecoflow/apis/containers/mqttDevice';
-import { MqttQuotaMessage, MqttSetReplyMessage, MqttTopicType } from '@ecoflow/apis/interfaces/mqttApiContracts';
+import {
+  MqttQuotaMessage,
+  MqttSetReplyMessage,
+  MqttStatusMessage,
+  MqttTopicType,
+} from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceInfoConfig } from '@ecoflow/config';
 import { Logging } from 'homebridge';
 import { Observable, Subscription } from 'rxjs';
@@ -10,6 +16,7 @@ describe('MqttDevice', () => {
   let config: DeviceInfoConfig;
   let quotaCallbackMock: jest.Mock;
   let setReplyCallbackMock: jest.Mock;
+  let statusCallbackMock: jest.Mock;
 
   beforeEach(() => {
     logMock = { debug: jest.fn(), warn: jest.fn() } as unknown as jest.Mocked<Logging>;
@@ -18,6 +25,7 @@ describe('MqttDevice', () => {
 
     quotaCallbackMock = jest.fn();
     setReplyCallbackMock = jest.fn();
+    statusCallbackMock = jest.fn();
   });
 
   describe('processReceivedMessage', () => {
@@ -29,6 +37,7 @@ describe('MqttDevice', () => {
     beforeEach(() => {
       device.subscribeOnMessage(MqttTopicType.Quota, quotaCallbackMock);
       device.subscribeOnMessage(MqttTopicType.SetReply, setReplyCallbackMock);
+      device.subscribeOnMessage(MqttTopicType.Status, statusCallbackMock);
     });
 
     it('should ignore mqtt message when its topic is not supported', async () => {
@@ -37,6 +46,7 @@ describe('MqttDevice', () => {
       expect(logMock.warn).toHaveBeenCalledWith('Received message for unsupported topic:', 'unknown_topic');
       expect(quotaCallbackMock).not.toHaveBeenCalled();
       expect(setReplyCallbackMock).not.toHaveBeenCalled();
+      expect(statusCallbackMock).not.toHaveBeenCalled();
     });
 
     it('should notify quota subscribers when quota mqtt message is received', () => {
@@ -44,6 +54,7 @@ describe('MqttDevice', () => {
 
       expect(quotaCallbackMock).toHaveBeenCalledWith(message);
       expect(setReplyCallbackMock).not.toHaveBeenCalled();
+      expect(statusCallbackMock).not.toHaveBeenCalled();
     });
 
     it('should notify set_reply subscribers when set_reply mqtt message is received', () => {
@@ -51,6 +62,15 @@ describe('MqttDevice', () => {
 
       expect(setReplyCallbackMock).toHaveBeenCalledWith(message);
       expect(quotaCallbackMock).not.toHaveBeenCalled();
+      expect(statusCallbackMock).not.toHaveBeenCalled();
+    });
+
+    it('should notify status subscribers when status mqtt message is received', () => {
+      device.processReceivedMessage(MqttTopicType.Status, message);
+
+      expect(statusCallbackMock).toHaveBeenCalledWith(message);
+      expect(quotaCallbackMock).not.toHaveBeenCalled();
+      expect(setReplyCallbackMock).not.toHaveBeenCalled();
     });
 
     it('should log message when it is received', () => {
@@ -65,12 +85,15 @@ describe('MqttDevice', () => {
   describe('subscribeOnMessage', () => {
     let quotaMock: jest.Mocked<Observable<MqttQuotaMessage>>;
     let setReplyMock: jest.Mocked<Observable<MqttSetReplyMessage>>;
+    let statusMock: jest.Mocked<Observable<MqttStatusMessage>>;
 
     beforeEach(() => {
       quotaMock = { subscribe: jest.fn() } as unknown as jest.Mocked<Observable<MqttQuotaMessage>>;
       setReplyMock = { subscribe: jest.fn() } as unknown as jest.Mocked<Observable<MqttSetReplyMessage>>;
+      statusMock = { subscribe: jest.fn() } as unknown as jest.Mocked<Observable<MqttStatusMessage>>;
       Object.defineProperty(device, 'quota$', { value: quotaMock, configurable: true });
       Object.defineProperty(device, 'setReply$', { value: setReplyMock, configurable: true });
+      Object.defineProperty(device, 'status$', { value: statusMock, configurable: true });
     });
 
     it('should ignore subscription to topic when it is not supported', async () => {
@@ -80,9 +103,10 @@ describe('MqttDevice', () => {
       expect(logMock.warn).toHaveBeenCalledWith('Topic is not supported for subscription:', 'unknown_topic');
       expect(quotaMock.subscribe).not.toHaveBeenCalled();
       expect(setReplyMock.subscribe).not.toHaveBeenCalled();
+      expect(statusMock.subscribe).not.toHaveBeenCalled();
     });
 
-    it('should subscribe on quota$ observable when subscribing on quota topic', () => {
+    it('should subscribe on quota$ observable and return subscription when subscribing on quota topic', () => {
       const expected = {} as jest.Mocked<Subscription>;
       quotaMock.subscribe.mockReturnValueOnce(expected);
 
@@ -111,6 +135,22 @@ describe('MqttDevice', () => {
       subscriptionCallback(setReplyMessage);
 
       expect(setReplyCallbackMock).toHaveBeenCalledWith(setReplyMessage);
+    });
+
+    it('should subscribe on status$ observable when subscribing on status topic', () => {
+      const statusMessage: MqttStatusMessage = {
+        id: '1',
+        version: 'v1',
+        timestamp: 123,
+        params: { status: EnableType.On },
+      };
+      statusMock.subscribe.mockReturnValueOnce({} as jest.Mocked<Subscription>);
+
+      device.subscribeOnMessage(MqttTopicType.Status, statusCallbackMock);
+      const subscriptionCallback = statusMock.subscribe.mock.calls[0][0]!;
+      subscriptionCallback(statusMessage);
+
+      expect(statusCallbackMock).toHaveBeenCalledWith(statusMessage);
     });
   });
 });

@@ -1,6 +1,17 @@
+import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
+
 export interface MqttMessage {}
 
 export interface MqttQuotaMessage extends MqttMessage {}
+
+export interface MqttStatusMessage extends MqttMessage {
+  id: string;
+  version: string;
+  timestamp: number;
+  params: {
+    status: EnableType;
+  };
+}
 
 export interface MqttQuotaMessageWithParams<TParams> extends MqttQuotaMessage {
   params: TParams;
@@ -49,4 +60,5 @@ export interface MqttSetReplyMessageWithData<TData extends MqttSetReplyMessageDa
 export enum MqttTopicType {
   Quota = 'quota',
   SetReply = 'set_reply',
+  Status = 'status',
 }

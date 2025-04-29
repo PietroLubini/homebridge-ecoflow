@@ -4,6 +4,8 @@ import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic, CharacteristicValue, WithUUID } from 'homebridge';
 
 export abstract class OutletServiceBase extends ServiceBase {
+  private state: boolean = false;
+
   constructor(
     ecoFlowAccessory: EcoFlowAccessoryBase,
     private readonly additionalCharacteristics?: string[],
@@ -13,6 +15,7 @@ export abstract class OutletServiceBase extends ServiceBase {
   }
 
   public updateState(state: boolean): void {
+    this.state = state;
     this.updateCharacteristic(this.platform.Characteristic.On, 'State', state);
   }
 
@@ -45,11 +48,14 @@ export abstract class OutletServiceBase extends ServiceBase {
   }
 
   protected override addCharacteristics(): Characteristic[] {
-    const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On);
-    onCharacteristic.onSet((value: CharacteristicValue) => {
-      const newValue = value as boolean;
-      this.processOnSetOn(newValue, () => this.updateState(!newValue));
-    });
+    const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On)
+      .onGet(() => this.processOnGet(this.state))
+      .onSet((value: CharacteristicValue) =>
+        this.processOnSet(this.platform.Characteristic.On.name, () => {
+          this.state = value as boolean;
+          this.processOnSetOn(this.state, () => this.updateState(!this.state));
+        })
+      );
 
     const characteristics = [
       this.addCharacteristic(this.platform.Characteristic.OutletInUse),
