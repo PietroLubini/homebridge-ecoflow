@@ -3,7 +3,8 @@ import { Simulator } from '@ecoflow/apis/simulations/simulator';
 import { IClientOptions, IPublishPacket, ISubscriptionGrant, MqttClient, Packet, StreamBuilder } from 'mqtt';
 
 export class MockMqttClient extends MqttClient {
-  private emitQuotaTimeoutId: NodeJS.Timeout | null = null;
+  private emitQuotaIntervalId: NodeJS.Timeout | null = null;
+  private emitStatusIntervalId: NodeJS.Timeout | null = null;
   private readonly subscriptionTopics: string[] = [];
   private readonly simulator: Simulator | null;
 
@@ -22,9 +23,13 @@ export class MockMqttClient extends MqttClient {
   }
 
   public override async endAsync(): Promise<void> {
-    if (this.emitQuotaTimeoutId !== null) {
-      clearTimeout(this.emitQuotaTimeoutId);
-      this.emitQuotaTimeoutId = null;
+    if (this.emitQuotaIntervalId !== null) {
+      clearTimeout(this.emitQuotaIntervalId);
+      this.emitQuotaIntervalId = null;
+    }
+    if (this.emitStatusIntervalId !== null) {
+      clearTimeout(this.emitStatusIntervalId);
+      this.emitStatusIntervalId = null;
     }
   }
 
@@ -32,9 +37,14 @@ export class MockMqttClient extends MqttClient {
     this.subscriptionTopics.push(topic);
 
     if (topic.endsWith('quota')) {
-      this.emitQuotaTimeoutId = setInterval(() => {
+      this.emitQuotaIntervalId = setInterval(() => {
         this.emitQuota();
       }, this.deviceInfo.config.simulateQuotaTimeoutMs ?? 10000);
+    }
+    if (topic.endsWith('status')) {
+      this.emitStatusIntervalId = setInterval(() => {
+        this.emitStatus();
+      }, this.deviceInfo.config.simulateStatusTimeoutMs ?? 10000);
     }
     return [];
   }
@@ -57,6 +67,16 @@ export class MockMqttClient extends MqttClient {
         .filter(topic => topic.endsWith('quota'))
         .forEach(topic => {
           this.emitMessage(topic, this.simulator!.generateQuota());
+        });
+    }
+  }
+
+  private emitStatus(): void {
+    if (this.simulator) {
+      this.subscriptionTopics
+        .filter(topic => topic.endsWith('status'))
+        .forEach(topic => {
+          this.emitMessage(topic, this.simulator!.generateStatus());
         });
     }
   }

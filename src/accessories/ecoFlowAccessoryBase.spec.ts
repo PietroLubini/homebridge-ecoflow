@@ -25,7 +25,7 @@ jest.mock('@ecoflow/services/batteryStatusService');
 jest.mock('@ecoflow/services/accessoryInformationService');
 
 class MockEcoFlowAccessory extends EcoFlowAccessoryBase {
-  private readonly batteryService: BatteryStatusService;
+  private readonly _batteryService: BatteryStatusService;
 
   constructor(
     platform: EcoFlowHomebridgePlatform,
@@ -37,15 +37,19 @@ class MockEcoFlowAccessory extends EcoFlowAccessoryBase {
     batteryStatusProvider: BatteryStatusProvider
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
-    this.batteryService = new BatteryStatusService(this, batteryStatusProvider);
+    this._batteryService = new BatteryStatusService(this, batteryStatusProvider);
   }
 
   public override async initializeDefaultValues(): Promise<void> {}
 
   public override processQuotaMessage(): void {}
 
+  public get batteryService(): BatteryStatusService {
+    return this._batteryService;
+  }
+
   protected override getServices(): ServiceBase[] {
-    return [this.batteryService];
+    return [this._batteryService];
   }
 }
 
@@ -71,7 +75,11 @@ describe('EcoFlowAccessoryBase', () => {
   ];
 
   function waitMqttReconnection(attempts: number): Promise<void> {
-    return sleep(config.reconnectMqttTimeoutMs! * (1 / 2 + attempts));
+    return sleep(config.reconnectMqttTimeoutMs! * (0.5 + attempts));
+  }
+
+  function waitSetReplyTimeout(): Promise<void> {
+    return sleep(config.setReplyWaitResponseTimeoutMs! * 1.5);
   }
 
   beforeEach(() => {
@@ -113,7 +121,12 @@ describe('EcoFlowAccessoryBase', () => {
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     batteryStatusProviderMock = {} as jest.Mocked<BatteryStatusProvider>;
-    config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
+    config = {
+      secretKey: 'secretKey1',
+      accessKey: 'accessKey1',
+      serialNumber: 'sn1',
+      setReplyWaitResponseTimeoutMs: 100,
+    } as unknown as DeviceConfig;
     accessory = new MockEcoFlowAccessory(
       platformMock,
       accessoryMock,
@@ -325,6 +338,16 @@ describe('EcoFlowAccessoryBase', () => {
       );
     });
 
+    it('should clear timeout for message when it is already processed', async () => {
+      await accessory.sendSetCommand({} as MqttSetMessage, revertMock);
+      message.data.ack = false;
+
+      processSetReplyMessage(message);
+      await waitSetReplyTimeout();
+
+      expect(logMock.debug).not.toHaveBeenCalledWith('Timed out message is already processed. Ignore it:', 500000);
+    });
+
     it("should do nothing when 'set_reply' message contains successful 'ack' acknowledgement", async () => {
       await accessory.sendSetCommand({} as MqttSetMessage, revertMock);
       message.data.ack = false;
@@ -519,18 +542,103 @@ describe('EcoFlowAccessoryBase', () => {
 
   describe('sendSetCommand', () => {
     let revertMock: jest.Mock;
-    beforeEach(() => {
-      revertMock = jest.fn();
+    let updateReachabilityMock: jest.Mock;
+    beforeEach(async () => {
       jest.spyOn(Math, 'random').mockReturnValue(0.6);
+      revertMock = jest.fn();
+      updateReachabilityMock = jest.fn();
+      accessory.batteryService.updateReachability = updateReachabilityMock;
+
+      await accessory.initialize();
     });
 
-    it('should stop mqtt reconnection when destroying accessory', async () => {
+    it('should send mqtt "set" message when sending of command is requested', async () => {
       const expectedMessage: MqttSetMessage = {
         id: 600000,
         version: '1.0',
       };
       await accessory.sendSetCommand(expectedMessage, revertMock);
+
       expect(mqttApiManagerMock.sendSetCommand).toHaveBeenCalledWith(deviceInfo, expectedMessage);
+      expect(revertMock).not.toHaveBeenCalled();
+    });
+
+    it('should revert sent command when its sending is timed out', async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      await waitSetReplyTimeout();
+
+      expect(revertMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("should log timed out warning when command's sending is timed out", async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      await waitSetReplyTimeout();
+
+      expect(logMock.warn.mock.calls).toEqual([
+        ['Sending of command is timed out. Reverts value back for:', 600000],
+        ['Device is offline'],
+      ]);
+      expect(updateReachabilityMock).toHaveBeenCalledWith(false);
+    });
+
+    it("should mark all accessory's services as unreachable when command's sending is timed out", async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      await waitSetReplyTimeout();
+
+      expect(updateReachabilityMock).toHaveBeenCalledWith(false);
+    });
+
+    it("should remove message from setReply dictionary when command's sending is timed out", async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      await waitSetReplyTimeout();
+
+      expect(Object.keys(accessory.setReplies).length).toBe(0);
+    });
+
+    it('should ignore timed out message when it is already processed', async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      delete accessory.setReplies['600000'];
+      await waitSetReplyTimeout();
+
+      expect(logMock.debug).toHaveBeenCalledWith('Timed out message is already processed. Ignore it:', 600000);
+    });
+
+    it('should use default value of setReplyWaitResponseTimeoutMs when it is not set in config', async () => {
+      const expectedMessage: MqttSetMessage = {
+        id: 600000,
+        version: '1.0',
+      };
+      config.setReplyWaitResponseTimeoutMs = undefined;
+
+      await accessory.sendSetCommand(expectedMessage, revertMock);
+      await sleep(3100);
+
+      expect(Object.keys(accessory.setReplies).length).toBe(0);
     });
   });
 });
