@@ -10,8 +10,6 @@ import {
 } from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { BrightnessService } from '@ecoflow/accessories/powerstream/services/brightnessService';
-import { OutletInvService } from '@ecoflow/accessories/powerstream/services/outletInvService';
-import { OutletService } from '@ecoflow/accessories/powerstream/services/outletService';
 import { PowerDemandService } from '@ecoflow/accessories/powerstream/services/powerDemandService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
@@ -31,11 +29,11 @@ import { AccessoryInformationService } from '@ecoflow/services/accessoryInformat
 import { FanServiceBase } from '@ecoflow/services/fanServiceBase';
 import { LightBulbServiceBase } from '@ecoflow/services/lightBulbServiceBase';
 import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
+import { OutletReadOnlyService } from '@ecoflow/services/outletReadOnlyService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
-jest.mock('@ecoflow/accessories/powerstream/services/outletService');
-jest.mock('@ecoflow/accessories/powerstream/services/outletInvService');
+jest.mock('@ecoflow/services/outletReadOnlyService');
 jest.mock('@ecoflow/accessories/powerstream/services/brightnessService');
 jest.mock('@ecoflow/accessories/powerstream/services/powerDemandService');
 jest.mock('@ecoflow/services/accessoryInformationService');
@@ -48,22 +46,22 @@ describe('PowerStreamAccessory', () => {
   let mqttApiManagerMock: jest.Mocked<EcoFlowMqttApiManager>;
   let config: DeviceConfig;
   let accessory: PowerStreamAccessory;
-  let solarOutletServiceMock: jest.Mocked<OutletService>;
-  let batteryOutletServiceMock: jest.Mocked<OutletService>;
-  let inverterOutletServiceMock: jest.Mocked<OutletInvService>;
+  let solarOutletServiceMock: jest.Mocked<OutletReadOnlyService>;
+  let batteryOutletServiceMock: jest.Mocked<OutletReadOnlyService>;
+  let inverterOutletServiceMock: jest.Mocked<OutletReadOnlyService>;
   let inverterBrightnessServiceMock: jest.Mocked<BrightnessService>;
   let inverterPowerDemandServiceMock: jest.Mocked<PowerDemandService>;
   let accessoryInformationServiceMock: jest.Mocked<AccessoryInformationService>;
   let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   const expectedServices: MockService[] = [
     {
-      Name: 'OutletInvService',
+      Name: 'OutletReadOnlyService',
     },
     {
-      Name: 'OutletService',
+      Name: 'OutletReadOnlyService',
     },
     {
-      Name: 'OutletService',
+      Name: 'OutletReadOnlyService',
     },
     {
       Name: 'BrightnessService',
@@ -118,21 +116,25 @@ describe('PowerStreamAccessory', () => {
       return serviceMock;
     }
 
-    solarOutletServiceMock = createOutletService(new OutletService(accessory, batteryStatusProviderMock, 'PV'));
-    batteryOutletServiceMock = createOutletService(new OutletService(accessory, batteryStatusProviderMock, 'BAT'));
-    (OutletService as unknown as jest.Mock).mockImplementation(
+    solarOutletServiceMock = createOutletService(new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'PV'));
+    batteryOutletServiceMock = createOutletService(
+      new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'BAT')
+    );
+    inverterOutletServiceMock = createOutletService(
+      new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'INV')
+    );
+    (OutletReadOnlyService as unknown as jest.Mock).mockImplementation(
       (_: PowerStreamAccessory, __: BatteryStatusProvider, serviceSubType: string) => {
         if (serviceSubType === 'PV') {
           return solarOutletServiceMock;
         } else if (serviceSubType === 'BAT') {
           return batteryOutletServiceMock;
+        } else if (serviceSubType === 'INV') {
+          return inverterOutletServiceMock;
         }
         return undefined;
       }
     );
-
-    inverterOutletServiceMock = createOutletService(new OutletInvService(accessory, batteryStatusProviderMock));
-    (OutletInvService as unknown as jest.Mock).mockImplementation(() => inverterOutletServiceMock);
 
     inverterBrightnessServiceMock = createLightBulbService(new BrightnessService(accessory, 1023));
     (BrightnessService as jest.Mock).mockImplementation(() => inverterBrightnessServiceMock);
@@ -193,7 +195,7 @@ describe('PowerStreamAccessory', () => {
         deviceConfig: DeviceConfig
       ): CharacteristicType[] | undefined {
         let actual: CharacteristicType[] | undefined;
-        (OutletService as unknown as jest.Mock).mockImplementation(
+        (OutletReadOnlyService as unknown as jest.Mock).mockImplementation(
           (
             _: EcoFlowAccessoryBase,
             __: BatteryStatusProvider,
@@ -201,15 +203,6 @@ describe('PowerStreamAccessory', () => {
             additionalCharacteristics?: CharacteristicType[]
           ) => {
             if (serviceSubType === expectedServiceSubType) {
-              actual = additionalCharacteristics;
-              return mock;
-            }
-            return undefined;
-          }
-        );
-        (OutletInvService as unknown as jest.Mock).mockImplementation(
-          (_: EcoFlowAccessoryBase, __: BatteryStatusProvider, additionalCharacteristics?: CharacteristicType[]) => {
-            if (expectedServiceSubType === 'INV') {
               actual = additionalCharacteristics;
               return mock;
             }

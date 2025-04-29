@@ -157,14 +157,15 @@ describe('PluginConfigDevicesRenderer', () => {
   describe('hideDeviceSettingsPerModel', () => {
     it('should contain proper hideDeviceSettingsPerModel configuration', () => {
       const expected = {
-        'Delta 2': ['powerStream', 'outlet'],
-        'Delta 2 Max': ['powerStream', 'outlet'],
-        'Delta Pro': ['powerStream', 'outlet'],
-        'Delta Pro 3': ['powerStream', 'outlet'],
-        'Delta Pro Ultra': ['powerStream', 'outlet'],
-        PowerStream: ['battery', 'outlet'],
-        'Smart Plug': ['battery', 'powerStream'],
-        Glacier: ['powerStream', 'outlet'],
+        'Delta 2': ['powerStream', 'powerOcean', 'outlet'],
+        'Delta 2 Max': ['powerStream', 'powerOcean', 'outlet'],
+        'Delta Pro': ['powerStream', 'powerOcean', 'outlet'],
+        'Delta Pro 3': ['powerStream', 'powerOcean', 'outlet'],
+        'Delta Pro Ultra': ['powerStream', 'powerOcean', 'outlet'],
+        PowerStream: ['battery', 'powerOcean', 'outlet'],
+        PowerOcean: ['battery', 'powerStream', 'outlet'],
+        'Smart Plug': ['battery', 'powerStream', 'powerOcean'],
+        Glacier: ['powerStream', 'powerOcean', 'outlet'],
       };
 
       const actual = renderer.hideDeviceSettingsPerModel;

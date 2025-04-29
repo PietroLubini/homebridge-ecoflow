@@ -148,6 +148,51 @@
                 }
               }
             },
+            "powerOcean": {
+              "title": "PowerOcean Settings",
+              "type": "object",
+              "properties": {
+                "batteryAdditionalCharacteristics": {
+                  "title": "Battery Additional Characteristics",
+                  "description": "List of additional characteristics for Battery connected to PowerStream",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "title": "Characteristic",
+                    "type": "string",
+                    "enum": [
+                      "Battery Level, %",
+                      "Input Consumption, W",
+                      "Output Consumption, W",
+                      "Charging State",
+                      "Status Low Battery"
+                    ]
+                  }
+                },
+                "pvAdditionalCharacteristics": {
+                  "title": "PV Additional Characteristics",
+                  "description": "List of additional characteristics for PVs connected for PowerStream",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "title": "Characteristic",
+                    "type": "string",
+                    "enum": ["Output Consumption, W"]
+                  }
+                },
+                "inverterAdditionalCharacteristics": {
+                  "title": "Inverter Additional Characteristics",
+                  "description": "List of additional characteristics for PowerStream",
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {
+                    "title": "Characteristic",
+                    "type": "string",
+                    "enum": ["Input Consumption, W", "Output Consumption, W"]
+                  }
+                }
+              }
+            },
             "outlet": {
               "title": "Outlet Settings",
               "type": "object",

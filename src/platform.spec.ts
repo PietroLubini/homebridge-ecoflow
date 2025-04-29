@@ -5,6 +5,7 @@ import { DeltaPro3Accessory } from '@ecoflow/accessories/batteries/deltapro3/del
 import { DeltaProUltraAccessory } from '@ecoflow/accessories/batteries/deltaproultra/deltaProUltraAccessory';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { GlacierAccessory } from '@ecoflow/accessories/glacier/glacierAccessory';
+import { PowerOceanAccessory } from '@ecoflow/accessories/powerocean/powerOceanAccessory';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { SmartPlugAccessory } from '@ecoflow/accessories/smartplug/smartPlugAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
@@ -24,6 +25,7 @@ jest.mock('@ecoflow/accessories/batteries/delta2/delta2MaxAccessory');
 jest.mock('@ecoflow/accessories/batteries/deltapro/deltaProAccessory');
 jest.mock('@ecoflow/accessories/batteries/deltapro3/deltaPro3Accessory');
 jest.mock('@ecoflow/accessories/batteries/deltaproultra/deltaProUltraAccessory');
+jest.mock('@ecoflow/accessories/powerocean/powerOceanAccessory');
 jest.mock('@ecoflow/accessories/powerstream/powerStreamAccessory');
 jest.mock('@ecoflow/accessories/smartplug/smartPlugAccessory');
 jest.mock('@ecoflow/accessories/glacier/glacierAccessory');
@@ -449,6 +451,28 @@ describe('EcoFlowHomebridgePlatform', () => {
         registerDevices();
 
         expect(powerStreamAccessoryMock.initialize).toHaveBeenCalled();
+      });
+
+      it.skip('should register PowerOcean accessory when model is PowerOcean in config', () => {
+        config.devices = [
+          {
+            name: 'device4',
+            // model: DeviceModel.PowerOcean,
+            serialNumber: 'sn2',
+            accessKey: 'key1',
+            secretKey: 'key1',
+          } as DeviceConfig,
+        ];
+        const powerOceanAccessoryMock = createAccessory(
+          PowerOceanAccessory,
+          config.devices[0],
+          log2Mock,
+          accessory2Mock
+        );
+
+        registerDevices();
+
+        expect(powerOceanAccessoryMock.initialize).toHaveBeenCalled();
       });
 
       it('should register SmartPlug accessory when model is SmartPlug in config', () => {

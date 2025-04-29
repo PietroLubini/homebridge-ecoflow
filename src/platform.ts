@@ -253,6 +253,14 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
       //   EcoFlowAccessoryType = DeltaProUltraAccessory;
       //   EcoFlowAccessorySimulatorType = DeltaProUltraSimulator;
       //   break;
+      // case DeviceModel.Glacier:
+      //   EcoFlowAccessoryType = GlacierAccessory;
+      //   EcoFlowAccessorySimulatorType = GlacierSimulator;
+      //   break;
+      // case DeviceModel.PowerOcean:
+      //   EcoFlowAccessoryType = PowerOceanAccessory;
+      //   EcoFlowAccessorySimulatorType = PowerOceanSimulator;
+      //   break;
       case DeviceModel.PowerStream:
         EcoFlowAccessoryType = PowerStreamAccessory;
         EcoFlowAccessorySimulatorType = PowerStreamSimulator;
@@ -261,10 +269,6 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
         EcoFlowAccessoryType = SmartPlugAccessory;
         EcoFlowAccessorySimulatorType = SmartPlugSimulator;
         break;
-      // case DeviceModel.Glacier:
-      //   EcoFlowAccessoryType = GlacierAccessory;
-      //   EcoFlowAccessorySimulatorType = GlacierSimulator;
-      //   break;
       default:
         log.warn(`"${config.model}" is not supported. Ignoring the device`);
     }
