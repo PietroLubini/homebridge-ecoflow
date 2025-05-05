@@ -3,6 +3,7 @@ import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2/delta2
 import { DeltaProAccessory } from '@ecoflow/accessories/batteries/deltapro/deltaProAccessory';
 import { DeltaPro3Accessory } from '@ecoflow/accessories/batteries/deltapro3/deltaPro3Accessory';
 import { DeltaProUltraAccessory } from '@ecoflow/accessories/batteries/deltaproultra/deltaProUltraAccessory';
+import { DiscoveryAccessory } from '@ecoflow/accessories/discovery/discoveryAccessory';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { GlacierAccessory } from '@ecoflow/accessories/glacier/glacierAccessory';
 import { PowerOceanAccessory } from '@ecoflow/accessories/powerocean/powerOceanAccessory';
@@ -29,6 +30,7 @@ jest.mock('@ecoflow/accessories/powerocean/powerOceanAccessory');
 jest.mock('@ecoflow/accessories/powerstream/powerStreamAccessory');
 jest.mock('@ecoflow/accessories/smartplug/smartPlugAccessory');
 jest.mock('@ecoflow/accessories/glacier/glacierAccessory');
+jest.mock('@ecoflow/accessories/discovery/discoveryAccessory');
 jest.mock('@ecoflow/apis/ecoFlowHttpApiManager');
 jest.mock('@ecoflow/apis/ecoFlowMqttApiManager');
 jest.mock('@ecoflow/helpers/machineIdProvider');
@@ -429,6 +431,28 @@ describe('EcoFlowHomebridgePlatform', () => {
         registerDevices();
 
         expect(deltaProAccessoryMock.initialize).toHaveBeenCalled();
+      });
+
+      it('should register Discovery accessory when model is Discovery in config', () => {
+        config.devices = [
+          {
+            name: 'device4',
+            model: DeviceModel.Discovery,
+            serialNumber: 'sn2',
+            accessKey: 'key1',
+            secretKey: 'key1',
+          } as DeviceConfig,
+        ];
+        const powerStreamAccessoryMock = createAccessory(
+          DiscoveryAccessory,
+          config.devices[0],
+          log2Mock,
+          accessory2Mock
+        );
+
+        registerDevices();
+
+        expect(powerStreamAccessoryMock.initialize).toHaveBeenCalled();
       });
 
       it('should register PowerStream accessory when model is PowerStream in config', () => {
