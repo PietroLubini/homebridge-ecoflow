@@ -1,15 +1,9 @@
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { GlacierAllQuotaData, TemperatureType } from '@ecoflow/accessories/glacier/interfaces/glacierHttpApiContracts';
-import {
-  GlacierMqttSetModuleType,
-  GlacierMqttSetOperateType,
-} from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
+import { GlacierMqttSetModuleType, GlacierMqttSetOperateType } from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
 import { ThermostatFridgeDualLeftZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeDualLeftZoneService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
-import {
-  TargetHeatingCoolingStateType,
-  TemperatureDisplayUnitsType,
-} from '@ecoflow/characteristics/characteristicContracts';
+import { TargetHeatingCoolingStateType, TemperatureDisplayUnitsType } from '@ecoflow/characteristics/characteristicContracts';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService, HAPStatus, HapStatusError } from 'hap-nodejs';
@@ -80,7 +74,7 @@ describe('ThermostatFridgeDualLeftZoneService', () => {
     it('should not allow to set Target State value', () => {
       const actual = characteristic.setValue(TargetHeatingCoolingStateType.Cool);
 
-      expect(actual.statusCode).toBe(HAPStatus.READ_ONLY_CHARACTERISTIC);
+      expect(actual.statusCode).toEqual(HAPStatus.READ_ONLY_CHARACTERISTIC);
     });
   });
 
@@ -136,9 +130,7 @@ describe('ThermostatFridgeDualLeftZoneService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(TemperatureDisplayUnitsType.Fahrenheit);
-      expect(logMock.debug.mock.calls).toEqual([
-        ['Dual Left Zone Temperature Display Units ->', TemperatureDisplayUnitsType.Fahrenheit],
-      ]);
+      expect(logMock.debug.mock.calls).toEqual([['Dual Left Zone Temperature Display Units ->', TemperatureDisplayUnitsType.Fahrenheit]]);
     });
   });
 

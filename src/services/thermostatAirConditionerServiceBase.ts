@@ -1,30 +1,33 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import {
   CurrentHeatingCoolingStateType,
-  FridgeStateType,
   TargetHeatingCoolingStateType,
   TemperatureDisplayUnitsType,
 } from '@ecoflow/characteristics/characteristicContracts';
-import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic, CharacteristicValue } from 'homebridge';
 
-export abstract class ThermostatFridgeServiceBase extends ServiceBase {
-  private currentTemperature: number = 0;
-  private targetTemperature: number = 0;
+export abstract class ThermostatAirConditionerServiceBase extends ServiceBase {
+  private readonly minTemperatureFarenheit: number;
+  private readonly maxTemperaturefarenheit: number;
+  private currentTemperature: number;
+  private targetTemperature: number;
   private currentHeatingCoolingStateType: CurrentHeatingCoolingStateType = CurrentHeatingCoolingStateType.Off;
   private targetHeatingCoolingStateType: TargetHeatingCoolingStateType = TargetHeatingCoolingStateType.Off;
-  private targetFridgeState: FridgeStateType = FridgeStateType.Off;
-  private temperatureDisplayUnits: number = 0;
+  private temperatureDisplayUnits: TemperatureDisplayUnitsType = TemperatureDisplayUnitsType.Celsius;
+  private targetTemperatureCharacteristic?: Characteristic;
 
   constructor(
     ecoFlowAccessory: EcoFlowAccessoryBase,
-    private readonly minTemperature: number,
-    private readonly maxTemperature: number,
-    serviceSubType: string,
-    private readonly targetStateCharacteristicPermsType: CharacteristicPermsType = CharacteristicPermsType.DEFAULT
+    private readonly minTemperatureCelsius: number,
+    private readonly maxTemperatureCelsius: number,
+    serviceSubType?: string
   ) {
     super(ecoFlowAccessory.platform.Service.Thermostat, ecoFlowAccessory, serviceSubType);
+    this.minTemperatureFarenheit = ThermostatAirConditionerServiceBase.celsiusToFahrenheit(this.minTemperatureCelsius);
+    this.maxTemperaturefarenheit = ThermostatAirConditionerServiceBase.celsiusToFahrenheit(this.maxTemperatureCelsius);
+    this.currentTemperature = this.minTemperatureCelsius;
+    this.targetTemperature = this.maxTemperatureCelsius;
   }
 
   public updateCurrentTemperature(value: number): void {
@@ -37,25 +40,27 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
     this.updateCharacteristic(this.platform.Characteristic.TargetTemperature, 'Target Temperature', value);
   }
 
-  public updateCurrentState(value: FridgeStateType): void {
-    this.currentHeatingCoolingStateType = value === FridgeStateType.On ? CurrentHeatingCoolingStateType.Cool : CurrentHeatingCoolingStateType.Off;
+  public updateCurrentState(value: CurrentHeatingCoolingStateType): void {
+    this.currentHeatingCoolingStateType = value;
     this.updateCharacteristic(this.platform.Characteristic.CurrentHeatingCoolingState, 'Current State', this.currentHeatingCoolingStateType);
   }
 
-  public updateTargetState(value: FridgeStateType): void {
-    this.targetHeatingCoolingStateType = value === FridgeStateType.On ? TargetHeatingCoolingStateType.Cool : TargetHeatingCoolingStateType.Off;
+  public updateTargetState(value: TargetHeatingCoolingStateType): void {
+    this.targetHeatingCoolingStateType = value;
     this.updateCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState, 'Target State', this.targetHeatingCoolingStateType);
   }
 
   public updateTemperatureDisplayUnits(value: TemperatureDisplayUnitsType): void {
     this.temperatureDisplayUnits = value;
     this.updateCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits, 'Temperature Display Units', value);
+    this.updateTargetTemperatureLimits(value);
   }
 
   protected override addCharacteristics(): Characteristic[] {
+    this.targetTemperatureCharacteristic = this.addTargetTemperatureCharacteristic();
     const characteristics = [
       this.addCurrentTemperatureCharacteristic(),
-      this.addTargetTemperatureCharacteristic(),
+      this.targetTemperatureCharacteristic,
       this.addCurrentHeatingCoolingStateCharacteristic(),
       this.addTargetHeatingCoolingStateCharacteristic(),
       this.addTemperatureDisplayUnitsCharacteristic(),
@@ -71,7 +76,7 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected processOnSetTargetState(value: FridgeStateType, revert: () => void): Promise<void> {
+  protected processOnSetTargetState(value: TargetHeatingCoolingStateType, revert: () => void): Promise<void> {
     return Promise.resolve();
   }
 
@@ -80,24 +85,20 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
     return Promise.resolve();
   }
 
+  private static celsiusToFahrenheit(celsius: number): number {
+    return (celsius * 9) / 5 + 32;
+  }
+
   private addCurrentTemperatureCharacteristic(): Characteristic {
-    const characteristic = this.addCharacteristic(this.platform.Characteristic.CurrentTemperature)
-      .setProps({
-        minValue: this.minTemperature,
-        maxValue: this.maxTemperature,
-        minStep: 0.1,
-      })
-      .onGet(() => this.processOnGet(this.currentTemperature));
+    const characteristic = this.addCharacteristic(this.platform.Characteristic.CurrentTemperature).onGet(() =>
+      this.processOnGet(this.currentTemperature)
+    );
     return characteristic;
   }
 
   private addTargetTemperatureCharacteristic(): Characteristic {
     const characteristic = this.addCharacteristic(this.platform.Characteristic.TargetTemperature)
-      .setProps({
-        minValue: this.minTemperature,
-        maxValue: this.maxTemperature,
-        minStep: 0.1,
-      })
+      .setProps({ minStep: 0.1 })
       .onGet(() => this.processOnGet(this.targetTemperature))
       .onSet((value: CharacteristicValue) => {
         const prevTargetTemperature = this.targetTemperature;
@@ -116,9 +117,7 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
 
   private addCurrentHeatingCoolingStateCharacteristic(): Characteristic {
     const characteristic = this.addCharacteristic(this.platform.Characteristic.CurrentHeatingCoolingState)
-      .setProps({
-        validValues: [TargetHeatingCoolingStateType.Off, TargetHeatingCoolingStateType.Cool],
-      })
+      .setProps({ validValues: [CurrentHeatingCoolingStateType.Off, CurrentHeatingCoolingStateType.Cool, CurrentHeatingCoolingStateType.Heat] })
       .onGet(() => this.processOnGet(this.currentHeatingCoolingStateType));
     return characteristic;
   }
@@ -126,20 +125,22 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
   private addTargetHeatingCoolingStateCharacteristic(): Characteristic {
     const characteristic = this.addCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState)
       .setProps({
-        validValues: [TargetHeatingCoolingStateType.Off, TargetHeatingCoolingStateType.Cool],
+        validValues: [
+          TargetHeatingCoolingStateType.Off,
+          TargetHeatingCoolingStateType.Cool,
+          TargetHeatingCoolingStateType.Heat,
+          TargetHeatingCoolingStateType.Auto,
+        ],
       })
-      .setPropsPerms(this.targetStateCharacteristicPermsType)
       .onGet(() => this.processOnGet(this.targetHeatingCoolingStateType))
       .onSet((value: CharacteristicValue) => {
-        const prevTargetFridgeState = this.targetFridgeState;
-        const revert = () => this.updateTargetState(prevTargetFridgeState);
+        const prevTargetHeatingCoolingStateType = this.targetHeatingCoolingStateType;
+        const revert = () => this.updateTargetState(prevTargetHeatingCoolingStateType);
         this.processOnSet(
           this.platform.Characteristic.TargetHeatingCoolingState.name,
           async () => {
             this.targetHeatingCoolingStateType = value as TargetHeatingCoolingStateType;
-            this.targetFridgeState =
-              this.targetHeatingCoolingStateType === TargetHeatingCoolingStateType.Cool ? FridgeStateType.On : FridgeStateType.Off;
-            await this.processOnSetTargetState(this.targetFridgeState, revert);
+            await this.processOnSetTargetState(this.targetHeatingCoolingStateType, revert);
           },
           revert
         );
@@ -158,10 +159,18 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
           async () => {
             this.temperatureDisplayUnits = value as TemperatureDisplayUnitsType;
             await this.processOnSetTemperatureDisplayUnits(this.temperatureDisplayUnits, revert);
+            this.updateTargetTemperatureLimits(this.temperatureDisplayUnits);
           },
           revert
         );
       });
     return characteristic;
+  }
+
+  private updateTargetTemperatureLimits(temperatureDisplayUnits: TemperatureDisplayUnitsType): void {
+    this.targetTemperatureCharacteristic?.setProps({
+      minValue: temperatureDisplayUnits === TemperatureDisplayUnitsType.Celsius ? this.minTemperatureCelsius : this.minTemperatureFarenheit,
+      maxValue: temperatureDisplayUnits === TemperatureDisplayUnitsType.Celsius ? this.maxTemperatureCelsius : this.maxTemperaturefarenheit,
+    });
   }
 }

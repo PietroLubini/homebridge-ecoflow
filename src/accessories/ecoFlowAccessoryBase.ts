@@ -1,12 +1,7 @@
 import { DeviceInfo } from '@ecoflow/apis/containers/deviceInfo';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
-import {
-  MqttQuotaMessage,
-  MqttSetMessage,
-  MqttSetReplyMessage,
-  MqttStatusMessage,
-} from '@ecoflow/apis/interfaces/mqttApiContracts';
+import { MqttQuotaMessage, MqttSetMessage, MqttSetReplyMessage, MqttStatusMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
@@ -21,10 +16,7 @@ export abstract class EcoFlowAccessoryBase {
   private isMqttConnected: boolean = false;
   private subscriptions: Subscription[] = [];
   protected readonly deviceInfo: DeviceInfo;
-  public readonly setReplies: Record<
-    string,
-    { requestMessage: MqttSetMessage; revert: () => void; timeoutId: NodeJS.Timeout }
-  > = {};
+  public readonly setReplies: Record<string, { requestMessage: MqttSetMessage; revert: () => void; timeoutId: NodeJS.Timeout }> = {};
 
   constructor(
     public readonly platform: EcoFlowHomebridgePlatform,
@@ -62,9 +54,7 @@ export abstract class EcoFlowAccessoryBase {
         );
         this.accessory.removeService(service);
       });
-    this.services
-      .filter(service => this.accessory.services.includes(service.service))
-      .forEach(service => service.cleanupCharacteristics());
+    this.services.filter(service => this.accessory.services.includes(service.service)).forEach(service => service.cleanupCharacteristics());
   }
 
   public destroy() {

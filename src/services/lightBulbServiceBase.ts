@@ -19,23 +19,33 @@ export abstract class LightBulbServiceBase extends ServiceBase {
   protected override addCharacteristics(): Characteristic[] {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On)
       .onGet(() => this.processOnGet(this.state))
-      .onSet(value =>
-        this.processOnSet(this.platform.Characteristic.On.name, () => {
-          this.state = value as boolean;
-          this.processOnSetOn(this.state, () => this.updateState(!this.state));
-        })
-      );
+      .onSet(value => {
+        const revert = () => this.updateState(!value);
+        this.processOnSet(
+          this.platform.Characteristic.On.name,
+          async () => {
+            this.state = value as boolean;
+            await this.processOnSetOn(this.state, revert);
+          },
+          revert
+        );
+      });
 
     this.brightnessCharacteristic = this.addCharacteristic(this.platform.Characteristic.Brightness)
       .onGet(() => this.processOnGet(this.brightnessPercents))
-      .onSet(percents =>
-        this.processOnSet(this.platform.Characteristic.Brightness.name, () => {
-          this.brightnessPercents = percents as number;
-          const prevBrightness = this.brightness;
-          this.brightness = this.covertPercentsToValue(this.brightnessPercents, this.maxBrightness);
-          this.processOnSetBrightness(this.brightness, () => this.updateBrightness(prevBrightness));
-        })
-      );
+      .onSet(percents => {
+        const prevBrightness = this.brightness;
+        const revert = () => this.updateBrightness(prevBrightness);
+        this.processOnSet(
+          this.platform.Characteristic.Brightness.name,
+          async () => {
+            this.brightnessPercents = percents as number;
+            this.brightness = this.covertPercentsToValue(this.brightnessPercents, this.maxBrightness);
+            await this.processOnSetBrightness(this.brightness, revert);
+          },
+          revert
+        );
+      });
 
     return [onCharacteristic, this.brightnessCharacteristic];
   }
@@ -55,7 +65,13 @@ export abstract class LightBulbServiceBase extends ServiceBase {
     this.brightnessCharacteristic?.setValue(value);
   }
 
-  protected abstract processOnSetOn(value: boolean, revert: () => void): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected processOnSetOn(value: boolean, revert: () => void): Promise<void> {
+    return Promise.resolve();
+  }
 
-  protected abstract processOnSetBrightness(value: number, revert: () => void): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected processOnSetBrightness(value: number, revert: () => void): Promise<void> {
+    return Promise.resolve();
+  }
 }

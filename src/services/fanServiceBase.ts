@@ -19,23 +19,37 @@ export abstract class FanServiceBase extends ServiceBase {
   protected override addCharacteristics(): Characteristic[] {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On)
       .onGet(() => this.processOnGet(this.state))
-      .onSet(value =>
-        this.processOnSet(this.platform.Characteristic.On.name, () => {
-          this.state = value as boolean;
-          this.processOnSetOn(this.state, () => this.updateState(!this.state));
-        })
-      );
+      .onSet(value => {
+        const revert = () => this.updateState(!value);
+        this.processOnSet(
+          this.platform.Characteristic.On.name,
+          async () => {
+            this.state = value as boolean;
+            await this.processOnSetOn(this.state, revert);
+          },
+          revert
+        );
+      });
 
     this.rotationSpeedCharacteristic = this.addCharacteristic(this.platform.Characteristic.RotationSpeed)
       .onGet(() => this.processOnGet(this.rotationSpeedPercents))
-      .onSet(percents =>
-        this.processOnSet(this.platform.Characteristic.RotationSpeed.name, () => {
-          this.rotationSpeedPercents = percents as number;
-          const prevRotationSpeed = this.rotationSpeed;
-          this.rotationSpeed = this.covertPercentsToValue(this.rotationSpeedPercents, this.maxRotationSpeed);
-          this.processOnSetRotationSpeed(this.rotationSpeed, () => this.updateRotationSpeed(prevRotationSpeed));
-        })
-      );
+      .onSet(percents => {
+        const prevRotationSpeed = this.rotationSpeed;
+        const revert = () => this.updateRotationSpeed(prevRotationSpeed);
+        this.processOnSet(
+          this.platform.Characteristic.RotationSpeed.name,
+          async () => {
+            this.rotationSpeedPercents = percents as number;
+            this.rotationSpeed = this.covertPercentsToValue(this.rotationSpeedPercents, this.maxRotationSpeed);
+            const newValue = await this.processOnSetRotationSpeed(this.rotationSpeed, revert);
+            if (this.rotationSpeed !== newValue) {
+              this.rotationSpeed = newValue;
+              this.setRotationSpeed(this.rotationSpeed);
+            }
+          },
+          revert
+        );
+      });
 
     return [onCharacteristic, this.rotationSpeedCharacteristic];
   }
@@ -55,7 +69,13 @@ export abstract class FanServiceBase extends ServiceBase {
     this.rotationSpeedCharacteristic?.setValue(value);
   }
 
-  protected abstract processOnSetOn(value: boolean, revert: () => void): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected processOnSetOn(value: boolean, revert: () => void): Promise<void> {
+    return Promise.resolve();
+  }
 
-  protected abstract processOnSetRotationSpeed(value: number, revert: () => void): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected processOnSetRotationSpeed(value: number, revert: () => void): Promise<number> {
+    return Promise.resolve(value);
+  }
 }

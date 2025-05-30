@@ -21,17 +21,25 @@ export abstract class SwitchServiceBase extends ServiceBase {
   protected override addCharacteristics(): Characteristic[] {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On)
       .onGet(() => this.processOnGet(this.state))
-      .onSet((value: CharacteristicValue) =>
-        this.processOnSet(this.platform.Characteristic.On.name, () => {
-          this.state = value as boolean;
-          this.processOnSetOn(this.state, () => this.updateState(!this.state));
-        })
-      );
+      .onSet((value: CharacteristicValue) => {
+        const revert = () => this.updateState(!value);
+        this.processOnSet(
+          this.platform.Characteristic.On.name,
+          async () => {
+            this.state = value as boolean;
+            await this.processOnSetOn(this.state, revert);
+          },
+          revert
+        );
+      });
 
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.serviceName);
 
     return [onCharacteristic];
   }
 
-  protected abstract processOnSetOn(value: boolean, revert: () => void): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected processOnSetOn(value: boolean, revert: () => void): Promise<void> {
+    return Promise.resolve();
+  }
 }

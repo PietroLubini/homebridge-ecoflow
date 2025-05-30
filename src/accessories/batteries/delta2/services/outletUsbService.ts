@@ -6,11 +6,18 @@ import {
 import { Delta2OutletServiceBase } from '@ecoflow/accessories/batteries/delta2/services/delta2OutletServiceBase';
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { EnableType } from '@ecoflow/characteristics/characteristicContracts';
+import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 
 export class OutletUsbService extends Delta2OutletServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryBase, batteryStatusProvider: BatteryStatusProvider) {
-    super(ecoFlowAccessory, batteryStatusProvider, 'USB', ecoFlowAccessory.config.battery?.additionalCharacteristics);
+    super(
+      ecoFlowAccessory,
+      batteryStatusProvider,
+      'USB',
+      CharacteristicPermsType.DEFAULT,
+      ecoFlowAccessory.config.battery?.additionalCharacteristics
+    );
   }
 
   protected override processOnSetOn(value: boolean, revert: () => void): Promise<void> {

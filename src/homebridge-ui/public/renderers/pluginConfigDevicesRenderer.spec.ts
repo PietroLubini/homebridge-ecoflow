@@ -167,6 +167,7 @@ describe('PluginConfigDevicesRenderer', () => {
         PowerOcean: ['battery', 'powerStream', 'outlet'],
         'Smart Plug': ['battery', 'powerStream', 'powerOcean'],
         Glacier: ['powerStream', 'powerOcean', 'outlet'],
+        Wave: ['powerStream', 'powerOcean', 'outlet'],
       };
 
       const actual = renderer.hideDeviceSettingsPerModel;
@@ -216,10 +217,7 @@ describe('PluginConfigDevicesRenderer', () => {
         renderer.render(context);
 
         expect(homebridgeProviderMock.createForm).toHaveBeenCalledTimes(1);
-        expect(homebridgeProviderMock.createForm).toHaveBeenCalledWith(
-          { schema: expectedSchema.items },
-          expectedConfiguration
-        );
+        expect(homebridgeProviderMock.createForm).toHaveBeenCalledWith({ schema: expectedSchema.items }, expectedConfiguration);
       });
 
       it('should render form for second device when second tab is clicked', () => {
@@ -231,10 +229,7 @@ describe('PluginConfigDevicesRenderer', () => {
         activateTab(1);
 
         expect(homebridgeProviderMock.createForm).toHaveBeenCalledTimes(1);
-        expect(homebridgeProviderMock.createForm).toHaveBeenCalledWith(
-          { schema: expectedSchema.items },
-          expectedConfiguration
-        );
+        expect(homebridgeProviderMock.createForm).toHaveBeenCalledWith({ schema: expectedSchema.items }, expectedConfiguration);
         expect(formMock.end).toHaveBeenCalledTimes(1);
       });
     });
@@ -269,10 +264,7 @@ describe('PluginConfigDevicesRenderer', () => {
         deviceTabAdd.trigger('click');
 
         expect(homebridgeProviderMock.createForm).toHaveBeenCalledTimes(1);
-        expect(homebridgeProviderMock.createForm).toHaveBeenCalledWith(
-          { schema: expectedSchema.items },
-          { model: 'Delta 2', prop1: 'true' }
-        );
+        expect(homebridgeProviderMock.createForm).toHaveBeenCalledWith({ schema: expectedSchema.items }, { model: 'Delta 2', prop1: 'true' });
         expect(formMock.end).toHaveBeenCalledTimes(2);
       });
 
@@ -372,10 +364,7 @@ describe('PluginConfigDevicesRenderer', () => {
         const expectedConfiguration = clone(configuration).devices[0];
 
         expect(homebridgeProviderMock.createForm).toHaveBeenCalledTimes(1);
-        expect(homebridgeProviderMock.createForm).toHaveBeenCalledWith(
-          { schema: expectedSchema.items },
-          expectedConfiguration
-        );
+        expect(homebridgeProviderMock.createForm).toHaveBeenCalledWith({ schema: expectedSchema.items }, expectedConfiguration);
         expect(formMock.end).toHaveBeenCalledTimes(1);
       });
     });

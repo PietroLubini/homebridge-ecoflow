@@ -16,6 +16,7 @@ export enum DeviceModel {
   // PowerOcean = 'PowerOcean',
   SmartPlug = 'Smart Plug',
   // Glacier = 'Glacier',
+  Wave = 'Wave',
 }
 
 export enum LocationType {
@@ -55,9 +56,7 @@ export interface BatteryDeviceConfig {
   additionalCharacteristics: AdditionalBatteryCharacteristicType[];
 }
 
-export type AdditionalBatteryCharacteristicType =
-  | AdditionalOutletCharacteristicType
-  | AdditionalBatteryOutletCharacteristicType;
+export type AdditionalBatteryCharacteristicType = AdditionalOutletCharacteristicType | AdditionalBatteryOutletCharacteristicType;
 
 export enum AdditionalBatteryOutletCharacteristicType {
   BatteryLevel = 'Battery Level, %',

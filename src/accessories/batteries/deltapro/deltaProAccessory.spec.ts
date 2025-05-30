@@ -3,7 +3,6 @@ import { DeltaProAllQuotaData } from '@ecoflow/accessories/batteries/deltapro/in
 import { DeltaProMqttQuotaMessageWithParams } from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProMqttApiContracts';
 import { OutletAcService } from '@ecoflow/accessories/batteries/deltapro/services/outletAcService';
 import { OutletCarService } from '@ecoflow/accessories/batteries/deltapro/services/outletCarService';
-import { OutletUsbService } from '@ecoflow/accessories/batteries/deltapro/services/outletUsbService';
 import { SwitchXboostService } from '@ecoflow/accessories/batteries/deltapro/services/switchXboostService';
 import { AcEnableType, AcXBoostType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
@@ -17,11 +16,12 @@ import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { AccessoryInformationService } from '@ecoflow/services/accessoryInformationService';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
 import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
+import { OutletReadOnlyService } from '@ecoflow/services/outletReadOnlyService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 jest.mock('@ecoflow/services/batteryStatusService');
-jest.mock('@ecoflow/accessories/batteries/deltapro/services/outletUsbService');
+jest.mock('@ecoflow/services/outletBatteryReadOnlyService');
 jest.mock('@ecoflow/accessories/batteries/deltapro/services/outletAcService');
 jest.mock('@ecoflow/accessories/batteries/deltapro/services/outletCarService');
 jest.mock('@ecoflow/accessories/batteries/deltapro/services/switchXboostService');
@@ -36,7 +36,7 @@ describe('DeltaProAccessory', () => {
   let config: DeviceConfig;
   let accessory: DeltaProAccessory;
   let batteryStatusServiceMock: jest.Mocked<BatteryStatusService>;
-  let outletUsbServiceMock: jest.Mocked<OutletUsbService>;
+  let outletUsbServiceMock: jest.Mocked<OutletReadOnlyService>;
   let outletAcServiceMock: jest.Mocked<OutletAcService>;
   let outletCarServiceMock: jest.Mocked<OutletCarService>;
   let switchXboostServiceMock: jest.Mocked<SwitchXboostService>;
@@ -80,10 +80,7 @@ describe('DeltaProAccessory', () => {
       return serviceMock;
     }
 
-    function initOutletService<TService extends OutletBatteryServiceBase>(
-      Module: object,
-      service: TService
-    ): jest.Mocked<TService> {
+    function initOutletService<TService extends OutletBatteryServiceBase>(Module: object, service: TService): jest.Mocked<TService> {
       return initService(Module, service, mock => {
         const mockOutletBase = mock as jest.Mocked<OutletBatteryServiceBase>;
         mockOutletBase.updateBatteryLevel.mockReset();
@@ -95,27 +92,17 @@ describe('DeltaProAccessory', () => {
     }
 
     batteryStatusProviderMock = {} as jest.Mocked<BatteryStatusProvider>;
-    batteryStatusServiceMock = initService(
-      BatteryStatusService,
-      new BatteryStatusService(accessory, batteryStatusProviderMock),
-      mock => {
-        mock.updateBatteryLevel.mockReset();
-        mock.updateChargingState.mockReset();
-      }
-    );
+    batteryStatusServiceMock = initService(BatteryStatusService, new BatteryStatusService(accessory, batteryStatusProviderMock), mock => {
+      mock.updateBatteryLevel.mockReset();
+      mock.updateChargingState.mockReset();
+    });
     outletUsbServiceMock = initOutletService(
-      OutletUsbService,
-      new OutletUsbService(accessory, batteryStatusProviderMock)
+      OutletReadOnlyService,
+      new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'USB', accessory.config.battery?.additionalCharacteristics)
     );
     outletAcServiceMock = initOutletService(OutletAcService, new OutletAcService(accessory, batteryStatusProviderMock));
-    outletCarServiceMock = initOutletService(
-      OutletCarService,
-      new OutletCarService(accessory, batteryStatusProviderMock)
-    );
-    accessoryInformationServiceMock = initService(
-      AccessoryInformationService,
-      new AccessoryInformationService(accessory)
-    );
+    outletCarServiceMock = initOutletService(OutletCarService, new OutletCarService(accessory, batteryStatusProviderMock));
+    accessoryInformationServiceMock = initService(AccessoryInformationService, new AccessoryInformationService(accessory));
     switchXboostServiceMock = initService(SwitchXboostService, new SwitchXboostService(accessory), mock => {
       mock.updateState.mockReset();
     });

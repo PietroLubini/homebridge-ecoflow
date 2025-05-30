@@ -1,13 +1,8 @@
 import { EmsStatus } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
-import {
-  DeltaProAllQuotaData,
-  InvStatus,
-  PdStatus,
-} from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProHttpApiContracts';
+import { DeltaProAllQuotaData, InvStatus, PdStatus } from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProHttpApiContracts';
 import { DeltaProMqttQuotaMessageWithParams } from '@ecoflow/accessories/batteries/deltapro/interfaces/deltaProMqttApiContracts';
 import { OutletAcService } from '@ecoflow/accessories/batteries/deltapro/services/outletAcService';
 import { OutletCarService } from '@ecoflow/accessories/batteries/deltapro/services/outletCarService';
-import { OutletUsbService } from '@ecoflow/accessories/batteries/deltapro/services/outletUsbService';
 import { SwitchXboostService } from '@ecoflow/accessories/batteries/deltapro/services/switchXboostService';
 import { AcEnableType, AcXBoostType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
@@ -19,12 +14,13 @@ import { DeviceConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
+import { OutletReadOnlyService } from '@ecoflow/services/outletReadOnlyService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 export class DeltaProAccessory extends EcoFlowAccessoryWithQuotaBase<DeltaProAllQuotaData> {
   private readonly batteryStatusService: BatteryStatusService;
-  private readonly outletUsbService: OutletUsbService;
+  private readonly outletUsbService: OutletReadOnlyService;
   private readonly outletAcService: OutletAcService;
   private readonly outletCarService: OutletCarService;
   private readonly switchXboostService: SwitchXboostService;
@@ -40,20 +36,14 @@ export class DeltaProAccessory extends EcoFlowAccessoryWithQuotaBase<DeltaProAll
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
     this.batteryStatusService = new BatteryStatusService(this, batteryStatusProvider);
-    this.outletUsbService = new OutletUsbService(this, batteryStatusProvider);
+    this.outletUsbService = new OutletReadOnlyService(this, batteryStatusProvider, 'USB', this.config.battery?.additionalCharacteristics);
     this.outletAcService = new OutletAcService(this, batteryStatusProvider);
     this.outletCarService = new OutletCarService(this, batteryStatusProvider);
     this.switchXboostService = new SwitchXboostService(this);
   }
 
   protected override getServices(): ServiceBase[] {
-    return [
-      this.batteryStatusService,
-      this.outletUsbService,
-      this.outletAcService,
-      this.outletCarService,
-      this.switchXboostService,
-    ];
+    return [this.batteryStatusService, this.outletUsbService, this.outletAcService, this.outletCarService, this.switchXboostService];
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
@@ -104,8 +94,7 @@ export class DeltaProAccessory extends EcoFlowAccessoryWithQuotaBase<DeltaProAll
 
   private updateInvValues(params: InvStatus): void {
     if (params.inputWatts !== undefined) {
-      const isCharging =
-        params.inputWatts > 0 && (params.outputWatts === undefined || params.inputWatts !== params.outputWatts);
+      const isCharging = params.inputWatts > 0 && (params.outputWatts === undefined || params.inputWatts !== params.outputWatts);
       this.batteryStatusService.updateChargingState(isCharging);
       this.outletAcService.updateChargingState(isCharging);
       this.outletUsbService.updateChargingState(isCharging);
@@ -143,14 +132,7 @@ export class DeltaProAccessory extends EcoFlowAccessoryWithQuotaBase<DeltaProAll
       params.typec1Watts !== undefined ||
       params.typec2Watts !== undefined
     ) {
-      const usbWatts = this.sum(
-        params.usb1Watts,
-        params.usb2Watts,
-        params.qcUsb1Watts,
-        params.qcUsb2Watts,
-        params.typec1Watts,
-        params.typec2Watts
-      );
+      const usbWatts = this.sum(params.usb1Watts, params.usb2Watts, params.qcUsb1Watts, params.qcUsb2Watts, params.typec1Watts, params.typec2Watts);
       this.outletUsbService.updateOutputConsumption(usbWatts);
     }
   }
