@@ -62,13 +62,13 @@ export class MockMqttClient extends MqttClient {
   }
 
   private emitQuota(): void {
-    // if (this.simulator) {
-    //   this.subscriptionTopics
-    //     .filter(topic => topic.endsWith('quota'))
-    //     .forEach(topic => {
-    //       this.emitMessage(topic, this.simulator!.generateQuota());
-    //     });
-    // }
+    if (this.simulator) {
+      this.subscriptionTopics
+        .filter(topic => topic.endsWith('quota'))
+        .forEach(topic => {
+          this.emitMessage(topic, this.simulator!.generateQuota());
+        });
+    }
   }
 
   private emitStatus(): void {

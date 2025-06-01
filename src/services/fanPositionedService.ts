@@ -4,26 +4,33 @@ import { FanServiceBase } from '@ecoflow/services/fanServiceBase';
 
 export abstract class FanPositionedServiceBase<TPositionType, TPositionTypeObj extends Enum> extends FanServiceBase {
   private readonly positionLength: number;
-  constructor(
-    ecoFlowAccessory: EcoFlowAccessoryBase,
-    serviceSubType: string,
-    private positionTypeObj: TPositionTypeObj
-  ) {
+  private readonly positionValues: TPositionType[];
+  constructor(ecoFlowAccessory: EcoFlowAccessoryBase, serviceSubType: string, positionTypeObj: TPositionTypeObj) {
     super(ecoFlowAccessory, 100, serviceSubType);
-    this.positionLength = 100 / Object.values(positionTypeObj).filter(v => typeof v === 'number').length / 2;
+    this.positionValues = Object.values(positionTypeObj)
+      .filter(v => typeof v === 'number')
+      .map(v => v as TPositionType);
+    this.positionLength = 100 / this.positionValues.length;
   }
 
-  protected override async processOnSetRotationSpeed(value: number, revert: () => void): Promise<number> {
+  public updatePositionedRotationSpeed(value: TPositionType): void {
+    super.updateRotationSpeed(this.covertFromPositionedValue(value));
+  }
+
+  public updateRotationSpeed(): void {
+    this.log.warn('Use updatePositionedRotationSpeed method instead of updateRotationSpeed. Ignoring call.');
+  }
+
+  protected override async processOnSetRotationSpeed(value: number, revert: () => void): Promise<void> {
     const positionedValue = this.covertToPositionedValue(value);
     await this.processOnSetPositionedRotationSpeed(positionedValue, revert);
-    return this.covertFromPositionedValue(positionedValue);
   }
 
   protected abstract processOnSetPositionedRotationSpeed(value: TPositionType, revert: () => void): Promise<void>;
 
   private covertToPositionedValue(value: number): TPositionType {
     const pos = Math.floor(value / this.positionLength);
-    return Object.values(this.positionTypeObj)[pos] as unknown as TPositionType;
+    return this.positionValues[pos];
   }
 
   private covertFromPositionedValue(value: TPositionType): number {

@@ -23,6 +23,7 @@ import { MqttQuotaMessage } from '@ecoflow/apis/interfaces/mqttApiContracts';
 import { TargetHeatingCoolingStateType, TemperatureDisplayUnitsType } from '@ecoflow/characteristics/characteristicContracts';
 import { DeviceConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
+import { Converter } from '@ecoflow/helpers/converter';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
 import { OutletReadOnlyService } from '@ecoflow/services/outletReadOnlyService';
@@ -52,11 +53,10 @@ export class WaveAccessory extends EcoFlowAccessoryWithQuotaBase<WaveAllQuotaDat
   }
 
   protected override getServices(): ServiceBase[] {
-    return [this.batteryStatusService, this.outletBatteryService, /*this.thermostatAirConditionerService,*/ this.fanModeService];
+    return [this.batteryStatusService, this.outletBatteryService, this.thermostatAirConditionerService, this.fanModeService];
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
-    this.log.warn('message is received', message);
     const waveMessage = message as WaveMqttQuotaMessage;
     if (waveMessage.typeCode === WaveMqttMessageTypeCodeType.BMS) {
       const bmsParams = (message as WaveMqttQuotaMessageWithParams<BmsStatus>).params;
@@ -79,7 +79,7 @@ export class WaveAccessory extends EcoFlowAccessoryWithQuotaBase<WaveAllQuotaDat
           ? undefined
           : pdParams.pdTempSys === TemperatureDisplayUnitsType.Celsius
             ? pdParams.setTempCel
-            : pdParams.setTempfah;
+            : Converter.convertFahrenheitToCelsius(pdParams.setTempfah);
       this.updatePdValues(this.quota.pd);
     } else if (waveMessage.typeCode === WaveMqttMessageTypeCodeType.PD_DEV) {
       const pdDevParams = (message as WaveMqttQuotaMessageWithParams<PdStatusDev>).params;
@@ -159,26 +159,23 @@ export class WaveAccessory extends EcoFlowAccessoryWithQuotaBase<WaveAllQuotaDat
 
   private updatePdValues(params: PdStatusAnalysisPd): void {
     if (params.mainMode !== undefined && params.powerMode !== undefined) {
-      this.outletBatteryService.updateState(params.powerMode === WavePowerModeType.On);
       if (params.powerMode === WavePowerModeType.Off) {
-        this.log.info('________OFF');
         this.thermostatAirConditionerService.updateTargetState(TargetHeatingCoolingStateType.Off);
         this.fanModeService.updateState(false);
       } else if (params.mainMode === WaveMainModeType.Fan) {
-        this.log.info('________FAN');
         this.thermostatAirConditionerService.updateTargetState(TargetHeatingCoolingStateType.Auto);
         this.fanModeService.updateState(true);
       } else {
-        this.log.info('________COOL/HEAT');
         this.thermostatAirConditionerService.updateTargetState(
           params.mainMode === WaveMainModeType.Cool ? TargetHeatingCoolingStateType.Cool : TargetHeatingCoolingStateType.Heat
         );
+        this.fanModeService.updateState(false);
       }
     }
 
-    // if (params.fanValue !== undefined) {
-    //   this.fanModeService.updateRotationSpeed(params.fanValue);
-    // }
+    if (params.fanValue !== undefined) {
+      this.fanModeService.updatePositionedRotationSpeed(params.fanValue);
+    }
     if (params.tempSys !== undefined) {
       this.thermostatAirConditionerService.updateTemperatureDisplayUnits(params.tempSys);
     }
@@ -207,6 +204,7 @@ export class WaveAccessory extends EcoFlowAccessoryWithQuotaBase<WaveAllQuotaDat
       this.outletBatteryService.updateInputConsumption(params.acPwrIn);
     }
     if (params.batPwrOut !== undefined) {
+      this.outletBatteryService.updateState(params.batPwrOut > 0);
       this.outletBatteryService.updateOutputConsumption(params.batPwrOut);
     }
     if (params.batCurr !== undefined) {

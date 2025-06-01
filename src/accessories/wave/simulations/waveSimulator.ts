@@ -1,4 +1,4 @@
-import { BmsStatus, PdStatusDev, PowerStatus, WaveMainModeType, WavePowerModeType } from '@ecoflow/accessories/wave/interfaces/waveHttpApiContracts';
+import { BmsStatus, PdStatusDev, PowerStatus, WavePowerModeType } from '@ecoflow/accessories/wave/interfaces/waveHttpApiContracts';
 import {
   WaveAnalysisPdQuotaParams,
   WaveMqttMessageTypeCodeType,
@@ -25,15 +25,14 @@ export class WaveSimulator extends SimulatorTyped<WaveMqttSetMessage> {
       const quotaPdStatus: WaveMqttQuotaMessageWithParams<WaveAnalysisPdQuotaParams> = {
         typeCode: WaveMqttMessageTypeCodeType.PD,
         params: {
-          pdMainMode: WaveMainModeType.Cool, //this.getRandomInt(0, 2),
-          pdTempSys: TemperatureDisplayUnitsType.Fahrenheit,
-          // this.getRandomBoolean() ? TemperatureDisplayUnitsType.Celsius : TemperatureDisplayUnitsType.Fahrenheit,
-          //setFanVal: this.getRandomInt(0, 3),
+          pdMainMode: this.getRandomInt(0, 2),
+          pdTempSys: this.getRandomBoolean() ? TemperatureDisplayUnitsType.Celsius : TemperatureDisplayUnitsType.Fahrenheit,
+          setFanVal: this.getRandomInt(0, 2),
           //lcdStatus: this.getRandomInt(0, 1),
           //waterValue: this.getRandomInt(0, 2),
-          powerSts: WavePowerModeType.On, //this.getRandomBoolean() ? WavePowerModeType.On : WavePowerModeType.Off,
-          setTempCel: 24, //this.getRandomNumber(16, 30),
-          setTempfah: 70, //this.getRandomNumber(60.8, 86),
+          powerSts: this.getRandomBoolean() ? WavePowerModeType.On : WavePowerModeType.Off,
+          setTempCel: this.getRandomNumber(16, 30),
+          setTempfah: this.getRandomNumber(60.8, 86),
         },
       };
       return quotaPdStatus;

@@ -107,10 +107,12 @@ export abstract class ServiceBase {
     return value;
   }
 
-  protected async processOnSet(name: string, process: () => Promise<void>, revert: () => void): Promise<void> {
-    // TODO: check that reachability or enability still works in async method
+  protected processOnSetVerify(name: string): void {
     this.checkIsReachable();
     this.checkIsEnabled(name);
+  }
+
+  protected async processOnSet(process: () => Promise<void>, revert: () => void): Promise<void> {
     try {
       await process();
     } catch (error) {

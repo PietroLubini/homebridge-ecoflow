@@ -27,8 +27,8 @@ class MockFanService extends FanServiceBase {
 
   public override async processOnSetOn(): Promise<void> {}
 
-  public override async processOnSetRotationSpeed(value: number): Promise<number> {
-    return Promise.resolve(value);
+  public override async processOnSetRotationSpeed(): Promise<void> {
+    return Promise.resolve();
   }
 }
 

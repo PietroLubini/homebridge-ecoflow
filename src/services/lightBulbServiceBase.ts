@@ -20,31 +20,25 @@ export abstract class LightBulbServiceBase extends ServiceBase {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On)
       .onGet(() => this.processOnGet(this.state))
       .onSet(value => {
+        this.processOnSetVerify(this.platform.Characteristic.On.name);
         const revert = () => this.updateState(!value);
-        this.processOnSet(
-          this.platform.Characteristic.On.name,
-          async () => {
-            this.state = value as boolean;
-            await this.processOnSetOn(this.state, revert);
-          },
-          revert
-        );
+        this.processOnSet(async () => {
+          this.state = value as boolean;
+          await this.processOnSetOn(this.state, revert);
+        }, revert);
       });
 
     this.brightnessCharacteristic = this.addCharacteristic(this.platform.Characteristic.Brightness)
       .onGet(() => this.processOnGet(this.brightnessPercents))
       .onSet(percents => {
+        this.processOnSetVerify(this.platform.Characteristic.Brightness.name);
         const prevBrightness = this.brightness;
         const revert = () => this.updateBrightness(prevBrightness);
-        this.processOnSet(
-          this.platform.Characteristic.Brightness.name,
-          async () => {
-            this.brightnessPercents = percents as number;
-            this.brightness = this.covertPercentsToValue(this.brightnessPercents, this.maxBrightness);
-            await this.processOnSetBrightness(this.brightness, revert);
-          },
-          revert
-        );
+        this.processOnSet(async () => {
+          this.brightnessPercents = percents as number;
+          this.brightness = this.covertPercentsToValue(this.brightnessPercents, this.maxBrightness);
+          await this.processOnSetBrightness(this.brightness, revert);
+        }, revert);
       });
 
     return [onCharacteristic, this.brightnessCharacteristic];

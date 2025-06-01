@@ -20,35 +20,25 @@ export abstract class FanServiceBase extends ServiceBase {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On)
       .onGet(() => this.processOnGet(this.state))
       .onSet(value => {
+        this.processOnSetVerify(this.platform.Characteristic.On.name);
         const revert = () => this.updateState(!value);
-        this.processOnSet(
-          this.platform.Characteristic.On.name,
-          async () => {
-            this.state = value as boolean;
-            await this.processOnSetOn(this.state, revert);
-          },
-          revert
-        );
+        this.processOnSet(async () => {
+          this.state = value as boolean;
+          await this.processOnSetOn(this.state, revert);
+        }, revert);
       });
 
     this.rotationSpeedCharacteristic = this.addCharacteristic(this.platform.Characteristic.RotationSpeed)
       .onGet(() => this.processOnGet(this.rotationSpeedPercents))
       .onSet(percents => {
+        this.processOnSetVerify(this.platform.Characteristic.RotationSpeed.name);
         const prevRotationSpeed = this.rotationSpeed;
         const revert = () => this.updateRotationSpeed(prevRotationSpeed);
-        this.processOnSet(
-          this.platform.Characteristic.RotationSpeed.name,
-          async () => {
-            this.rotationSpeedPercents = percents as number;
-            this.rotationSpeed = this.covertPercentsToValue(this.rotationSpeedPercents, this.maxRotationSpeed);
-            const newValue = await this.processOnSetRotationSpeed(this.rotationSpeed, revert);
-            if (this.rotationSpeed !== newValue) {
-              this.rotationSpeed = newValue;
-              this.setRotationSpeed(this.rotationSpeed);
-            }
-          },
-          revert
-        );
+        this.processOnSet(async () => {
+          this.rotationSpeedPercents = percents as number;
+          this.rotationSpeed = this.covertPercentsToValue(this.rotationSpeedPercents, this.maxRotationSpeed);
+          await this.processOnSetRotationSpeed(this.rotationSpeed, revert);
+        }, revert);
       });
 
     return [onCharacteristic, this.rotationSpeedCharacteristic];
@@ -75,7 +65,7 @@ export abstract class FanServiceBase extends ServiceBase {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected processOnSetRotationSpeed(value: number, revert: () => void): Promise<number> {
-    return Promise.resolve(value);
+  protected processOnSetRotationSpeed(value: number, revert: () => void): Promise<void> {
+    return Promise.resolve();
   }
 }

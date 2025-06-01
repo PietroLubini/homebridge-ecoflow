@@ -54,15 +54,12 @@ export abstract class OutletServiceBase extends ServiceBase {
       .setPropsPerms(this.onCharacteristicPermsType)
       .onGet(() => this.processOnGet(this.state))
       .onSet((value: CharacteristicValue) => {
+        this.processOnSetVerify(this.platform.Characteristic.On.name);
         const revert = () => this.updateState(!value);
-        this.processOnSet(
-          this.platform.Characteristic.On.name,
-          async () => {
-            this.state = value as boolean;
-            await this.processOnSetOn(this.state, revert);
-          },
-          revert
-        );
+        this.processOnSet(async () => {
+          this.state = value as boolean;
+          await this.processOnSetOn(this.state, revert);
+        }, revert);
       });
 
     const characteristics = [
