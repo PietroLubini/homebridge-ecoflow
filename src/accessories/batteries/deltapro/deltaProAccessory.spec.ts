@@ -21,7 +21,7 @@ import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 jest.mock('@ecoflow/services/batteryStatusService');
-jest.mock('@ecoflow/services/outletBatteryReadOnlyService');
+jest.mock('@ecoflow/services/outletReadOnlyService');
 jest.mock('@ecoflow/accessories/batteries/deltapro/services/outletAcService');
 jest.mock('@ecoflow/accessories/batteries/deltapro/services/outletCarService');
 jest.mock('@ecoflow/accessories/batteries/deltapro/services/switchXboostService');
@@ -47,7 +47,7 @@ describe('DeltaProAccessory', () => {
       Name: 'BatteryStatusService',
     },
     {
-      Name: 'OutletUsbService',
+      Name: 'OutletReadOnlyService',
     },
     {
       Name: 'OutletAcService',
@@ -96,10 +96,7 @@ describe('DeltaProAccessory', () => {
       mock.updateBatteryLevel.mockReset();
       mock.updateChargingState.mockReset();
     });
-    outletUsbServiceMock = initOutletService(
-      OutletReadOnlyService,
-      new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'USB', accessory.config.battery?.additionalCharacteristics)
-    );
+    outletUsbServiceMock = initOutletService(OutletReadOnlyService, new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'USB'));
     outletAcServiceMock = initOutletService(OutletAcService, new OutletAcService(accessory, batteryStatusProviderMock));
     outletCarServiceMock = initOutletService(OutletCarService, new OutletCarService(accessory, batteryStatusProviderMock));
     accessoryInformationServiceMock = initService(AccessoryInformationService, new AccessoryInformationService(accessory));

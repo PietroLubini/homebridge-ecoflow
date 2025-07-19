@@ -1,23 +1,13 @@
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { GlacierAllQuotaData, TemperatureType } from '@ecoflow/accessories/glacier/interfaces/glacierHttpApiContracts';
-import {
-  GlacierMqttSetModuleType,
-  GlacierMqttSetOperateType,
-} from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
+import { GlacierMqttSetModuleType, GlacierMqttSetOperateType } from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
 import { ThermostatFridgeDualRightZoneService } from '@ecoflow/accessories/glacier/services/thermostatFridgeDualRightZoneService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
-import {
-  TargetHeatingCoolingStateType,
-  TemperatureDisplayUnitsType,
-} from '@ecoflow/characteristics/characteristicContracts';
+import { TemperatureDisplayUnitsType } from '@ecoflow/characteristics/characteristicContracts';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
-import { Characteristic as HapCharacteristic, Service as HapService, HAPStatus, HapStatusError } from 'hap-nodejs';
+import { Characteristic as HapCharacteristic, Service as HapService, Perms } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
-
-enum HAPStatusMock {
-  READ_ONLY_CHARACTERISTIC = -70404,
-}
 
 describe('ThermostatFridgeDualRightZoneService', () => {
   let service: ThermostatFridgeDualRightZoneService;
@@ -30,8 +20,6 @@ describe('ThermostatFridgeDualRightZoneService', () => {
 
   const hapMock = {
     Characteristic: HapCharacteristic,
-    HapStatusError: HapStatusError,
-    HAPStatus: HAPStatusMock,
   } as unknown as HAP;
 
   beforeEach(() => {
@@ -78,9 +66,7 @@ describe('ThermostatFridgeDualRightZoneService', () => {
     });
 
     it('should not allow to set Target State value', () => {
-      const actual = characteristic.setValue(TargetHeatingCoolingStateType.Cool);
-
-      expect(actual.statusCode).toBe(HAPStatus.READ_ONLY_CHARACTERISTIC);
+      expect(characteristic.props.perms).not.toContain(Perms.PAIRED_WRITE);
     });
   });
 
@@ -136,9 +122,7 @@ describe('ThermostatFridgeDualRightZoneService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(TemperatureDisplayUnitsType.Fahrenheit);
-      expect(logMock.debug.mock.calls).toEqual([
-        ['Dual Right Zone Temperature Display Units ->', TemperatureDisplayUnitsType.Fahrenheit],
-      ]);
+      expect(logMock.debug.mock.calls).toEqual([['Dual Right Zone Temperature Display Units ->', TemperatureDisplayUnitsType.Fahrenheit]]);
     });
   });
 

@@ -72,13 +72,13 @@ export class MockMqttClient extends MqttClient {
   }
 
   private emitStatus(): void {
-    // if (this.simulator) {
-    //   this.subscriptionTopics
-    //     .filter(topic => topic.endsWith('status'))
-    //     .forEach(topic => {
-    //       this.emitMessage(topic, this.simulator!.generateStatus());
-    //     });
-    // }
+    if (this.simulator) {
+      this.subscriptionTopics
+        .filter(topic => topic.endsWith('status'))
+        .forEach(topic => {
+          this.emitMessage(topic, this.simulator!.generateStatus());
+        });
+    }
   }
 
   private emitMessage(topic: string, message: object): void {

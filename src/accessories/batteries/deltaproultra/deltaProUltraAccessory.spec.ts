@@ -21,7 +21,7 @@ import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
 jest.mock('@ecoflow/services/batteryStatusService');
-jest.mock('@ecoflow/services/outletBatteryReadOnlyService');
+jest.mock('@ecoflow/services/outletReadOnlyService');
 jest.mock('@ecoflow/accessories/batteries/deltaproultra/services/outletUsbService');
 jest.mock('@ecoflow/accessories/batteries/deltaproultra/services/switchXboostService');
 jest.mock('@ecoflow/services/accessoryInformationService');
@@ -48,7 +48,7 @@ describe('DeltaProUltraAccessory', () => {
       Name: 'OutletUsbService',
     },
     {
-      Name: 'OutletAcService',
+      Name: 'OutletReadOnlyService',
     },
     {
       Name: 'SwitchXboostService',
@@ -91,10 +91,7 @@ describe('DeltaProUltraAccessory', () => {
       mock.updateChargingState.mockReset();
     });
     outletUsbServiceMock = initOutletService(OutletUsbService, new OutletUsbService(accessory, batteryStatusProviderMock));
-    outletAcServiceMock = initOutletService(
-      OutletReadOnlyService,
-      new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'AC', accessory.config.battery?.additionalCharacteristics)
-    );
+    outletAcServiceMock = initOutletService(OutletReadOnlyService, new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'AC'));
     accessoryInformationServiceMock = initService(AccessoryInformationService, new AccessoryInformationService(accessory));
     switchXboostServiceMock = initService(SwitchXboostService, new SwitchXboostService(accessory), mock => {
       mock.updateState.mockReset();

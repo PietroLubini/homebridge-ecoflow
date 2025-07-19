@@ -16,10 +16,6 @@ import {
 } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-enum HAPStatusMock {
-  READ_ONLY_CHARACTERISTIC = -70404,
-}
-
 class MockFanService extends FanServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
     super(ecoFlowAccessory, 6000, 'MOCK');
@@ -44,7 +40,6 @@ describe('FanServiceBase', () => {
   const hapMock = {
     Characteristic: HapCharacteristic,
     HapStatusError: HapStatusError,
-    HAPStatus: HAPStatusMock,
   } as unknown as HAP;
   EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
 

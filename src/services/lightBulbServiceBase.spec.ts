@@ -16,10 +16,6 @@ import {
 } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-enum HAPStatusMock {
-  READ_ONLY_CHARACTERISTIC = -70404,
-}
-
 class MockLightBulbService extends LightBulbServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
     super(ecoFlowAccessory, 1023, 'MOCK');
@@ -42,7 +38,6 @@ describe('LightBulbServiceBase', () => {
   const hapMock = {
     Characteristic: HapCharacteristic,
     HapStatusError: HapStatusError,
-    HAPStatus: HAPStatusMock,
   } as unknown as HAP;
   EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
 
@@ -284,18 +279,14 @@ describe('LightBulbServiceBase', () => {
         it('should throw an error when setting On value but device is offline', () => {
           service.updateReachability(false);
 
-          expect(() => handlerOnSet(true, undefined)).toThrow(
-            new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE)
-          );
+          expect(() => handlerOnSet(true, undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
         });
 
         it('should throw an error when setting On value but service is disabled', () => {
           service.updateEnabled(false);
 
           expect(() => handlerOnSet(true, undefined)).toThrow(new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC));
-          expect(logMock.warn.mock.calls).toEqual([
-            ['[accessory1 MOCK] Service is disabled. Setting of "On" is disallowed'],
-          ]);
+          expect(logMock.warn.mock.calls).toEqual([['[accessory1 MOCK] Service is disabled. Setting of "On" is disallowed']]);
         });
 
         it('should revert changing of On state when it is failed', () => {
@@ -362,18 +353,14 @@ describe('LightBulbServiceBase', () => {
         it('should throw an error when setting Brightness value but device is offline', () => {
           service.updateReachability(false);
 
-          expect(() => handlerOnSet(23, undefined)).toThrow(
-            new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE)
-          );
+          expect(() => handlerOnSet(23, undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
         });
 
         it('should throw an error when setting on value but service is disabled', () => {
           service.updateEnabled(false);
 
           expect(() => handlerOnSet(23, undefined)).toThrow(new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC));
-          expect(logMock.warn.mock.calls).toEqual([
-            ['[accessory1 MOCK] Service is disabled. Setting of "Brightness" is disallowed'],
-          ]);
+          expect(logMock.warn.mock.calls).toEqual([['[accessory1 MOCK] Service is disabled. Setting of "Brightness" is disallowed']]);
         });
 
         it('should revert changing of Brightness when sending Set command to device is failed', () => {

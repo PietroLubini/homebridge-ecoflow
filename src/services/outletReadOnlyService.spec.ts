@@ -8,12 +8,8 @@ import {
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { OutletReadOnlyService } from '@ecoflow/services/outletReadOnlyService';
-import { Characteristic as HapCharacteristic, Service as HapService, HAPStatus, HapStatusError } from 'hap-nodejs';
+import { Characteristic as HapCharacteristic, Service as HapService, Perms } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
-
-enum HAPStatusMock {
-  READ_ONLY_CHARACTERISTIC = -70404,
-}
 
 describe('OutletReadOnlyService', () => {
   let service: OutletReadOnlyService;
@@ -27,8 +23,6 @@ describe('OutletReadOnlyService', () => {
 
   const hapMock = {
     Characteristic: HapCharacteristic,
-    HapStatusError: HapStatusError,
-    HAPStatus: HAPStatusMock,
   } as unknown as HAP;
   EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
 
@@ -209,9 +203,7 @@ describe('OutletReadOnlyService', () => {
     });
 
     it('should not allow to set ON value', () => {
-      const actual = characteristic.setValue(true);
-
-      expect(actual.statusCode).toBe(HAPStatus.READ_ONLY_CHARACTERISTIC);
+      expect(characteristic.props.perms).not.toContain(Perms.PAIRED_WRITE);
     });
   });
 });
