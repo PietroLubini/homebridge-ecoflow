@@ -34,6 +34,7 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 - [Delta Pro](#delta-pro)
 - [Delta Pro 3](#delta-pro-3)
 - [Delta Pro Ultra](#delta-pro-ultra)
+- [Discovery](#discovery)
 - [Glacier](#glacier)
 - [PowerOcean](#powerocean)
 - [PowerStream Micro-inverter](#powerstream-micro-inverter)
@@ -360,6 +361,45 @@ The following additional characteristics is available:
 }
 ```
 
+### Discovery
+
+Type of device that helps to discover whether support for device that is not listed in [Ecoflow IoT Developer Platform](https://developer-eu.ecoflow.com/us/document/introduction) documentation could be added or not.
+
+#### Steps
+
+- Configure new device in UI with parameters:
+  ```json
+  {
+    "name": "Test",
+    "model": "Discovery",
+    "serialNumber": "serial number of your device to be discovered",
+    "accessKey": "your access key",
+    "secretKey": "your secret key"
+  }
+  ```
+- Save configuration and restart homebridge / child bridge
+- Note current time and change parameter inside EcoFlow App
+- Repeat previous step for all parameters which support is expected to be added to the plugin
+- Attach homebridge log and description of "time - performed action in EcoFlow App" to an issue in GitHub
+
+#### Services
+
+No services
+
+#### Configuration
+
+```json
+{
+  ...
+  "devices": [
+    {
+      ...
+      "model": "Discovery"
+    }
+  ],
+}
+```
+
 ### Glacier
 
 > Not Activated (no testing is performed)
@@ -421,6 +461,8 @@ The following additional characteristics is available:
 ```
 
 ### PowerOcean
+
+> Not Activated (no testing is performed)
 
 #### Services
 

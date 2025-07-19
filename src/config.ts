@@ -11,6 +11,7 @@ export enum DeviceModel {
   // DeltaPro = 'Delta Pro',
   DeltaPro3 = 'Delta Pro 3',
   // DeltaProUltra = 'Delta Pro Ultra',
+  Discovery = 'Discovery',
   PowerStream = 'PowerStream',
   // PowerOcean = 'PowerOcean',
   SmartPlug = 'Smart Plug',
