@@ -39,6 +39,7 @@ The goal is to add HomeKit support to EcoFlow devices and make them fully contro
 - [PowerOcean](#powerocean)
 - [PowerStream Micro-inverter](#powerstream-micro-inverter)
 - [Smart Plug](#smart-plug)
+- [Wave Air Conditioner](#wave-air-conditioner)
 
 For a full list of devices that could be potentially added check [here](https://developer-eu.ecoflow.com/us/document/introduction)
 
@@ -633,6 +634,65 @@ The following additional characteristics is available:
           "Output Consumption, W",
           "Output Voltage, V",
           "Output Current, A"
+        ]
+      }
+    }
+  ],
+}
+```
+
+### Wave Air Conditioner
+
+#### Services
+
+| EcoFlow Parameter          | Service    | Characteristic            | Standard | Permission                                                                               |
+| -------------------------- | ---------- | ------------------------- | -------- | ---------------------------------------------------------------------------------------- |
+| Battery                    | Outlet BAT | On                        | ✅       | Read                                                                                     |
+| Battery Discharging        | Outlet BAT | OutletInUse               | ✅       | Read                                                                                     |
+| Battery Level              | Outlet BAT | Battery Level, %          | 🔲       | Read                                                                                     |
+| Battery Charging           | Outlet BAT | Input Consumption, W      | 🔲       | Read                                                                                     |
+| Battery Discharging        | Outlet BAT | Output Consumption, W     | 🔲       | Read                                                                                     |
+| Battery Charging State     | Outlet BAT | ChargingState, Yes/No     | 🔲       | Read                                                                                     |
+| Battery Level              | Outlet BAT | StatusLowBattery, Yes/No  | 🔲       | Read                                                                                     |
+| BatteryInput               | Outlet BAT | Input Consumption, W      | 🔲       | Read                                                                                     |
+| Battery Output             | Outlet BAT | Output Consumption, W     | 🔲       | Read                                                                                     |
+| Battery Voltage            | Outlet BAT | Output Voltage, V         | 🔲       | Read                                                                                     |
+| Battery Current            | Outlet BAT | Output Current, V         | 🔲       | Read                                                                                     |
+| Current Temperature        | Thermostat | CurrentTemperature        | ✅       | Read                                                                                     |
+| Target Temperature         | Thermostat | TargetTemperature         | ✅       | Read/write                                                                               |
+| Device Mode                | Thermostat | TargetHeatingCoolingState | ✅       | Read                                                                                     |
+| Temperature Display Units  | Thermostat | TemperatureDisplayUnits   | ✅       | Read/write                                                                               |
+| Device OFF/Device Mode Fan | Fan        | On                        | ✅       | Read / write (ON: Device Mode is Fan; OFF: Device is OFF or Device Mode is Cool or Heat) |
+| Fan Mode                   | Fan        | RotationSpeed             | ✅       | Read/write (>33% - Low; between 33% and 66% - Medium; > 66% - High)                      |
+
+#### Configuration
+
+The following additional characteristics is available:
+
+- Battery Level, %
+- Input Consumption, W
+- Output Consumption, W
+- Output Voltage, V
+- Output Current, A
+- Charging State
+- Status Low Battery
+
+```json
+{
+  ...
+  "devices": [
+    {
+      ...
+      "model": "Wave",
+      "battery": {
+        "additionalCharacteristics": [
+          "Battery Level, %",
+          "Input Consumption, W",
+          "Output Consumption, W",
+          "Output Voltage, V",
+          "Output Current, A",
+          "Charging State",
+          "Status Low Battery"
         ]
       }
     }
