@@ -1,16 +1,16 @@
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
-import { PowerStreamMqttSetCmdCodeType } from '@ecoflow/accessories/powerstream/interfaces/powerStreamMqttApiContracts';
-import { PowerDemandService } from '@ecoflow/accessories/powerstream/services/powerDemandService';
+import { WaveAllQuotaData, WaveFanSpeedType, WaveMainModeType, WavePowerModeType } from '@ecoflow/accessories/wave/interfaces/waveHttpApiContracts';
+import { WaveMqttSetModuleType, WaveMqttSetOperateType } from '@ecoflow/accessories/wave/interfaces/waveMqttApiContracts';
+import { FanModeService } from '@ecoflow/accessories/wave/services/fanModeService';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-describe('PowerDemandService', () => {
-  let service: PowerDemandService;
-  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
+describe('FanModeService', () => {
+  let service: FanModeService;
+  let ecoFlowAccessoryMock: jest.Mocked<EcoFlowAccessoryWithQuotaBase<WaveAllQuotaData>>;
   let logMock: jest.Mocked<Logging>;
   let platformMock: jest.Mocked<EcoFlowHomebridgePlatform>;
   let accessoryMock: jest.Mocked<PlatformAccessory>;
@@ -52,8 +52,8 @@ describe('PowerDemandService', () => {
       httpApiManager: httpApiManagerMock,
       quota: {},
       sendSetCommand: jest.fn(),
-    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<PowerStreamAllQuotaData>>;
-    service = new PowerDemandService(ecoFlowAccessoryMock, 8000);
+    } as unknown as jest.Mocked<EcoFlowAccessoryWithQuotaBase<WaveAllQuotaData>>;
+    service = new FanModeService(ecoFlowAccessoryMock);
     hapService = new HapService('Accessory Fan Name', HapService.Lightbulb.UUID);
   });
 
@@ -89,11 +89,11 @@ describe('PowerDemandService', () => {
       const actual = characteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug).toHaveBeenCalledWith('Power Demand State ->', true);
+      expect(logMock.debug).toHaveBeenCalledWith('Fan Mode State ->', true);
     });
   });
 
-  describe('updatePowerDemand', () => {
+  describe('updatePositionedRotationSpeed', () => {
     let characteristic: Characteristic;
 
     beforeEach(() => {
@@ -102,44 +102,31 @@ describe('PowerDemandService', () => {
       characteristic = service.service.getCharacteristic(HapCharacteristic.RotationSpeed);
     });
 
-    it('should set 100% power demand when maximum value is set', () => {
-      service.updateRotationSpeed(8000);
+    it('should set 100% rotation speed when Fan Mode is set to High', () => {
+      service.updatePositionedRotationSpeed(WaveFanSpeedType.High);
 
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug).toHaveBeenCalledWith('Power Demand RotationSpeed ->', 100);
+      expect(logMock.debug).toHaveBeenCalledWith('Fan Mode RotationSpeed ->', 100);
     });
 
-    it('should set 0% power demand when minimum value is set', () => {
-      service.updateRotationSpeed(0);
+    it('should set 67% rotation speed when Fan Mode is set to Medium', () => {
+      service.updatePositionedRotationSpeed(WaveFanSpeedType.Medium);
 
       const actual = characteristic.value;
 
-      expect(actual).toEqual(0);
-      expect(logMock.debug).toHaveBeenCalledWith('Power Demand RotationSpeed ->', 0);
+      expect(actual).toEqual(67);
+      expect(logMock.debug).toHaveBeenCalledWith('Fan Mode RotationSpeed ->', 67);
     });
 
-    it('should set power demand when it is requested', () => {
-      service.updateRotationSpeed(2500);
+    it('should set 33% rotation speed when Fan Mode is set to Low', () => {
+      service.updatePositionedRotationSpeed(WaveFanSpeedType.Low);
 
       const actual = characteristic.value;
 
-      expect(actual).toEqual(31);
-      expect(logMock.debug).toHaveBeenCalledWith('Power Demand RotationSpeed ->', 31.25);
-    });
-
-    it('should revert changing of power demand to value set from UI when sending Set command to device is failed', () => {
-      service.updateRotationSpeed(8000);
-      logMock.debug.mockReset();
-
-      characteristic.setValue(20);
-      const revertFunc = ecoFlowAccessoryMock.sendSetCommand.mock.calls[0][1];
-      revertFunc();
-      const actual = characteristic.value;
-
-      expect(actual).toEqual(100);
-      expect(logMock.debug.mock.calls).toEqual([['Power Demand RotationSpeed ->', 100]]);
+      expect(actual).toEqual(33);
+      expect(logMock.debug).toHaveBeenCalledWith('Fan Mode RotationSpeed ->', 33);
     });
   });
 
@@ -151,32 +138,34 @@ describe('PowerDemandService', () => {
       characteristic = service.service.getCharacteristic(HapCharacteristic.On);
     });
 
-    it('should send Set command with max demand value to device when On value was changed to true', () => {
+    it('should send Set command with main mode set to Fan to device when On value was changed to true', () => {
       characteristic.setValue(true);
 
       expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
         {
           id: 0,
           version: '',
-          cmdCode: PowerStreamMqttSetCmdCodeType.PowerDemand,
+          moduleType: WaveMqttSetModuleType.Default,
+          operateType: WaveMqttSetOperateType.MainMode,
           params: {
-            permanentWatts: 8000,
+            mainMode: WaveMainModeType.Fan,
           },
         },
         expect.any(Function)
       );
     });
 
-    it('should send Set command with min demand value to device when On value was changed to false', () => {
+    it('should send Set command with powerMode set to Off to device when On value was changed to false', () => {
       characteristic.setValue(false);
 
       expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
         {
           id: 0,
           version: '',
-          cmdCode: PowerStreamMqttSetCmdCodeType.PowerDemand,
+          moduleType: WaveMqttSetModuleType.Default,
+          operateType: WaveMqttSetOperateType.PowerMode,
           params: {
-            permanentWatts: 0,
+            powerMode: WavePowerModeType.Off,
           },
         },
         expect.any(Function)
@@ -192,11 +181,11 @@ describe('PowerDemandService', () => {
       const actual = characteristic.value;
 
       expect(actual).toBeTruthy();
-      expect(logMock.debug.mock.calls).toEqual([['Power Demand RotationSpeed ->', 0]]);
+      expect(logMock.debug.mock.calls).toEqual([['Fan Mode State ->', true]]);
     });
   });
 
-  describe('processOnSetRotationSpeed', () => {
+  describe('processOnSetPositionedRotationSpeed', () => {
     let characteristic: Characteristic;
     beforeEach(() => {
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
@@ -204,23 +193,58 @@ describe('PowerDemandService', () => {
       characteristic = service.service.getCharacteristic(HapCharacteristic.RotationSpeed);
     });
 
-    it('should send Set command to device when Power Demand value was changed', () => {
-      characteristic.setValue(30);
+    it('should send Set command with fanValue set to Low to device when Fan Mode value was changed to 33', () => {
+      characteristic.setValue(33);
 
       expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
         {
           id: 0,
           version: '',
-          cmdCode: PowerStreamMqttSetCmdCodeType.PowerDemand,
+          moduleType: WaveMqttSetModuleType.Default,
+          operateType: WaveMqttSetOperateType.FanSpeedMode,
           params: {
-            permanentWatts: 2400,
+            fanValue: WaveFanSpeedType.Low,
           },
         },
         expect.any(Function)
       );
     });
 
-    it('should revert changing of Power Demand when sending Set command to device is failed', () => {
+    it('should send Set command with fanValue set to Medium to device when Fan Mode value was changed to 67', () => {
+      characteristic.setValue(67);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          moduleType: WaveMqttSetModuleType.Default,
+          operateType: WaveMqttSetOperateType.FanSpeedMode,
+          params: {
+            fanValue: WaveFanSpeedType.Medium,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('should send Set command with fanValue set to High to device when Fan Mode value was changed to 100', () => {
+      characteristic.setValue(100);
+
+      expect(ecoFlowAccessoryMock.sendSetCommand).toHaveBeenCalledWith(
+        {
+          id: 0,
+          version: '',
+          moduleType: WaveMqttSetModuleType.Default,
+          operateType: WaveMqttSetOperateType.FanSpeedMode,
+          params: {
+            fanValue: WaveFanSpeedType.High,
+          },
+        },
+        expect.any(Function)
+      );
+    });
+
+    it('should revert changing of Fan Mode when sending Set command to device is failed', () => {
       characteristic.setValue(100);
       ecoFlowAccessoryMock.sendSetCommand.mockReset();
       logMock.debug.mockReset();
@@ -231,7 +255,7 @@ describe('PowerDemandService', () => {
       const actual = characteristic.value;
 
       expect(actual).toEqual(100);
-      expect(logMock.debug.mock.calls).toEqual([['Power Demand RotationSpeed ->', 100]]);
+      expect(logMock.debug.mock.calls).toEqual([['Fan Mode RotationSpeed ->', 100]]);
     });
   });
 });

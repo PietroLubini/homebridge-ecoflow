@@ -17,8 +17,8 @@ export abstract class FanPositionedServiceBase<TPositionType, TPositionTypeObj e
     super.updateRotationSpeed(this.covertFromPositionedValue(value));
   }
 
-  public updateRotationSpeed(): void {
-    this.log.warn('Use updatePositionedRotationSpeed method instead of updateRotationSpeed. Ignoring call.');
+  public updateRotationSpeed(value: number): void {
+    super.updateRotationSpeed(this.covertFromPositionedValue(this.covertToPositionedValue(value)));
   }
 
   protected override async processOnSetRotationSpeed(value: number, revert: () => void): Promise<void> {
@@ -30,11 +30,11 @@ export abstract class FanPositionedServiceBase<TPositionType, TPositionTypeObj e
 
   private covertToPositionedValue(value: number): TPositionType {
     const pos = Math.floor(value / this.positionLength);
-    return this.positionValues[pos];
+    return this.positionValues[Math.max(0, pos - 1)];
   }
 
   private covertFromPositionedValue(value: TPositionType): number {
     const pos = value as unknown as number;
-    return Math.round(pos * this.positionLength);
+    return Math.round((pos + 1) * this.positionLength);
   }
 }

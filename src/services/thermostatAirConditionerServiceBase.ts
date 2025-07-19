@@ -81,15 +81,23 @@ export abstract class ThermostatAirConditionerServiceBase extends ServiceBase {
   }
 
   private addCurrentTemperatureCharacteristic(): Characteristic {
-    const characteristic = this.addCharacteristic(this.platform.Characteristic.CurrentTemperature).onGet(() =>
-      this.processOnGet(this.currentTemperature)
-    );
+    const characteristic = this.addCharacteristic(this.platform.Characteristic.CurrentTemperature)
+      .setProps({
+        minValue: this.minTemperatureCelsius,
+        maxValue: this.maxTemperatureCelsius,
+        minStep: 0.1,
+      })
+      .onGet(() => this.processOnGet(this.currentTemperature));
     return characteristic;
   }
 
   private addTargetTemperatureCharacteristic(): Characteristic {
     const characteristic = this.addCharacteristic(this.platform.Characteristic.TargetTemperature)
-      .setProps({ minStep: 0.1 })
+      .setProps({
+        minValue: this.minTemperatureCelsius,
+        maxValue: this.maxTemperatureCelsius,
+        minStep: 0.1,
+      })
       .onGet(() => this.processOnGet(this.targetTemperature))
       .onSet((value: CharacteristicValue) => {
         this.processOnSetVerify(this.platform.Characteristic.TargetTemperature.name);
