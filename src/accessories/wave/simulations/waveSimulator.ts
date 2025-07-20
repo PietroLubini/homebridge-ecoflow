@@ -11,7 +11,7 @@ import { TemperatureDisplayUnitsType } from '@ecoflow/characteristics/characteri
 
 export class WaveSimulator extends SimulatorTyped<WaveMqttSetMessage> {
   public override generateQuota(): object {
-    const quotaType = 34; // this.getRandomNumber(0, 100);
+    const quotaType = this.getRandomNumber(0, 100);
     if (quotaType < 25) {
       const quotaBmsStatus: WaveMqttQuotaMessageWithParams<BmsStatus> = {
         typeCode: WaveMqttMessageTypeCodeType.BMS,
@@ -28,8 +28,8 @@ export class WaveSimulator extends SimulatorTyped<WaveMqttSetMessage> {
           pdMainMode: this.getRandomInt(0, 2),
           pdTempSys: this.getRandomBoolean() ? TemperatureDisplayUnitsType.Celsius : TemperatureDisplayUnitsType.Fahrenheit,
           setFanVal: this.getRandomInt(0, 2),
-          //lcdStatus: this.getRandomInt(0, 1),
-          //waterValue: this.getRandomInt(0, 2),
+          lcdStatus: this.getRandomInt(0, 1),
+          waterValue: this.getRandomInt(0, 2),
           powerSts: this.getRandomBoolean() ? WavePowerModeType.On : WavePowerModeType.Off,
           setTempCel: this.getRandomNumber(16, 30),
           setTempfah: this.getRandomNumber(60.8, 86),

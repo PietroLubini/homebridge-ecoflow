@@ -158,6 +158,12 @@ export class WaveAccessory extends EcoFlowAccessoryWithQuotaBase<WaveAllQuotaDat
   }
 
   private updatePdValues(params: PdStatusAnalysisPd): void {
+    this.updateAirConditionerModeValues(params);
+    this.updateFanModeValues(params);
+    this.updateAirConditionerStateValues(params);
+  }
+
+  private updateAirConditionerModeValues(params: PdStatusAnalysisPd): void {
     if (params.mainMode !== undefined && params.powerMode !== undefined) {
       if (params.powerMode === WavePowerModeType.Off) {
         this.thermostatAirConditionerService.updateTargetState(TargetHeatingCoolingStateType.Off);
@@ -172,10 +178,15 @@ export class WaveAccessory extends EcoFlowAccessoryWithQuotaBase<WaveAllQuotaDat
         this.fanModeService.updateState(false);
       }
     }
+  }
 
+  private updateFanModeValues(params: PdStatusAnalysisPd): void {
     if (params.fanValue !== undefined) {
       this.fanModeService.updatePositionedRotationSpeed(params.fanValue);
     }
+  }
+
+  private updateAirConditionerStateValues(params: PdStatusAnalysisPd): void {
     if (params.tempSys !== undefined) {
       this.thermostatAirConditionerService.updateTemperatureDisplayUnits(params.tempSys);
     }
