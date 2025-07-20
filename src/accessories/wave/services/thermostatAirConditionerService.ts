@@ -53,8 +53,6 @@ export class ThermostatAirConditionerService extends ThermostatAirConditionerSer
 
   private convertCoolingHeatingStateToMainMode(value: TargetHeatingCoolingStateType): WaveMainModeType {
     switch (value) {
-      case TargetHeatingCoolingStateType.Cool:
-        return WaveMainModeType.Cool;
       case TargetHeatingCoolingStateType.Heat:
         return WaveMainModeType.Heat;
       case TargetHeatingCoolingStateType.Auto:

@@ -3,6 +3,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { AdditionalOutletCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
+import { sleep } from '@ecoflow/helpers/tests/sleep';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 import {
@@ -442,6 +443,29 @@ describe('OutletServiceBase', () => {
 
           expect(actual).toBeTruthy();
           expect(logMock.debug.mock.calls).toEqual([['MOCK State ->', true]]);
+        });
+
+        it('should revert changing of On state when it is failed with error', async () => {
+          accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+          service.initialize();
+          const characteristic = service.service.getCharacteristic(HapCharacteristic.On);
+          characteristic.setValue(true);
+          logMock.debug.mockReset();
+          const processOnSetMock = jest.fn();
+          service.processOnSetOn = processOnSetMock;
+          const error = new Error('Failed to set On');
+          processOnSetMock.mockImplementationOnce(() => {
+            throw error;
+          });
+
+          characteristic.setValue(false);
+          await sleep(500);
+
+          const actual = characteristic.value;
+
+          expect(actual).toBeTruthy();
+          expect(logMock.debug.mock.calls).toEqual([['MOCK State ->', true]]);
+          expect(logMock.warn.mock.calls).toEqual([['Failed to process onSet. Reverting value...', error]]);
         });
       });
     });

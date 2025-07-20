@@ -61,11 +61,13 @@ export abstract class LightBulbServiceBase extends ServiceBase {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected processOnSetOn(value: boolean, revert: () => void): Promise<void> {
+    /* istanbul ignore next */
     return Promise.resolve();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected processOnSetBrightness(value: number, revert: () => void): Promise<void> {
+    /* istanbul ignore next */
     return Promise.resolve();
   }
 }

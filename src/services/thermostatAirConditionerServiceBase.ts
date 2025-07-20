@@ -67,16 +67,19 @@ export abstract class ThermostatAirConditionerServiceBase extends ServiceBase {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected processOnSetTargetTemperature(value: number, revert: () => void): Promise<void> {
+    /* istanbul ignore next */
     return Promise.resolve();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected processOnSetTargetState(value: TargetHeatingCoolingStateType, revert: () => void): Promise<void> {
+    /* istanbul ignore next */
     return Promise.resolve();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected processOnSetTemperatureDisplayUnits(value: TemperatureDisplayUnitsType, revert: () => void): Promise<void> {
+    /* istanbul ignore next */
     return Promise.resolve();
   }
 

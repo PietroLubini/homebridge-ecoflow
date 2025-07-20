@@ -782,12 +782,30 @@ describe('WaveAccessory', () => {
 
           await accessory.initializeDefaultValues();
 
-          expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
-          expect(outletBatteryServiceMock.updateChargingState).toHaveBeenCalledWith(true);
-          expect(outletBatteryServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.2);
-          expect(outletBatteryServiceMock.updateOutputConsumption).toHaveBeenCalledWith(2.3);
-          expect(outletBatteryServiceMock.updateOutputCurrent).toHaveBeenCalledWith(2.1);
-          expect(outletBatteryServiceMock.updateOutputVoltage).toHaveBeenCalledWith(2.4);
+          expect(thermostatAirConditionerServiceMock.updateTargetState).toHaveBeenCalledWith(TargetHeatingCoolingStateType.Heat);
+          expect(thermostatAirConditionerServiceMock.updateTemperatureDisplayUnits).toHaveBeenCalledWith(TemperatureDisplayUnitsType.Fahrenheit);
+          expect(fanModeServiceMock.updateState).toHaveBeenCalledWith(false);
+          expect(fanModeServiceMock.updatePositionedRotationSpeed).toHaveBeenCalledWith(WaveFanSpeedType.Medium);
+        });
+
+        it('should update target temperature when quota is received with tempSys=Fahrenheit', async () => {
+          quota.pd.tempSys = TemperatureDisplayUnitsType.Fahrenheit;
+          quota.pd.setTemp = 98.6;
+          httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
+
+          await accessory.initializeDefaultValues();
+
+          expect(thermostatAirConditionerServiceMock.updateTargetTemperature).toHaveBeenCalledWith(37);
+        });
+
+        it('should update target temperature when quota is received with tempSys=Celsius', async () => {
+          quota.pd.tempSys = TemperatureDisplayUnitsType.Celsius;
+          quota.pd.setTemp = 27;
+          httpApiManagerMock.getAllQuotas.mockResolvedValueOnce(quota);
+
+          await accessory.initializeDefaultValues();
+
+          expect(thermostatAirConditionerServiceMock.updateTargetTemperature).toHaveBeenCalledWith(27);
         });
 
         it('should not update Pd-related characteristics when is requested and quotas were not initialized properly for it', async () => {
@@ -795,12 +813,11 @@ describe('WaveAccessory', () => {
 
           await accessory.initializeDefaultValues();
 
-          expect(batteryStatusServiceMock.updateChargingState).not.toHaveBeenCalled();
-          expect(outletBatteryServiceMock.updateChargingState).not.toHaveBeenCalled();
-          expect(outletBatteryServiceMock.updateInputConsumption).not.toHaveBeenCalled();
-          expect(outletBatteryServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
-          expect(outletBatteryServiceMock.updateOutputCurrent).not.toHaveBeenCalled();
-          expect(outletBatteryServiceMock.updateOutputVoltage).not.toHaveBeenCalled();
+          expect(thermostatAirConditionerServiceMock.updateTargetState).not.toHaveBeenCalled();
+          expect(thermostatAirConditionerServiceMock.updateTargetTemperature).not.toHaveBeenCalled();
+          expect(thermostatAirConditionerServiceMock.updateTemperatureDisplayUnits).not.toHaveBeenCalled();
+          expect(fanModeServiceMock.updateState).not.toHaveBeenCalled();
+          expect(fanModeServiceMock.updatePositionedRotationSpeed).not.toHaveBeenCalled();
         });
       });
 
@@ -829,11 +846,12 @@ describe('WaveAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(thermostatAirConditionerServiceMock.updateTargetState).toHaveBeenCalledWith(TargetHeatingCoolingStateType.Heat);
-        expect(thermostatAirConditionerServiceMock.updateTargetTemperature).toHaveBeenCalledWith(37);
-        expect(thermostatAirConditionerServiceMock.updateTemperatureDisplayUnits).toHaveBeenCalledWith(TemperatureDisplayUnitsType.Fahrenheit);
-        expect(fanModeServiceMock.updateState).toHaveBeenCalledWith(false);
-        expect(fanModeServiceMock.updatePositionedRotationSpeed).toHaveBeenCalledWith(WaveFanSpeedType.Medium);
+        expect(batteryStatusServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletBatteryServiceMock.updateChargingState).toHaveBeenCalledWith(true);
+        expect(outletBatteryServiceMock.updateInputConsumption).toHaveBeenCalledWith(2.2);
+        expect(outletBatteryServiceMock.updateOutputConsumption).toHaveBeenCalledWith(2.3);
+        expect(outletBatteryServiceMock.updateOutputCurrent).toHaveBeenCalledWith(2.1);
+        expect(outletBatteryServiceMock.updateOutputVoltage).toHaveBeenCalledWith(2.4);
       });
 
       it('should not update POWER-related characteristics when is requested and quotas were not initialized properly for it', async () => {
@@ -841,11 +859,12 @@ describe('WaveAccessory', () => {
 
         await accessory.initializeDefaultValues();
 
-        expect(thermostatAirConditionerServiceMock.updateTargetState).not.toHaveBeenCalled();
-        expect(thermostatAirConditionerServiceMock.updateTargetTemperature).not.toHaveBeenCalled();
-        expect(thermostatAirConditionerServiceMock.updateTemperatureDisplayUnits).not.toHaveBeenCalled();
-        expect(fanModeServiceMock.updateState).not.toHaveBeenCalled();
-        expect(fanModeServiceMock.updatePositionedRotationSpeed).not.toHaveBeenCalled();
+        expect(batteryStatusServiceMock.updateChargingState).not.toHaveBeenCalled();
+        expect(outletBatteryServiceMock.updateChargingState).not.toHaveBeenCalled();
+        expect(outletBatteryServiceMock.updateInputConsumption).not.toHaveBeenCalled();
+        expect(outletBatteryServiceMock.updateOutputConsumption).not.toHaveBeenCalled();
+        expect(outletBatteryServiceMock.updateOutputCurrent).not.toHaveBeenCalled();
+        expect(outletBatteryServiceMock.updateOutputVoltage).not.toHaveBeenCalled();
       });
     });
   });
