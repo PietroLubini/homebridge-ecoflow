@@ -3,6 +3,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { AdditionalOutletCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
+import { sleep } from '@ecoflow/helpers/tests/sleep';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { OutletServiceBase } from '@ecoflow/services/outletServiceBase';
 import {
@@ -234,9 +235,7 @@ describe('OutletServiceBase', () => {
 
       service.updateOutputConsumption(34.6);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.OutputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.OutputConsumptionWatts).value;
 
       expect(actual).toEqual(35);
       expect(logMock.debug.mock.calls).toEqual([
@@ -251,9 +250,7 @@ describe('OutletServiceBase', () => {
 
       service.updateOutputConsumption(34.6);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.OutputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.OutputConsumptionWatts).value;
 
       expect(actual).toEqual(0);
       expect(logMock.debug.mock.calls).toEqual([['MOCK InUse ->', true]]);
@@ -341,7 +338,7 @@ describe('OutletServiceBase', () => {
   describe('characteristics', () => {
     function createCharacteristicMock(): jest.Mocked<Characteristic> {
       return {
-        setProps: jest.fn(),
+        setPropsPerms: jest.fn(),
         onGet: jest.fn(),
         onSet: jest.fn(),
         updateValue: jest.fn(),
@@ -349,10 +346,10 @@ describe('OutletServiceBase', () => {
     }
 
     function setupCharacteristicMock(characteristicMock: jest.Mocked<Characteristic>): void {
-      characteristicMock.setProps.mockReset();
+      characteristicMock.setPropsPerms.mockReset();
       characteristicMock.onGet.mockReset();
       characteristicMock.onSet.mockReset();
-      characteristicMock.setProps.mockReturnValueOnce(characteristicMock);
+      characteristicMock.setPropsPerms.mockReturnValueOnce(characteristicMock);
       characteristicMock.onGet.mockReturnValueOnce(characteristicMock);
       characteristicMock.onSet.mockReturnValueOnce(characteristicMock);
     }
@@ -419,18 +416,14 @@ describe('OutletServiceBase', () => {
         it('should throw an error when setting On value but device is offline', () => {
           service.updateReachability(false);
 
-          expect(() => handlerOnSet(true, undefined)).toThrow(
-            new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE)
-          );
+          expect(() => handlerOnSet(true, undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
         });
 
         it('should throw an error when setting On value but service is disabled', () => {
           service.updateEnabled(false);
 
           expect(() => handlerOnSet(true, undefined)).toThrow(new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC));
-          expect(logMock.warn.mock.calls).toEqual([
-            ['[accessory1 MOCK] Service is disabled. Setting of "On" is disallowed'],
-          ]);
+          expect(logMock.warn.mock.calls).toEqual([['[accessory1 MOCK] Service is disabled. Setting of "On" is disallowed']]);
         });
 
         it('should revert changing of On state when it is failed', () => {
@@ -450,6 +443,29 @@ describe('OutletServiceBase', () => {
 
           expect(actual).toBeTruthy();
           expect(logMock.debug.mock.calls).toEqual([['MOCK State ->', true]]);
+        });
+
+        it('should revert changing of On state when it is failed with error', async () => {
+          accessoryMock.getServiceById.mockReturnValueOnce(hapService);
+          service.initialize();
+          const characteristic = service.service.getCharacteristic(HapCharacteristic.On);
+          characteristic.setValue(true);
+          logMock.debug.mockReset();
+          const processOnSetMock = jest.fn();
+          service.processOnSetOn = processOnSetMock;
+          const error = new Error('Failed to set On');
+          processOnSetMock.mockImplementationOnce(() => {
+            throw error;
+          });
+
+          characteristic.setValue(false);
+          await sleep(500);
+
+          const actual = characteristic.value;
+
+          expect(actual).toBeTruthy();
+          expect(logMock.debug.mock.calls).toEqual([['MOCK State ->', true]]);
+          expect(logMock.warn.mock.calls).toEqual([['Failed to process onSet. Reverting value...', error]]);
         });
       });
     });

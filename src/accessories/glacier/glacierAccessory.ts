@@ -19,7 +19,6 @@ import {
   GlacierMqttQuotaMessageWithParams,
   IceCubeShapeType,
 } from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
-import { OutletBatteryService } from '@ecoflow/accessories/glacier/services/outletBatteryService';
 import { SwitchDetachIceService } from '@ecoflow/accessories/glacier/services/switchDetachIceService';
 import { SwitchEcoModeService } from '@ecoflow/accessories/glacier/services/switchEcoModeService';
 import { SwitchMakeIceService } from '@ecoflow/accessories/glacier/services/switchMakeIceService';
@@ -35,6 +34,7 @@ import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { BatteryStatusService } from '@ecoflow/services/batteryStatusService';
 import { ContactSensorService } from '@ecoflow/services/contactSensorService';
+import { OutletReadOnlyService } from '@ecoflow/services/outletReadOnlyService';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Logging, PlatformAccessory } from 'homebridge';
 
@@ -45,7 +45,7 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
   private readonly fridgeSingleZoneService: ThermostatFridgeSingleZoneService;
   private readonly switchEcoModeService: SwitchEcoModeService;
   private readonly contactSensorDoorService: ContactSensorService;
-  private readonly outletBatteryService: OutletBatteryService;
+  private readonly outletBatteryService: OutletReadOnlyService;
   private readonly switchMakeIceSmallService: SwitchMakeIceService;
   private readonly switchMakeIceLargeService: SwitchMakeIceService;
   private readonly switchDetachIceService: SwitchDetachIceService;
@@ -66,7 +66,7 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
     this.fridgeSingleZoneService = new ThermostatFridgeSingleZoneService(this);
     this.switchEcoModeService = new SwitchEcoModeService(this);
     this.contactSensorDoorService = new ContactSensorService(this, 'Door');
-    this.outletBatteryService = new OutletBatteryService(this, batteryStatusProvider);
+    this.outletBatteryService = new OutletReadOnlyService(this, batteryStatusProvider, 'Battery', config.battery?.additionalCharacteristics);
     this.switchMakeIceSmallService = new SwitchMakeIceService(this, IceCubeShapeType.Small);
     this.switchMakeIceLargeService = new SwitchMakeIceService(this, IceCubeShapeType.Large);
     this.switchDetachIceService = new SwitchDetachIceService(this);
@@ -222,12 +222,8 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
 
   private updateIceMakingValues(params: PdStatusIceMaking): void {
     if (params.iceMkMode !== undefined) {
-      const iceSmallMaking =
-        params.iceMkMode === MakeIceStatusType.SmallInPreparation ||
-        params.iceMkMode === MakeIceStatusType.SmallInProgress;
-      const iceLargeMaking =
-        params.iceMkMode === MakeIceStatusType.LargeInPreparation ||
-        params.iceMkMode === MakeIceStatusType.LargeInProgress;
+      const iceSmallMaking = params.iceMkMode === MakeIceStatusType.SmallInPreparation || params.iceMkMode === MakeIceStatusType.SmallInProgress;
+      const iceLargeMaking = params.iceMkMode === MakeIceStatusType.LargeInPreparation || params.iceMkMode === MakeIceStatusType.LargeInProgress;
 
       this.switchMakeIceSmallService.updateEnabled(iceSmallMaking);
       this.switchMakeIceLargeService.updateEnabled(iceLargeMaking);

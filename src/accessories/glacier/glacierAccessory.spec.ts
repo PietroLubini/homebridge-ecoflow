@@ -1,6 +1,5 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { GlacierAccessory } from '@ecoflow/accessories/glacier/glacierAccessory';
-import { OutletBatteryService } from '@ecoflow/accessories/glacier/services/outletBatteryService';
 import { SwitchDetachIceService } from '@ecoflow/accessories/glacier/services/switchDetachIceService';
 import { SwitchEcoModeService } from '@ecoflow/accessories/glacier/services/switchEcoModeService';
 import { SwitchMakeIceService } from '@ecoflow/accessories/glacier/services/switchMakeIceService';
@@ -40,9 +39,10 @@ import { EnableType, FridgeStateType } from '@ecoflow/characteristics/characteri
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { ContactSensorService } from '@ecoflow/services/contactSensorService';
 import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
+import { OutletReadOnlyService } from '@ecoflow/services/outletReadOnlyService';
 import { SwitchServiceBase } from '@ecoflow/services/switchServiceBase';
 
-jest.mock('@ecoflow/accessories/glacier/services/outletBatteryService');
+jest.mock('@ecoflow/services/outletReadOnlyService');
 jest.mock('@ecoflow/accessories/glacier/services/switchDetachIceService');
 jest.mock('@ecoflow/accessories/glacier/services/switchEcoModeService');
 jest.mock('@ecoflow/accessories/glacier/services/switchMakeIceService');
@@ -64,7 +64,7 @@ describe('GlacierAccessory', () => {
   let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   let batteryStatusServiceMock: jest.Mocked<BatteryStatusService>;
   let contactSensorDoorServiceMock: jest.Mocked<ContactSensorService>;
-  let outletBatteryServiceMock: jest.Mocked<OutletBatteryService>;
+  let outletBatteryServiceMock: jest.Mocked<OutletReadOnlyService>;
   let switchDetachIceServiceMock: jest.Mocked<SwitchDetachIceService>;
   let switchEcoModeServiceMock: jest.Mocked<SwitchEcoModeService>;
   let switchMakeIceSmallServiceMock: jest.Mocked<SwitchMakeIceService>;
@@ -93,7 +93,7 @@ describe('GlacierAccessory', () => {
       Name: 'ContactSensorService',
     },
     {
-      Name: 'OutletBatteryService',
+      Name: 'OutletReadOnlyService',
     },
     {
       Name: 'SwitchMakeIceService',
@@ -118,9 +118,7 @@ describe('GlacierAccessory', () => {
       return serviceMock;
     }
 
-    function createBatteryStatusService<TService extends BatteryStatusService>(
-      service: TService
-    ): jest.Mocked<TService> {
+    function createBatteryStatusService<TService extends BatteryStatusService>(service: TService): jest.Mocked<TService> {
       const serviceMock = service as jest.Mocked<TService>;
       const serviceBaseMock = serviceMock as jest.Mocked<BatteryStatusService>;
       serviceBaseMock.initialize.mockReset();
@@ -130,9 +128,7 @@ describe('GlacierAccessory', () => {
       return serviceMock;
     }
 
-    function createOutletBatteryService<TService extends OutletBatteryServiceBase>(
-      service: TService
-    ): jest.Mocked<TService> {
+    function createOutletBatteryService<TService extends OutletBatteryServiceBase>(service: TService): jest.Mocked<TService> {
       const serviceMock = service as jest.Mocked<TService>;
       const serviceBaseMock = serviceMock as jest.Mocked<OutletBatteryServiceBase>;
       serviceBaseMock.initialize.mockReset();
@@ -148,9 +144,7 @@ describe('GlacierAccessory', () => {
       return serviceMock;
     }
 
-    function createFridgeService<TService extends GlacierThermostatFridgeServiceBase>(
-      service: TService
-    ): jest.Mocked<TService> {
+    function createFridgeService<TService extends GlacierThermostatFridgeServiceBase>(service: TService): jest.Mocked<TService> {
       const serviceMock = service as jest.Mocked<TService>;
       const serviceBaseMock = serviceMock as jest.Mocked<GlacierThermostatFridgeServiceBase>;
       serviceBaseMock.initialize.mockReset();
@@ -174,9 +168,7 @@ describe('GlacierAccessory', () => {
       return serviceMock;
     }
 
-    function createContactSensorService<TService extends ContactSensorService>(
-      service: TService
-    ): jest.Mocked<TService> {
+    function createContactSensorService<TService extends ContactSensorService>(service: TService): jest.Mocked<TService> {
       const serviceMock = service as jest.Mocked<TService>;
       const serviceBaseMock = serviceMock as jest.Mocked<ContactSensorService>;
       serviceBaseMock.initialize.mockReset();
@@ -187,20 +179,14 @@ describe('GlacierAccessory', () => {
     }
 
     batteryStatusProviderMock = {} as jest.Mocked<BatteryStatusProvider>;
-    batteryStatusServiceMock = createBatteryStatusService(
-      new BatteryStatusService(accessory, batteryStatusProviderMock)
-    );
+    batteryStatusServiceMock = createBatteryStatusService(new BatteryStatusService(accessory, batteryStatusProviderMock));
     (BatteryStatusService as unknown as jest.Mock).mockImplementation(() => batteryStatusServiceMock);
 
     fridgeDualLeftZoneServiceMock = createFridgeService(new ThermostatFridgeDualLeftZoneService(accessory));
-    (ThermostatFridgeDualLeftZoneService as unknown as jest.Mock).mockImplementation(
-      () => fridgeDualLeftZoneServiceMock
-    );
+    (ThermostatFridgeDualLeftZoneService as unknown as jest.Mock).mockImplementation(() => fridgeDualLeftZoneServiceMock);
 
     fridgeDualRightZoneServiceMock = createFridgeService(new ThermostatFridgeDualRightZoneService(accessory));
-    (ThermostatFridgeDualRightZoneService as unknown as jest.Mock).mockImplementation(
-      () => fridgeDualRightZoneServiceMock
-    );
+    (ThermostatFridgeDualRightZoneService as unknown as jest.Mock).mockImplementation(() => fridgeDualRightZoneServiceMock);
 
     fridgeSingleZoneServiceMock = createFridgeService(new ThermostatFridgeSingleZoneService(accessory));
     (ThermostatFridgeSingleZoneService as unknown as jest.Mock).mockImplementation(() => fridgeSingleZoneServiceMock);
@@ -213,23 +199,21 @@ describe('GlacierAccessory', () => {
 
     switchMakeIceSmallServiceMock = createSwitchService(new SwitchMakeIceService(accessory, IceCubeShapeType.Small));
     switchMakeIceLargeServiceMock = createSwitchService(new SwitchMakeIceService(accessory, IceCubeShapeType.Large));
-    (SwitchMakeIceService as unknown as jest.Mock).mockImplementation(
-      (_: EcoFlowAccessoryBase, iceCubeShapeType: IceCubeShapeType) => {
-        switch (iceCubeShapeType) {
-          case IceCubeShapeType.Small:
-            return switchMakeIceSmallServiceMock;
-          case IceCubeShapeType.Large:
-            return switchMakeIceLargeServiceMock;
-          default:
-            return undefined;
-        }
+    (SwitchMakeIceService as unknown as jest.Mock).mockImplementation((_: EcoFlowAccessoryBase, iceCubeShapeType: IceCubeShapeType) => {
+      switch (iceCubeShapeType) {
+        case IceCubeShapeType.Small:
+          return switchMakeIceSmallServiceMock;
+        case IceCubeShapeType.Large:
+          return switchMakeIceLargeServiceMock;
+        default:
+          return undefined;
       }
-    );
+    });
 
     outletBatteryServiceMock = createOutletBatteryService(
-      new OutletBatteryService(accessory, batteryStatusProviderMock)
+      new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'Battery', config?.battery?.additionalCharacteristics)
     );
-    (OutletBatteryService as unknown as jest.Mock).mockImplementation(() => outletBatteryServiceMock);
+    (OutletReadOnlyService as unknown as jest.Mock).mockImplementation(() => outletBatteryServiceMock);
 
     contactSensorDoorServiceMock = createContactSensorService(new ContactSensorService(accessory, 'Door'));
     (ContactSensorService as jest.Mock).mockImplementation(() => contactSensorDoorServiceMock);
@@ -254,15 +238,7 @@ describe('GlacierAccessory', () => {
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
-    accessory = new GlacierAccessory(
-      platformMock,
-      accessoryMock,
-      config,
-      logMock,
-      httpApiManagerMock,
-      mqttApiManagerMock,
-      batteryStatusProviderMock
-    );
+    accessory = new GlacierAccessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock, batteryStatusProviderMock);
   });
 
   describe('initialize', () => {
@@ -292,15 +268,7 @@ describe('GlacierAccessory', () => {
           return contactSensorDoorServiceMock;
         });
 
-        new GlacierAccessory(
-          platformMock,
-          accessoryMock,
-          deviceConfig,
-          logMock,
-          httpApiManagerMock,
-          mqttApiManagerMock,
-          batteryStatusProviderMock
-        );
+        new GlacierAccessory(platformMock, accessoryMock, deviceConfig, logMock, httpApiManagerMock, mqttApiManagerMock, batteryStatusProviderMock);
         return actual;
       }
 

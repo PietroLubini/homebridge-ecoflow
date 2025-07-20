@@ -27,24 +27,9 @@ export class PowerOceanAccessory extends EcoFlowAccessoryWithQuotaBase<PowerOcea
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
 
-    this.inverterOutletService = new OutletReadOnlyService(
-      this,
-      batteryStatusProvider,
-      'INV',
-      config.powerOcean?.inverterAdditionalCharacteristics
-    );
-    this.solarOutletService = new OutletReadOnlyService(
-      this,
-      batteryStatusProvider,
-      'PV',
-      config.powerOcean?.pvAdditionalCharacteristics
-    );
-    this.batteryOutletService = new OutletReadOnlyService(
-      this,
-      batteryStatusProvider,
-      'BAT',
-      config.powerOcean?.batteryAdditionalCharacteristics
-    );
+    this.inverterOutletService = new OutletReadOnlyService(this, batteryStatusProvider, 'INV', config.powerOcean?.inverterAdditionalCharacteristics);
+    this.solarOutletService = new OutletReadOnlyService(this, batteryStatusProvider, 'PV', config.powerOcean?.pvAdditionalCharacteristics);
+    this.batteryOutletService = new OutletReadOnlyService(this, batteryStatusProvider, 'BAT', config.powerOcean?.batteryAdditionalCharacteristics);
   }
 
   protected override getServices(): ServiceBase[] {

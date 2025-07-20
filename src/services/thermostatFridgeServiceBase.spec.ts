@@ -22,21 +22,12 @@ import {
 } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-enum HAPStatusMock {
-  READ_ONLY_CHARACTERISTIC = -70404,
-}
-
 class MockThermostatFridgeService extends ThermostatFridgeServiceBase {
   static MaxTemperature = 5;
   static MinTemperature = -20;
 
   constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
-    super(
-      ecoFlowAccessory,
-      MockThermostatFridgeService.MinTemperature,
-      MockThermostatFridgeService.MaxTemperature,
-      'MOCK'
-    );
+    super(ecoFlowAccessory, MockThermostatFridgeService.MinTemperature, MockThermostatFridgeService.MaxTemperature, 'MOCK');
   }
 
   public override async processOnSetTargetTemperature(): Promise<void> {}
@@ -58,7 +49,6 @@ describe('ThermostatFridgeServiceBase', () => {
   const hapMock = {
     Characteristic: HapCharacteristic,
     HapStatusError: HapStatusError,
-    HAPStatus: HAPStatusMock,
   } as unknown as HAP;
   EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
 
@@ -337,6 +327,7 @@ describe('ThermostatFridgeServiceBase', () => {
     function createCharacteristicMock(): jest.Mocked<Characteristic> {
       return {
         setProps: jest.fn(),
+        setPropsPerms: jest.fn(),
         onGet: jest.fn(),
         onSet: jest.fn(),
         updateValue: jest.fn(),
@@ -345,9 +336,11 @@ describe('ThermostatFridgeServiceBase', () => {
 
     function setupCharacteristicMock(characteristicMock: jest.Mocked<Characteristic>): void {
       characteristicMock.setProps.mockReset();
+      characteristicMock.setPropsPerms.mockReset();
       characteristicMock.onGet.mockReset();
       characteristicMock.onSet.mockReset();
       characteristicMock.setProps.mockReturnValueOnce(characteristicMock);
+      characteristicMock.setPropsPerms.mockReturnValueOnce(characteristicMock);
       characteristicMock.onGet.mockReturnValueOnce(characteristicMock);
       characteristicMock.onSet.mockReturnValueOnce(characteristicMock);
     }
@@ -461,9 +454,7 @@ describe('ThermostatFridgeServiceBase', () => {
           service.updateEnabled(false);
 
           expect(() => handlerOnSet(1, undefined)).toThrow(new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC));
-          expect(logMock.warn.mock.calls).toEqual([
-            ['[accessory1 MOCK] Service is disabled. Setting of "TargetTemperature" is disallowed'],
-          ]);
+          expect(logMock.warn.mock.calls).toEqual([['[accessory1 MOCK] Service is disabled. Setting of "TargetTemperature" is disallowed']]);
         });
 
         it('should revert changing of TargetTemperature when sending Set command to device is failed', () => {
@@ -563,12 +554,8 @@ describe('ThermostatFridgeServiceBase', () => {
         it('should throw an error when setting on value but service is disabled', () => {
           service.updateEnabled(false);
 
-          expect(() => handlerOnSet(TargetHeatingCoolingStateType.Cool, undefined)).toThrow(
-            new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC)
-          );
-          expect(logMock.warn.mock.calls).toEqual([
-            ['[accessory1 MOCK] Service is disabled. Setting of "TargetHeatingCoolingState" is disallowed'],
-          ]);
+          expect(() => handlerOnSet(TargetHeatingCoolingStateType.Cool, undefined)).toThrow(new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC));
+          expect(logMock.warn.mock.calls).toEqual([['[accessory1 MOCK] Service is disabled. Setting of "TargetHeatingCoolingState" is disallowed']]);
         });
 
         it('should revert changing of TargetHeatingCoolingState when sending Set command to device is failed', () => {
@@ -647,9 +634,7 @@ describe('ThermostatFridgeServiceBase', () => {
           expect(() => handlerOnSet(TemperatureDisplayUnitsType.Fahrenheit, undefined)).toThrow(
             new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC)
           );
-          expect(logMock.warn.mock.calls).toEqual([
-            ['[accessory1 MOCK] Service is disabled. Setting of "TemperatureDisplayUnits" is disallowed'],
-          ]);
+          expect(logMock.warn.mock.calls).toEqual([['[accessory1 MOCK] Service is disabled. Setting of "TemperatureDisplayUnits" is disallowed']]);
         });
 
         it('should revert changing of TemperatureDisplayUnits when sending Set command to device is failed', () => {
@@ -669,9 +654,7 @@ describe('ThermostatFridgeServiceBase', () => {
           const actual = characteristic.value;
 
           expect(actual).toBe(TemperatureDisplayUnitsType.Fahrenheit);
-          expect(logMock.debug.mock.calls).toEqual([
-            ['MOCK Temperature Display Units ->', TemperatureDisplayUnitsType.Fahrenheit],
-          ]);
+          expect(logMock.debug.mock.calls).toEqual([['MOCK Temperature Display Units ->', TemperatureDisplayUnitsType.Fahrenheit]]);
         });
       });
     });

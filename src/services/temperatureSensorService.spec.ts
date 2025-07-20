@@ -5,17 +5,8 @@ import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteri
 import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/tests/serviceTestHelper';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { TemperatureSensorService } from '@ecoflow/services/temperatureSensorService';
-import {
-  CharacteristicGetHandler,
-  Characteristic as HapCharacteristic,
-  Service as HapService,
-  HapStatusError,
-} from 'hap-nodejs';
+import { CharacteristicGetHandler, Characteristic as HapCharacteristic, Service as HapService, HapStatusError } from 'hap-nodejs';
 import { Characteristic, HAP, HAPStatus, Logging, PlatformAccessory } from 'homebridge';
-
-enum HAPStatusMock {
-  READ_ONLY_CHARACTERISTIC = -70404,
-}
 
 describe('TemperatureSensorService', () => {
   let service: TemperatureSensorService;
@@ -29,7 +20,6 @@ describe('TemperatureSensorService', () => {
   const hapMock = {
     Characteristic: HapCharacteristic,
     HapStatusError: HapStatusError,
-    HAPStatus: HAPStatusMock,
   } as unknown as HAP;
   EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
 
@@ -89,11 +79,7 @@ describe('TemperatureSensorService', () => {
       const actual = service.service;
 
       expect(actual).toEqual(expected);
-      expect(accessoryMock.addService).toHaveBeenCalledWith(
-        HapService.TemperatureSensor,
-        'accessory1',
-        HapService.TemperatureSensor.UUID
-      );
+      expect(accessoryMock.addService).toHaveBeenCalledWith(HapService.TemperatureSensor, 'accessory1', HapService.TemperatureSensor.UUID);
     });
 
     it('should use existing TemperatureSensor service when it is already added to accessory', () => {

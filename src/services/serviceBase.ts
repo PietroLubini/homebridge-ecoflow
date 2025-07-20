@@ -72,18 +72,13 @@ export abstract class ServiceBase {
 
   protected getOrAddService(service: WithUUID<typeof Service>, displayName?: string): Service {
     const result =
-      this.ecoFlowAccessory.accessory.getService(service) ||
-      this.ecoFlowAccessory.accessory.addService(service, displayName, service.UUID);
+      this.ecoFlowAccessory.accessory.getService(service) || this.ecoFlowAccessory.accessory.addService(service, displayName, service.UUID);
     result.displayName = displayName ?? result.displayName;
 
     return result;
   }
 
-  protected getOrAddServiceById(
-    service: WithUUID<typeof Service>,
-    serviceName: string,
-    serviceSubType: string
-  ): Service {
+  protected getOrAddServiceById(service: WithUUID<typeof Service>, serviceName: string, serviceSubType: string): Service {
     const result =
       this.ecoFlowAccessory.accessory.getServiceById(service, serviceSubType) ||
       this.ecoFlowAccessory.accessory.addService(service, serviceName, serviceSubType);
@@ -91,11 +86,7 @@ export abstract class ServiceBase {
     return result;
   }
 
-  protected updateCharacteristic(
-    characteristic: WithUUID<{ new (): Characteristic }>,
-    name: string,
-    value: CharacteristicValue
-  ): void {
+  protected updateCharacteristic(characteristic: WithUUID<{ new (): Characteristic }>, name: string, value: CharacteristicValue): void {
     const newName = this.serviceSubType !== undefined ? `${this.serviceSubType} ${name}` : name;
     this.log.debug(`${newName} ->`, value);
     this.service.getCharacteristic(characteristic).updateValue(value);
@@ -116,10 +107,18 @@ export abstract class ServiceBase {
     return value;
   }
 
-  protected processOnSet(name: string, func: () => void): void {
+  protected processOnSetVerify(name: string): void {
     this.checkIsReachable();
     this.checkIsEnabled(name);
-    func();
+  }
+
+  protected async processOnSet(process: () => Promise<void>, revert: () => void): Promise<void> {
+    try {
+      await process();
+    } catch (error) {
+      this.log.warn('Failed to process onSet. Reverting value...', error);
+      setTimeout(() => revert(), 300);
+    }
   }
 
   private checkIsReachable(): void {

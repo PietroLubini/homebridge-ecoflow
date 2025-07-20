@@ -1,8 +1,5 @@
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import {
-  Heartbeat,
-  PowerStreamAllQuotaData,
-} from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
+import { Heartbeat, PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
 import {
   PowerStreamMqttMessageFuncType,
   PowerStreamMqttMessageType,
@@ -40,29 +37,11 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
   ) {
     super(platform, accessory, config, log, httpApiManager, mqttApiManager);
 
-    this.inverterOutletService = new OutletReadOnlyService(
-      this,
-      batteryStatusProvider,
-      'INV',
-      config.powerStream?.inverterAdditionalCharacteristics
-    );
-    this.solarOutletService = new OutletReadOnlyService(
-      this,
-      batteryStatusProvider,
-      'PV',
-      config.powerStream?.pvAdditionalCharacteristics
-    );
-    this.batteryOutletService = new OutletReadOnlyService(
-      this,
-      batteryStatusProvider,
-      'BAT',
-      config.powerStream?.batteryAdditionalCharacteristics
-    );
+    this.inverterOutletService = new OutletReadOnlyService(this, batteryStatusProvider, 'INV', config.powerStream?.inverterAdditionalCharacteristics);
+    this.solarOutletService = new OutletReadOnlyService(this, batteryStatusProvider, 'PV', config.powerStream?.pvAdditionalCharacteristics);
+    this.batteryOutletService = new OutletReadOnlyService(this, batteryStatusProvider, 'BAT', config.powerStream?.batteryAdditionalCharacteristics);
     this.inverterBrightnessService = new BrightnessService(this, 1023);
-    this.inverterPowerDemandService = new PowerDemandService(
-      this,
-      (config.powerStream?.type ?? PowerStreamConsumptionType.W600) * 10
-    );
+    this.inverterPowerDemandService = new PowerDemandService(this, (config.powerStream?.type ?? PowerStreamConsumptionType.W600) * 10);
   }
 
   protected override getServices(): ServiceBase[] {
@@ -77,10 +56,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
     const powerStreamMessage = message as PowerStreamMqttQuotaMessage;
-    if (
-      powerStreamMessage.cmdFunc === PowerStreamMqttMessageFuncType.Func20 &&
-      powerStreamMessage.cmdId === PowerStreamMqttMessageType.Heartbeat
-    ) {
+    if (powerStreamMessage.cmdFunc === PowerStreamMqttMessageFuncType.Func20 && powerStreamMessage.cmdId === PowerStreamMqttMessageType.Heartbeat) {
       const heartbeat = (message as PowerStreamMqttQuotaMessageWithParams<Heartbeat>).param;
       Object.assign(this.quota['20_1'], heartbeat);
       this.updateHeartbeatValues(heartbeat);

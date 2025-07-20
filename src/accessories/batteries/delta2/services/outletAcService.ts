@@ -12,6 +12,7 @@ import {
   AcXBoostType,
 } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
+import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 
 export class OutletAcService extends Delta2OutletServiceBase {
@@ -20,7 +21,7 @@ export class OutletAcService extends Delta2OutletServiceBase {
     batteryStatusProvider: BatteryStatusProvider,
     private readonly setModuleType: Delta2MqttSetModuleType
   ) {
-    super(ecoFlowAccessory, batteryStatusProvider, 'AC', ecoFlowAccessory.config.battery?.additionalCharacteristics);
+    super(ecoFlowAccessory, batteryStatusProvider, 'AC', CharacteristicPermsType.DEFAULT, ecoFlowAccessory.config.battery?.additionalCharacteristics);
   }
 
   protected override processOnSetOn(value: boolean, revert: () => void): Promise<void> {

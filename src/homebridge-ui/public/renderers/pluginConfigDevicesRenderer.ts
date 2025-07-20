@@ -1,11 +1,5 @@
 import { IContext, IDeviceContext } from '../interfaces/contracts';
-import {
-  IForm,
-  PluginConfigSchema,
-  PluginConfigSchemaDevicesItems,
-  PluginConfigSchemaEnum,
-  PluginDeviceConfig,
-} from '../interfaces/homebridge';
+import { IForm, PluginConfigSchema, PluginConfigSchemaDevicesItems, PluginConfigSchemaEnum, PluginDeviceConfig } from '../interfaces/homebridge';
 import { ComponentRenderer } from './componentRenderer';
 import { PluginConfigRendererBase } from './pluginConfigRendererBase';
 
@@ -30,6 +24,7 @@ export class PluginConfigDevicesRenderer extends PluginConfigRendererBase {
       PowerOcean: ['battery', 'powerStream', 'outlet'],
       'Smart Plug': ['battery', 'powerStream', 'powerOcean'],
       Glacier: ['powerStream', 'powerOcean', 'outlet'],
+      Wave: ['powerStream', 'powerOcean', 'outlet'],
     };
   }
 
@@ -71,13 +66,7 @@ export class PluginConfigDevicesRenderer extends PluginConfigRendererBase {
 
       this.$tabs.append(tabHtml);
 
-      this.renderDeviceTabPanel(
-        context,
-        deviceConfiguration,
-        index,
-        activeIndex,
-        this.$tabs.find(`#deviceTab${index}`)
-      );
+      this.renderDeviceTabPanel(context, deviceConfiguration, index, activeIndex, this.$tabs.find(`#deviceTab${index}`));
     });
 
     this.renderAddNewDeviceTab(tabTemplate, context);
@@ -119,9 +108,7 @@ export class PluginConfigDevicesRenderer extends PluginConfigRendererBase {
   `;
 
     const activeTabPanelClass = index === activeIndex ? 'in show active' : '';
-    const tabPanelHtml = tabPanelTemplate
-      .replace(/{activeClass}/g, activeTabPanelClass)
-      .replace(/{index}/g, index.toString());
+    const tabPanelHtml = tabPanelTemplate.replace(/{activeClass}/g, activeTabPanelClass).replace(/{index}/g, index.toString());
 
     this.$tabPanels.append(tabPanelHtml);
     const $tabPanel = this.$tabPanels.find(`#deviceTabPanel${index}`);
@@ -142,16 +129,10 @@ export class PluginConfigDevicesRenderer extends PluginConfigRendererBase {
     modelSchema: PluginConfigSchemaEnum,
     deviceConfiguration: PluginDeviceConfig
   ) {
-    this.componentRenderer.renderDropDown(
-      $tabPanel,
-      'model' + index,
-      modelSchema,
-      deviceConfiguration.model,
-      newValue => {
-        deviceConfiguration.model = newValue;
-        this.renderForm($tab, index, index, context, deviceSchema, deviceConfiguration);
-      }
-    );
+    this.componentRenderer.renderDropDown($tabPanel, 'model' + index, modelSchema, deviceConfiguration.model, newValue => {
+      deviceConfiguration.model = newValue;
+      this.renderForm($tab, index, index, context, deviceSchema, deviceConfiguration);
+    });
   }
 
   private renderRemoveButton($parent: JQuery, index: number, context: IDeviceContext) {

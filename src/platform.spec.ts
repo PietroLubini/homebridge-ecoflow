@@ -9,6 +9,7 @@ import { GlacierAccessory } from '@ecoflow/accessories/glacier/glacierAccessory'
 import { PowerOceanAccessory } from '@ecoflow/accessories/powerocean/powerOceanAccessory';
 import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStreamAccessory';
 import { SmartPlugAccessory } from '@ecoflow/accessories/smartplug/smartPlugAccessory';
+import { WaveAccessory } from '@ecoflow/accessories/wave/waveAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
@@ -31,6 +32,7 @@ jest.mock('@ecoflow/accessories/powerstream/powerStreamAccessory');
 jest.mock('@ecoflow/accessories/smartplug/smartPlugAccessory');
 jest.mock('@ecoflow/accessories/glacier/glacierAccessory');
 jest.mock('@ecoflow/accessories/discovery/discoveryAccessory');
+jest.mock('@ecoflow/accessories/wave/waveAccessory');
 jest.mock('@ecoflow/apis/ecoFlowHttpApiManager');
 jest.mock('@ecoflow/apis/ecoFlowMqttApiManager');
 jest.mock('@ecoflow/helpers/machineIdProvider');
@@ -196,10 +198,7 @@ describe('EcoFlowHomebridgePlatform', () => {
       } as jest.Mocked<PlatformAccessory>;
       machineIdProviderMock = new MachineIdProvider() as jest.Mocked<MachineIdProvider>;
       httpApiManagerMock = new EcoFlowHttpApiManager() as jest.Mocked<EcoFlowHttpApiManager>;
-      mqttApiManagerMock = new EcoFlowMqttApiManager(
-        httpApiManagerMock,
-        machineIdProviderMock
-      ) as jest.Mocked<EcoFlowMqttApiManager>;
+      mqttApiManagerMock = new EcoFlowMqttApiManager(httpApiManagerMock, machineIdProviderMock) as jest.Mocked<EcoFlowMqttApiManager>;
       batteryStatusProviderMock = new BatteryStatusProvider() as jest.Mocked<BatteryStatusProvider>;
       delta2AccessoryMock = createAccessory(Delta2Accessory, delta2Config, log1Mock, accessory1Mock);
       delta2MaxAccessoryMock = createAccessory(Delta2MaxAccessory, delta2MaxConfig, log2Mock, accessory2Mock);
@@ -421,12 +420,7 @@ describe('EcoFlowHomebridgePlatform', () => {
             secretKey: 'key1',
           } as DeviceConfig,
         ];
-        const deltaProAccessoryMock = createAccessory(
-          DeltaProUltraAccessory,
-          config.devices[0],
-          log1Mock,
-          accessory2Mock
-        );
+        const deltaProAccessoryMock = createAccessory(DeltaProUltraAccessory, config.devices[0], log1Mock, accessory2Mock);
 
         registerDevices();
 
@@ -443,12 +437,7 @@ describe('EcoFlowHomebridgePlatform', () => {
             secretKey: 'key1',
           } as DeviceConfig,
         ];
-        const powerStreamAccessoryMock = createAccessory(
-          DiscoveryAccessory,
-          config.devices[0],
-          log2Mock,
-          accessory2Mock
-        );
+        const powerStreamAccessoryMock = createAccessory(DiscoveryAccessory, config.devices[0], log2Mock, accessory2Mock);
 
         registerDevices();
 
@@ -465,12 +454,7 @@ describe('EcoFlowHomebridgePlatform', () => {
             secretKey: 'key1',
           } as DeviceConfig,
         ];
-        const powerStreamAccessoryMock = createAccessory(
-          PowerStreamAccessory,
-          config.devices[0],
-          log2Mock,
-          accessory2Mock
-        );
+        const powerStreamAccessoryMock = createAccessory(PowerStreamAccessory, config.devices[0], log2Mock, accessory2Mock);
 
         registerDevices();
 
@@ -487,12 +471,7 @@ describe('EcoFlowHomebridgePlatform', () => {
             secretKey: 'key1',
           } as DeviceConfig,
         ];
-        const powerOceanAccessoryMock = createAccessory(
-          PowerOceanAccessory,
-          config.devices[0],
-          log2Mock,
-          accessory2Mock
-        );
+        const powerOceanAccessoryMock = createAccessory(PowerOceanAccessory, config.devices[0], log2Mock, accessory2Mock);
 
         registerDevices();
 
@@ -532,6 +511,23 @@ describe('EcoFlowHomebridgePlatform', () => {
 
         expect(smartPlugAccessoryMock.initialize).toHaveBeenCalled();
       });
+
+      it('should register Wave accessory when model is Glacier in config', () => {
+        config.devices = [
+          {
+            name: 'device4',
+            model: DeviceModel.Wave,
+            serialNumber: 'sn2',
+            accessKey: 'key1',
+            secretKey: 'key1',
+          } as DeviceConfig,
+        ];
+        const smartPlugAccessoryMock = createAccessory(WaveAccessory, config.devices[0], log2Mock, accessory2Mock);
+
+        registerDevices();
+
+        expect(smartPlugAccessoryMock.initialize).toHaveBeenCalled();
+      });
     });
 
     describe('cachedDevice', () => {
@@ -541,10 +537,7 @@ describe('EcoFlowHomebridgePlatform', () => {
 
         registerDevices();
 
-        expect(log1Mock.info.mock.calls).toEqual([
-          ['Restoring existing accessory from cache'],
-          ['Initializing accessory'],
-        ]);
+        expect(log1Mock.info.mock.calls).toEqual([['Restoring existing accessory from cache'], ['Initializing accessory']]);
       });
 
       it('should not register platform accessory when cached device is created', () => {
@@ -588,11 +581,7 @@ describe('EcoFlowHomebridgePlatform', () => {
 
         registerDevices();
 
-        expect(apiMock.unregisterPlatformAccessories).toHaveBeenCalledWith(
-          '@pietrolubini/homebridge-ecoflow',
-          'EcoFlowHomebridge',
-          [accessory1Mock]
-        );
+        expect(apiMock.unregisterPlatformAccessories).toHaveBeenCalledWith('@pietrolubini/homebridge-ecoflow', 'EcoFlowHomebridge', [accessory1Mock]);
         expect(commonLogMock.info.mock.calls).toEqual([['Removing obsolete accessory:', 'accessory1']]);
       });
     });

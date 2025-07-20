@@ -1,4 +1,5 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
+import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
 import {
   AdditionalBatteryCharacteristicType as BatteryCharacteristicType,
   AdditionalBatteryOutletCharacteristicType as BatteryOutletCharacteristicType,
@@ -12,9 +13,10 @@ export abstract class OutletBatteryServiceBase extends OutletServiceBase {
     ecoFlowAccessory: EcoFlowAccessoryBase,
     private readonly batteryStatusProvider: BatteryStatusProvider,
     serviceSubType: string,
+    onCharacteristicPermsType: CharacteristicPermsType,
     additionalCharacteristics?: BatteryCharacteristicType[]
   ) {
-    super(ecoFlowAccessory, additionalCharacteristics, serviceSubType);
+    super(ecoFlowAccessory, additionalCharacteristics, serviceSubType, onCharacteristicPermsType);
   }
 
   public updateInputConsumption(watt: number): void {
@@ -52,18 +54,9 @@ export abstract class OutletBatteryServiceBase extends OutletServiceBase {
         this.platform.Characteristic.PowerConsumption.InputConsumptionWatts,
         BatteryOutletCharacteristicType.InputConsumptionInWatts
       ),
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.BatteryLevel,
-        BatteryOutletCharacteristicType.BatteryLevel
-      ),
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.ChargingState,
-        BatteryOutletCharacteristicType.ChargingState
-      ),
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.StatusLowBattery,
-        BatteryOutletCharacteristicType.StatusLowBattery
-      ),
+      this.tryAddCustomCharacteristic(this.platform.Characteristic.BatteryLevel, BatteryOutletCharacteristicType.BatteryLevel),
+      this.tryAddCustomCharacteristic(this.platform.Characteristic.ChargingState, BatteryOutletCharacteristicType.ChargingState),
+      this.tryAddCustomCharacteristic(this.platform.Characteristic.StatusLowBattery, BatteryOutletCharacteristicType.StatusLowBattery),
     ];
 
     return [...characteristics, ...additionalCharacteristics].filter(characteristic => characteristic !== null);

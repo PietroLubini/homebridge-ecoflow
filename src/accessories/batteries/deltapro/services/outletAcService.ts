@@ -3,14 +3,12 @@ import { DeltaProMqttSetAcOnMessageParams } from '@ecoflow/accessories/batteries
 import { DeltaProOutletServiceBase } from '@ecoflow/accessories/batteries/deltapro/services/deltaProOutletServiceBase';
 import { AcEnableType, AcXBoostType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
+import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 
 export class OutletAcService extends DeltaProOutletServiceBase {
-  constructor(
-    ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<DeltaProAllQuotaData>,
-    batteryStatusProvider: BatteryStatusProvider
-  ) {
-    super(ecoFlowAccessory, batteryStatusProvider, 'AC', ecoFlowAccessory.config.battery?.additionalCharacteristics);
+  constructor(ecoFlowAccessory: EcoFlowAccessoryWithQuotaBase<DeltaProAllQuotaData>, batteryStatusProvider: BatteryStatusProvider) {
+    super(ecoFlowAccessory, batteryStatusProvider, 'AC', CharacteristicPermsType.DEFAULT, ecoFlowAccessory.config.battery?.additionalCharacteristics);
   }
 
   protected override processOnSetOn(value: boolean, revert: () => void): Promise<void> {
