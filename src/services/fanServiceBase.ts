@@ -59,15 +59,15 @@ export abstract class FanServiceBase extends ServiceBase {
     this.rotationSpeedCharacteristic?.setValue(value);
   }
 
+  /* istanbul ignore next */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected processOnSetOn(value: boolean, revert: () => void): Promise<void> {
-    /* istanbul ignore next */
     return Promise.resolve();
   }
 
+  /* istanbul ignore next */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected processOnSetRotationSpeed(value: number, revert: () => void): Promise<void> {
-    /* istanbul ignore next */
     return Promise.resolve();
   }
 }

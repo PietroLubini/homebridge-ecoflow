@@ -65,21 +65,21 @@ export abstract class ThermostatFridgeServiceBase extends ServiceBase {
     return characteristics;
   }
 
+  /* istanbul ignore next */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected processOnSetTargetTemperature(value: number, revert: () => void): Promise<void> {
-    /* istanbul ignore next */
     return Promise.resolve();
   }
 
+  /* istanbul ignore next */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected processOnSetTargetState(value: FridgeStateType, revert: () => void): Promise<void> {
-    /* istanbul ignore next */
     return Promise.resolve();
   }
 
+  /* istanbul ignore next */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected processOnSetTemperatureDisplayUnits(value: TemperatureDisplayUnitsType, revert: () => void): Promise<void> {
-    /* istanbul ignore next */
     return Promise.resolve();
   }
 

@@ -77,9 +77,9 @@ export abstract class OutletServiceBase extends ServiceBase {
     return characteristics.filter(characteristic => characteristic !== null);
   }
 
+  /* istanbul ignore next */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected processOnSetOn(value: boolean, revert: () => void): Promise<void> {
-    /* istanbul ignore next */
     return Promise.resolve();
   }
 
