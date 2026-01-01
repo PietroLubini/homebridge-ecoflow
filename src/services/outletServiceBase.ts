@@ -1,4 +1,5 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
+import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
 import { AdditionalOutletCharacteristicType as OutletCharacteristicType } from '@ecoflow/config';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic, CharacteristicValue, WithUUID } from 'homebridge';
@@ -9,7 +10,8 @@ export abstract class OutletServiceBase extends ServiceBase {
   constructor(
     ecoFlowAccessory: EcoFlowAccessoryBase,
     private readonly additionalCharacteristics?: string[],
-    serviceSubType?: string
+    serviceSubType?: string,
+    private readonly onCharacteristicPermsType: CharacteristicPermsType = CharacteristicPermsType.DEFAULT
   ) {
     super(ecoFlowAccessory.platform.Service.Outlet, ecoFlowAccessory, serviceSubType);
   }
@@ -49,25 +51,22 @@ export abstract class OutletServiceBase extends ServiceBase {
 
   protected override addCharacteristics(): Characteristic[] {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On)
+      .setPropsPerms(this.onCharacteristicPermsType)
       .onGet(() => this.processOnGet(this.state))
-      .onSet((value: CharacteristicValue) =>
-        this.processOnSet(this.platform.Characteristic.On.name, () => {
+      .onSet((value: CharacteristicValue) => {
+        this.processOnSetVerify(this.platform.Characteristic.On.name);
+        const revert = () => this.updateState(!value);
+        this.processOnSet(async () => {
           this.state = value as boolean;
-          this.processOnSetOn(this.state, () => this.updateState(!this.state));
-        })
-      );
+          await this.processOnSetOn(this.state, revert);
+        }, revert);
+      });
 
     const characteristics = [
       this.addCharacteristic(this.platform.Characteristic.OutletInUse),
       onCharacteristic,
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.PowerConsumption.OutputVoltage,
-        OutletCharacteristicType.OutputVoltage
-      ),
-      this.tryAddCustomCharacteristic(
-        this.platform.Characteristic.PowerConsumption.OutputCurrent,
-        OutletCharacteristicType.OutputCurrent
-      ),
+      this.tryAddCustomCharacteristic(this.platform.Characteristic.PowerConsumption.OutputVoltage, OutletCharacteristicType.OutputVoltage),
+      this.tryAddCustomCharacteristic(this.platform.Characteristic.PowerConsumption.OutputCurrent, OutletCharacteristicType.OutputCurrent),
       this.tryAddCustomCharacteristic(
         this.platform.Characteristic.PowerConsumption.OutputConsumptionWatts,
         OutletCharacteristicType.OutputConsumptionInWatts
@@ -78,12 +77,13 @@ export abstract class OutletServiceBase extends ServiceBase {
     return characteristics.filter(characteristic => characteristic !== null);
   }
 
-  protected abstract processOnSetOn(value: boolean, revert: () => void): Promise<void>;
+  /* istanbul ignore next */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected processOnSetOn(value: boolean, revert: () => void): Promise<void> {
+    return Promise.resolve();
+  }
 
-  protected tryAddCustomCharacteristic(
-    characteristic: WithUUID<{ new (): Characteristic }>,
-    characteristicType: string
-  ): Characteristic | null {
+  protected tryAddCustomCharacteristic(characteristic: WithUUID<{ new (): Characteristic }>, characteristicType: string): Characteristic | null {
     if (this.additionalCharacteristics?.includes(characteristicType)) {
       return this.addCharacteristic(characteristic);
     }

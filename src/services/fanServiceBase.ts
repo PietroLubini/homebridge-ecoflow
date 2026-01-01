@@ -19,23 +19,27 @@ export abstract class FanServiceBase extends ServiceBase {
   protected override addCharacteristics(): Characteristic[] {
     const onCharacteristic = this.addCharacteristic(this.platform.Characteristic.On)
       .onGet(() => this.processOnGet(this.state))
-      .onSet(value =>
-        this.processOnSet(this.platform.Characteristic.On.name, () => {
+      .onSet(value => {
+        this.processOnSetVerify(this.platform.Characteristic.On.name);
+        const revert = () => this.updateState(!value);
+        this.processOnSet(async () => {
           this.state = value as boolean;
-          this.processOnSetOn(this.state, () => this.updateState(!this.state));
-        })
-      );
+          await this.processOnSetOn(this.state, revert);
+        }, revert);
+      });
 
     this.rotationSpeedCharacteristic = this.addCharacteristic(this.platform.Characteristic.RotationSpeed)
       .onGet(() => this.processOnGet(this.rotationSpeedPercents))
-      .onSet(percents =>
-        this.processOnSet(this.platform.Characteristic.RotationSpeed.name, () => {
+      .onSet(percents => {
+        this.processOnSetVerify(this.platform.Characteristic.RotationSpeed.name);
+        const prevRotationSpeed = this.rotationSpeed;
+        const revert = () => this.updateRotationSpeed(prevRotationSpeed);
+        this.processOnSet(async () => {
           this.rotationSpeedPercents = percents as number;
-          const prevRotationSpeed = this.rotationSpeed;
           this.rotationSpeed = this.covertPercentsToValue(this.rotationSpeedPercents, this.maxRotationSpeed);
-          this.processOnSetRotationSpeed(this.rotationSpeed, () => this.updateRotationSpeed(prevRotationSpeed));
-        })
-      );
+          await this.processOnSetRotationSpeed(this.rotationSpeed, revert);
+        }, revert);
+      });
 
     return [onCharacteristic, this.rotationSpeedCharacteristic];
   }
@@ -55,7 +59,15 @@ export abstract class FanServiceBase extends ServiceBase {
     this.rotationSpeedCharacteristic?.setValue(value);
   }
 
-  protected abstract processOnSetOn(value: boolean, revert: () => void): Promise<void>;
+  /* istanbul ignore next */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected processOnSetOn(value: boolean, revert: () => void): Promise<void> {
+    return Promise.resolve();
+  }
 
-  protected abstract processOnSetRotationSpeed(value: number, revert: () => void): Promise<void>;
+  /* istanbul ignore next */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected processOnSetRotationSpeed(value: number, revert: () => void): Promise<void> {
+    return Promise.resolve();
+  }
 }

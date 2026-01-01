@@ -16,7 +16,7 @@ export class PowerDemandService extends FanServiceBase {
     return Promise.resolve();
   }
 
-  protected override processOnSetRotationSpeed(value: number, revert: () => void): Promise<void> {
+  protected override async processOnSetRotationSpeed(value: number, revert: () => void): Promise<void> {
     const message: PowerStreamMqttSetMessageWithParams<PowerStreamMqttSetPermanentWattsMessageParams> = {
       id: 0,
       version: '',
@@ -25,6 +25,6 @@ export class PowerDemandService extends FanServiceBase {
         permanentWatts: value,
       },
     };
-    return this.ecoFlowAccessory.sendSetCommand(message, revert);
+    await this.ecoFlowAccessory.sendSetCommand(message, revert);
   }
 }

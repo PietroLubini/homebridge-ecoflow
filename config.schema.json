@@ -32,7 +32,7 @@
               "type": "string",
               "default": "Delta 2",
               "required": true,
-              "enum": ["Delta 2", "Delta 2 Max", "Delta Pro 3", "Discovery", "PowerStream", "Smart Plug"]
+              "enum": ["Delta 2", "Delta 2 Max", "Delta Pro 3", "Discovery", "PowerStream", "Smart Plug", "Wave"]
             },
             "serialNumber": {
               "title": "Serial Number",
@@ -84,13 +84,7 @@
                   "items": {
                     "title": "Characteristic",
                     "type": "string",
-                    "enum": [
-                      "Battery Level, %",
-                      "Input Consumption, W",
-                      "Output Consumption, W",
-                      "Charging State",
-                      "Status Low Battery"
-                    ]
+                    "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W", "Charging State", "Status Low Battery"]
                   }
                 }
               }
@@ -115,13 +109,7 @@
                   "items": {
                     "title": "Characteristic",
                     "type": "string",
-                    "enum": [
-                      "Battery Level, %",
-                      "Input Consumption, W",
-                      "Output Consumption, W",
-                      "Charging State",
-                      "Status Low Battery"
-                    ]
+                    "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W", "Charging State", "Status Low Battery"]
                   }
                 },
                 "pvAdditionalCharacteristics": {
@@ -160,13 +148,7 @@
                   "items": {
                     "title": "Characteristic",
                     "type": "string",
-                    "enum": [
-                      "Battery Level, %",
-                      "Input Consumption, W",
-                      "Output Consumption, W",
-                      "Charging State",
-                      "Status Low Battery"
-                    ]
+                    "enum": ["Battery Level, %", "Input Consumption, W", "Output Consumption, W", "Charging State", "Status Low Battery"]
                   }
                 },
                 "pvAdditionalCharacteristics": {

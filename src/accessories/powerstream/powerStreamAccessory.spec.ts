@@ -1,8 +1,5 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
-import {
-  Heartbeat,
-  PowerStreamAllQuotaData,
-} from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
+import { Heartbeat, PowerStreamAllQuotaData } from '@ecoflow/accessories/powerstream/interfaces/powerStreamHttpApiContracts';
 import {
   PowerStreamMqttMessageFuncType,
   PowerStreamMqttMessageType,
@@ -117,12 +114,8 @@ describe('PowerStreamAccessory', () => {
     }
 
     solarOutletServiceMock = createOutletService(new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'PV'));
-    batteryOutletServiceMock = createOutletService(
-      new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'BAT')
-    );
-    inverterOutletServiceMock = createOutletService(
-      new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'INV')
-    );
+    batteryOutletServiceMock = createOutletService(new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'BAT'));
+    inverterOutletServiceMock = createOutletService(new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'INV'));
     (OutletReadOnlyService as unknown as jest.Mock).mockImplementation(
       (_: PowerStreamAccessory, __: BatteryStatusProvider, serviceSubType: string) => {
         if (serviceSubType === 'PV') {
@@ -196,12 +189,7 @@ describe('PowerStreamAccessory', () => {
       ): CharacteristicType[] | undefined {
         let actual: CharacteristicType[] | undefined;
         (OutletReadOnlyService as unknown as jest.Mock).mockImplementation(
-          (
-            _: EcoFlowAccessoryBase,
-            __: BatteryStatusProvider,
-            serviceSubType: string,
-            additionalCharacteristics?: CharacteristicType[]
-          ) => {
+          (_: EcoFlowAccessoryBase, __: BatteryStatusProvider, serviceSubType: string, additionalCharacteristics?: CharacteristicType[]) => {
             if (serviceSubType === expectedServiceSubType) {
               actual = additionalCharacteristics;
               return mock;
@@ -298,10 +286,7 @@ describe('PowerStreamAccessory', () => {
             },
           } as DeviceConfig);
 
-          expect(actual).toEqual([
-            BatteryOutletCharacteristicType.InputConsumptionInWatts,
-            OutletCharacteristicType.OutputConsumptionInWatts,
-          ]);
+          expect(actual).toEqual([BatteryOutletCharacteristicType.InputConsumptionInWatts, OutletCharacteristicType.OutputConsumptionInWatts]);
         });
 
         it('should initialize INV outlet service with additional characteristics when inverter settings are not defined in config', () => {

@@ -1,14 +1,4 @@
-import {
-  API,
-  Characteristic,
-  DynamicPlatformPlugin,
-  HAP,
-  Logging,
-  PlatformAccessory,
-  PlatformConfig,
-  Service,
-  UnknownContext,
-} from 'homebridge';
+import { API, Characteristic, DynamicPlatformPlugin, HAP, Logging, PlatformAccessory, PlatformConfig, Service, UnknownContext } from 'homebridge';
 
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2/delta2Accessory';
 import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2/delta2MaxAccessory';
@@ -22,6 +12,8 @@ import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStre
 import { PowerStreamSimulator } from '@ecoflow/accessories/powerstream/simulations/powerStreamSimulator';
 import { SmartPlugSimulator } from '@ecoflow/accessories/smartplug/simulations/smartPlugSimulator';
 import { SmartPlugAccessory } from '@ecoflow/accessories/smartplug/smartPlugAccessory';
+import { WaveSimulator } from '@ecoflow/accessories/wave/simulations/waveSimulator';
+import { WaveAccessory } from '@ecoflow/accessories/wave/waveAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { Simulator } from '@ecoflow/apis/simulations/simulator';
@@ -55,10 +47,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
   public readonly accessories: PlatformAccessory[] = [];
 
   private readonly httpApiManager: EcoFlowHttpApiManager = new EcoFlowHttpApiManager();
-  private readonly mqttApiManager: EcoFlowMqttApiManager = new EcoFlowMqttApiManager(
-    this.httpApiManager,
-    new MachineIdProvider()
-  );
+  private readonly mqttApiManager: EcoFlowMqttApiManager = new EcoFlowMqttApiManager(this.httpApiManager, new MachineIdProvider());
 
   private readonly batteryStatusProvider: BatteryStatusProvider = new BatteryStatusProvider();
 
@@ -149,9 +138,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
         continue;
       }
 
-      const existingAccessory = configuredAccessories.find(
-        accessory => accessory.context.deviceConfig.serialNumber === config.serialNumber
-      );
+      const existingAccessory = configuredAccessories.find(accessory => accessory.context.deviceConfig.serialNumber === config.serialNumber);
       if (existingAccessory) {
         log.warn(`Device with the same SN (${config.serialNumber}) already exists. Ignoring the device`);
         continue;
@@ -210,9 +197,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
         this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         removedAccessories.push(accessory);
       });
-    const ecoFlowAccessories = configuredEcoFlowAccessories.filter(
-      ecoFlowAccessory => !removedAccessories.includes(ecoFlowAccessory.accessory)
-    );
+    const ecoFlowAccessories = configuredEcoFlowAccessories.filter(ecoFlowAccessory => !removedAccessories.includes(ecoFlowAccessory.accessory));
     this.initialize(ecoFlowAccessories, logs);
   }
 
@@ -227,11 +212,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     }
   }
 
-  private createAccessory(
-    accessory: PlatformAccessory<UnknownContext>,
-    config: DeviceConfig,
-    log: Logging
-  ): EcoFlowAccessoryBase | null {
+  private createAccessory(accessory: PlatformAccessory<UnknownContext>, config: DeviceConfig, log: Logging): EcoFlowAccessoryBase | null {
     let EcoFlowAccessoryType: EcoFlowAccessoryType | null = null;
     let EcoFlowAccessorySimulatorType: EcoFlowAccessorySimulatorType | undefined = undefined;
     switch (config.model) {
@@ -275,6 +256,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
         EcoFlowAccessoryType = SmartPlugAccessory;
         EcoFlowAccessorySimulatorType = SmartPlugSimulator;
         break;
+      case DeviceModel.Wave:
+        EcoFlowAccessoryType = WaveAccessory;
+        EcoFlowAccessorySimulatorType = WaveSimulator;
+        break;
       default:
         log.warn(`"${config.model}" is not supported. Ignoring the device`);
     }
@@ -282,15 +267,7 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     if (EcoFlowAccessoryType === null) {
       return null;
     }
-    return new EcoFlowAccessoryType(
-      this,
-      accessory,
-      config,
-      log,
-      this.httpApiManager,
-      this.mqttApiManager,
-      this.batteryStatusProvider
-    );
+    return new EcoFlowAccessoryType(this, accessory, config, log, this.httpApiManager, this.mqttApiManager, this.batteryStatusProvider);
   }
 }
 

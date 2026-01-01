@@ -16,10 +16,6 @@ import {
 } from 'hap-nodejs';
 import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
 
-enum HAPStatusMock {
-  READ_ONLY_CHARACTERISTIC = -70404,
-}
-
 class MockFanService extends FanServiceBase {
   constructor(ecoFlowAccessory: EcoFlowAccessoryBase) {
     super(ecoFlowAccessory, 6000, 'MOCK');
@@ -27,7 +23,9 @@ class MockFanService extends FanServiceBase {
 
   public override async processOnSetOn(): Promise<void> {}
 
-  public override async processOnSetRotationSpeed(): Promise<void> {}
+  public override async processOnSetRotationSpeed(): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 describe('FanServiceBase', () => {
@@ -42,7 +40,6 @@ describe('FanServiceBase', () => {
   const hapMock = {
     Characteristic: HapCharacteristic,
     HapStatusError: HapStatusError,
-    HAPStatus: HAPStatusMock,
   } as unknown as HAP;
   EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
 
@@ -283,18 +280,14 @@ describe('FanServiceBase', () => {
         it('should throw an error when setting On value but device is offline', () => {
           service.updateReachability(false);
 
-          expect(() => handlerOnSet(true, undefined)).toThrow(
-            new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE)
-          );
+          expect(() => handlerOnSet(true, undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
         });
 
         it('should throw an error when setting On value but service is disabled', () => {
           service.updateEnabled(false);
 
           expect(() => handlerOnSet(true, undefined)).toThrow(new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC));
-          expect(logMock.warn.mock.calls).toEqual([
-            ['[accessory1 MOCK] Service is disabled. Setting of "On" is disallowed'],
-          ]);
+          expect(logMock.warn.mock.calls).toEqual([['[accessory1 MOCK] Service is disabled. Setting of "On" is disallowed']]);
         });
 
         it('should revert changing of On state when it is failed', () => {
@@ -361,18 +354,14 @@ describe('FanServiceBase', () => {
         it('should throw an error when setting RotationSpeed value but device is offline', () => {
           service.updateReachability(false);
 
-          expect(() => handlerOnSet(123, undefined)).toThrow(
-            new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE)
-          );
+          expect(() => handlerOnSet(123, undefined)).toThrow(new HapStatusError(HAPStatus.SERVICE_COMMUNICATION_FAILURE));
         });
 
         it('should throw an error when setting RotationSpeed value but service is disabled', () => {
           service.updateEnabled(false);
 
           expect(() => handlerOnSet(123, undefined)).toThrow(new HapStatusError(HAPStatus.READ_ONLY_CHARACTERISTIC));
-          expect(logMock.warn.mock.calls).toEqual([
-            ['[accessory1 MOCK] Service is disabled. Setting of "RotationSpeed" is disallowed'],
-          ]);
+          expect(logMock.warn.mock.calls).toEqual([['[accessory1 MOCK] Service is disabled. Setting of "RotationSpeed" is disallowed']]);
         });
 
         it('should revert changing of RotationSpeed when sending Set command to device is failed', () => {
