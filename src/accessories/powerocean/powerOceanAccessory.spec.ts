@@ -74,12 +74,8 @@ describe('PowerOceanAccessory', () => {
     }
 
     solarOutletServiceMock = createOutletService(new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'PV'));
-    batteryOutletServiceMock = createOutletService(
-      new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'BAT')
-    );
-    inverterOutletServiceMock = createOutletService(
-      new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'INV')
-    );
+    batteryOutletServiceMock = createOutletService(new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'BAT'));
+    inverterOutletServiceMock = createOutletService(new OutletReadOnlyService(accessory, batteryStatusProviderMock, 'INV'));
     (OutletReadOnlyService as unknown as jest.Mock).mockImplementation(
       (_: PowerOceanAccessory, __: BatteryStatusProvider, serviceSubType: string) => {
         if (serviceSubType === 'PV') {
@@ -145,12 +141,7 @@ describe('PowerOceanAccessory', () => {
       ): CharacteristicType[] | undefined {
         let actual: CharacteristicType[] | undefined;
         (OutletReadOnlyService as unknown as jest.Mock).mockImplementation(
-          (
-            _: EcoFlowAccessoryBase,
-            __: BatteryStatusProvider,
-            serviceSubType: string,
-            additionalCharacteristics?: CharacteristicType[]
-          ) => {
+          (_: EcoFlowAccessoryBase, __: BatteryStatusProvider, serviceSubType: string, additionalCharacteristics?: CharacteristicType[]) => {
             if (serviceSubType === expectedServiceSubType) {
               actual = additionalCharacteristics;
               return mock;
@@ -247,10 +238,7 @@ describe('PowerOceanAccessory', () => {
             },
           } as DeviceConfig);
 
-          expect(actual).toEqual([
-            BatteryOutletCharacteristicType.InputConsumptionInWatts,
-            OutletCharacteristicType.OutputConsumptionInWatts,
-          ]);
+          expect(actual).toEqual([BatteryOutletCharacteristicType.InputConsumptionInWatts, OutletCharacteristicType.OutputConsumptionInWatts]);
         });
 
         it('should initialize INV outlet service with additional characteristics when inverter settings are not defined in config', () => {
@@ -301,6 +289,19 @@ describe('PowerOceanAccessory', () => {
         const actual = quota;
 
         expect(actual).toEqual(message.params);
+      });
+
+      it('should ignore Hearbeat message when its content is unsupported', async () => {
+        const message = {
+          unknown: {
+            value: 1,
+          },
+        };
+
+        processQuotaMessage(message);
+        const actual = quota;
+
+        expect(actual).toEqual({});
       });
 
       describe('updateBatteryLevel', () => {

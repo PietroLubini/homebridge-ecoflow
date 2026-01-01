@@ -91,16 +91,13 @@ export class GlacierAccessory extends EcoFlowAccessoryWithQuotaBase<GlacierAllQu
     const glacierMessage = message as GlacierMqttQuotaMessage;
     if (glacierMessage.typeCode === GlacierMqttMessageType.EMS) {
       const emsStatus = (message as MqttQuotaMessageWithParams<EmsStatus>).params;
-      Object.assign(this.quota.bms_emsStatus, emsStatus);
-      this.updateEmsValues(emsStatus);
+      this.updateParamsValues(emsStatus, this.quota.bms_emsStatus, this.updateEmsValues.bind(this));
     } else if (glacierMessage.typeCode === GlacierMqttMessageType.BMS) {
       const bmsStatus = (message as MqttQuotaMessageWithParams<BmsStatus>).params;
-      Object.assign(this.quota.bms_bmsStatus, bmsStatus);
-      this.updateBmsValues(bmsStatus);
+      this.updateParamsValues(bmsStatus, this.quota.bms_bmsStatus, this.updateBmsValues.bind(this));
     } else if (glacierMessage.typeCode === GlacierMqttMessageType.PD) {
       const pdStatus = (message as MqttQuotaMessageWithParams<PdStatus>).params;
-      Object.assign(this.quota.pd, pdStatus);
-      this.updatePdValues(pdStatus);
+      this.updateParamsValues(pdStatus, this.quota.pd, this.updatePdValues.bind(this));
     }
   }
 

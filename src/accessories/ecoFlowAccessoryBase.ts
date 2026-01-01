@@ -126,6 +126,13 @@ export abstract class EcoFlowAccessoryBase {
     }
   }
 
+  protected updateParamsValues<TParams extends object>(params: TParams, quotaParams: TParams, updateFunc: (params: TParams) => void): void {
+    if (params) {
+      Object.assign(quotaParams, params);
+      updateFunc(params);
+    }
+  }
+
   private getMqttSetMessageKey(message: MqttSetMessage): string {
     return message.id.toString();
   }

@@ -55,33 +55,23 @@ export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<
   }
 
   protected override getServices(): ServiceBase[] {
-    return [
-      this.batteryStatusService,
-      this.outletUsbService,
-      this.outletAcService,
-      this.outletCarService,
-      this.switchXboostService,
-    ];
+    return [this.batteryStatusService, this.outletUsbService, this.outletAcService, this.outletCarService, this.switchXboostService];
   }
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
     const batteryMessage = message as Delta2MqttQuotaMessage;
     if (batteryMessage.typeCode === Delta2MqttMessageType.EMS) {
       const emsStatus = (message as MqttQuotaMessageWithParams<EmsStatus>).params;
-      Object.assign(this.quota.bms_emsStatus, emsStatus);
-      this.updateEmsValues(emsStatus);
+      this.updateParamsValues(emsStatus, this.quota.bms_emsStatus, this.updateEmsValues.bind(this));
     } else if (batteryMessage.typeCode === Delta2MqttMessageType.INV) {
       const invStatus = (message as MqttQuotaMessageWithParams<InvStatus>).params;
-      Object.assign(this.quota.inv, invStatus);
-      this.updateInvValues(invStatus);
+      this.updateParamsValues(invStatus, this.quota.inv, this.updateInvValues.bind(this));
     } else if (batteryMessage.typeCode === Delta2MqttMessageType.PD) {
       const pdStatus = (message as MqttQuotaMessageWithParams<PdStatus>).params;
-      Object.assign(this.quota.pd, pdStatus);
-      this.updatePdValues(pdStatus);
+      this.updateParamsValues(pdStatus, this.quota.pd, this.updatePdValues.bind(this));
     } else if (batteryMessage.typeCode === Delta2MqttMessageType.MPPT) {
       const mpptStatus = (message as MqttQuotaMessageWithParams<MpptStatus>).params;
-      Object.assign(this.quota.mppt, mpptStatus);
-      this.updateMpptValues(mpptStatus);
+      this.updateParamsValues(mpptStatus, this.quota.mppt, this.updateMpptValues.bind(this));
     }
   }
 
@@ -152,8 +142,7 @@ export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<
 
   private updateInvValues(params: InvStatus): void {
     if (params.inputWatts !== undefined) {
-      const isCharging =
-        params.inputWatts > 0 && (params.outputWatts === undefined || params.inputWatts !== params.outputWatts);
+      const isCharging = params.inputWatts > 0 && (params.outputWatts === undefined || params.inputWatts !== params.outputWatts);
       this.batteryStatusService.updateChargingState(isCharging);
       this.outletAcService.updateChargingState(isCharging);
       this.outletUsbService.updateChargingState(isCharging);
@@ -186,14 +175,7 @@ export abstract class Delta2AccessoryBase extends EcoFlowAccessoryWithQuotaBase<
       params.typec1Watts !== undefined ||
       params.typec2Watts !== undefined
     ) {
-      const usbWatts = this.sum(
-        params.usb1Watts,
-        params.usb2Watts,
-        params.qcUsb1Watts,
-        params.qcUsb2Watts,
-        params.typec1Watts,
-        params.typec2Watts
-      );
+      const usbWatts = this.sum(params.usb1Watts, params.usb2Watts, params.qcUsb1Watts, params.qcUsb2Watts, params.typec1Watts, params.typec2Watts);
       this.outletUsbService.updateOutputConsumption(usbWatts);
     }
   }

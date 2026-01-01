@@ -58,8 +58,7 @@ export class PowerStreamAccessory extends EcoFlowAccessoryWithQuotaBase<PowerStr
     const powerStreamMessage = message as PowerStreamMqttQuotaMessage;
     if (powerStreamMessage.cmdFunc === PowerStreamMqttMessageFuncType.Func20 && powerStreamMessage.cmdId === PowerStreamMqttMessageType.Heartbeat) {
       const heartbeat = (message as PowerStreamMqttQuotaMessageWithParams<Heartbeat>).param;
-      Object.assign(this.quota['20_1'], heartbeat);
-      this.updateHeartbeatValues(heartbeat);
+      this.updateParamsValues(heartbeat, this.quota['20_1'], this.updateHeartbeatValues.bind(this));
     }
   }
 

@@ -56,12 +56,10 @@ export class DeltaProUltraAccessory extends EcoFlowAccessoryWithQuotaBase<DeltaP
     const accessoryMessage = message as DeltaProUltraMqttQuotaMessage;
     if (accessoryMessage.addr === DeltaProUltraMqttMessageAddrType.PD) {
       const pdStatus = (message as DeltaProUltraMqttQuotaMessageWithParams<PdStatus>).param;
-      Object.assign(this.quota.hs_yj751_pd_appshow_addr, pdStatus);
-      this.updatePdValues(pdStatus);
+      this.updateParamsValues(pdStatus, this.quota.hs_yj751_pd_appshow_addr, this.updatePdValues.bind(this));
     } else if (accessoryMessage.addr === DeltaProUltraMqttMessageAddrType.PD_SET) {
       const pdSetStatus = (message as DeltaProUltraMqttQuotaMessageWithParams<PdSetStatus>).param;
-      Object.assign(this.quota.hs_yj751_pd_app_set_info_addr, pdSetStatus);
-      // this.updatePdSetValues(pdSetStatus);
+      this.updateParamsValues(pdSetStatus, this.quota.hs_yj751_pd_app_set_info_addr, () => {}); // this.updatePdSetValues(pdSetStatus);
     }
   }
 

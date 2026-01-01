@@ -60,32 +60,34 @@ export class WaveAccessory extends EcoFlowAccessoryWithQuotaBase<WaveAllQuotaDat
     const waveMessage = message as WaveMqttQuotaMessage;
     if (waveMessage.typeCode === WaveMqttMessageTypeCodeType.BMS) {
       const bmsParams = (message as WaveMqttQuotaMessageWithParams<BmsStatus>).params;
-      Object.assign(this.quota.bms, bmsParams);
-      this.updateBmsValues(this.quota.bms);
+      this.updateParamsValues(bmsParams, this.quota.bms, this.updateBmsValues.bind(this));
     } else if (waveMessage.typeCode === WaveMqttMessageTypeCodeType.POWER) {
       const powerParams = (message as WaveMqttQuotaMessageWithParams<PowerStatus>).params;
-      Object.assign(this.quota.power, powerParams);
-      this.updatePowerValues(this.quota.power);
+      this.updateParamsValues(powerParams, this.quota.power, this.updatePowerValues.bind(this));
     } else if (waveMessage.typeCode === WaveMqttMessageTypeCodeType.PD) {
       const pdParams = (message as WaveMqttQuotaMessageWithParams<WaveAnalysisPdQuotaParams>).params;
-      this.quota.pd.mainMode = pdParams.pdMainMode;
-      this.quota.pd.tempSys = pdParams.pdTempSys;
-      this.quota.pd.fanValue = pdParams.setFanVal;
-      this.quota.pd.tempDisplay = pdParams.lcdStatus;
-      this.quota.pd.waterValue = pdParams.waterValue;
-      this.quota.pd.powerMode = pdParams.powerSts;
-      this.quota.pd.setTemp =
-        pdParams.pdTempSys === undefined
-          ? undefined
-          : pdParams.pdTempSys === TemperatureDisplayUnitsType.Celsius
-            ? pdParams.setTempCel
-            : Converter.convertFahrenheitToCelsius(pdParams.setTempfah);
-      this.updatePdValues(this.quota.pd);
+      if (pdParams) {
+        this.quota.pd.mainMode = pdParams.pdMainMode;
+        this.quota.pd.tempSys = pdParams.pdTempSys;
+        this.quota.pd.fanValue = pdParams.setFanVal;
+        this.quota.pd.tempDisplay = pdParams.lcdStatus;
+        this.quota.pd.waterValue = pdParams.waterValue;
+        this.quota.pd.powerMode = pdParams.powerSts;
+        this.quota.pd.setTemp =
+          pdParams.pdTempSys === undefined
+            ? undefined
+            : pdParams.pdTempSys === TemperatureDisplayUnitsType.Celsius
+              ? pdParams.setTempCel
+              : Converter.convertFahrenheitToCelsius(pdParams.setTempfah);
+        this.updatePdValues(this.quota.pd);
+      }
     } else if (waveMessage.typeCode === WaveMqttMessageTypeCodeType.PD_DEV) {
       const pdDevParams = (message as WaveMqttQuotaMessageWithParams<PdStatusDev>).params;
-      this.quota.pd.coolTemp = pdDevParams.coolTemp;
-      this.quota.pd.envTemp = pdDevParams.envTemp;
-      this.updatePdDevValues(this.quota.pd);
+      if (pdDevParams) {
+        this.quota.pd.coolTemp = pdDevParams.coolTemp;
+        this.quota.pd.envTemp = pdDevParams.envTemp;
+        this.updatePdDevValues(this.quota.pd);
+      }
     }
   }
 

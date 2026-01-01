@@ -38,6 +38,9 @@ export class PowerOceanAccessory extends EcoFlowAccessoryWithQuotaBase<PowerOcea
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
     const params = (message as PowerOceanMqttQuotaMessageWithParams<PowerOceanAllQuotaData>).params;
+    if (params === undefined) {
+      return;
+    }
     if (params.bpPwr !== undefined) {
       this.quota.bpPwr = params.bpPwr;
     }

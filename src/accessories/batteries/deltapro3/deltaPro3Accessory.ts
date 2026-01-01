@@ -1,7 +1,4 @@
-import {
-  DeltaPro3AcEnableType,
-  DeltaPro3AllQuotaData,
-} from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3HttpApiContracts';
+import { DeltaPro3AcEnableType, DeltaPro3AllQuotaData } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3HttpApiContracts';
 import { DeltaPro3MqttQuotaMessage } from '@ecoflow/accessories/batteries/deltapro3/interfaces/deltaPro3MqttApiContracts';
 import { OutletAcHvService } from '@ecoflow/accessories/batteries/deltapro3/services/outletAcHvService';
 import { OutletAcLvService } from '@ecoflow/accessories/batteries/deltapro3/services/outletAcLvService';
@@ -57,11 +54,7 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
     const data = message as DeltaPro3MqttQuotaMessage;
-    Object.assign(this.quota, data);
-    this.updateSocValues(data);
-    this.updateInputWattsValues(data);
-    this.updateOutputWattsValues(data);
-    this.updateSwitchStateValues(data);
+    this.updateParamsValues(data, this.quota, this.updateQuotaValues.bind(this));
   }
 
   protected override initializeQuota(quota: DeltaPro3AllQuotaData | null): DeltaPro3AllQuotaData {
@@ -71,6 +64,13 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
 
   protected override updateInitialValues(data: DeltaPro3AllQuotaData): void {
     this.processQuotaMessage(data);
+  }
+
+  private updateQuotaValues(data: DeltaPro3MqttQuotaMessage): void {
+    this.updateSocValues(data);
+    this.updateInputWattsValues(data);
+    this.updateOutputWattsValues(data);
+    this.updateSwitchStateValues(data);
   }
 
   private updateSocValues(params: DeltaPro3MqttQuotaMessage): void {
@@ -84,8 +84,7 @@ export class DeltaPro3Accessory extends EcoFlowAccessoryWithQuotaBase<DeltaPro3A
 
   private updateInputWattsValues(params: DeltaPro3MqttQuotaMessage): void {
     if (params.inputWatts !== undefined) {
-      const isCharging =
-        params.inputWatts > 0 && (params.outputWatts === undefined || params.inputWatts !== params.outputWatts);
+      const isCharging = params.inputWatts > 0 && (params.outputWatts === undefined || params.inputWatts !== params.outputWatts);
       this.batteryStatusService.updateChargingState(isCharging);
       this.outletAcHvService.updateChargingState(isCharging);
       this.outletAcLvService.updateChargingState(isCharging);
