@@ -54,7 +54,9 @@ jobs:
         run: npm ci
 
       - name: Debug npm config
-        run: npm config list
+        run: |
+          NODE_AUTH_TOKEN="" npm publish # Cleanup default auth token https://github.com/actions/setup-node/issues/1440
+          npm config list
 
       - name: Publish (latest)
         if: ${{ env.RELEASE_TAG == null }}
