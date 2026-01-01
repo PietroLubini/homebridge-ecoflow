@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/PietroLubini/homebridge-ecoflow#readme",
   "engines": {
-    "node": "^18.16.0 || ^20.9.0 || ^22",
+    "node": "^18.16.0 || ^20.9.0 || ^22 || ^24",
     "homebridge": "^1.7.0 || ^2.0.0-beta.11"
   },
   "main": "dist/index.js",
@@ -26,6 +26,7 @@
     "lint": "eslint \"src/**/*.ts\" --max-warnings=0",
     "lint:fix": "eslint \"src/**/*.ts\" --max-warnings=0 --fix",
     "watch": "npm link && nodemon",
+    "run": "npm run build:all && hb-service run --foreground -I -D",
     "clean": "rimraf ./dist",
     "build": "npm run clean && npm run build:all",
     "build:all": "npm run build:be && npm run build:fe",
