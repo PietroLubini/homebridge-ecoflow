@@ -1,8 +1,11 @@
 name: Publish
 
 on:
-  release:
-    types: [published]
+  # release:
+  #   types: [published]
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   parse_release_name:
