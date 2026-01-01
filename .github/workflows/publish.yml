@@ -41,7 +41,10 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Use Latest npm # to fix potential publish issues
-        run: npm install -g npm@latest
+        run: |
+          npm -v
+          npm install -g npm@10.9.4
+          npm -v
 
       - name: Update package version
         run: |
