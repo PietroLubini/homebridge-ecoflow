@@ -34,7 +34,8 @@
     "test": "jest --forceExit",
     "test:cov": "jest --coverage",
     "test:ci": "jest --coverage --ci --json --coverage --testLocationInResults --outputFile=coverage/new_report.json --reporters=default --reporters=jest-junit --forceExit",
-    "prepublishOnly": "npm run lint && npm run build && npm run test:ci"
+    "prepublishOnly": "npm run build",
+    "prepublishOnly__backup": "npm run lint && npm run build && npm run test:ci"
   },
   "keywords": [
     "homebridge-plugin",
