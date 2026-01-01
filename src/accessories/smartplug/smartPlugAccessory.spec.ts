@@ -88,9 +88,7 @@ describe('SmartPlugAccessory', () => {
       return serviceMock;
     }
 
-    function createTemperatureSensorService<TService extends TemperatureSensorService>(
-      service: TService
-    ): jest.Mocked<TService> {
+    function createTemperatureSensorService<TService extends TemperatureSensorService>(service: TService): jest.Mocked<TService> {
       const serviceMock = service as jest.Mocked<TService>;
       const serviceBaseMock = serviceMock as jest.Mocked<TemperatureSensorService>;
       serviceBaseMock.initialize.mockReset();
@@ -128,14 +126,7 @@ describe('SmartPlugAccessory', () => {
       sendSetCommand: jest.fn(),
     } as unknown as jest.Mocked<EcoFlowMqttApiManager>;
     config = { secretKey: 'secretKey1', accessKey: 'accessKey1', serialNumber: 'sn1' } as unknown as DeviceConfig;
-    accessory = new SmartPlugAccessory(
-      platformMock,
-      accessoryMock,
-      config,
-      logMock,
-      httpApiManagerMock,
-      mqttApiManagerMock
-    );
+    accessory = new SmartPlugAccessory(platformMock, accessoryMock, config, logMock, httpApiManagerMock, mqttApiManagerMock);
   });
 
   describe('initialize', () => {
@@ -151,25 +142,13 @@ describe('SmartPlugAccessory', () => {
     });
 
     describe('outletServices', () => {
-      function run<TService>(
-        mock: jest.Mocked<TService>,
-        deviceConfig: DeviceConfig
-      ): CharacteristicType[] | undefined {
+      function run<TService>(mock: jest.Mocked<TService>, deviceConfig: DeviceConfig): CharacteristicType[] | undefined {
         let actual: CharacteristicType[] | undefined;
-        (OutletService as unknown as jest.Mock).mockImplementation(
-          (_: EcoFlowAccessoryBase, additionalCharacteristics?: CharacteristicType[]) => {
-            actual = additionalCharacteristics;
-            return mock;
-          }
-        );
-        new SmartPlugAccessory(
-          platformMock,
-          accessoryMock,
-          deviceConfig,
-          logMock,
-          httpApiManagerMock,
-          mqttApiManagerMock
-        );
+        (OutletService as unknown as jest.Mock).mockImplementation((_: EcoFlowAccessoryBase, additionalCharacteristics?: CharacteristicType[]) => {
+          actual = additionalCharacteristics;
+          return mock;
+        });
+        new SmartPlugAccessory(platformMock, accessoryMock, deviceConfig, logMock, httpApiManagerMock, mqttApiManagerMock);
         return actual;
       }
 
@@ -208,14 +187,7 @@ describe('SmartPlugAccessory', () => {
           return brightnessServiceMock;
         });
 
-        new SmartPlugAccessory(
-          platformMock,
-          accessoryMock,
-          deviceConfig,
-          logMock,
-          httpApiManagerMock,
-          mqttApiManagerMock
-        );
+        new SmartPlugAccessory(platformMock, accessoryMock, deviceConfig, logMock, httpApiManagerMock, mqttApiManagerMock);
         return actual;
       }
 
@@ -262,6 +234,19 @@ describe('SmartPlugAccessory', () => {
         const actual = quota['2_1'];
 
         expect(actual).toEqual(message.param);
+      });
+
+      it('should ignore Hearbeat message when its content is unsupported', async () => {
+        const message = {
+          unknown: {
+            value: 1,
+          },
+        };
+
+        processQuotaMessage(message);
+        const actual = quota;
+
+        expect(actual).toEqual({ '2_1': {} });
       });
 
       describe('updateOutletValues', () => {

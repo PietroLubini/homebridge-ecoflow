@@ -43,13 +43,9 @@ export class SmartPlugAccessory extends EcoFlowAccessoryWithQuotaBase<SmartPlugA
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
     const smartPlugMessage = message as SmartPlugMqttQuotaMessage;
-    if (
-      smartPlugMessage.cmdFunc === SmartPlugMqttMessageFuncType.Func2 &&
-      smartPlugMessage.cmdId === SmartPlugMqttMessageType.Heartbeat
-    ) {
+    if (smartPlugMessage.cmdFunc === SmartPlugMqttMessageFuncType.Func2 && smartPlugMessage.cmdId === SmartPlugMqttMessageType.Heartbeat) {
       const heartbeat = (message as SmartPlugMqttQuotaMessageWithParams<Heartbeat>).param;
-      Object.assign(this.quota['2_1'], heartbeat);
-      this.updateHeartbeatValues(heartbeat);
+      this.updateParamsValues(heartbeat, this.quota['2_1'], this.updateHeartbeatValues.bind(this));
     }
   }
 

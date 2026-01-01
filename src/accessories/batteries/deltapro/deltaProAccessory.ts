@@ -48,18 +48,9 @@ export class DeltaProAccessory extends EcoFlowAccessoryWithQuotaBase<DeltaProAll
 
   protected override processQuotaMessage(message: MqttQuotaMessage): void {
     const data = (message as DeltaProMqttQuotaMessageWithParams<DeltaProAllQuotaData>).data;
-    if (data?.ems !== undefined && Object.keys(data.ems).length > 0) {
-      Object.assign(this.quota.ems, data.ems);
-      this.updateEmsValues(data.ems);
-    }
-    if (data?.inv !== undefined && Object.keys(data.inv).length > 0) {
-      Object.assign(this.quota.inv, data.inv);
-      this.updateInvValues(data.inv);
-    }
-    if (data?.pd !== undefined && Object.keys(data.pd).length > 0) {
-      Object.assign(this.quota.pd, data.pd);
-      this.updatePdValues(data.pd);
-    }
+    this.updateParamsValues(data?.ems, this.quota.ems, this.updateEmsValues.bind(this));
+    this.updateParamsValues(data?.inv, this.quota.inv, this.updateInvValues.bind(this));
+    this.updateParamsValues(data?.pd, this.quota.pd, this.updatePdValues.bind(this));
   }
 
   protected override initializeQuota(quota: DeltaProAllQuotaData | null): DeltaProAllQuotaData {

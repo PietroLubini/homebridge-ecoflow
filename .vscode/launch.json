@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Homebridge",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/homebridge/bin/homebridge",
+      "args": ["-I", "-D", "-U", "${env:HOME}/.homebridge", "--plugin-path", "${workspaceFolder}"],
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "name": "Homebridge UI",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/homebridge-config-ui-x/dist/bin/standalone.js",
+      "args": ["-I", "-U", "${env:HOME}/.homebridge"],
+      "console": "integratedTerminal"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Homebridge + UI",
+      "configurations": ["Homebridge", "Homebridge UI"]
+    }
+  ]
+}
