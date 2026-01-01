@@ -53,6 +53,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Debug npm config
+        run: npm config list
+
       - name: Publish (latest)
         if: ${{ env.RELEASE_TAG == null }}
         run: npm publish --provenance --access public
