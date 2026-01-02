@@ -1,4 +1,4 @@
-import { API, Characteristic, DynamicPlatformPlugin, HAP, Logging, PlatformAccessory, PlatformConfig, Service, UnknownContext } from 'homebridge';
+import { API, Characteristic, DynamicPlatformPlugin, Logging, PlatformAccessory, PlatformConfig, Service, UnknownContext } from 'homebridge';
 
 import { Delta2Accessory } from '@ecoflow/accessories/batteries/delta2/delta2Accessory';
 import { Delta2MaxAccessory } from '@ecoflow/accessories/batteries/delta2/delta2MaxAccessory';
@@ -17,13 +17,8 @@ import { WaveAccessory } from '@ecoflow/accessories/wave/waveAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { Simulator } from '@ecoflow/apis/simulations/simulator';
-import {
-  CustomCharacteristics,
-  InputConsumptionWattFactory,
-  OutputConsumptionWattFactory,
-  OutputCurrentFactory,
-  OutputVoltageFactory,
-} from '@ecoflow/characteristics/customCharacteristic';
+import { InitCharacteristicExtensions } from '@ecoflow/characteristics/characteristicExtensions';
+import { CustomCharacteristics, InitCustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { DeviceConfig, DeviceModel, EcoFlowConfig } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { Logger } from '@ecoflow/helpers/logger';
@@ -56,7 +51,8 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     public readonly config: PlatformConfig,
     public readonly api: API
   ) {
-    EcoFlowHomebridgePlatform.InitCustomCharacteristics(api.hap);
+    EcoFlowHomebridgePlatform.InitCharacteristics(api);
+
     this.ecoFlowConfig = this.config as EcoFlowConfig;
     this.Service = api.hap.Service;
     this.Characteristic = {
@@ -81,11 +77,9 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
     });
   }
 
-  public static InitCustomCharacteristics(hap: HAP): void {
-    CustomCharacteristics.PowerConsumption.InputConsumptionWatts = InputConsumptionWattFactory(hap);
-    CustomCharacteristics.PowerConsumption.OutputConsumptionWatts = OutputConsumptionWattFactory(hap);
-    CustomCharacteristics.PowerConsumption.OutputVoltage = OutputVoltageFactory(hap);
-    CustomCharacteristics.PowerConsumption.OutputCurrent = OutputCurrentFactory(hap);
+  public static InitCharacteristics(api: API): void {
+    InitCustomCharacteristics(api.hap);
+    InitCharacteristicExtensions(api);
   }
 
   /**

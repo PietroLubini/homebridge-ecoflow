@@ -1,8 +1,5 @@
 import { Delta2AllQuotaData } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2HttpApiContracts';
-import {
-  Delta2MqttSetModuleType,
-  Delta2MqttSetOperationType,
-} from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
+import { Delta2MqttSetModuleType, Delta2MqttSetOperationType } from '@ecoflow/accessories/batteries/delta2/interfaces/delta2MqttApiContracts';
 import { OutletAcService } from '@ecoflow/accessories/batteries/delta2/services/outletAcService';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
@@ -14,7 +11,7 @@ import {
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
-import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
+import { API, Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
 describe('OutletAcService', () => {
   let service: OutletAcService;
@@ -26,10 +23,12 @@ describe('OutletAcService', () => {
   let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   let hapService: HapService;
 
-  const hapMock = {
-    Characteristic: HapCharacteristic,
-  } as unknown as HAP;
-  EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
+  const apiMock = {
+    hap: {
+      Characteristic: HapCharacteristic,
+    },
+  } as unknown as API;
+  EcoFlowHomebridgePlatform.InitCharacteristics(apiMock);
 
   beforeEach(() => {
     logMock = {
@@ -74,9 +73,7 @@ describe('OutletAcService', () => {
 
       service.updateOutputConsumption(34.6);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.OutputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.OutputConsumptionWatts).value;
 
       expect(actual).toEqual(35);
       expect(logMock.debug.mock.calls).toEqual([
@@ -91,9 +88,7 @@ describe('OutletAcService', () => {
 
       service.updateOutputConsumption(34.6);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.OutputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.OutputConsumptionWatts).value;
 
       expect(actual).toEqual(0);
       expect(logMock.debug.mock.calls).toEqual([['AC InUse ->', true]]);
@@ -111,9 +106,7 @@ describe('OutletAcService', () => {
 
       service.updateInputConsumption(41.1);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.InputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.InputConsumptionWatts).value;
 
       expect(actual).toEqual(41);
       expect(logMock.debug.mock.calls).toEqual([['AC Input Consumption, W ->', 41.1]]);
@@ -125,9 +118,7 @@ describe('OutletAcService', () => {
 
       service.updateInputConsumption(41.1);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.InputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.InputConsumptionWatts).value;
 
       expect(actual).toEqual(0);
       expect(logMock.debug).not.toHaveBeenCalled();
@@ -142,9 +133,7 @@ describe('OutletAcService', () => {
       service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock, Delta2MqttSetModuleType.MPPT);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
-      batteryStatusProviderMock.getStatusLowBattery.mockReturnValue(
-        HapCharacteristic.StatusLowBattery.BATTERY_LEVEL_LOW
-      );
+      batteryStatusProviderMock.getStatusLowBattery.mockReturnValue(HapCharacteristic.StatusLowBattery.BATTERY_LEVEL_LOW);
 
       service.updateBatteryLevel(19.99, 20);
       const actual = service.service.getCharacteristic(HapCharacteristic.StatusLowBattery).value;
@@ -160,9 +149,7 @@ describe('OutletAcService', () => {
       service = new OutletAcService(ecoFlowAccessoryMock, batteryStatusProviderMock, Delta2MqttSetModuleType.MPPT);
       accessoryMock.getServiceById.mockReturnValueOnce(hapService);
       service.initialize();
-      batteryStatusProviderMock.getStatusLowBattery.mockReturnValue(
-        HapCharacteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL
-      );
+      batteryStatusProviderMock.getStatusLowBattery.mockReturnValue(HapCharacteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL);
 
       service.updateBatteryLevel(20, 20);
       const actual = service.service.getCharacteristic(HapCharacteristic.StatusLowBattery).value;

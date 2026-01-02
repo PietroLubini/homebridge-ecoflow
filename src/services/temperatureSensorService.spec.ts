@@ -6,7 +6,7 @@ import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/t
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { TemperatureSensorService } from '@ecoflow/services/temperatureSensorService';
 import { CharacteristicGetHandler, Characteristic as HapCharacteristic, Service as HapService, HapStatusError } from 'hap-nodejs';
-import { Characteristic, HAP, HAPStatus, Logging, PlatformAccessory } from 'homebridge';
+import { API, Characteristic, HAPStatus, Logging, PlatformAccessory } from 'homebridge';
 
 describe('TemperatureSensorService', () => {
   let service: TemperatureSensorService;
@@ -17,11 +17,13 @@ describe('TemperatureSensorService', () => {
   let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
   let hapService: HapService;
 
-  const hapMock = {
-    Characteristic: HapCharacteristic,
-    HapStatusError: HapStatusError,
-  } as unknown as HAP;
-  EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
+  const apiMock = {
+    hap: {
+      Characteristic: HapCharacteristic,
+      HapStatusError: HapStatusError,
+    },
+  } as unknown as API;
+  EcoFlowHomebridgePlatform.InitCharacteristics(apiMock);
 
   const expectedMandatoryCharacteristics: MockCharacteristic[] = [
     {
@@ -45,9 +47,7 @@ describe('TemperatureSensorService', () => {
         ...HapCharacteristic,
         ...CustomCharacteristics,
       } as unknown as typeof HapCharacteristic & typeof CustomCharacteristics,
-      api: {
-        hap: hapMock,
-      },
+      api: apiMock,
     } as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
     accessoryMock = {
       getService: jest.fn(),

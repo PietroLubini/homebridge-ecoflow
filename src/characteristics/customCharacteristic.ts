@@ -128,3 +128,10 @@ export class PowerConsumption {
 export class CustomCharacteristics {
   public static readonly PowerConsumption: typeof PowerConsumption = PowerConsumption;
 }
+
+export const InitCustomCharacteristics = (hap: HAP) => {
+  CustomCharacteristics.PowerConsumption.InputConsumptionWatts = InputConsumptionWattFactory(hap);
+  CustomCharacteristics.PowerConsumption.OutputConsumptionWatts = OutputConsumptionWattFactory(hap);
+  CustomCharacteristics.PowerConsumption.OutputVoltage = OutputVoltageFactory(hap);
+  CustomCharacteristics.PowerConsumption.OutputCurrent = OutputCurrentFactory(hap);
+};

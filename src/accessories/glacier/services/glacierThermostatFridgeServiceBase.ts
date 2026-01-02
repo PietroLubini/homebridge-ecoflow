@@ -7,8 +7,7 @@ import {
   GlacierMqttSetOperateType,
   GlacierMqttSetTemperatureUnitMessageParams,
 } from '@ecoflow/accessories/glacier/interfaces/glacierMqttApiContracts';
-import { TemperatureDisplayUnitsType } from '@ecoflow/characteristics/characteristicContracts';
-import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
+import { CharacteristicPermsType, TemperatureDisplayUnitsType } from '@ecoflow/characteristics/characteristicContracts';
 import { ThermostatFridgeServiceBase } from '@ecoflow/services/thermostatFridgeServiceBase';
 
 export abstract class GlacierThermostatFridgeServiceBase extends ThermostatFridgeServiceBase {

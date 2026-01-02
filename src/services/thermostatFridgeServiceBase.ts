@@ -1,11 +1,11 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import {
+  CharacteristicPermsType,
   CurrentHeatingCoolingStateType,
   FridgeStateType,
   TargetHeatingCoolingStateType,
   TemperatureDisplayUnitsType,
 } from '@ecoflow/characteristics/characteristicContracts';
-import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
 import { ServiceBase } from '@ecoflow/services/serviceBase';
 import { Characteristic, CharacteristicValue } from 'homebridge';
 

@@ -7,7 +7,7 @@ import { TemperatureDisplayUnitsType } from '@ecoflow/characteristics/characteri
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService, Perms } from 'hap-nodejs';
-import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
+import { API, Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
 describe('ThermostatFridgeDualRightZoneService', () => {
   let service: ThermostatFridgeDualRightZoneService;
@@ -18,9 +18,12 @@ describe('ThermostatFridgeDualRightZoneService', () => {
   let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
   let hapService: HapService;
 
-  const hapMock = {
-    Characteristic: HapCharacteristic,
-  } as unknown as HAP;
+  const apiMock = {
+    hap: {
+      Characteristic: HapCharacteristic,
+    },
+  } as unknown as API;
+  EcoFlowHomebridgePlatform.InitCharacteristics(apiMock);
 
   beforeEach(() => {
     logMock = {
@@ -33,9 +36,7 @@ describe('ThermostatFridgeDualRightZoneService', () => {
         ...HapCharacteristic,
         ...CustomCharacteristics,
       } as unknown as typeof HapCharacteristic & typeof CustomCharacteristics,
-      api: {
-        hap: hapMock,
-      },
+      api: apiMock,
     } as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
     accessoryMock = {
       getServiceById: jest.fn(),

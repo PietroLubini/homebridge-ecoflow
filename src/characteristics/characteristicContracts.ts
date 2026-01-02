@@ -1,3 +1,8 @@
+export enum CharacteristicPermsType {
+  DEFAULT = 0,
+  READ_ONLY = 1,
+}
+
 export enum EnableType {
   Off = 0,
   On = 1,

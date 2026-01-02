@@ -32,13 +32,16 @@ jobs:
       RELEASE_TAG: ${{ needs.parse_release_name.outputs.release-tag }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v6
         with:
-          node-version: 18.x
+          node-version: 22.x
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Use latest npm
+        run: npm install -g npm@latest
 
       - name: Update package version
         run: |
@@ -53,11 +56,7 @@ jobs:
       - name: Publish (latest)
         if: ${{ env.RELEASE_TAG == null }}
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish (not latest)
         if: ${{ env.RELEASE_TAG != null }}
         run: npm publish --provenance --access public --tag ${{ env.RELEASE_TAG }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
