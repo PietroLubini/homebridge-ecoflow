@@ -3,7 +3,7 @@ import { DeltaProMqttSetAcOnMessageParams } from '@ecoflow/accessories/batteries
 import { DeltaProOutletServiceBase } from '@ecoflow/accessories/batteries/deltapro/services/deltaProOutletServiceBase';
 import { AcEnableType, AcXBoostType } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
+import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicContracts';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 
 export class OutletAcService extends DeltaProOutletServiceBase {

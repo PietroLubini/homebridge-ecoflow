@@ -12,7 +12,7 @@ import {
   AcXBoostType,
 } from '@ecoflow/accessories/batteries/interfaces/batteryHttpApiContracts';
 import { EcoFlowAccessoryWithQuotaBase } from '@ecoflow/accessories/ecoFlowAccessoryWithQuotaBase';
-import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
+import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicContracts';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 
 export class OutletAcService extends Delta2OutletServiceBase {

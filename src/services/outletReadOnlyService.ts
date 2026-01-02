@@ -1,5 +1,5 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
-import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
+import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicContracts';
 import { AdditionalBatteryCharacteristicType as CharacteristicType } from '@ecoflow/config';
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';

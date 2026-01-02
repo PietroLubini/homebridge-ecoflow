@@ -20,7 +20,7 @@ import {
   HAPStatus,
   HapStatusError,
 } from 'hap-nodejs';
-import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
+import { API, Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
 class MockThermostatFridgeService extends ThermostatFridgeServiceBase {
   static MaxTemperature = 5;
@@ -46,11 +46,13 @@ describe('ThermostatFridgeServiceBase', () => {
   let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
   let hapService: HapService;
 
-  const hapMock = {
-    Characteristic: HapCharacteristic,
-    HapStatusError: HapStatusError,
-  } as unknown as HAP;
-  EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
+  const apiMock = {
+    hap: {
+      Characteristic: HapCharacteristic,
+      HapStatusError: HapStatusError,
+    },
+  } as unknown as API;
+  EcoFlowHomebridgePlatform.InitCharacteristics(apiMock);
 
   const expectedMandatoryCharacteristics: MockCharacteristic[] = [
     {
@@ -90,9 +92,7 @@ describe('ThermostatFridgeServiceBase', () => {
         ...HapCharacteristic,
         ...CustomCharacteristics,
       } as unknown as typeof HapCharacteristic & typeof CustomCharacteristics,
-      api: {
-        hap: hapMock,
-      },
+      api: apiMock,
     } as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
     accessoryMock = {
       getServiceById: jest.fn(),

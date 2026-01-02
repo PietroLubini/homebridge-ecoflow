@@ -1,6 +1,6 @@
 import { EcoFlowAccessoryBase } from '@ecoflow/accessories/ecoFlowAccessoryBase';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
-import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicExtensions';
+import { CharacteristicPermsType } from '@ecoflow/characteristics/characteristicContracts';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import {
   AdditionalBatteryCharacteristicType as BatteryCharacteristicType,
@@ -11,7 +11,7 @@ import { getActualCharacteristics, MockCharacteristic } from '@ecoflow/helpers/t
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { OutletBatteryServiceBase } from '@ecoflow/services/outletBatteryServiceBase';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
-import { HAP, Logging, PlatformAccessory } from 'homebridge';
+import { API, Logging, PlatformAccessory } from 'homebridge';
 
 class MockOutletService extends OutletBatteryServiceBase {
   constructor(
@@ -35,10 +35,12 @@ describe('OutletBatteryServiceBase', () => {
   let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   let hapService: HapService;
 
-  const hapMock = {
-    Characteristic: HapCharacteristic,
-  } as unknown as HAP;
-  EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
+  const apiMock = {
+    hap: {
+      Characteristic: HapCharacteristic,
+    },
+  } as unknown as API;
+  EcoFlowHomebridgePlatform.InitCharacteristics(apiMock);
 
   const expectedMandatoryCharacteristics: MockCharacteristic[] = [
     {

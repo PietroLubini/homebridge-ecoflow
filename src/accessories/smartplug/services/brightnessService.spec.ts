@@ -6,7 +6,7 @@ import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { CustomCharacteristics } from '@ecoflow/characteristics/customCharacteristic';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
-import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
+import { API, Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
 describe('BrightnessService', () => {
   let service: BrightnessService;
@@ -17,10 +17,12 @@ describe('BrightnessService', () => {
   let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
   let hapService: HapService;
 
-  const hapMock = {
-    Characteristic: HapCharacteristic,
-  } as unknown as HAP;
-  EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
+  const apiMock = {
+    hap: {
+      Characteristic: HapCharacteristic,
+    },
+  } as unknown as API;
+  EcoFlowHomebridgePlatform.InitCharacteristics(apiMock);
 
   beforeEach(() => {
     logMock = {
@@ -33,9 +35,7 @@ describe('BrightnessService', () => {
         ...HapCharacteristic,
         ...CustomCharacteristics,
       } as unknown as typeof HapCharacteristic & typeof CustomCharacteristics,
-      api: {
-        hap: hapMock,
-      },
+      api: apiMock,
     } as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
     accessoryMock = {
       getServiceById: jest.fn(),

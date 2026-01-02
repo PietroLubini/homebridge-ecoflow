@@ -9,7 +9,7 @@ import {
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService } from 'hap-nodejs';
-import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
+import { API, Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
 describe('OutletCarService', () => {
   let service: OutletCarService;
@@ -21,10 +21,12 @@ describe('OutletCarService', () => {
   let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   let hapService: HapService;
 
-  const hapMock = {
-    Characteristic: HapCharacteristic,
-  } as unknown as HAP;
-  EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
+  const apiMock = {
+    hap: {
+      Characteristic: HapCharacteristic,
+    },
+  } as unknown as API;
+  EcoFlowHomebridgePlatform.InitCharacteristics(apiMock);
 
   beforeEach(() => {
     logMock = {
@@ -70,9 +72,7 @@ describe('OutletCarService', () => {
 
       service.updateOutputConsumption(34.6);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.OutputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.OutputConsumptionWatts).value;
 
       expect(actual).toEqual(35);
       expect(logMock.debug.mock.calls).toEqual([
@@ -87,9 +87,7 @@ describe('OutletCarService', () => {
 
       service.updateOutputConsumption(34.6);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.OutputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.OutputConsumptionWatts).value;
 
       expect(actual).toEqual(0);
       expect(logMock.debug.mock.calls).toEqual([['CAR InUse ->', true]]);
@@ -107,9 +105,7 @@ describe('OutletCarService', () => {
 
       service.updateInputConsumption(41.1);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.InputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.InputConsumptionWatts).value;
 
       expect(actual).toEqual(41);
       expect(logMock.debug.mock.calls).toEqual([['CAR Input Consumption, W ->', 41.1]]);
@@ -121,9 +117,7 @@ describe('OutletCarService', () => {
 
       service.updateInputConsumption(41.1);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.InputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.InputConsumptionWatts).value;
 
       expect(actual).toEqual(0);
       expect(logMock.debug).not.toHaveBeenCalled();

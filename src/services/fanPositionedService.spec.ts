@@ -14,7 +14,7 @@ import {
   HAPStatus,
   HapStatusError,
 } from 'hap-nodejs';
-import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
+import { API, Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
 export enum MockFanSpeedType {
   Level1 = 0,
@@ -44,11 +44,13 @@ describe('FanPositionedServiceBase', () => {
   let httpApiManagerMock: jest.Mocked<EcoFlowHttpApiManager>;
   let hapService: HapService;
 
-  const hapMock = {
-    Characteristic: HapCharacteristic,
-    HapStatusError: HapStatusError,
-  } as unknown as HAP;
-  EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
+  const apiMock = {
+    hap: {
+      Characteristic: HapCharacteristic,
+      HapStatusError: HapStatusError,
+    },
+  } as unknown as API;
+  EcoFlowHomebridgePlatform.InitCharacteristics(apiMock);
 
   const expectedMandatoryCharacteristics: MockCharacteristic[] = [
     {
@@ -76,9 +78,7 @@ describe('FanPositionedServiceBase', () => {
         ...HapCharacteristic,
         ...CustomCharacteristics,
       } as unknown as typeof HapCharacteristic & typeof CustomCharacteristics,
-      api: {
-        hap: hapMock,
-      },
+      api: apiMock,
     } as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
     accessoryMock = {
       getServiceById: jest.fn(),

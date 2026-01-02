@@ -1,6 +1,7 @@
 import { Characteristic as HapCharacteristic, Perms } from 'hap-nodejs';
-import './characteristicExtensions';
-import { CharacteristicPermsType } from './characteristicExtensions';
+import { API } from 'homebridge';
+import { CharacteristicPermsType } from './characteristicContracts';
+import { InitCharacteristicExtensions } from './characteristicExtensions';
 
 describe('characteristicExtensions', () => {
   describe('setPropsPerms', () => {
@@ -9,6 +10,12 @@ describe('characteristicExtensions', () => {
     beforeEach(() => {
       characteristic = Object.create(HapCharacteristic.prototype);
       characteristic.setProps = jest.fn().mockReturnThis();
+      const apiMock = {
+        hap: {
+          Characteristic: HapCharacteristic,
+        },
+      } as unknown as API;
+      InitCharacteristicExtensions(apiMock);
     });
 
     it('should set default perms when called with DEFAULT', () => {

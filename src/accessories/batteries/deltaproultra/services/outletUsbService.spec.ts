@@ -11,7 +11,7 @@ import {
 import { BatteryStatusProvider } from '@ecoflow/helpers/batteryStatusProvider';
 import { EcoFlowHomebridgePlatform } from '@ecoflow/platform';
 import { Characteristic as HapCharacteristic, Service as HapService, HapStatusError } from 'hap-nodejs';
-import { Characteristic, HAP, Logging, PlatformAccessory } from 'homebridge';
+import { API, Characteristic, Logging, PlatformAccessory } from 'homebridge';
 
 describe('OutletUsbService', () => {
   let service: OutletUsbService;
@@ -23,11 +23,13 @@ describe('OutletUsbService', () => {
   let batteryStatusProviderMock: jest.Mocked<BatteryStatusProvider>;
   let hapService: HapService;
 
-  const hapMock = {
-    Characteristic: HapCharacteristic,
-    HapStatusError: HapStatusError,
-  } as unknown as HAP;
-  EcoFlowHomebridgePlatform.InitCustomCharacteristics(hapMock);
+  const apiMock = {
+    hap: {
+      Characteristic: HapCharacteristic,
+      HapStatusError: HapStatusError,
+    },
+  } as unknown as API;
+  EcoFlowHomebridgePlatform.InitCharacteristics(apiMock);
 
   beforeEach(() => {
     logMock = {
@@ -40,9 +42,7 @@ describe('OutletUsbService', () => {
         ...HapCharacteristic,
         ...CustomCharacteristics,
       } as unknown as typeof HapCharacteristic & typeof CustomCharacteristics,
-      api: {
-        hap: hapMock,
-      },
+      api: apiMock,
     } as unknown as jest.Mocked<EcoFlowHomebridgePlatform>;
     accessoryMock = {
       getServiceById: jest.fn(),
@@ -76,9 +76,7 @@ describe('OutletUsbService', () => {
 
       service.updateOutputConsumption(34.6);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.OutputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.OutputConsumptionWatts).value;
 
       expect(actual).toEqual(35);
       expect(logMock.debug.mock.calls).toEqual([
@@ -93,9 +91,7 @@ describe('OutletUsbService', () => {
 
       service.updateOutputConsumption(34.6);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.OutputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.OutputConsumptionWatts).value;
 
       expect(actual).toEqual(0);
       expect(logMock.debug.mock.calls).toEqual([['USB InUse ->', true]]);
@@ -113,9 +109,7 @@ describe('OutletUsbService', () => {
 
       service.updateInputConsumption(41.1);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.InputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.InputConsumptionWatts).value;
 
       expect(actual).toEqual(41);
       expect(logMock.debug.mock.calls).toEqual([['USB Input Consumption, W ->', 41.1]]);
@@ -127,9 +121,7 @@ describe('OutletUsbService', () => {
 
       service.updateInputConsumption(41.1);
 
-      const actual = service.service.getCharacteristic(
-        CustomCharacteristics.PowerConsumption.InputConsumptionWatts
-      ).value;
+      const actual = service.service.getCharacteristic(CustomCharacteristics.PowerConsumption.InputConsumptionWatts).value;
 
       expect(actual).toEqual(0);
       expect(logMock.debug).not.toHaveBeenCalled();
