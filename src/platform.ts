@@ -12,8 +12,6 @@ import { PowerStreamAccessory } from '@ecoflow/accessories/powerstream/powerStre
 import { PowerStreamSimulator } from '@ecoflow/accessories/powerstream/simulations/powerStreamSimulator';
 import { SmartPlugSimulator } from '@ecoflow/accessories/smartplug/simulations/smartPlugSimulator';
 import { SmartPlugAccessory } from '@ecoflow/accessories/smartplug/smartPlugAccessory';
-import { WaveSimulator } from '@ecoflow/accessories/wave/simulations/waveSimulator';
-import { WaveAccessory } from '@ecoflow/accessories/wave/waveAccessory';
 import { EcoFlowHttpApiManager } from '@ecoflow/apis/ecoFlowHttpApiManager';
 import { EcoFlowMqttApiManager } from '@ecoflow/apis/ecoFlowMqttApiManager';
 import { Simulator } from '@ecoflow/apis/simulations/simulator';
@@ -250,10 +248,10 @@ export class EcoFlowHomebridgePlatform implements DynamicPlatformPlugin {
         EcoFlowAccessoryType = SmartPlugAccessory;
         EcoFlowAccessorySimulatorType = SmartPlugSimulator;
         break;
-      case DeviceModel.Wave:
-        EcoFlowAccessoryType = WaveAccessory;
-        EcoFlowAccessorySimulatorType = WaveSimulator;
-        break;
+      // case DeviceModel.Wave:
+      //   EcoFlowAccessoryType = WaveAccessory;
+      //   EcoFlowAccessorySimulatorType = WaveSimulator;
+      //   break;
       default:
         log.warn(`"${config.model}" is not supported. Ignoring the device`);
     }

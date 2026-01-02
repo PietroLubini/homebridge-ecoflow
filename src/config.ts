@@ -16,7 +16,7 @@ export enum DeviceModel {
   // PowerOcean = 'PowerOcean',
   SmartPlug = 'Smart Plug',
   // Glacier = 'Glacier',
-  Wave = 'Wave',
+  // Wave = 'Wave',
 }
 
 export enum LocationType {
