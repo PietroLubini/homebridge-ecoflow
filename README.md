@@ -643,6 +643,8 @@ The following additional characteristics is available:
 
 ### Wave Air Conditioner
 
+> Not Activated (no testing is performed)
+
 #### Services
 
 | EcoFlow Parameter          | Service    | Characteristic            | Standard | Permission                                                                               |
