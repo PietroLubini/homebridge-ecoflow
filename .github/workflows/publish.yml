@@ -50,19 +50,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build package
-        run: npm run prepublishOnly__backup
-
-      - name: Use Node.js 24.x
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24.x
-          registry-url: 'https://registry.npmjs.org'
-
       - name: Publish (latest)
         if: ${{ env.RELEASE_TAG == null }}
         run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish (not latest)
         if: ${{ env.RELEASE_TAG != null }}
         run: npm publish --provenance --access public --tag ${{ env.RELEASE_TAG }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
